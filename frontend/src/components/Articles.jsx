@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { articleService } from '../services/articleService';
 import { fadeIn, slideUp, staggerChildren } from '../utils/motionVariants';
 
 const Articles = () => {
@@ -10,25 +9,40 @@ const Articles = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
-
-  const fetchArticles = async () => {
-    try {
-      setLoading(true);
-      const response = await articleService.getAll();
-      if (response.success) {
-        setArticles(response.data);
-      } else {
-        setError('Failed to load articles');
+    // Temporary disable API calls to prevent CORS errors
+    const mockArticles = [
+      {
+        id: 1,
+        title: 'Pentingnya Menjaga Lingkungan Kampus Aman dari Kekerasan Seksual',
+        slug: 'pentingnya-menjaga-lingkungan-kampus-aman-dari-kekerasan-seksual',
+        image: 'articles/safe-campus.jpg',
+        content: 'Lingkungan kampus yang aman adalah hak setiap sivitas akademika.',
+        is_published: true,
+        published_at: '2024-01-07T00:00:00.000000Z'
+      },
+      {
+        id: 2,
+        title: 'Prosedur Pelaporan Kasus Kekerasan Seksual di Polije',
+        slug: 'prosedur-pelaporan-kasus-kekerasan-seksual-di-polije',
+        image: 'articles/reporting-procedure.jpg',
+        content: 'Prosedur pelaporan kasus kekerasan seksual di Politeknik Negeri Jember.',
+        is_published: true,
+        published_at: '2024-01-05T00:00:00.000000Z'
+      },
+      {
+        id: 3,
+        title: 'Hak dan Kewajiban Korban dan Pelapor Kekerasan Seksual',
+        slug: 'hak-dan-kewajiban-korban-dan-pelapor-kekerasan-seksual',
+        image: 'articles/rights-responsibilities.jpg',
+        content: 'Sebagai korban atau pelapor kekerasan seksual, Anda memiliki hak-hak.',
+        is_published: true,
+        published_at: '2024-01-03T00:00:00.000000Z'
       }
-    } catch (err) {
-      setError('Failed to load articles');
-      console.error('Error fetching articles:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    ];
+    
+    setArticles(mockArticles);
+    setLoading(false);
+  }, []);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -144,7 +158,7 @@ const Articles = () => {
               >
                 {articles.map((article, index) => (
                   <motion.article
-                    key={article.uuid}
+                    key={article.id || index}
                     className="bg-white rounded-2xl shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-2 overflow-hidden group"
                     variants={fadeIn}
                     initial="hidden"

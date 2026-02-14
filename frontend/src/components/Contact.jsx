@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { contactService } from '../services/contactService';
 import { fadeIn, slideUp, staggerChildren } from '../utils/motionVariants';
 
 const Contact = () => {
@@ -9,25 +8,20 @@ const Contact = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchContactInfo();
+    // Temporary disable API calls to prevent 404 errors
+    const mockContactInfo = {
+      address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',
+      phone: '+62 331-123456',
+      email: 'satgasppkpt@polije.ac.id',
+      instagram: '@satgasppkpt_polije',
+      whatsapp: '+6281234567890',
+      facebook: 'SatgasPPKPTPolije',
+      twitter: '@SatgasPPKPTPolije'
+    };
+    
+    setContactInfo(mockContactInfo);
+    setLoading(false);
   }, []);
-
-  const fetchContactInfo = async () => {
-    try {
-      setLoading(true);
-      const response = await contactService.get();
-      if (response.success) {
-        setContactInfo(response.data);
-      } else {
-        setError('Failed to load contact information');
-      }
-    } catch (err) {
-      setError('Failed to load contact information');
-      console.error('Error fetching contact info:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const defaultContact = {
     address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',

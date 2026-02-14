@@ -4,10 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { fadeIn, slideDown } from '../utils/motionVariants';
 import ThemeToggle from './ThemeToggle';
+import LoginModal from './LoginModal';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,22 +80,15 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link 
-              to="/" 
-              className="flex items-center space-x-3 group"
-              onClick={() => handleNavClick('#hero')}
-            >
-              <div className="relative">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-soft group-hover:shadow-card transition-all duration-300 border border-primary/20">
-                  <img 
-                    src="/logo_polijecare.png" 
-                    alt="PolijeCare Logo" 
-                    className="w-10 h-10 object-contain"
-                  />
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
+                <img 
+                  src="/logo_polijecare.png" 
+                  alt="Polijecare Logo" 
+                  className="w-8 h-8 object-contain"
+                />
               </div>
-              <span className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 Polijecare
               </span>
             </Link>
@@ -151,12 +146,12 @@ const Navbar = () => {
                     </button>
                   </>
                 ) : (
-                  <Link 
-                    to="/login" 
+                  <button 
+                    onClick={() => setIsLoginModalOpen(true)}
                     className="px-6 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-soft font-medium"
                   >
                     Masuk
-                  </Link>
+                  </button>
                 )}
                 
                 {/* Theme Toggle */}
@@ -259,13 +254,15 @@ const Navbar = () => {
                       </button>
                     </>
                   ) : (
-                    <Link 
-                      to="/login" 
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium text-center"
+                    <button
+                      onClick={() => {
+                        setIsLoginModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
                     >
                       Masuk
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
@@ -273,6 +270,12 @@ const Navbar = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+      />
     </>
   );
 };

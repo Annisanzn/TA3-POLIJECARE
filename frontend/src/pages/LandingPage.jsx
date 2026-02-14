@@ -6,32 +6,28 @@ import Services from '../components/Services';
 import Articles from '../components/Articles';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
-import { heroService } from '../services/heroService';
+import LoginModal from '../components/LoginModal';
 
 const LandingPage = () => {
   const [heroData, setHeroData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchHeroData();
+    // Temporary disable API calls to prevent 404 errors
+    const mockHeroData = {
+      title: 'Aman Bicara, Aman Melapor',
+      subtitle: 'Satgas PPKPT Politeknik Negeri Jember',
+      description: 'Kami siap mendengar dan membantu Anda dengan profesionalisme dan kerahasiaan terjamin. Setiap laporan akan ditangani dengan empati dan seksama.'
+    };
+    
+    setHeroData(mockHeroData);
+    setLoading(false);
   }, []);
-
-  const fetchHeroData = async () => {
-    try {
-      const response = await heroService.get();
-      if (response.success) {
-        setHeroData(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching hero data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen">
       <Navbar />
+      <LoginModal />
       <Hero heroData={heroData} />
       <About />
       <Services />
