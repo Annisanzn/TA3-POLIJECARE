@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Home, Info, FileText, BookOpen, Phone } from 'lucide-react';
+import { ExpandableTabs } from "@/components/ui/expandable-tabs";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
@@ -6,8 +8,10 @@ import { fadeIn, slideDown } from '../utils/motionVariants';
 import ThemeToggle from './ThemeToggle';
 import LoginModal from './LoginModal';
 
+
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState('#hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
@@ -22,14 +26,56 @@ const Navbar = () => {
     { name: 'Kontak', href: '#contact' }
   ];
 
+  const tabs = [
+    { title: "Beranda", icon: Home },
+    { title: "Tentang Kami", icon: Info },
+    { title: "Cara Melapor", icon: FileText },
+    { title: "Artikel", icon: BookOpen },
+    { title: "Kontak", icon: Phone },
+  ];
+
+  const handleNavClick = (href) => {
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      // Logic for switching navbar type (Standard vs Expandable)
+      // Switch when approaching 'about' section or scrolled past 1st screen
+      const aboutSection = document.getElementById('about');
+      const threshold = aboutSection ? aboutSection.offsetTop - 400 : window.innerHeight - 200;
+      setIsScrolled(window.scrollY > threshold);
+
+      // ScrollSpy Logic
+      const sections = navLinks.map(link => link.href.substring(1));
+      let currentSection = "";
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 150 && rect.bottom >= 150) {
+            currentSection = "#" + section;
+          }
+        }
+      }
+
+      if (currentSection && currentSection !== activeLink) {
+        setActiveLink(currentSection);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navLinks, activeLink]);
 
   const handleLogout = () => {
     logout();
@@ -38,7 +84,7 @@ const Navbar = () => {
 
   const handleDashboardRedirect = () => {
     if (!user) return;
-    
+
     switch (user.role) {
       case 'user':
         navigate('/user/dashboard');
@@ -55,226 +101,248 @@ const Navbar = () => {
     }
   };
 
-  const handleNavClick = (href) => {
-    if (href.startsWith('#')) {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    setIsMobileMenuOpen(false);
-  };
-
   return (
     <>
-      <motion.nav 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/95 backdrop-blur-md shadow-soft border-b border-gray-100' 
-            : 'bg-white shadow-sm'
-        }`}
-        variants={fadeIn}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-                <img 
-                  src="/logo_polijecare.png" 
-                  alt="Polijecare Logo" 
-                  className="w-8 h-8 object-contain"
-                />
-              </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                Polijecare
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <motion.div 
-                className="flex space-x-6"
-                variants={slideDown}
-                initial="hidden"
-                animate="visible"
-              >
-                {navLinks.map((link, index) => (
-                  <motion.div 
-                    key={link.name}
-                    variants={fadeIn}
-                    transition={{ delay: 0.1 * index }}
-                  >
-                    {link.href.startsWith('#') ? (
-                      <button
-                        onClick={() => handleNavClick(link.href)}
-                        className="text-gray-600 hover:text-primary font-medium transition-colors relative group"
-                      >
-                        {link.name}
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                      </button>
-                    ) : (
-                      <Link 
-                        to={link.href}
-                        className="text-gray-600 hover:text-primary font-medium transition-colors relative group"
-                      >
-                        {link.name}
-                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-                      </Link>
-                    )}
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Auth Buttons & Theme Toggle */}
-              <div className="flex items-center space-x-4">
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      onClick={handleDashboardRedirect}
-                      className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-soft font-medium"
-                    >
-                      Dashboard
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="px-4 py-2 border-2 border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-all duration-300 font-medium"
-                    >
-                      Keluar
-                    </button>
-                  </>
-                ) : (
-                  <button 
-                    onClick={() => setIsLoginModalOpen(true)}
-                    className="px-6 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-soft font-medium"
-                  >
-                    Masuk
-                  </button>
-                )}
-                
-                {/* Theme Toggle */}
-                <ThemeToggle />
-              </div>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-600 hover:text-primary p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <AnimatePresence mode="wait">
-                    {isMobileMenuOpen ? (
-                      <motion.path
-                        key="close"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                        initial={{ opacity: 0, rotate: -90 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: 90 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ) : (
-                      <motion.path
-                        key="menu"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div 
-              className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="px-4 py-6 space-y-4">
-                {navLinks.map((link, index) => (
-                  <motion.div
-                    key={link.name}
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: 0.05 * index }}
-                  >
-                    {link.href.startsWith('#') ? (
-                      <button
-                        onClick={() => handleNavClick(link.href)}
-                        className="block w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 font-medium"
-                      >
-                        {link.name}
-                      </button>
-                    ) : (
-                      <Link 
-                        to={link.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block w-full px-4 py-3 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 font-medium"
-                      >
-                        {link.name}
-                      </Link>
-                    )}
-                  </motion.div>
-                ))}
-                
-                <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+      <AnimatePresence>
+        {isScrolled ? (
+          <motion.div
+            key="expandable-tabs"
+            initial={{ opacity: 0, scale: 0.8, y: -20, x: "-50%" }}
+            animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, scale: 0.8, y: -20, x: "-50%", transition: { duration: 0.1 } }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed top-4 left-1/2 z-50 transform -translate-x-1/2"
+          >
+            <ExpandableTabs
+              tabs={tabs}
+              activeTab={navLinks.findIndex(link => link.href === activeLink)}
+              onChange={(index) => {
+                if (index !== null) {
+                  const href = navLinks[index].href;
+                  setActiveLink(href);
+                  handleNavClick(href);
+                }
+              }}
+              trailingElement={
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
                   {isAuthenticated ? (
                     <>
                       <button
                         onClick={handleDashboardRedirect}
-                        className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
+                        className="px-4 py-2 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-colors"
                       >
                         Dashboard
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="w-full px-4 py-3 border-2 border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-all duration-300 font-medium"
+                        className="px-4 py-2 text-sm font-medium border border-[#191970] text-[#191970] rounded-full hover:bg-gray-100 transition-colors"
                       >
                         Keluar
                       </button>
                     </>
                   ) : (
                     <button
-                      onClick={() => {
-                        setIsLoginModalOpen(true);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
+                      onClick={() => setIsLoginModalOpen(true)}
+                      className="px-6 py-2 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-colors shadow-lg"
                     >
                       Masuk
                     </button>
                   )}
                 </div>
+              }
+            />
+          </motion.div>
+        ) : (
+          <motion.nav
+            key="navbar"
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -20, transition: { duration: 0.1 } }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/50 backdrop-blur-md border-b border-white/20 shadow-sm"
+          >
+            <div className="w-full px-4">
+              <div className="flex items-center justify-between h-20">
+                {/* Logo Section - Left */}
+                <Link to="/" className="flex items-center space-x-2 cursor-default">
+                  <img
+                    src="/logo_polije.png"
+                    alt="Logo Polije"
+                    className="h-12 w-auto object-contain"
+                  />
+                  <img
+                    src="/logo_polijecare.png"
+                    alt="Polijecare Logo"
+                    className="h-12 w-auto object-contain"
+                  />
+                </Link>
+
+                {/* Centered Navigation Links */}
+                <div className="hidden md:flex items-center space-x-1">
+                  {navLinks.map((link) => (
+                    <button
+                      key={link.name}
+                      onClick={() => {
+                        setActiveLink(link.href);
+                        handleNavClick(link.href);
+                      }}
+                      className={`px-5 py-2.5 text-base font-medium rounded-full transition-all duration-200 ${activeLink === link.href
+                        ? 'bg-[#191970] text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]'
+                        : 'text-gray-600 hover:text-[#191970] hover:bg-gray-100'
+                        }`}
+                    >
+                      {link.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right Section - Auth & Theme */}
+                <div className="hidden md:flex items-center space-x-4">
+                  <ThemeToggle />
+
+                  {isAuthenticated ? (
+                    <>
+                      <button
+                        onClick={handleDashboardRedirect}
+                        className="px-5 py-2.5 bg-primary text-white rounded-full hover:bg-primary-dark transition-all duration-300 hover:shadow-lg font-medium text-sm"
+                      >
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="px-5 py-2.5 border-2 border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-all duration-300 font-medium text-sm"
+                      >
+                        Keluar
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setIsLoginModalOpen(true)}
+                      className="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-primary-dark transition-all duration-300 hover:shadow-lg font-medium text-sm"
+                    >
+                      Masuk
+                    </button>
+                  )}
+                </div>
+
+                {/* Mobile menu button */}
+                <div className="md:hidden">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="text-gray-600 hover:text-primary p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <AnimatePresence mode="wait">
+                        {isMobileMenuOpen ? (
+                          <motion.path
+                            key="close"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                            initial={{ opacity: 0, rotate: -90 }}
+                            animate={{ opacity: 1, rotate: 0 }}
+                            exit={{ opacity: 0, rotate: 90 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        ) : (
+                          <motion.path
+                            key="menu"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-      
-      {/* Login Modal */}
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+            </div>
+
+            {/* Mobile menu */}
+            <AnimatePresence>
+              {isMobileMenuOpen && (
+                <motion.div
+                  className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="px-4 py-6 space-y-4">
+                    {navLinks.map((link, index) => (
+                      <motion.div
+                        key={link.name}
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: 0.05 * index }}
+                      >
+                        {link.href.startsWith('#') ? (
+                          <button
+                            onClick={() => handleNavClick(link.href)}
+                            className="block w-full text-left px-4 py-3 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 font-medium"
+                          >
+                            {link.name}
+                          </button>
+                        ) : (
+                          <Link
+                            to={link.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block w-full px-4 py-3 text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 font-medium"
+                          >
+                            {link.name}
+                          </Link>
+                        )}
+                      </motion.div>
+                    ))}
+
+                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                      {isAuthenticated ? (
+                        <>
+                          <button
+                            onClick={handleDashboardRedirect}
+                            className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
+                          >
+                            Dashboard
+                          </button>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full px-4 py-3 border-2 border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-all duration-300 font-medium"
+                          >
+                            Keluar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setIsLoginModalOpen(true);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
+                        >
+                          Masuk
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
     </>
   );

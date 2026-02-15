@@ -13,32 +13,32 @@ const Hero = ({ heroData }) => {
   const hero = heroData || defaultHero;
 
   return (
-    <section 
-      id="hero" 
-      className="min-h-screen flex items-center bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-purple-900 relative overflow-hidden pt-16 transition-colors duration-300"
+    <section
+      id="hero"
+      className="min-h-screen flex items-center bg-soft-white relative overflow-hidden pt-16 transition-colors duration-300"
     >
       {/* Background Decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute top-20 left-10 w-72 h-72 bg-accent/10 rounded-full blur-3xl"
-          animate={{ 
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-primary-light/30 rounded-full blur-[100px]"
+          animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3] 
+            opacity: [0.3, 0.5, 0.3]
           }}
-          transition={{ 
-            duration: 8, 
+          transition={{
+            duration: 8,
             repeat: Infinity,
-            ease: "easeInOut" 
+            ease: "easeInOut"
           }}
         />
-        <motion.div 
-          className="absolute bottom-20 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
-          animate={{ 
+        <motion.div
+          className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]"
+          animate={{
             scale: [1, 1.3, 1],
-            opacity: [0.3, 0.4, 0.3] 
+            opacity: [0.3, 0.4, 0.3]
           }}
-          transition={{ 
-            duration: 10, 
+          transition={{
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
             delay: 2
@@ -49,21 +49,21 @@ const Hero = ({ heroData }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
-          <motion.div 
+          <motion.div
             className="space-y-8"
             variants={slideUp}
             initial="hidden"
             animate="visible"
             transition={{ duration: 0.8 }}
           >
-            <motion.div 
+            <motion.div
               className="space-y-4"
               variants={fadeIn}
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.2 }}
             >
-              <motion.h1 
+              <motion.h1
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight"
                 variants={slideUp}
                 initial="hidden"
@@ -72,8 +72,8 @@ const Hero = ({ heroData }) => {
               >
                 {hero.title}
               </motion.h1>
-              
-              <motion.h2 
+
+              <motion.h2
                 className="text-xl md:text-2xl lg:text-3xl font-semibold text-primary dark:text-primary-light"
                 variants={slideUp}
                 initial="hidden"
@@ -84,7 +84,7 @@ const Hero = ({ heroData }) => {
               </motion.h2>
             </motion.div>
 
-            <motion.p 
+            <motion.p
               className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl"
               variants={fadeIn}
               initial="hidden"
@@ -94,7 +94,7 @@ const Hero = ({ heroData }) => {
               {hero.description}
             </motion.p>
 
-            <motion.div 
+            <motion.div
               className="flex flex-col sm:flex-row gap-4 pt-4"
               variants={slideUp}
               initial="hidden"
@@ -115,7 +115,7 @@ const Hero = ({ heroData }) => {
               >
                 Butuh Bantuan Darurat
               </motion.a>
-              
+
               <motion.div
                 variants={fadeIn}
                 initial="hidden"
@@ -124,7 +124,7 @@ const Hero = ({ heroData }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link 
+                <Link
                   to="/artikel"
                   className="px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold text-center shadow-soft inline-block w-full sm:w-auto"
                 >
@@ -134,7 +134,7 @@ const Hero = ({ heroData }) => {
             </motion.div>
 
             {/* Trust Indicators */}
-            <motion.div 
+            <motion.div
               className="flex flex-wrap gap-6 pt-8"
               variants={fadeIn}
               initial="hidden"
@@ -145,12 +145,12 @@ const Hero = ({ heroData }) => {
                 <div className="w-2 h-2 bg-accent rounded-full"></div>
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">100% Rahasia</span>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-accent rounded-full"></div>
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Profesional</span>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-accent rounded-full"></div>
                 <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">24/7 Support</span>
@@ -159,7 +159,7 @@ const Hero = ({ heroData }) => {
           </motion.div>
 
           {/* Right Content - Logo & Branding */}
-          <motion.div 
+          <motion.div
             className="relative lg:pl-12"
             variants={slideRight}
             initial="hidden"
@@ -167,66 +167,24 @@ const Hero = ({ heroData }) => {
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             {/* Main Logo Container */}
-            <motion.div 
-              className="relative z-10"
-              animate={{ 
-                y: [0, -20, 0],
-              }}
-              transition={{ 
-                duration: 6, 
-                repeat: Infinity,
-                ease: "easeInOut" 
-              }}
+            <motion.div
+              className="relative z-10 flex justify-end lg:pr-4"
             >
-              <div className="bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-3xl p-12 backdrop-blur-sm border border-white/50 dark:border-gray-700/50 shadow-soft">
-                <div className="aspect-square max-w-md mx-auto flex flex-col items-center justify-center space-y-6">
-                  {/* Logo Image */}
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.05, 1],
-                    }}
-                    transition={{ 
-                      duration: 4, 
-                      repeat: Infinity,
-                      ease: "easeInOut" 
-                    }}
-                    className="relative"
-                  >
-                    <div className="w-48 h-48 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex items-center justify-center p-6">
-                      <img 
-                        src="/logo_polijecare.png" 
-                        alt="Polijecare Logo" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    {/* Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl -z-10"></div>
-                  </motion.div>
-                  
-                  {/* Brand Text */}
-                  <motion.div 
-                    className="text-center space-y-2"
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: 0.5 }}
-                  >
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Polijecare</h3>
-                    <p className="text-primary dark:text-primary-light font-medium">Satgas PPKPT Polije</p>
-                    <div className="w-16 h-1 bg-gradient-to-r from-primary to-accent rounded-full mx-auto"></div>
-                  </motion.div>
-                </div>
-              </div>
+              <img
+                src="/gambar_header.png"
+                alt="header gambar"
+                className="w-full max-w-[500px] h-auto object-cover"
+              />
             </motion.div>
 
-          {/* Background Shape */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 dark:from-purple-900/20 to-accent/10 dark:to-accent/20 rounded-3xl blur-2xl -z-10"></div>
+            {/* Background Shape */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 dark:from-purple-900/20 to-accent/10 dark:to-accent/20 rounded-3xl blur-2xl -z-10"></div>
           </motion.div>
         </div>
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div 
+      <motion.div
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
