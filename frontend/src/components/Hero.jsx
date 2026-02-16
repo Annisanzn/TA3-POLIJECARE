@@ -1,9 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Component as ReportButton } from './button';
+import { Icon } from '@iconify/react';
 import { motion } from 'framer-motion';
 import { fadeIn, slideUp, slideLeft, slideRight } from '../utils/motionVariants';
 
 const Hero = ({ heroData }) => {
+  const navigate = useNavigate();
   const defaultHero = {
     title: 'Aman Bicara, Aman Melapor',
     subtitle: 'Satgas PPKPT Politeknik Negeri Jember',
@@ -46,11 +49,11 @@ const Hero = ({ heroData }) => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="max-w-[1440px] mx-auto px-8 sm:px-12 lg:px-16 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
           <motion.div
-            className="space-y-8"
+            className="space-y-6"
             variants={slideUp}
             initial="hidden"
             animate="visible"
@@ -64,7 +67,7 @@ const Hero = ({ heroData }) => {
               transition={{ delay: 0.2 }}
             >
               <motion.h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight"
                 variants={slideUp}
                 initial="hidden"
                 animate="visible"
@@ -74,7 +77,7 @@ const Hero = ({ heroData }) => {
               </motion.h1>
 
               <motion.h2
-                className="text-xl md:text-2xl lg:text-3xl font-semibold text-primary dark:text-primary-light"
+                className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[#191970] dark:text-blue-300"
                 variants={slideUp}
                 initial="hidden"
                 animate="visible"
@@ -85,27 +88,34 @@ const Hero = ({ heroData }) => {
             </motion.div>
 
             <motion.p
-              className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl"
+              className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl"
               variants={fadeIn}
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.5 }}
             >
-              {hero.description}
+              {hero.description ? (
+                hero.description
+              ) : (
+                <>
+                  Kami siap mendengar dan membantu Anda dengan{' '}
+                  <span className="highlight-marker" style={{ '--delay': '1' }}>profesionalisme</span> dan{' '}
+                  <span className="highlight-marker" style={{ '--delay': '1.6' }}>kerahasiaan terjamin</span>.{' '}
+                  Setiap laporan akan ditangani dengan{' '}
+                  <span className="highlight-marker" style={{ '--delay': '2.2' }}>empati</span> dan{' '}
+                  <span className="highlight-marker" style={{ '--delay': '2.6' }}>seksama</span>.
+                </>
+              )}
             </motion.p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 pt-4"
+              className="flex flex-row gap-4 pt-4 items-start"
               variants={slideUp}
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.6 }}
             >
-              <motion.a
-                href="https://wa.me/6281234567890"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-danger text-white rounded-xl hover:bg-danger-dark transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold text-center shadow-soft"
+              <motion.div
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
@@ -113,8 +123,16 @@ const Hero = ({ heroData }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Butuh Bantuan Darurat
-              </motion.a>
+                <ReportButton
+                  icon={<Icon icon="solar:phone-calling-bold-duotone" />}
+                  title="Butuh Bantuan Darurat"
+                  size="sm"
+                  className="rounded-full bg-red-600 hover:bg-red-700 border-0"
+                  gradientLight={{ from: "from-red-600", via: "via-red-600", to: "to-red-600" }}
+                  gradientDark={{ from: "from-red-600", via: "via-red-600", to: "to-red-600" }}
+                  onClick={() => window.open('https://wa.me/6281234567890', '_blank')}
+                />
+              </motion.div>
 
               <motion.div
                 variants={fadeIn}
@@ -124,38 +142,20 @@ const Hero = ({ heroData }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link
-                  to="/artikel"
-                  className="px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold text-center shadow-soft inline-block w-full sm:w-auto"
-                >
-                  Buat Laporan
-                </Link>
+                <ReportButton
+                  icon={<Icon icon="solar:document-add-bold-duotone" />}
+                  title="Buat Laporan"
+                  size="sm"
+                  className="rounded-full bg-[#191970] hover:bg-blue-900 border-0"
+                  gradientLight={{ from: "from-[#191970]", via: "via-[#191970]", to: "to-[#191970]" }}
+                  gradientDark={{ from: "from-[#191970]", via: "via-[#191970]", to: "to-[#191970]" }}
+                  onClick={() => navigate('/artikel')}
+                />
               </motion.div>
             </motion.div>
 
             {/* Trust Indicators */}
-            <motion.div
-              className="flex flex-wrap gap-6 pt-8"
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.9 }}
-            >
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-accent rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">100% Rahasia</span>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-accent rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Profesional</span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-accent rounded-full"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">24/7 Support</span>
-              </div>
-            </motion.div>
           </motion.div>
 
           {/* Right Content - Logo & Branding */}
@@ -173,7 +173,7 @@ const Hero = ({ heroData }) => {
               <img
                 src="/gambar_header.png"
                 alt="header gambar"
-                className="w-full max-w-[500px] h-auto object-cover"
+                className="w-full max-w-[550px] h-auto object-cover"
               />
             </motion.div>
 
@@ -181,26 +181,12 @@ const Hero = ({ heroData }) => {
             <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 dark:from-purple-900/20 to-accent/10 dark:to-accent/20 rounded-3xl blur-2xl -z-10"></div>
           </motion.div>
         </div>
+
+        {/* Brand Stats Banner - Glassmorphic Light Design */}
+
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="flex flex-col items-center space-y-2"
-        >
-          <span className="text-sm text-gray-400 dark:text-gray-500 font-medium">Scroll ke bawah</span>
-          <div className="w-6 h-10 border-2 border-gray-400 dark:border-gray-500 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-gray-600 dark:bg-gray-400 rounded-full mt-2"></div>
-          </div>
-        </motion.div>
-      </motion.div>
+
     </section>
   );
 };

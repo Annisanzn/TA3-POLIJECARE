@@ -5,7 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { fadeIn, slideDown } from '../utils/motionVariants';
-import ThemeToggle from './ThemeToggle';
+import Switch from './sky-toggle';
 import LoginModal from './LoginModal';
 
 
@@ -47,33 +47,39 @@ const Navbar = () => {
 
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      // Logic for switching navbar type (Standard vs Expandable)
-      // Switch when approaching 'about' section or scrolled past 1st screen
-      const aboutSection = document.getElementById('about');
-      const threshold = aboutSection ? aboutSection.offsetTop - 400 : window.innerHeight - 200;
-      setIsScrolled(window.scrollY > threshold);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // Logic for switching navbar type (Standard vs Expandable)
+          const aboutSection = document.getElementById('about');
+          const threshold = aboutSection ? aboutSection.offsetTop - 400 : window.innerHeight - 200;
+          setIsScrolled(window.scrollY > threshold);
 
-      // ScrollSpy Logic
-      const sections = navLinks.map(link => link.href.substring(1));
-      let currentSection = "";
+          // ScrollSpy Logic
+          const sections = navLinks.map(link => link.href.substring(1));
+          let currentSection = "";
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 150 && rect.bottom >= 150) {
-            currentSection = "#" + section;
+          for (const section of sections) {
+            const element = document.getElementById(section);
+            if (element) {
+              const rect = element.getBoundingClientRect();
+              if (rect.top <= 150 && rect.bottom >= 150) {
+                currentSection = "#" + section;
+              }
+            }
           }
-        }
-      }
 
-      if (currentSection && currentSection !== activeLink) {
-        setActiveLink(currentSection);
+          if (currentSection && currentSection !== activeLink) {
+            setActiveLink(currentSection);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [navLinks, activeLink]);
 
@@ -103,15 +109,15 @@ const Navbar = () => {
 
   return (
     <>
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isScrolled ? (
           <motion.div
             key="expandable-tabs"
-            initial={{ opacity: 0, scale: 0.8, y: -20, x: "-50%" }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, scale: 0.8, y: -20, x: "-50%", transition: { duration: 0.1 } }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-4 left-1/2 z-50 transform -translate-x-1/2"
+            initial={{ opacity: 0, y: -10, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -10, x: "-50%", transition: { duration: 0.15 } }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed top-4 left-1/2 z-50 transform -translate-x-1/2 will-change-transform"
           >
             <ExpandableTabs
               tabs={tabs}
@@ -125,18 +131,18 @@ const Navbar = () => {
               }}
               trailingElement={
                 <div className="flex items-center gap-2">
-                  <ThemeToggle />
+                  <Switch />
                   {isAuthenticated ? (
                     <>
                       <button
                         onClick={handleDashboardRedirect}
-                        className="px-4 py-2 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-colors"
+                        className="px-5 py-2.5 text-sm font-medium bg-primary text-white rounded-full hover:bg-primary-dark transition-all duration-300 hover:shadow-lg"
                       >
                         Dashboard
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="px-4 py-2 text-sm font-medium border border-[#191970] text-[#191970] rounded-full hover:bg-gray-100 transition-colors"
+                        className="px-5 py-2.5 text-sm font-medium border-2 border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-all duration-300"
                       >
                         Keluar
                       </button>
@@ -144,7 +150,7 @@ const Navbar = () => {
                   ) : (
                     <button
                       onClick={() => setIsLoginModalOpen(true)}
-                      className="px-6 py-2 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-colors shadow-lg"
+                      className="px-6 py-2.5 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg"
                     >
                       Masuk
                     </button>
@@ -156,11 +162,11 @@ const Navbar = () => {
         ) : (
           <motion.nav
             key="navbar"
-            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20, transition: { duration: 0.1 } }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/50 backdrop-blur-md border-b border-white/20 shadow-sm"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
+            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 bg-white/50 backdrop-blur-md border-b border-white/20 shadow-sm will-change-transform"
           >
             <div className="w-full px-4">
               <div className="flex items-center justify-between h-20">
@@ -199,7 +205,7 @@ const Navbar = () => {
 
                 {/* Right Section - Auth & Theme */}
                 <div className="hidden md:flex items-center space-x-4">
-                  <ThemeToggle />
+                  <Switch />
 
                   {isAuthenticated ? (
                     <>
@@ -219,7 +225,7 @@ const Navbar = () => {
                   ) : (
                     <button
                       onClick={() => setIsLoginModalOpen(true)}
-                      className="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-primary-dark transition-all duration-300 hover:shadow-lg font-medium text-sm"
+                      className="px-6 py-2.5 bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg font-medium text-sm"
                     >
                       Masuk
                     </button>

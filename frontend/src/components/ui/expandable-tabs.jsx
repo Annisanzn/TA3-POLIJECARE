@@ -10,10 +10,10 @@ const buttonVariants = {
     paddingLeft: ".5rem",
     paddingRight: ".5rem",
   },
-  animate: (isSelected) => ({
-    gap: isSelected ? ".5rem" : 0,
-    paddingLeft: isSelected ? "2rem" : "1rem",
-    paddingRight: isSelected ? "2rem" : "1rem",
+  animate: (isExpanded) => ({
+    gap: isExpanded ? ".5rem" : 0,
+    paddingLeft: isExpanded ? "2rem" : "1rem",
+    paddingRight: isExpanded ? "2rem" : "1rem",
   }),
 };
 
@@ -34,6 +34,7 @@ export function ExpandableTabs({
   trailingElement
 }) {
   const [selected, setSelected] = React.useState(null);
+  const [hovered, setHovered] = React.useState(null);
   const outsideClickRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -69,6 +70,7 @@ export function ExpandableTabs({
         }
 
         const Icon = tab.icon;
+        const isExpanded = selected === index || hovered === index;
         return (
           <motion.button
             key={tab.title}
@@ -76,18 +78,22 @@ export function ExpandableTabs({
             variants={buttonVariants}
             initial={false}
             animate="animate"
-            custom={selected === index}
+            custom={isExpanded}
             onClick={() => handleSelect(index)}
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(null)}
             transition={transition}
             className={cn(
               "relative flex items-center rounded-full py-3 text-base font-medium transition-colors duration-300",
               selected === index
                 ? "bg-[#191970] text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                : hovered === index
+                  ? "bg-gray-200 text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
             )}>
             <Icon size={24} />
             <AnimatePresence initial={false}>
-              {selected === index && (
+              {isExpanded && (
                 <motion.span
                   variants={spanVariants}
                   initial="initial"
