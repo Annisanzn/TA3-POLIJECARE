@@ -34,11 +34,10 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-white dark:bg-black border-t border-gray-100 dark:border-white/10 pt-16 pb-8 relative overflow-hidden">
+    <footer className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-t border-gray-200/50 dark:border-white/5 pt-20 pb-10 relative overflow-hidden">
       {/* Background Gradients */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-white/20 to-transparent opacity-50"></div>
-      <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-70"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent opacity-70"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
@@ -48,28 +47,28 @@ const Footer = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-4"
             >
               <img
                 src="/logo_polijecare.png"
                 alt="PolijeCare Logo"
-                className="w-12 h-12 object-contain"
+                className="w-14 h-14 object-contain filter drop-shadow-sm"
               />
-              <div>
-                <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+              <div className="space-y-0.5">
+                <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                   PolijeCare
                 </h3>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">
-                  SATGAS PPKS POLITEKNIK NEGERI JEMBER
+                <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary">
+                  Satgas PPKS Polije
                 </p>
               </div>
             </motion.div>
 
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed max-w-sm">
-              Kami berkomitmen menciptakan lingkungan kampus yang aman, inklusif, dan bebas dari kekerasan seksual melalui pencegahan, penanganan, dan pemulihan yang berpusat pada korban.
+            <p className="text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm text-sm">
+              Mewujudkan lingkungan kampus yang aman, inklusif, dan bebas kekerasan seksual. Kami hadir untuk melayani, melindungi, dan mendampingi sivitas akademika Polije.
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
@@ -77,36 +76,38 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-gray-200 dark:border-white/10"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {social.icon}
+                  {React.cloneElement(social.icon, { className: "w-4 h-4" })}
                 </motion.a>
               ))}
             </div>
           </div>
 
           {/* Links Columns */}
-          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-4">
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {Object.entries(footerLinks).map(([title, links], columnIndex) => (
               <div key={title} className="space-y-6">
-                <h4 className="font-bold text-gray-900 dark:text-white text-lg">{title}</h4>
-                <ul className="space-y-4">
+                <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wider">{title}</h4>
+                <ul className="space-y-3">
                   {links.map((link, index) => (
                     <motion.li
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: (columnIndex * 0.1) + (index * 0.05) }}
+                      transition={{ delay: 0.1 + (index * 0.05) }}
                     >
                       <a
                         href={link.href}
-                        className="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors inline-block relative group"
+                        className="text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors inline-flex items-center group"
                       >
-                        <span className="relative z-10">{link.name}</span>
-                        <span className="absolute left-0 bottom-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full"></span>
+                        <span className="relative overflow-hidden">
+                          {link.name}
+                          <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
+                        </span>
                       </a>
                     </motion.li>
                   ))}
@@ -117,15 +118,15 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-100 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
-          <p>© {currentYear} PolijeCare. Dikembangkan dengan <Heart className="w-3 h-3 inline text-red-500 mx-1 fill-current animate-pulse" /> untuk kemanusiaan.</p>
-          <div className="flex gap-6">
+        <div className="pt-8 border-t border-gray-200/50 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-500 dark:text-gray-500">
+          <p>© {currentYear} PolijeCare. All rights reserved.</p>
+          <div className="flex gap-8">
             <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span>Jember, Jawa Timur</span>
+              <MapPin className="w-3 h-3" />
+              <span>Jember, East Java</span>
             </div>
             <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
+              <Mail className="w-3 h-3" />
               <span>satgasppkpt@polije.ac.id</span>
             </div>
           </div>
