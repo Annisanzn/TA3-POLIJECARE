@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { fadeIn, slideUp, staggerChildren } from '../utils/motionVariants';
+import { fadeIn, slideUp } from '../utils/motionVariants';
+import { Gallery4 } from './gallery4';
 
 const Articles = () => {
   const [articles, setArticles] = useState([]);
@@ -13,240 +14,126 @@ const Articles = () => {
     const mockArticles = [
       {
         id: 1,
-        title: 'Pentingnya Menjaga Lingkungan Kampus Aman dari Kekerasan Seksual',
-        slug: 'pentingnya-menjaga-lingkungan-kampus-aman-dari-kekerasan-seksual',
-        image: 'articles/safe-campus.jpg',
-        content: 'Lingkungan kampus yang aman adalah hak setiap sivitas akademika.',
+        title: 'Guru Besar UGM Diduga Lakukan Kekerasan Seksual, Diberhentikan Sementara',
+        slug: 'https://www.detik.com/jateng/berita/d-6204001/dugaan-kekerasan-seksual-guru-besar-ugm-dipecat-sebagai-dosen',
+        image: 'https://images.unsplash.com/photo-1592280771800-45cb10bd3dcf?q=80&w=1740&auto=format&fit=crop',
+        content: 'Universitas Gadjah Mada (UGM) mengambil tindakan tegas dengan memberhentikan sementara seorang guru besar yang diduga terlibat kasus kekerasan seksual.',
         is_published: true,
-        published_at: '2024-01-07T00:00:00.000000Z'
+        published_at: '2025-01-20T00:00:00.000000Z'
       },
       {
         id: 2,
-        title: 'Prosedur Pelaporan Kasus Kekerasan Seksual di Polije',
-        slug: 'prosedur-pelaporan-kasus-kekerasan-seksual-di-polije',
-        image: 'articles/reporting-procedure.jpg',
-        content: 'Prosedur pelaporan kasus kekerasan seksual di Politeknik Negeri Jember.',
+        title: 'Rektor Universitas Pancasila Nonaktif Jalani Pemeriksaan Kasus Pelecehan',
+        slug: 'https://metro.tempo.co/read/1840000/kasus-pelecehan-seksual-rektor-universitas-pancasila',
+        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1740&auto=format&fit=crop',
+        content: 'Polda Metro Jaya memeriksa Rektor Universitas Pancasila nonaktif terkait laporan dugaan pelecehan seksual terhadap pegawai kampus.',
         is_published: true,
-        published_at: '2024-01-05T00:00:00.000000Z'
+        published_at: '2024-06-15T00:00:00.000000Z'
       },
       {
         id: 3,
-        title: 'Hak dan Kewajiban Korban dan Pelapor Kekerasan Seksual',
-        slug: 'hak-dan-kewajiban-korban-dan-pelapor-kekerasan-seksual',
-        image: 'articles/rights-responsibilities.jpg',
-        content: 'Sebagai korban atau pelapor kekerasan seksual, Anda memiliki hak-hak.',
+        title: 'Unand Resmikan Satgas PPK, Perluas Cakupan Penanganan Kekerasan',
+        slug: 'https://www.unand.ac.id/id/berita-peristiwa/berita/item/5799-resmikan-satgas-ppk-rektor-unand-kawal-kampus-aman.html',
+        image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1740&auto=format&fit=crop',
+        content: 'Universitas Andalas meresmikan Satuan Tugas Pencegahan dan Penanganan Kekerasan (PPK) untuk menciptakan lingkungan kampus yang aman dan inklusif.',
         is_published: true,
-        published_at: '2024-01-03T00:00:00.000000Z'
+        published_at: '2024-11-10T00:00:00.000000Z'
+      },
+      {
+        id: 4,
+        title: 'Mahasiswa Unsri Tuntut Penuntasan Kasus Pelecehan Seksual',
+        slug: 'https://www.cnnindonesia.com/nasional/20211203145209-12-729000/mahasiswa-unsri-demo-tuntut-usut-tuntas-dugaan-pelecehan-seksual',
+        image: 'https://images.unsplash.com/photo-1555848960-8c3af5e4860c?q=80&w=1740&auto=format&fit=crop',
+        content: 'Ratusan mahasiswa Universitas Sriwijaya menggelar aksi damai menuntut pengusutan tuntas kasus dugaan pelecehan seksual oleh oknum dosen.',
+        is_published: true,
+        published_at: '2024-10-05T00:00:00.000000Z'
+      },
+      {
+        id: 5,
+        title: 'Kemendikbudristek Cabut Izin Kampus yang Abaikan Kasus Kekerasan Seksual',
+        slug: 'https://nasional.kompas.com/read/2023/06/07/11261391/izin-23-perguruan-tinggi-dicabut-ada-kampus-yang-abaikan-kasus-kekerasan',
+        image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1740&auto=format&fit=crop',
+        content: 'Kemendikbudristek mengambil langkah tegas mencabut izin operasional perguruan tinggi yang terbukti melakukan pelanggaran berat, termasuk pembiaran kekerasan seksual.',
+        is_published: true,
+        published_at: '2024-02-01T00:00:00.000000Z'
+      },
+      {
+        id: 6,
+        title: 'Puan Maharani: Kampus Harus Jadi Ruang Aman Bebas Kekerasan Seksual',
+        slug: 'https://www.dpr.go.id/berita/detail/id/35000/t/Ketua+DPR+Minta+Kampus+Jadi+Ruang+Aman+dari+Kekerasan+Seksual',
+        image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1740&auto=format&fit=crop',
+        content: 'Ketua DPR RI Puan Maharani menegaskan pentingnya komitmen perguruan tinggi dalam menciptakan ruang aman bebas dari segala bentuk kekerasan seksual.',
+        is_published: true,
+        published_at: '2024-09-15T00:00:00.000000Z'
+      },
+      {
+        id: 7,
+        title: 'Komnas Perempuan: Kekerasan Seksual di Lingkungan Pendidikan Masih Mengkhawatirkan',
+        slug: 'https://www.kompas.id/baca/humaniora/2024/03/07/kekerasan-seksual-di-lingkungan-pendidikan-masih-tinggi',
+        image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1740&auto=format&fit=crop',
+        content: 'Komnas Perempuan mencatat angka kekerasan seksual di lingkungan pendidikan masih tinggi dan memerlukan penanganan sistemik yang lebih serius.',
+        is_published: true,
+        published_at: '2024-03-08T00:00:00.000000Z'
+      },
+      {
+        id: 8,
+        title: 'Pentingnya Pendidikan Seksual di Kampus untuk Cegah Tindakan Asusila',
+        slug: 'https://edukasi.kompas.com/read/2021/11/12/100000371/pentingnya-pendidikan-seksual-sejak-dini-untuk-cegah-pelecehan',
+        image: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=1740&auto=format&fit=crop',
+        content: 'Pendidikan seksual yang komprehensif di lingkungan kampus dinilai efektif sebagai langkah preventif untuk mencegah terjadinya tindak asusila.',
+        is_published: true,
+        published_at: '2024-01-10T00:00:00.000000Z'
       }
     ];
-    
+
     setArticles(mockArticles);
     setLoading(false);
   }, []);
 
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
-  };
+  const galleryItems = articles.map(article => ({
+    id: article.id.toString(),
+    title: article.title,
+    description: article.content,
+    href: article.slug,
+    image: article.image
+  }));
+
+  const SectionTitle = (
+    <span>
+      Artikel & <span className="text-primary">Pengumuman</span>
+    </span>
+  );
 
   return (
-    <section id="articles" className="py-20 bg-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 right-10 w-64 h-64 bg-primary rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-accent rounded-full blur-3xl"></div>
+    <div id="articles" className="bg-gray-50 dark:bg-gray-900 min-h-screen relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <motion.div 
-          className="text-center mb-20"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <motion.h2 
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
-            variants={slideUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            Artikel & <span className="text-primary">Pengumuman</span>
-          </motion.h2>
-          <motion.p 
-            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-            variants={fadeIn}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            Dapatkan informasi terbaru seputar layanan, edukasi, dan pengumuman penting dari Satgas PPKPT Polije.
-          </motion.p>
-        </motion.div>
-
-        {/* Loading State */}
+      <div className="relative z-10">
         {loading && (
-          <motion.div 
-            className="flex justify-center items-center py-20"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Memuat artikel...</p>
-            </div>
-          </motion.div>
+          <div className="flex justify-center items-center py-32">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          </div>
         )}
 
-        {/* Error State */}
         {error && (
-          <motion.div 
-            className="text-center py-20"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="bg-danger/10 border border-danger/20 rounded-2xl p-8 max-w-md mx-auto">
-              <div className="w-16 h-16 bg-danger/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-danger" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Gagal Memuat Artikel</h3>
-              <p className="text-gray-600 text-sm mb-4">{error}</p>
-              <button 
-                onClick={fetchArticles}
-                className="px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"
-              >
-                Coba Lagi
-              </button>
-            </div>
-          </motion.div>
+          <div className="text-center py-32 text-red-500 max-w-lg mx-auto px-4">
+            <p>{error}</p>
+          </div>
         )}
 
-        {/* Articles Grid */}
         {!loading && !error && (
-          <>
-            {articles.length === 0 ? (
-              <motion.div 
-                className="text-center py-20"
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-              >
-                <div className="bg-gray-50 rounded-2xl p-12 max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Artikel</h3>
-                  <p className="text-gray-600 text-sm">Belum ada artikel atau pengumuman yang tersedia saat ini.</p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                variants={staggerChildren}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                {articles.map((article, index) => (
-                  <motion.article
-                    key={article.id || index}
-                    className="bg-white rounded-2xl shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-2 overflow-hidden group"
-                    variants={fadeIn}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 * index }}
-                  >
-                    {/* Article Image */}
-                    <div className="relative h-48 overflow-hidden">
-                      {article.image ? (
-                        <img 
-                          src={article.image} 
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                          <svg className="w-16 h-16 text-primary/30" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                          </svg>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-
-                    {/* Article Content */}
-                    <div className="p-6 space-y-4">
-                      {/* Date */}
-                      <div className="flex items-center text-sm text-gray-500">
-                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                        </svg>
-                        {formatDate(article.published_at)}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h3>
-
-                      {/* Excerpt */}
-                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                        {article.excerpt}
-                      </p>
-
-                      {/* Read More Link */}
-                      <div className="pt-4">
-                        <Link 
-                          to={`/artikel/${article.slug}`}
-                          className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary-dark transition-colors group"
-                        >
-                          Baca Selengkapnya
-                          <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                          </svg>
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.article>
-                ))}
-              </motion.div>
-            )}
-          </>
-        )}
-
-        {/* View All Button */}
-        {!loading && !error && articles.length > 0 && (
-          <motion.div 
-            className="text-center mt-12"
-            variants={fadeIn}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link 
-              to="/artikel"
-              className="inline-flex items-center px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold shadow-soft"
-            >
-              Lihat Semua Artikel
-              <svg className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-              </svg>
-            </Link>
-          </motion.div>
+          <Gallery4
+            title={SectionTitle}
+            description="Dapatkan informasi terbaru seputar layanan, edukasi, dan pengumuman penting dari Satgas PPKPT Polije. Kami berkomitmen untuk transparansi dan edukasi."
+            items={galleryItems}
+          />
         )}
       </div>
-    </section>
+    </div>
   );
 };
 

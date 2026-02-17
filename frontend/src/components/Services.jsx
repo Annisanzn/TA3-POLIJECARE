@@ -2,99 +2,119 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fadeIn, slideUp, staggerChildren } from '../utils/motionVariants';
+import {
+  MessageCircle,
+  FileText,
+  Shield,
+  Users,
+  HeartHandshake,
+  Phone,
+  CheckCircle2,
+  Search,
+  Gavel,
+  Smile
+} from 'lucide-react';
+import { SpotlightCard } from './ui/spotlight-card';
+import { FlowButton } from './ui/flow-button';
 
 const Services = () => {
   const reportingMethods = [
     {
       id: 'whatsapp',
       title: 'Via WhatsApp',
-      description: 'Laporkan secara langsung melalui WhatsApp untuk respons cepat dan konsultasi awal dengan tim kami.',
-      icon: (
-        <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.149-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.123-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
-        </svg>
-      ),
-      features: ['Respons 24/7', 'Konsultasi awal', 'Bimbingan langkah selanjutnya'],
-      buttonText: 'Butuh Bantuan Darurat',
-      buttonColor: 'bg-accent hover:bg-accent-dark',
-      buttonLink: 'https://wa.me/6281234567890'
+      description: 'Layanan cepat tanggap untuk konsultasi awal dan pelaporan darurat. Terhubung langsung dengan tim satgas kami.',
+      icon: <MessageCircle className="w-8 h-8" />,
+      features: ['Respons 24/7', 'Konsultasi Privat', 'Pendampingan Awal'],
+      buttonText: 'Chat WhatsApp Sekarang',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      buttonLink: 'https://wa.me/6281234567890',
+      gradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
+      iconColor: 'text-green-600 dark:text-green-400',
+      spotlightColor: 'rgba(34, 197, 94, 0.2)' // Green glow for WhatsApp
     },
     {
       id: 'form',
-      title: 'Form Pengaduan Online',
-      description: 'Isi form pengaduan secara online dengan detail lengkap dan upload bukti pendukung untuk proses yang lebih terstruktur.',
-      icon: (
-        <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-          <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h5v2H8z"/>
-        </svg>
-      ),
-      features: ['Form terstruktur', 'Upload bukti', 'Tracking status laporan'],
-      buttonText: 'Laporkan Sekarang',
-      buttonColor: 'bg-primary hover:bg-primary-dark',
-      buttonLink: '/artikel'
+      title: 'Form Pengaduan',
+      description: 'Saluran resmi untuk pelaporan mendetail. Mendukung lampiran bukti dan kronologi lengkap untuk investigasi.',
+      icon: <FileText className="w-8 h-8" />,
+      features: ['Form Terstruktur', 'Upload Bukti Aman', 'Tracking Status'],
+      buttonText: 'Isi Form Laporan',
+      buttonColor: 'bg-[#191970] hover:bg-blue-900',
+      buttonLink: '/artikel',
+      gradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
+      iconColor: 'text-[#191970] dark:text-blue-400',
+      spotlightColor: 'rgba(139, 92, 246, 0.2)' // Purple glow for Form
+    }
+  ];
+
+  const handlingFlow = [
+    {
+      step: '01',
+      title: 'Pelaporan',
+      desc: 'Laporan masuk via WA atau Website.',
+      icon: <FileText className="w-5 h-5" />
+    },
+    {
+      step: '02',
+      title: 'Verifikasi',
+      desc: 'Validasi data oleh tim Satgas.',
+      icon: <CheckCircle2 className="w-5 h-5" />
+    },
+    {
+      step: '03',
+      title: 'Tindak Lanjut',
+      desc: 'Investigasi atau mediasi kasus.',
+      icon: <Search className="w-5 h-5" />
+    },
+    {
+      step: '04',
+      title: 'Penyelesaian',
+      desc: 'Pemulihan dan penutupan kasus.',
+      icon: <Smile className="w-5 h-5" />
     }
   ];
 
   const importantInfo = [
     {
-      icon: '🛡️',
-      title: 'Aman',
-      description: 'Identitas Anda akan dirahasiakan sepenuhnya'
+      icon: <Shield className="w-6 h-6" />,
+      title: 'Dijamin Aman',
+      description: 'Identitas pelapor dirahasiakan sepenuhnya sesuai kode etik.'
     },
     {
-      icon: '👥',
+      icon: <Users className="w-6 h-6" />,
       title: 'Profesional',
-      description: 'Ditangani oleh tim yang berpengalaman'
+      description: 'Ditangani oleh tim ahli yang berpengalaman dan objektif.'
     },
     {
-      icon: '💚',
-      title: 'Support',
-      description: 'Dapatkan pendampingan penuh dari kami'
+      icon: <HeartHandshake className="w-6 h-6" />,
+      title: 'Pendampingan',
+      description: 'Dukungan psikologis dan hukum selama proses berjalan.'
     }
   ];
 
   return (
-    <section id="services" className="py-20 bg-gray-50 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-accent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+    <section id="services" className="pt-20 pb-24 bg-gray-50 dark:bg-gray-900 relative overflow-hidden transition-colors duration-300">
+      {/* Background Decorations */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-purple-200/30 dark:bg-purple-900/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-200/30 dark:bg-blue-900/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <motion.div 
-          className="text-center mb-20"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <motion.h2 
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
-            variants={slideUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            Cara <span className="text-primary">Melapor</span>
-          </motion.h2>
-          <motion.p 
-            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-            variants={fadeIn}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            Pilih metode pelaporan yang paling nyaman untuk Anda. Kami siap membantu dengan profesionalisme dan kerahasiaan terjamin.
-          </motion.p>
-        </motion.div>
 
-        {/* Reporting Methods Cards */}
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20"
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">
+            Cara <span className="text-[#191970] dark:text-blue-400">Melapor</span>
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Kami menyediakan ruang aman bagi Anda untuk bersuara. Pilih metode yang paling nyaman, kami siap mendampingi setiap langkahnya.
+          </p>
+        </div>
+
+        {/* Reporting Methods Grid */}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24"
           variants={staggerChildren}
           initial="hidden"
           whileInView="visible"
@@ -103,145 +123,175 @@ const Services = () => {
           {reportingMethods.map((method, index) => (
             <motion.div
               key={method.id}
-              className="bg-white rounded-3xl p-8 shadow-soft hover:shadow-card transition-all duration-500 hover:-translate-y-2 group"
               variants={fadeIn}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 * index }}
+              whileHover={{ y: -5 }}
+              className="h-full"
             >
-              {/* Icon */}
-              <motion.div 
-                className="w-20 h-20 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ duration: 0.3 }}
+              <SpotlightCard
+                className="h-full p-8 rounded-3xl border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/20 backdrop-blur-sm shadow-xl transition-all duration-300 group hover:bg-white/15 dark:hover:bg-white/5"
+                spotlightColor={method.spotlightColor}
               >
-                {method.icon}
-              </motion.div>
+                {/* Gradient Blob Background */}
+                <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${method.gradient} rounded-full blur-3xl -z-10 opacity-30 group-hover:opacity-60 transition-opacity duration-500`}></div>
 
-              {/* Content */}
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors">
-                  {method.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {method.description}
-                </p>
-
-                {/* Features */}
-                <div className="space-y-3">
-                  {method.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0"></div>
-                      <span className="text-gray-700 text-sm font-medium">{feature}</span>
+                <div className="flex flex-col h-full justify-between relative z-10">
+                  <div>
+                    <div className={`w-16 h-16 rounded-2xl bg-white dark:bg-gray-700 shadow-sm flex items-center justify-center mb-6 ${method.iconColor}`}>
+                      {method.icon}
                     </div>
-                  ))}
-                </div>
 
-                {/* Button */}
-                <div className="pt-6">
-                  {method.buttonLink.startsWith('http') ? (
-                    <a
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      {method.title}
+                    </h3>
+
+                    <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                      {method.description}
+                    </p>
+
+                    <ul className="space-y-3 mb-8">
+                      {method.features.map((feature, i) => (
+                        <li key={i} className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-medium">
+                          <CheckCircle2 className={`w-4 h-4 mr-2 ${method.iconColor}`} />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="w-full flex justify-center mt-auto pt-6">
+                    <FlowButton
+                      text={method.buttonText}
                       href={method.buttonLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center justify-center px-8 py-4 ${method.buttonColor} text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold w-full sm:w-auto shadow-soft`}
-                    >
-                      {method.buttonText}
-                    </a>
-                  ) : (
-                    <Link
-                      to={method.buttonLink}
-                      className={`inline-flex items-center justify-center px-8 py-4 ${method.buttonColor} text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-semibold w-full sm:w-auto shadow-soft`}
-                    >
-                      {method.buttonText}
-                    </Link>
-                  )}
+                      target={method.buttonLink.startsWith('http') ? "_blank" : undefined}
+                      colorStr={method.id === 'whatsapp' ? '#16a34a' : '#2563eb'}
+                      hoverColorStr={method.id === 'whatsapp' ? '#16a34a' : '#1e40af'}
+                      className="w-full max-w-[280px]"
+                    />
+                  </div>
                 </div>
-              </div>
+              </SpotlightCard>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Important Information */}
-        <motion.div 
-          className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-3xl p-8 md:p-12"
+        {/* Support & Flow Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+          {/* Trust Indicators (Left) */}
+          <motion.div
+            className="xl:col-span-1 bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-md h-full"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Kenapa Kami?</h3>
+            <div className="space-y-6">
+              {importantInfo.map((info, index) => (
+                <div key={index} className="flex items-start space-x-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#191970] dark:text-blue-300 flex-shrink-0">
+                    {info.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{info.title}</h4>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed mt-1">{info.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Process Flow (Right - Timeline) */}
+          <SpotlightCard
+            className="xl:col-span-2 relative overflow-hidden rounded-3xl p-8 md:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/20 backdrop-blur-sm shadow-xl transition-all duration-300 group hover:bg-white/15 dark:hover:bg-white/5"
+            spotlightColor="rgba(25, 25, 112, 0.1)"
+          >
+            {/* Background Pattern */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 dark:bg-blue-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-50 dark:bg-purple-900/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+            <h3 className="text-2xl font-bold mb-12 relative z-10 text-gray-900 dark:text-white">Alur Penanganan</h3>
+
+            <div className="relative z-10 w-full">
+              {/* Progress Line Background */}
+              <div className="hidden md:block absolute top-[28px] left-0 w-full h-[2px] bg-gray-200/50 dark:bg-gray-700/50 rounded-full"></div>
+
+              {/* Animated Progress Line */}
+              <motion.div
+                className="hidden md:block absolute top-[28px] left-0 h-[2px] bg-[#191970] dark:bg-blue-500 origin-left z-0 rounded-full overflow-hidden"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+              >
+                {/* Continuous Shimmer Animation */}
+                <motion.div
+                  className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                  animate={{ x: ['-100%', '100%'] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2,
+                    ease: "linear",
+                    repeatDelay: 0.5
+                  }}
+                />
+              </motion.div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                {handlingFlow.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    className="relative group/step pt-4 md:pt-0"
+                    variants={fadeIn}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2 + 0.3 }}
+                  >
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                      <div className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 flex items-center justify-center mb-4 text-[#191970] dark:text-blue-500 shadow-md group-hover/step:scale-110 group-hover/step:border-[#191970] dark:group-hover/step:border-blue-500 transition-all duration-300 relative bg-opacity-80 backdrop-blur-md">
+                        {step.icon}
+                      </div>
+                      <span className="text-xs font-bold font-mono text-[#191970] dark:text-blue-400 mb-2 opacity-80">{step.step}</span>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base mb-2">{step.title}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">{step.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </SpotlightCard>
+
+        </div>
+
+        {/* Emergency Banner */}
+        <motion.div
+          className="mt-12 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6"
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
-          <div className="text-center mb-8">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Penting Untuk Diketahui
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Kami memastikan setiap proses pelaporan berjalan dengan aman, profesional, dan mendukung.
-            </p>
-          </div>
-
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            variants={staggerChildren}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {importantInfo.map((info, index) => (
-              <motion.div
-                key={index}
-                className="text-center p-6 bg-white rounded-2xl shadow-soft hover:shadow-card transition-all duration-300"
-                variants={fadeIn}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="text-4xl mb-4">{info.icon}</div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">{info.title}</h4>
-                <p className="text-gray-600 text-sm leading-relaxed">{info.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* Emergency Notice */}
-        <motion.div 
-          className="mt-12 bg-gradient-to-r from-danger/10 to-danger/5 border border-danger/20 rounded-2xl p-6"
-          variants={fadeIn}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-        >
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-danger/20 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-danger" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+              <Phone className="w-6 h-6" />
             </div>
-            <div className="flex-1">
-              <h4 className="text-lg font-semibold text-gray-900 mb-1">Darurat? Hubungi Kami Sekarang</h4>
-              <p className="text-gray-600 text-sm">
-                Jika Anda atau orang lain berada dalam situasi darurat, segera hubungi WhatsApp kami untuk respons cepat 24/7.
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <a
-                href="https://wa.me/6281234567890"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-danger text-white rounded-xl hover:bg-danger-dark transition-all duration-300 font-semibold shadow-soft hover:shadow-lg"
-              >
-                Hubungi Darurat
-              </a>
+            <div>
+              <h4 className="font-bold text-gray-900 dark:text-white">Butuh Bantuan Darurat?</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Jangan ragu untuk menghubungi kami jika situasi mendesak.</p>
             </div>
           </div>
+          <FlowButton
+            text="Hubungi Sekarang"
+            href="https://wa.me/6281234567890"
+            target="_blank"
+            colorStr="#dc2626"
+            hoverColorStr="#dc2626"
+            className="w-auto px-8"
+          />
         </motion.div>
+
       </div>
     </section>
   );
