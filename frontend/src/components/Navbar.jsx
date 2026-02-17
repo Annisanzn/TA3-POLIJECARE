@@ -168,7 +168,7 @@ const Navbar = () => {
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 bg-white/50 backdrop-blur-md border-b border-white/20 shadow-sm will-change-transform"
           >
-            <div className="w-full px-4">
+            <div className="w-full px-8 lg:px-12">
               <div className="flex items-center justify-between h-20">
                 {/* Logo Section - Left */}
                 <Link to="/" className="flex items-center space-x-2 cursor-default">

@@ -44,8 +44,7 @@ export function ExpandableTabs({
   }, [activeTab]);
 
   useOnClickOutside(outsideClickRef, () => {
-    setSelected(null);
-    onChange?.(null);
+    // Keep the active tab visible — don't clear selection on outside click
   });
 
   const handleSelect = (index) => {
