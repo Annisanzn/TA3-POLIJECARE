@@ -17,9 +17,9 @@ const LandingPage = () => {
     const mockHeroData = {
       title: 'Aman Bicara, Aman Melapor',
       subtitle: 'Satgas PPKPT Politeknik Negeri Jember',
-      description: 'Kami siap mendengar dan membantu Anda dengan profesionalisme dan kerahasiaan terjamin. Setiap laporan akan ditangani dengan empati dan seksama.'
+      description: null
     };
-    
+
     setHeroData(mockHeroData);
     setLoading(false);
   }, []);
