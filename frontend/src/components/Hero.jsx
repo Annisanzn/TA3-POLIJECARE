@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Component as ReportButton } from './button';
+import { Component as ReportButton } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
 import { motion } from 'framer-motion';
 import { fadeIn, slideUp, slideLeft, slideRight } from '../utils/motionVariants';
