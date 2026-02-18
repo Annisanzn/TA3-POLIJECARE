@@ -8,9 +8,9 @@ import { ScrollParticles } from './components/ui/scroll-particles';
 
 // Pages
 import LandingPage from './pages/LandingPage';
-import UserDashboard from './pages/UserDashboard';
-import KonselorDashboard from './pages/KonselorDashboard';
-import OperatorDashboard from './pages/OperatorDashboard';
+import UserDashboard from './pages/user/dashboard';
+import KonselorDashboard from './pages/konselor/dashboard';
+import OperatorDashboard from './pages/operator/dashboard';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';

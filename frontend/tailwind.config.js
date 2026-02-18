@@ -44,9 +44,16 @@ export default {
   				'900': '#030712'
   			},
   			purple: {
-  				'50': '#F3E8FF',
-  				'100': '#E9D5FF',
-  				'200': '#D8B4FE'
+  				'50': '#F5F3FF',
+  				'100': '#EDE9FE',
+  				'200': '#DDD6FE',
+  				'300': '#C4B5FD',
+  				'400': '#A78BFA',
+  				'500': '#8B5CF6',
+  				'600': '#7C3AED',
+  				'700': '#6D28D9',
+  				'800': '#5B21B6',
+  				'900': '#4C1D95'
   			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

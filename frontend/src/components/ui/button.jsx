@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils"
 
+// Button component from shadcn/ui
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
@@ -43,5 +44,57 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, ..
   );
 })
 Button.displayName = "Button"
+
+// Custom Component for Hero section
+export const Component = ({
+  icon,
+  title,
+  subtitle,
+  size = "md",
+  className = "",
+  ...props
+}) => {
+  const sizes = {
+    sm: "p-3 rounded-xl",
+    md: "p-4 rounded-2xl",
+    lg: "p-6 rounded-3xl",
+  };
+
+  return (
+    <button
+      {...props}
+      className={`group relative overflow-hidden cursor-pointer transition-all duration-300 ease-out 
+                  shadow-lg hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 active:scale-95
+                  border-0 flex items-center justify-between gap-6
+                  ${sizes[size]} 
+                  ${className}`}>
+
+      {/* Subtle internal glow/shine for depth, but keeping base color solid */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+
+      {/* Content - flat structure for perfect alignment */}
+      <div className="relative z-10 flex items-center gap-3">
+        {/* Icon */}
+        {icon && (
+          <div className="text-2xl">
+            {icon}
+          </div>
+        )}
+
+        {/* Text */}
+        <div className="text-left">
+          <div className="font-semibold text-white">
+            {title}
+          </div>
+          {subtitle && (
+            <div className="text-sm text-white/80 mt-0.5">
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+};
 
 export { Button, buttonVariants }
