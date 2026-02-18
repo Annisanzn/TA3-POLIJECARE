@@ -179,7 +179,7 @@ export const AuthProvider = ({ children }) => {
           payload: { token, user },
         });
 
-        return { success: true, data: response.data };
+        return { success: true, data: response.data, message: response.data.message };
       } else {
         const message = response.data?.message || 'Login gagal';
         console.error('❌ Login failed:', message);
@@ -187,20 +187,19 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ Auth error:', error);
-      console.error('❌ Error config:', error.config);
-      console.error('❌ Error response:', error.response);
-      console.error('❌ Error status:', error.response?.status);
-      console.error('❌ Error data:', error.response?.data);
       
       // Handle different error types
       let errorMessage = 'Login gagal. Silakan coba lagi.';
       
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+      // Check if error has the structure from our axios interceptor
+      if (error && typeof error === 'object' && error.message && error.success === false) {
+        errorMessage = error.message;
+      } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
         errorMessage = 'Tidak dapat terhubung ke server. Pastikan backend berjalan.';
       } else if (error.response?.status === 401) {
         errorMessage = error.response.data?.message || 'Email atau password salah.';
       } else if (error.response?.status === 422) {
-        errorMessage = 'Validasi gagal. Periksa kembali input Anda.';
+        errorMessage = error.response.data?.message || 'Validasi gagal. Periksa kembali input Anda.';
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
@@ -212,7 +211,7 @@ export const AuthProvider = ({ children }) => {
         payload: errorMessage,
       });
 
-      return { success: false, error: errorMessage };
+      return { success: false, message: errorMessage };
     }
   };
 

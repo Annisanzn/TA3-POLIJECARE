@@ -30,20 +30,31 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    const { response } = error;
+    
     // Handle 401 Unauthorized - only redirect if not already on home page
-    if (error.response?.status === 401 && window.location.pathname !== '/') {
+    if (response?.status === 401 && window.location.pathname !== '/') {
       localStorage.removeItem('token');
       delete api.defaults.headers.common['Authorization'];
-      // Use navigate instead of direct location change to avoid infinite loop
       console.log('🔐 Token expired, redirecting to home...');
     }
     
     // Handle 403 Forbidden
-    if (error.response?.status === 403) {
+    if (response?.status === 403) {
       console.error('Access forbidden - insufficient permissions');
     }
     
-    return Promise.reject(error);
+    // Create a consistent error structure
+    const errorData = {
+      success: false,
+      message: response?.data?.message || 'Terjadi kesalahan pada server',
+      errors: response?.data?.errors || null,
+      status: response?.status || 500,
+      data: response?.data || null
+    };
+    
+    // Return a rejected promise with consistent structure
+    return Promise.reject(errorData);
   }
 );
 

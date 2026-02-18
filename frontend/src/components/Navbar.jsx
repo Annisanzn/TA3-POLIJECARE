@@ -149,7 +149,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <button
-                      onClick={() => setIsLoginModalOpen(true)}
+                      onClick={() => window.location.href = '/login-new'}
                       className="px-6 py-2.5 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg"
                     >
                       Masuk
@@ -224,7 +224,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <button
-                      onClick={() => setIsLoginModalOpen(true)}
+                      onClick={() => window.location.href = '/login-new'}
                       className="px-6 py-2.5 bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg font-medium text-sm"
                     >
                       Masuk
@@ -329,7 +329,7 @@ const Navbar = () => {
                       ) : (
                         <button
                           onClick={() => {
-                            setIsLoginModalOpen(true);
+                            window.location.href = '/login-new';
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"

@@ -53,7 +53,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   const { login } = useAuth();
 
   const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@polije\.ac\.id$/;
+    const emailRegex = /^[^\s@]+@(polije\.ac\.id|student\.polije\.ac\.id)$/;
     return emailRegex.test(email);
   };
 
@@ -117,17 +117,27 @@ const LoginModal = ({ isOpen, onClose }) => {
 
       if (result && result.success) {
         console.log('✅ Login successful');
-        onClose(); // Close modal
+        
+        // Get user role from response
+        const userRole = result.data?.user?.role || 'user';
+        console.log('🔍 User role:', userRole);
+        
+        // Close modal
+        onClose();
+        
+        // Redirect based on role - use the existing RedirectDashboard component
+        // Instead of navigating directly, we'll use the /redirect route
+        // which will automatically redirect based on user role
         navigate('/redirect');
       } else {
         console.error('❌ Login failed:', result);
-        const errorMessage = result?.message || result?.error || 'Login gagal. Silakan coba lagi.';
+        const errorMessage = result?.message || 'Login gagal. Silakan coba lagi.';
         setLoginError(errorMessage);
       }
     } catch (error) {
       console.error('❌ Login error:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      const errorMessage = error.response?.data?.message || error.message || 'Terjadi kesalahan. Silakan coba lagi.';
+      console.error('Error details:', error);
+      const errorMessage = error?.message || 'Terjadi kesalahan. Silakan coba lagi.';
       setLoginError(errorMessage);
     }
     

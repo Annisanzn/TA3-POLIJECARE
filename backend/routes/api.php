@@ -6,6 +6,7 @@ use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\ContactController;
 use App\Http\Controllers\API\HeroController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
 
 Route::get('/test', function () {
@@ -26,9 +27,13 @@ Route::get('/hero', [HeroController::class, 'index']);
 
 // Auth routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login-new', [NewLoginController::class, 'login']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
+    // New login protected routes
+    Route::post('/logout-new', [NewLoginController::class, 'logout']);
+    Route::get('/user-new', [NewLoginController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     

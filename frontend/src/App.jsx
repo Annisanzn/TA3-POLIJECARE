@@ -11,6 +11,10 @@ import LandingPage from './pages/LandingPage';
 import UserDashboard from './pages/UserDashboard';
 import KonselorDashboard from './pages/KonselorDashboard';
 import OperatorDashboard from './pages/OperatorDashboard';
+import NewLoginPage from './pages/NewLoginPage';
+import NewRedirectDashboard from './components/NewRedirectDashboard';
+import NewUserDashboard from './pages/NewUserDashboard';
+import NewProtectedRoute from './components/NewProtectedRoute';
 
 function App() {
   return (
@@ -25,6 +29,47 @@ function App() {
             <Route path="/services" element={<LandingPage />} />
             <Route path="/articles" element={<LandingPage />} />
             <Route path="/contact" element={<LandingPage />} />
+            
+            {/* New Login System Routes */}
+            <Route path="/login-new" element={<NewLoginPage />} />
+            <Route path="/redirect-new" element={<NewRedirectDashboard />} />
+            
+            {/* New Protected Dashboard Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <NewProtectedRoute>
+                  <UserDashboard />
+                </NewProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/dashboard"
+              element={
+                <NewProtectedRoute requiredRole="admin">
+                  <UserDashboard />
+                </NewProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/konselor/dashboard"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <KonselorDashboard />
+                </NewProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/operator/dashboard"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <OperatorDashboard />
+                </NewProtectedRoute>
+              }
+            />
 
             {/* Protected Dashboard Routes */}
             <Route
@@ -35,7 +80,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* Routes di bawah ini sudah digantikan oleh NewProtectedRoute di atas */}
+            {/* <Route
               path="/konselor/dashboard"
               element={
                 <ProtectedRoute requiredRole="konselor">
@@ -50,7 +96,7 @@ function App() {
                   <OperatorDashboard />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             {/* Redirect */}
             <Route path="/redirect" element={<RedirectDashboard />} />

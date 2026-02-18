@@ -33,12 +33,25 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized
+    const { response } = error;
+    
+    // Handle unauthorized
+    if (response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect automatically, let the component handle it
     }
-    return Promise.reject(error);
+    
+    // Create a consistent error structure
+    const errorData = {
+      success: false,
+      message: response?.data?.message || 'Terjadi kesalahan pada server',
+      errors: response?.data?.errors || null,
+      status: response?.status || 500,
+      data: response?.data || null
+    };
+    
+    // Return a rejected promise with consistent structure
+    return Promise.reject(errorData);
   }
 );
 

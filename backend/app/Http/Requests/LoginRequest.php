@@ -55,11 +55,27 @@ class LoginRequest extends FormRequest
         $validator->after(function ($validator) {
             $email = $this->input('email');
             
-            // Custom validation: email must contain polije.ac.id
-            if ($email && !str_contains($email, 'polije.ac.id')) {
+            // Custom validation: email must contain polije.ac.id or student.polije.ac.id
+            if ($email && !$this->isValidPolijeEmail($email)) {
                 $validator->errors()->add('email', 'Gunakan email resmi Polije (@polije.ac.id atau @student.polije.ac.id)');
             }
         });
+    }
+    
+    /**
+     * Check if email has valid Polije domain
+     */
+    private function isValidPolijeEmail(string $email): bool
+    {
+        $allowedDomains = ['@polije.ac.id', '@student.polije.ac.id'];
+        
+        foreach ($allowedDomains as $domain) {
+            if (str_ends_with($email, $domain)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
