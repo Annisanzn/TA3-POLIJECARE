@@ -32,8 +32,8 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
       category: 'MANAJEMEN',
       items: [
         { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
-        { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '#' },
-        { name: 'Manajemen Materi', icon: <FiBook />, path: '#' },
+        { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '/operator/complaints-management' },
+        { name: 'Manajemen Materi', icon: <FiBook />, path: '/operator/materials-management' },
         { name: 'Kategori Kekerasan', icon: <FiTag />, path: '#' },
         { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '#' },
         { name: 'Jadwal Konselor', icon: <FiClock />, path: '#' },

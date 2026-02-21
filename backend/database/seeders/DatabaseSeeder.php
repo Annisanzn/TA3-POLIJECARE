@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\ContactInfo;
 use App\Models\HeroSection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -84,21 +85,21 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Ahmad Mahasiswa',
                 'email' => '2021001@student.polije.ac.id',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Password1111'),
                 'role' => 'user',
                 'nim' => '2021001',
             ],
             [
                 'name' => 'Siti Konselor',
                 'email' => 'siti@polije.ac.id',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Password1111'),
                 'role' => 'konselor',
                 'nim' => null,
             ],
             [
                 'name' => 'Budi Operator',
                 'email' => 'budi@polije.ac.id',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Password1111'),
                 'role' => 'operator',
                 'nim' => null,
             ],
