@@ -55,6 +55,18 @@ export default {
   				'800': '#5B21B6',
   				'900': '#4C1D95'
   			},
+  			operator: {
+  				'50': '#EEEEFF',
+  				'100': '#DDDDFF',
+  				'200': '#BBBBFF',
+  				'300': '#9999EE',
+  				'400': '#7777DD',
+  				'500': '#6666DE',
+  				'600': '#5555CC',
+  				'700': '#4444BB',
+  				'800': '#3333AA',
+  				'900': '#222299'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -111,7 +123,11 @@ export default {
   		},
   		animation: {
   			float: 'float 3s ease-in-out infinite',
-  			'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+  			'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+  			'bar-grow': 'barGrow 0.8s ease-out forwards',
+  			'fade-in': 'fadeIn 0.6s ease-out forwards',
+  			'slide-up': 'slideUp 0.5s ease-out forwards',
+  			'fade-in-up': 'fadeInUp 0.7s ease-out forwards'
   		},
   		keyframes: {
   			float: {
@@ -120,6 +136,46 @@ export default {
   				},
   				'50%': {
   					transform: 'translateY(-10px)'
+  				}
+  			},
+  			barGrow: {
+  				'0%': {
+  					width: '0%',
+  					opacity: '0.7'
+  				},
+  				'100%': {
+  					width: 'var(--target-width)',
+  					opacity: '1'
+  				}
+  			},
+  			fadeIn: {
+  				'0%': {
+  					opacity: '0',
+  					transform: 'scale(0.95)'
+  				},
+  				'100%': {
+  					opacity: '1',
+  					transform: 'scale(1)'
+  				}
+  			},
+  			slideUp: {
+  				'0%': {
+  					opacity: '0',
+  					transform: 'translateY(10px)'
+  				},
+  				'100%': {
+  					opacity: '1',
+  					transform: 'translateY(0)'
+  				}
+  			},
+  			fadeInUp: {
+  				'0%': {
+  					opacity: '0',
+  					transform: 'translateY(20px)'
+  				},
+  				'100%': {
+  					opacity: '1',
+  					transform: 'translateY(0)'
   				}
   			}
   		}
