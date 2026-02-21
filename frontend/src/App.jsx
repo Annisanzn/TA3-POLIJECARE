@@ -12,6 +12,8 @@ import UserDashboard from './pages/user/dashboard';
 import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
 import UserManagementPage from './pages/operator/user-management';
+import ComplaintsManagementPage from './pages/operator/complaints-management';
+import MaterialsManagement from './pages/operator/materials-management';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
@@ -78,6 +80,24 @@ function App() {
               element={
                 <NewProtectedRoute requiredRole="operator">
                   <UserManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/operator/complaints-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <ComplaintsManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/operator/materials-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <MaterialsManagement />
                 </NewProtectedRoute>
               }
             />

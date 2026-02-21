@@ -6,6 +6,8 @@ use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\ContactController;
 use App\Http\Controllers\API\HeroController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\ComplaintController;
+use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
@@ -67,6 +69,15 @@ Route::middleware('auth:sanctum')->group(function () {
                 ]
             ]);
         });
+
+        // Complaint management routes (assigned only)
+        Route::get('/complaints', [ComplaintController::class, 'index']);
+        Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+
+        // Materials management routes
+        Route::get('/materials', [MaterialController::class, 'index']);
+        Route::post('/materials', [MaterialController::class, 'store']);
+        Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
     });
     
     // Operator routes
@@ -85,5 +96,16 @@ Route::middleware('auth:sanctum')->group(function () {
         // User management routes
         Route::apiResource('/users', UserController::class);
         Route::get('/users-stats', [UserController::class, 'stats']);
+
+        // Complaint management routes
+        Route::get('/complaints', [ComplaintController::class, 'index']);
+        Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+        Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
+        Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
+
+        // Materials management routes
+        Route::get('/materials', [MaterialController::class, 'index']);
+        Route::post('/materials', [MaterialController::class, 'store']);
+        Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
     });
 });
