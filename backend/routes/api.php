@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\ContactController;
 use App\Http\Controllers\API\HeroController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
@@ -14,6 +15,9 @@ Route::get('/test', function () {
         'status' => 'API OK',
     ]);
 });
+
+// Test route without authentication
+Route::get('/test-users', [UserController::class, 'index']);
 
 // Articles
 Route::get('/articles', [ArticleController::class, 'index']);
@@ -77,5 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
                 ]
             ]);
         });
+
+        // User management routes
+        Route::apiResource('/users', UserController::class);
+        Route::get('/users-stats', [UserController::class, 'stats']);
     });
 });

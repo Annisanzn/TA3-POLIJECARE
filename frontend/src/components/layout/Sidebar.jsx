@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  FiHome, 
-  FiUsers, 
-  FiFileText, 
-  FiBook, 
-  FiTag, 
-  FiCalendar, 
-  FiClock, 
-  FiBell, 
-  FiSettings, 
+import { Link, useLocation } from 'react-router-dom';
+import {
+  FiHome,
+  FiUsers,
+  FiFileText,
+  FiBook,
+  FiTag,
+  FiCalendar,
+  FiClock,
+  FiBell,
+  FiSettings,
   FiUser,
   FiChevronLeft,
   FiChevronRight,
@@ -17,38 +18,43 @@ import {
 } from 'react-icons/fi';
 
 const Sidebar = ({ collapsed, toggleCollapse }) => {
-  const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const menuItems = [
     {
       category: 'UTAMA',
       items: [
-        { name: 'Dashboard', icon: <FiHome />, active: true },
+        { name: 'Dashboard', icon: <FiHome />, path: '/operator/dashboard' },
       ]
     },
     {
       category: 'MANAJEMEN',
       items: [
-        { name: 'Manajemen Pengguna', icon: <FiUsers /> },
-        { name: 'Manajemen Pengaduan', icon: <FiFileText /> },
-        { name: 'Manajemen Materi', icon: <FiBook /> },
-        { name: 'Kategori Kekerasan', icon: <FiTag /> },
-        { name: 'Jadwal Konseling', icon: <FiCalendar /> },
-        { name: 'Jadwal Konselor', icon: <FiClock /> },
-        { name: 'Manajemen Pengumuman', icon: <FiBell /> },
+        { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
+        { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '#' },
+        { name: 'Manajemen Materi', icon: <FiBook />, path: '#' },
+        { name: 'Kategori Kekerasan', icon: <FiTag />, path: '#' },
+        { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '#' },
+        { name: 'Jadwal Konselor', icon: <FiClock />, path: '#' },
+        { name: 'Manajemen Pengumuman', icon: <FiBell />, path: '#' },
       ]
     },
     {
       category: 'PENGATURAN',
       items: [
-        { name: 'Manajemen Admin', icon: <FiSettings /> },
-        { name: 'Profil Operator', icon: <FiUser /> },
+        { name: 'Manajemen Admin', icon: <FiSettings />, path: '#' },
+        { name: 'Profil Operator', icon: <FiUser />, path: '#' },
       ]
     }
   ];
 
+  const isActive = (path) => {
+    return currentPath === path;
+  };
+
   return (
-    <div className={`h-screen flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} fixed lg:relative z-40`}>
+    <div className={`h-screen flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} shrink-0 sticky top-0 z-40`}>
       {/* Sidebar Header */}
       <div className="p-6 border-b border-[#E6E6FA]/30">
         <div className="flex items-center justify-between">
@@ -89,10 +95,10 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
             <ul className="space-y-1">
               {section.items.map((item, itemIdx) => (
                 <li key={itemIdx}>
-                  <button
-                    onClick={() => setActiveMenu(item.name)}
+                  <Link
+                    to={item.path}
                     className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 ${
-                      activeMenu === item.name
+                      isActive(item.path)
                         ? 'bg-gray-800/10 text-gray-800 border-l-4 border-[#6666DE]'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
@@ -106,7 +112,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
                     {item.active && !collapsed && (
                       <span className="ml-auto w-2 h-2 bg-green-400 rounded-full"></span>
                     )}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
