@@ -49,11 +49,11 @@ const OperatorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar dengan gradient ungu */}
-      <div 
+      {/* Sidebar dengan gradient ungu #E6E6FA */}
+      <div
         className="fixed inset-y-0 left-0 z-30"
         style={{
-          background: 'linear-gradient(180deg, #4C1D95 0%, #6D28D9 100%)'
+          background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)'
         }}
       >
         <Sidebar
@@ -75,17 +75,17 @@ const OperatorDashboard = () => {
         <div className="p-6">
           {/* Welcome Banner */}
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-r from-[#E6E6FA] to-[#D6D6EA] rounded-2xl p-8 text-gray-800">
               <h1 className="text-2xl font-bold mb-2">Selamat Datang, Operator!</h1>
               <p className="opacity-90 mb-4">
                 Anda memiliki <span className="font-bold">7 laporan baru</span> yang membutuhkan perhatian segera.
                 Pantau aktivitas sistem dan kelola laporan dengan efisien.
               </p>
               <div className="flex items-center space-x-4">
-                <button className="bg-white text-purple-700 hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors">
+                <button className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors">
                   Tinjau Laporan Baru
                 </button>
-                <button className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl font-medium transition-colors">
+                <button className="bg-gray-800/20 hover:bg-gray-800/30 text-gray-800 px-5 py-2.5 rounded-xl font-medium transition-colors">
                   Lihat Statistik
                 </button>
               </div>
@@ -121,7 +121,7 @@ const OperatorDashboard = () => {
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-4">
-                <div className="text-2xl font-bold text-purple-700 mb-2">24</div>
+                <div className="text-2xl font-bold text-[#E6E6FA] mb-2">24</div>
                 <div className="text-sm text-gray-600">Pengguna Aktif Hari Ini</div>
               </div>
               <div className="text-center p-4 border-l border-r border-gray-100">
