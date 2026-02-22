@@ -56,27 +56,32 @@ const NewProtectedRoute = ({ children, requiredRole }) => {
   }
 
   // Check role if specified
-  if (requiredRole && user?.role !== requiredRole) {
-    console.log(`🚫 Role mismatch: User role = ${user?.role}, Required role = ${requiredRole}`);
+  // Support both single role string or array of roles
+  if (requiredRole) {
+    const requiredRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    const hasRequiredRole = requiredRoles.includes(user?.role);
     
-    // Get appropriate dashboard based on user's actual role
-    const getDashboardPath = () => {
-      switch (user?.role) {
-        case 'admin': return '/admin/dashboard';
-        case 'konselor': return '/konselor/dashboard';
-        case 'operator': return '/operator/dashboard';
-        case 'user': return '/dashboard';
-        default: return '/dashboard';
-      }
-    };
-    
-    const dashboardPath = getDashboardPath();
-    
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-100">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="text-6xl text-red-500 mb-4">🚫</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Akses Ditolak</h1>
+    if (!hasRequiredRole) {
+      console.log(`🚫 Role mismatch: User role = ${user?.role}, Required role(s) = ${requiredRoles.join(', ')}`);
+      
+      // Get appropriate dashboard based on user's actual role
+      const getDashboardPath = () => {
+        switch (user?.role) {
+          case 'admin': return '/admin/dashboard';
+          case 'konselor': return '/konselor/dashboard';
+          case 'operator': return '/operator/dashboard';
+          case 'user': return '/dashboard';
+          default: return '/dashboard';
+        }
+      };
+      
+      const dashboardPath = getDashboardPath();
+      
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-100">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="text-6xl text-red-500 mb-4">🚫</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Akses Ditolak</h1>
           <p className="text-gray-600 mb-4">
             Anda tidak memiliki izin untuk mengakses halaman ini.
           </p>
@@ -127,6 +132,8 @@ const NewProtectedRoute = ({ children, requiredRole }) => {
         </div>
       </div>
     );
+  }
+  
   }
 
   // Render children if authenticated and authorized

@@ -9,12 +9,19 @@ import {
 } from 'react-icons/fi';
 import counselingService from '../../services/counselingService';
 import { useAuth } from '../../hooks/useAuth';
+import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
 
 const CounselorCounselingDashboard = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   // Data state
   const [schedules, setSchedules] = useState([]);
@@ -68,9 +75,22 @@ const CounselorCounselingDashboard = () => {
       const response = await counselingService.getCounselorSchedules(params);
       
       if (response.success) {
-        setSchedules(response.data.data);
-        setPagination(response.data.meta);
-        setStats(response.data.stats || stats);
+        setSchedules(response.data.data || []);
+        setPagination(response.data.meta || {
+          current_page: 1,
+          last_page: 1,
+          per_page: 10,
+          total: 0,
+        });
+        setStats(response.data.stats || {
+          total: 0,
+          pending: 0,
+          approved: 0,
+          completed: 0,
+          cancelled: 0,
+          today: 0,
+          upcoming: 0,
+        });
       } else {
         setError(response.message || 'Gagal memuat data jadwal');
       }
@@ -190,28 +210,52 @@ const CounselorCounselingDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Konseling</h1>
-              <p className="text-gray-600">
-                Selamat datang, {user?.name || 'Konselor'}! Kelola jadwal konseling Anda
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <FiUser className="w-6 h-6 text-blue-600" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar dengan gradient ungu */}
+      <div
+        className="fixed inset-y-0 left-0 z-30"
+        style={{
+          background: 'linear-gradient(180deg, #4C1D95 0%, #6D28D9 100%)'
+        }}
+      >
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          toggleCollapse={toggleSidebar}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div
+        className={`flex-1 transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-20' : 'ml-64'
+        }`}
+      >
+        {/* Topbar */}
+        <Topbar />
+
+        {/* Page Content */}
+        <main className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Konseling</h1>
+                  <p className="text-gray-600">
+                    Selamat datang, {user?.name || 'Konselor'}! Kelola jadwal konseling Anda
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FiUser className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{user?.name || 'Konselor'}</p>
+                    <p className="text-sm text-gray-500">Konselor</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-gray-900">{user?.name || 'Konselor'}</p>
-                <p className="text-sm text-gray-500">Konselor</p>
-              </div>
             </div>
-          </div>
-        </div>
 
         {/* Alerts */}
         <AnimatePresence>
@@ -450,7 +494,7 @@ const CounselorCounselingDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900">Daftar Jadwal Konseling</h3>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">
-                  Menampilkan {schedules.length} dari {pagination.total} jadwal
+                  Menampilkan {schedules.length} dari {pagination?.total || 0} jadwal
                 </span>
               </div>
             </div>
@@ -742,6 +786,8 @@ const CounselorCounselingDashboard = () => {
             </motion.div>
           )}
         </AnimatePresence>
+          </div>
+        </main>
       </div>
     </div>
   );

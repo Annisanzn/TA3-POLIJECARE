@@ -198,16 +198,16 @@ const ViolenceCategoriesManagement = () => {
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Kategori Kekerasan</h1>
+              <p className="text-gray-600 mt-1">Kelola kategori kekerasan untuk sistem pelaporan</p>
+            </div>
+          </div>
+        </header>
+
         <main className="flex-1 p-6 overflow-x-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Kategori Kekerasan</h1>
-            <p className="text-gray-600">Kelola kategori kekerasan untuk sistem pelaporan</p>
-          </motion.div>
 
           {/* Search and Actions */}
           <motion.div

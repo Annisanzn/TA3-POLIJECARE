@@ -16,8 +16,10 @@ import ComplaintsManagementPage from './pages/operator/complaints-management';
 import MaterialsManagement from './pages/operator/materials-management';
 import ViolenceCategoriesManagement from './pages/operator/violence-categories-management';
 import CounselingManagementPage from './pages/operator/counseling-management';
+import CounselorScheduleManagementPage from './pages/operator/counselor-schedule-management';
 import CounselingRequestPage from './pages/user/counseling-request';
 import CounselorCounselingDashboard from './pages/konselor/counseling-dashboard';
+import MyScheduleManagementPage from './pages/konselor/my-schedule-management';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
@@ -63,7 +65,7 @@ function App() {
             <Route
               path="/konselor/dashboard"
               element={
-                <NewProtectedRoute requiredRole="konselor">
+                <NewProtectedRoute requiredRole={['konselor', 'operator']}>
                   <KonselorDashboard />
                 </NewProtectedRoute>
               }
@@ -125,6 +127,16 @@ function App() {
               }
             />
 
+            {/* Counselor Schedule Management for Operator (and also accessible by counselors for admin view) */}
+            <Route
+              path="/operator/counselor-schedule-management"
+              element={
+                <NewProtectedRoute requiredRole={['operator', 'konselor']}>
+                  <CounselorScheduleManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
             {/* Counseling Request for User */}
             <Route
               path="/user/counseling-request"
@@ -135,12 +147,22 @@ function App() {
               }
             />
 
-            {/* Counseling Dashboard for Counselor */}
+            {/* Counseling Dashboard for Counselor (also accessible by operators to monitor counseling sessions) */}
             <Route
               path="/konselor/counseling-dashboard"
               element={
-                <NewProtectedRoute requiredRole="konselor">
+                <NewProtectedRoute requiredRole={['konselor', 'operator']}>
                   <CounselorCounselingDashboard />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* My Schedule Management for Counselor (also accessible by operators to view counselor perspective) */}
+            <Route
+              path="/konselor/my-schedule-management"
+              element={
+                <NewProtectedRoute requiredRole={['konselor', 'operator']}>
+                  <MyScheduleManagementPage />
                 </NewProtectedRoute>
               }
             />

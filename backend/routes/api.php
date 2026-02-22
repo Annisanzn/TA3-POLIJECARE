@@ -10,6 +10,7 @@ use App\Http\Controllers\API\ComplaintController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\ViolenceCategoryController;
 use App\Http\Controllers\API\CounselingController;
+use App\Http\Controllers\API\CounselorScheduleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
@@ -129,6 +130,17 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}/reject', [CounselingController::class, 'reject']);
             Route::put('/{id}/status', [CounselingController::class, 'updateStatus']);
             Route::get('/statistics', [CounselingController::class, 'statistics']);
+        });
+
+        // Counselor schedule management routes
+        Route::prefix('counselor-schedules')->group(function () {
+            Route::get('/', [CounselorScheduleController::class, 'index']);
+            Route::post('/', [CounselorScheduleController::class, 'store']);
+            Route::get('/{id}', [CounselorScheduleController::class, 'show']);
+            Route::put('/{id}', [CounselorScheduleController::class, 'update']);
+            Route::delete('/{id}', [CounselorScheduleController::class, 'destroy']);
+            Route::get('/counselors/with-schedules', [CounselorScheduleController::class, 'getCounselorsWithSchedules']);
+            Route::get('/{counselorId}/available-slots/{day}', [CounselorScheduleController::class, 'getAvailableSlots']);
         });
     });
 

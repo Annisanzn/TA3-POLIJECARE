@@ -15,6 +15,20 @@ const counselingService = {
     return response.data;
   },
 
+  // Get counselor schedules - for counselor dashboard
+  async getCounselorSchedules(params = {}) {
+    // Use test endpoint for development without auth
+    if (process.env.NODE_ENV === 'development' && params.test === true) {
+      const response = await axios.get('/counseling-test', { params });
+      return response.data;
+    }
+    
+    // For counselor, use counseling endpoint (without operator prefix)
+    const endpoint = '/counseling';
+    const response = await axios.get(endpoint, { params });
+    return response.data;
+  },
+
   // Get available counselors - accessible by all authenticated users
   async getCounselors() {
     const response = await axios.get('/counseling/counselors');

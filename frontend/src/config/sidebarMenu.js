@@ -14,8 +14,8 @@ export const sidebarMenu = {
         { name: 'Manajemen Pengaduan', icon: 'FiFileText', path: '/operator/manajemen-pengaduan' },
         { name: 'Manajemen Materi', icon: 'FiBook', path: '/operator/manajemen-materi' },
         { name: 'Kategori Kekerasan', icon: 'FiTag', path: '/operator/kategori-kekerasan' },
-        { name: 'Jadwal Konseling', icon: 'FiCalendar', path: '/operator/jadwal-konseling' },
-        { name: 'Jadwal Konselor', icon: 'FiClock', path: '/operator/jadwal-konselor' },
+        { name: 'Jadwal Konseling', icon: 'FiCalendar', path: '/operator/counseling-management' },
+        { name: 'Jadwal Konselor', icon: 'FiClock', path: '/operator/counselor-schedule-management' },
         { name: 'Manajemen Pengumuman', icon: 'FiBell', path: '/operator/manajemen-pengumuman' },
       ]
     },
@@ -33,7 +33,7 @@ export const sidebarMenu = {
       category: 'UTAMA',
       items: [
         { name: 'Dashboard', icon: 'FiHome', path: '/konselor/dashboard', active: true },
-        { name: 'Jadwal Saya', icon: 'FiCalendar', path: '/konselor/jadwal' },
+        { name: 'Jadwal Saya', icon: 'FiCalendar', path: '/konselor/my-schedule-management' },
       ]
     },
     {
