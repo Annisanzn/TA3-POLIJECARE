@@ -9,7 +9,12 @@ class Material extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'unique_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
+        'unique_id',
         'judul',
         'deskripsi',
         'tipe',
@@ -18,6 +23,17 @@ class Material extends Model
         'kategori',
         'uploaded_by',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($material) {
+            if (empty($material->unique_id)) {
+                $material->unique_id = 'MAT-' . strtoupper(uniqid()) . '-' . date('Y');
+            }
+        });
+    }
 
     protected $casts = [
         'tipe' => 'string',

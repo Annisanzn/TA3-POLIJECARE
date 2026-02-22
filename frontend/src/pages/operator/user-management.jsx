@@ -61,15 +61,17 @@ const UserManagementPage = () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
-      console.log('Fetching user data...');
+      console.log('🔍 Fetching user data...');
+      console.log('🔑 Token exists:', !!localStorage.getItem('token'));
       
       // Fetch stats
       const statsResponse = await userService.getUserStats();
-      console.log('Stats response:', statsResponse);
-      if (statsResponse.success) {
+      console.log('📊 Stats response:', statsResponse);
+      if (statsResponse && statsResponse.success) {
         setStats(statsResponse.data);
+        console.log('✅ Stats loaded:', statsResponse.data);
       } else {
-        console.warn('Stats API returned unsuccessful:', statsResponse);
+        console.warn('⚠️ Stats API returned unsuccessful:', statsResponse);
       }
 
       // Fetch users with current filters
@@ -80,27 +82,27 @@ const UserManagementPage = () => {
         role: roleFilter === 'all' ? 'all' : roleFilter
       });
       
-      console.log('Users response:', usersResponse);
+      console.log('👥 Users response:', usersResponse);
 
-      if (usersResponse.success) {
+      // Check if response has success property
+      if (usersResponse && usersResponse.success) {
         setUsers(usersResponse.data.users);
         setPagination(usersResponse.data.pagination);
+        setErrorMessage('');
+        console.log('✅ Users loaded successfully:', usersResponse.data.users.length, 'items');
       } else {
-        console.warn('Users API returned unsuccessful:', usersResponse);
+        console.warn('⚠️ Users API returned unsuccessful:', usersResponse);
+        console.warn('⚠️ Response structure:', usersResponse);
         setUsers([]);
-        setPagination({
-          total: 0,
-          per_page: itemsPerPage,
-          total_pages: 0
-        });
-        setErrorMessage(usersResponse.message || 'Gagal mengambil data pengguna.');
+        setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
+        setErrorMessage('Gagal mengambil data pengguna.');
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      console.error('❌ Error fetching user data:', error);
+      console.error('❌ Error details:', error?.response);
       setUsers([]);
-      setPagination({ total: 0, per_page: itemsPerPage, total_pages: 1 });
-      setErrorMessage(error?.message || 'Gagal mengambil data pengguna.');
+      setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
+      setErrorMessage(error?.response?.data?.message || 'Gagal mengambil data pengguna.');
     } finally {
       setIsLoading(false);
     }

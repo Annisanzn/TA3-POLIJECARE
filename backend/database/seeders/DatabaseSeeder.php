@@ -108,5 +108,78 @@ class DatabaseSeeder extends Seeder
         foreach ($users as $user) {
             User::create($user);
         }
+
+        // Seed Materials
+        $materials = [
+            [
+                'judul' => 'Panduan Konseling Dasar',
+                'deskripsi' => 'Panduan lengkap untuk konselor pemula',
+                'tipe' => 'file',
+                'file_path' => 'materials/panduan-konseling-dasar.pdf',
+                'kategori' => 'Panduan Konseling',
+                'uploaded_by' => 3, // Budi Operator
+                'unique_id' => 'MAT-DEMO-001-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'judul' => 'Protokol Penanganan Korban Kekerasan',
+                'deskripsi' => 'Standar operasional penanganan korban kekerasan',
+                'tipe' => 'file',
+                'file_path' => 'materials/protokol-penanganan.pdf',
+                'kategori' => 'Protokol',
+                'uploaded_by' => 3, // Budi Operator
+                'unique_id' => 'MAT-DEMO-002-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        foreach ($materials as $material) {
+            \App\Models\Material::create($material);
+        }
+
+        // Seed Violence Categories
+        $violenceCategories = [
+            [
+                'name' => 'Kekerasan Fisik',
+                'description' => 'Tindakan kekerasan yang menyebabkan cedera fisik atau nyeri pada korban',
+                'unique_id' => 'CAT-DEMO-001-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Kekerasan Psikis',
+                'description' => 'Tindakan yang menyebabkan tekanan mental, emosional, atau psikologis',
+                'unique_id' => 'CAT-DEMO-002-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Kekerasan Seksual',
+                'description' => 'Tindakan pelecehan atau kekerasan berbasis seksual',
+                'unique_id' => 'CAT-DEMO-003-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Kekerasan Verbal',
+                'description' => 'Tindakan kekerasan melalui kata-kata yang menyakitkan atau mengancam',
+                'unique_id' => 'CAT-DEMO-004-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Kekerasan Digital',
+                'description' => 'Tindakan kekerasan melalui media online atau teknologi digital',
+                'unique_id' => 'CAT-DEMO-005-' . date('Y'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        foreach ($violenceCategories as $category) {
+            \App\Models\ViolenceCategory::create($category);
+        }
     }
 }

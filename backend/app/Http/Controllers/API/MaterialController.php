@@ -44,15 +44,12 @@ class MaterialController extends Controller
         $materials = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json([
-            'success' => true,
-            'data' => [
-                'materials' => $materials->items(),
-                'pagination' => [
-                    'total' => $materials->total(),
-                    'per_page' => $materials->perPage(),
-                    'current_page' => $materials->currentPage(),
-                    'total_pages' => $materials->lastPage(),
-                ],
+            'materials' => $materials->items(),
+            'pagination' => [
+                'total' => $materials->total(),
+                'per_page' => $materials->perPage(),
+                'current_page' => $materials->currentPage(),
+                'total_pages' => $materials->lastPage(),
             ],
         ]);
     }
@@ -160,20 +157,20 @@ class MaterialController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($unique_id)
     {
-        $material = Material::findOrFail($id);
+        $material = Material::findOrFail($unique_id);
 
         // Authorization: operator or uploader
         if (auth()->user()->role !== 'operator' && $material->uploaded_by !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => 'Unauthorized. You can only delete your own materials.',
             ], 403);
         }
 
-        // Delete file if exists
-        if ($material->tipe === 'file' && $material->file_path) {
+        // Delete file from storage if exists
+        if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
             Storage::disk('public')->delete($material->file_path);
         }
 

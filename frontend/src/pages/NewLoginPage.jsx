@@ -81,7 +81,7 @@ const NewLoginPage = () => {
     setDebugInfo(null);
 
     try {
-      console.log('📤 Sending login request to /api/login-new');
+      console.log('📤 Sending login request to /login-new');
       console.log('Request data:', { email: formData.email, password: '***' });
       
       // Make API call to new login endpoint
@@ -91,24 +91,30 @@ const NewLoginPage = () => {
       });
 
       console.log('✅ Login response received:', response);
+      console.log('Response status:', response.status);
+      console.log('Response data:', response.data);
+      
       setDebugInfo({
         type: 'success',
         data: response
       });
 
-      if (response.success) {
+      // Access the actual data from axios response
+      const responseData = response.data;
+      
+      if (responseData.success) {
         console.log('✅ Login successful!');
-        console.log('User data:', response.user);
-        console.log('Token:', response.token ? 'Received' : 'Missing');
+        console.log('User data:', responseData.user);
+        console.log('Token:', responseData.token ? 'Received' : 'Missing');
         
         // Save token and user data to localStorage
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', responseData.token);
+        localStorage.setItem('user', JSON.stringify(responseData.user));
         
         console.log('💾 Token saved to localStorage');
         
         // Redirect based on role
-        const role = response.user?.role || 'user';
+        const role = responseData.user?.role || 'user';
         console.log(`🔄 Redirecting based on role: ${role}`);
         
         switch (role) {
@@ -127,27 +133,26 @@ const NewLoginPage = () => {
             break;
         }
       } else {
-        console.error('❌ Login failed (success: false):', response);
-        setLoginError(response.message || 'Login gagal. Silakan coba lagi.');
+        console.error('❌ Login failed (success: false):', responseData);
+        setLoginError(responseData.message || 'Login gagal. Silakan coba lagi.');
         setDebugInfo({
           type: 'error',
-          data: response
+          data: responseData
         });
       }
     } catch (error) {
       console.error('❌ Login error caught:', error);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+      console.error('Error message:', error.message);
       
-      // Enhanced error handling
-      let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+      let errorMessage = 'Login gagal. Silakan coba lagi.';
       
       if (error.response) {
         // The request was made and the server responded with a status code
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-        
-        errorMessage = error.response.data?.message || 
-                      error.response.data?.error || 
-                      `Server error: ${error.response.status}`;
+        // that falls out of the range of 2xx
+        console.error('Server responded with error:', error.response.status);
+        errorMessage = error.response?.data?.message || `Server error: ${error.response.status}`;
         
         setDebugInfo({
           type: 'error',

@@ -34,7 +34,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
         { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
         { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '/operator/complaints-management' },
         { name: 'Manajemen Materi', icon: <FiBook />, path: '/operator/materials-management' },
-        { name: 'Kategori Kekerasan', icon: <FiTag />, path: '#' },
+        { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
         { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '#' },
         { name: 'Jadwal Konselor', icon: <FiClock />, path: '#' },
         { name: 'Manajemen Pengumuman', icon: <FiBell />, path: '#' },

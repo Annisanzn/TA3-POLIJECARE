@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('report_id')->unique();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('counselor_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('violence_category_id')->constrained('violence_categories');
+            $table->string('violence_category_id'); // Change to string for unique_id reference
 
             $table->enum('victim_type', ['self', 'other']);
             $table->string('victim_name')->nullable();

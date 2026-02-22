@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('materials', function (Blueprint $table) {
-            $table->id();
+            $table->string('unique_id')->primary(); // Use unique_id as primary key
             $table->string('judul');
             $table->text('deskripsi')->nullable();
             $table->enum('tipe', ['file', 'link']);
