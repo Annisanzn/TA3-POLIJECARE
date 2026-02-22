@@ -35,8 +35,8 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
         { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '/operator/complaints-management' },
         { name: 'Manajemen Materi', icon: <FiBook />, path: '/operator/materials-management' },
         { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
-        { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '#' },
-        { name: 'Jadwal Konselor', icon: <FiClock />, path: '#' },
+        { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '/operator/counseling-management' },
+        { name: 'Jadwal Konselor', icon: <FiClock />, path: '/konselor/counseling-dashboard' },
         { name: 'Manajemen Pengumuman', icon: <FiBell />, path: '#' },
       ]
     },
@@ -54,7 +54,12 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
   };
 
   return (
-    <div className={`h-screen flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} shrink-0 sticky top-0 z-40`}>
+    <div
+      className={`h-screen flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} shrink-0 sticky top-0 z-40`}
+      style={{
+        background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)'
+      }}
+    >
       {/* Sidebar Header */}
       <div className="p-6 border-b border-[#E6E6FA]/30">
         <div className="flex items-center justify-between">

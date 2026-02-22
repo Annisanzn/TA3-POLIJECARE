@@ -9,6 +9,7 @@ use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ComplaintController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\ViolenceCategoryController;
+use App\Http\Controllers\API\CounselingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
@@ -31,6 +32,9 @@ Route::get('/contact', [ContactController::class, 'index']);
 
 // Hero Section
 Route::get('/hero', [HeroController::class, 'index']);
+
+// Counseling routes for testing (without auth)
+Route::get('/counseling-test', [CounselingController::class, 'index']);
 
 // Auth routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -114,5 +118,36 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/categories', [ViolenceCategoryController::class, 'store']);
         Route::put('/categories/{category}', [ViolenceCategoryController::class, 'update']);
         Route::delete('/categories/{category}', [ViolenceCategoryController::class, 'destroy']);
+
+        // Counseling schedules management routes
+        Route::prefix('counseling')->group(function () {
+            Route::get('/', [CounselingController::class, 'index']);
+            Route::get('/counselors', [CounselingController::class, 'getCounselors']);
+            Route::get('/available-slots', [CounselingController::class, 'getAvailableSlots']);
+            Route::post('/request', [CounselingController::class, 'store']);
+            Route::put('/{id}/approve', [CounselingController::class, 'approve']);
+            Route::put('/{id}/reject', [CounselingController::class, 'reject']);
+            Route::put('/{id}/status', [CounselingController::class, 'updateStatus']);
+            Route::get('/statistics', [CounselingController::class, 'statistics']);
+        });
+    });
+
+    // Counseling routes for all authenticated users (role-based access handled in controller)
+    Route::prefix('counseling')->group(function () {
+        Route::get('/', [CounselingController::class, 'index']);
+        Route::get('/counselors', [CounselingController::class, 'getCounselors']);
+        Route::get('/available-slots', [CounselingController::class, 'getAvailableSlots']);
+        Route::get('/statistics', [CounselingController::class, 'statistics']);
+    });
+
+    // User-specific counseling routes
+    Route::middleware(RoleMiddleware::class . ':user')->prefix('counseling')->group(function () {
+        Route::post('/request', [CounselingController::class, 'store']);
+    });
+
+    // Counselor-specific counseling routes
+    Route::middleware(RoleMiddleware::class . ':counselor')->prefix('counseling')->group(function () {
+        Route::put('/{id}/approve', [CounselingController::class, 'approve']);
+        Route::put('/{id}/reject', [CounselingController::class, 'reject']);
     });
 });

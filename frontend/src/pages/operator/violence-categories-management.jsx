@@ -194,27 +194,11 @@ const ViolenceCategoriesManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-lavender flex">
-      {/* Sidebar dengan gradient ungu #E6E6FA */}
-      <div
-        className="fixed inset-y-0 left-0 z-30"
-        style={{
-          background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)'
-        }}
-      >
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          toggleCollapse={toggleSidebar}
-        />
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarCollapsed ? 'ml-20' : 'ml-64'
-        }`}
-      >
-        <div className="p-4 md:p-6 lg:p-8">
+      <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 p-6 overflow-x-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -656,7 +640,7 @@ const ViolenceCategoriesManagement = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </main>
       </div>
     </div>
   );

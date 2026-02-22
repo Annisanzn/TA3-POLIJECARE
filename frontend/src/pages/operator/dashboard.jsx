@@ -48,31 +48,15 @@ const OperatorDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar dengan gradient ungu #E6E6FA */}
-      <div
-        className="fixed inset-y-0 left-0 z-30"
-        style={{
-          background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)'
-        }}
-      >
-        <Sidebar
-          collapsed={sidebarCollapsed} 
-          toggleCollapse={toggleSidebar} 
-        />
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
-      {/* Main Content Area */}
-      <div 
-        className={`flex-1 transition-all duration-300 ${
-          sidebarCollapsed ? 'ml-20' : 'ml-64'
-        }`}
-      >
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
         <Topbar />
 
         {/* Main Content */}
-        <div className="p-6">
+        <main className="flex-1 p-6 overflow-x-auto">
           {/* Welcome Banner */}
           <div className="mb-8">
             <div className="bg-gradient-to-r from-[#E6E6FA] to-[#D6D6EA] rounded-2xl p-8 text-gray-800">
@@ -134,12 +118,12 @@ const OperatorDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Mobile Sidebar Overlay */}
       {sidebarCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={toggleSidebar}
         ></div>
