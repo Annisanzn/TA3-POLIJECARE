@@ -12,7 +12,7 @@ export const userService = {
       },
     });
 
-    return response;
+    return response.data;
   },
 
   // Get user statistics
@@ -20,7 +20,7 @@ export const userService = {
     try {
       // Try authenticated route first
       const response = await axios.get('/operator/users-stats');
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Error fetching user stats from /operator/users-stats:', error);
       

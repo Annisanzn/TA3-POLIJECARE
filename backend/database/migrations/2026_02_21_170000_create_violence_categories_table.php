@@ -9,8 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('violence_categories', function (Blueprint $table) {
-            $table->id();
+            $table->string('unique_id')->primary(); // Use unique_id as primary key
             $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

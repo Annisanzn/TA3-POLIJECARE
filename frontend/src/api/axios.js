@@ -30,7 +30,8 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    return response.data;
+    // Return the full response, not just data
+    return response;
   },
   (error) => {
     const { response } = error;

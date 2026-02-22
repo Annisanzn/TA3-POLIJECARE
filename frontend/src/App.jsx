@@ -14,6 +14,7 @@ import OperatorDashboard from './pages/operator/dashboard';
 import UserManagementPage from './pages/operator/user-management';
 import ComplaintsManagementPage from './pages/operator/complaints-management';
 import MaterialsManagement from './pages/operator/materials-management';
+import ViolenceCategoriesManagement from './pages/operator/violence-categories-management';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
@@ -98,6 +99,15 @@ function App() {
               element={
                 <NewProtectedRoute requiredRole="operator">
                   <MaterialsManagement />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/operator/violence-categories-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <ViolenceCategoriesManagement />
                 </NewProtectedRoute>
               }
             />

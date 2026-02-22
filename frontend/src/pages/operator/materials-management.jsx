@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiSearch, FiFilter, FiDownload, FiExternalLink, FiEdit2, FiTrash2, FiFile, FiLink, FiEye, FiX, FiUpload, FiCheck, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiFileText, FiLink, FiEye, FiDownload, FiFile, FiUpload, FiExternalLink, FiAlertCircle, FiCheck, FiFilter } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import materialService from '../../services/materialService';
+import violenceCategoryService from '../../services/violenceCategoryService';
 
 const MaterialsManagement = () => {
+  console.log('🚀 MaterialsManagement component rendering...');
+  
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [materials, setMaterials] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -20,11 +24,22 @@ const MaterialsManagement = () => {
   const [tipeFilter, setTipeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [violenceCategories, setViolenceCategories] = useState([]);
+  
+  console.log('📊 Current state:', {
+    materialsCount: materials.length,
+    isLoading,
+    errorMessage,
+    violenceCategoriesCount: violenceCategories.length
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   const [formData, setFormData] = useState({
     judul: '',
     deskripsi: '',
@@ -41,10 +56,12 @@ const MaterialsManagement = () => {
     'Video Tutorial',
     'Template',
     'Lainnya',
+    ...violenceCategories.map(cat => cat.name)
   ];
 
   useEffect(() => {
     fetchMaterials();
+    fetchViolenceCategories();
   }, [currentPage, itemsPerPage, searchQuery, kategoriFilter, tipeFilter]);
 
   useEffect(() => {
@@ -58,6 +75,8 @@ const MaterialsManagement = () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
+      console.log('🔍 Fetching materials data...');
+      console.log('🔑 Token exists:', !!localStorage.getItem('token'));
       
       const params = {
         page: currentPage,
@@ -67,22 +86,30 @@ const MaterialsManagement = () => {
         ...(tipeFilter !== 'all' && { tipe: tipeFilter }),
       };
 
+      console.log('📤 Request params:', params);
+
       const response = await materialService.getMaterials(params);
-      console.log('Materials API Response:', response);
-      // API returns {materials, pagination} directly, not {success, data}
+      console.log('✅ Materials API Response:', response);
+      console.log('✅ Response type:', typeof response);
+      console.log('✅ Response keys:', response ? Object.keys(response) : 'null');
+      
+      // API returns {materials: [...], pagination: {...}} directly
       if (response && response.materials) {
         setMaterials(response.materials);
         setPagination(response.pagination);
-        setErrorMessage(''); // Clear any previous errors
+        setErrorMessage('');
+        console.log('✅ Materials loaded successfully:', response.materials.length, 'items');
+        console.log('✅ Sample material:', response.materials[0]);
       } else {
-        console.error('Invalid response structure:', response);
+        console.error('❌ Invalid response structure:', response);
         setMaterials([]);
         setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
-        setErrorMessage(response?.message || 'Gagal mengambil data materi. Response tidak valid.');
+        setErrorMessage('Gagal mengambil data materi. Response tidak valid.');
       }
     } catch (error) {
-      console.error('Materials API Error:', error);
-      console.error('Error response:', error?.response);
+      console.error('❌ Materials API Error:', error);
+      console.error('❌ Error details:', error?.response);
+      console.error('❌ Error message:', error?.message);
       setMaterials([]);
       setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
       setErrorMessage(error?.response?.data?.message || 'Gagal mengambil data materi.');
@@ -141,14 +168,20 @@ const MaterialsManagement = () => {
       setIsLoading(true);
       setErrorMessage('');
 
-      const response = await materialService.deleteMaterial(selectedMaterial.id);
-      if (response.success) {
+      const response = await materialService.deleteMaterial(selectedMaterial.unique_id);
+      console.log('Delete Material Response:', response);
+      
+      if (response && response.success === true) {
         setSuccessMessage('Materi berhasil dihapus!');
         setShowDeleteModal(false);
         setSelectedMaterial(null);
         fetchMaterials();
       } else {
-        setErrorMessage(response.message || 'Gagal menghapus materi.');
+        const errorMessage = response?.message || 
+                          response?.data?.message || 
+                          response?.error || 
+                          'Gagal menghapus materi.';
+        setErrorMessage(errorMessage);
       }
     } catch (error) {
       setErrorMessage(error?.response?.data?.message || 'Gagal menghapus materi.');
@@ -166,6 +199,28 @@ const MaterialsManagement = () => {
       file: null,
       link: '',
     });
+  };
+
+  const fetchViolenceCategories = async () => {
+    try {
+      console.log('🔍 Fetching violence categories...');
+      const response = await violenceCategoryService.getCategories();
+      console.log('✅ Categories API Response:', response);
+      console.log('✅ Categories type:', typeof response);
+      console.log('✅ Categories keys:', response ? Object.keys(response) : 'null');
+      
+      if (response && response.categories) {
+        setViolenceCategories(response.categories);
+        console.log('✅ Violence categories loaded:', response.categories.length, 'items');
+      } else {
+        console.warn('⚠️ No categories in response:', response);
+        setViolenceCategories([]);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch violence categories:', error);
+      console.error('❌ Error details:', error?.response);
+      setViolenceCategories([]);
+    }
   };
 
   const getFileIcon = (fileName) => {
@@ -193,9 +248,26 @@ const MaterialsManagement = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-lavender">
-      <Sidebar />
-      <div className="flex-1">
+    <div className="min-h-screen bg-lavender flex">
+      {/* Sidebar dengan gradient ungu #E6E6FA */}
+      <div
+        className="fixed inset-y-0 left-0 z-30"
+        style={{
+          background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)'
+        }}
+      >
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          toggleCollapse={toggleSidebar}
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <div
+        className={`flex-1 transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-20' : 'ml-64'
+        }`}
+      >
         <div className="p-4 md:p-6 lg:p-8">
           {/* Header */}
           <motion.div
@@ -386,25 +458,28 @@ const MaterialsManagement = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Judul
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ID
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Judul Materi
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Kategori
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Tipe
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         File/Link
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Diupload Oleh
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Uploader
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Tanggal
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
@@ -413,13 +488,18 @@ const MaterialsManagement = () => {
                     <AnimatePresence>
                       {materials.map((material, index) => (
                         <motion.tr
-                          key={material.id}
+                          key={material.unique_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20 }}
                           transition={{ delay: index * 0.05 }}
                           className="hover:bg-gray-50 transition-colors"
                         >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-mono text-purple-600 font-medium">
+                              {material.unique_id}
+                            </div>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{material.judul}</div>
                           </td>

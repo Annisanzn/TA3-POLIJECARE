@@ -8,6 +8,7 @@ use App\Http\Controllers\API\HeroController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ComplaintController;
 use App\Http\Controllers\API\MaterialController;
+use App\Http\Controllers\API\ViolenceCategoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Middleware\RoleMiddleware;
@@ -107,5 +108,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/materials', [MaterialController::class, 'index']);
         Route::post('/materials', [MaterialController::class, 'store']);
         Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
+
+        // Violence categories management routes
+        Route::get('/categories', [ViolenceCategoryController::class, 'index']);
+        Route::post('/categories', [ViolenceCategoryController::class, 'store']);
+        Route::put('/categories/{category}', [ViolenceCategoryController::class, 'update']);
+        Route::delete('/categories/{category}', [ViolenceCategoryController::class, 'destroy']);
     });
 });
