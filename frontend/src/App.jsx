@@ -15,6 +15,9 @@ import UserManagementPage from './pages/operator/user-management';
 import ComplaintsManagementPage from './pages/operator/complaints-management';
 import MaterialsManagement from './pages/operator/materials-management';
 import ViolenceCategoriesManagement from './pages/operator/violence-categories-management';
+import CounselingManagementPage from './pages/operator/counseling-management';
+import CounselingRequestPage from './pages/user/counseling-request';
+import CounselorCounselingDashboard from './pages/konselor/counseling-dashboard';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
@@ -108,6 +111,36 @@ function App() {
               element={
                 <NewProtectedRoute requiredRole="operator">
                   <ViolenceCategoriesManagement />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Counseling Management for Operator */}
+            <Route
+              path="/operator/counseling-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <CounselingManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Counseling Request for User */}
+            <Route
+              path="/user/counseling-request"
+              element={
+                <NewProtectedRoute requiredRole="user">
+                  <CounselingRequestPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Counseling Dashboard for Counselor */}
+            <Route
+              path="/konselor/counseling-dashboard"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <CounselorCounselingDashboard />
                 </NewProtectedRoute>
               }
             />
