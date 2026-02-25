@@ -36,7 +36,7 @@ const MyScheduleManagementPage = () => {
       const response = await axios.get('/api/counselor-schedules');
       if (response.data.success) {
         let schedulesData = response.data.data;
-        
+
         // If user is a counselor, filter to show only their schedules
         // If user is an operator, show all schedules
         if (user?.role === 'konselor') {
@@ -44,7 +44,7 @@ const MyScheduleManagementPage = () => {
             schedule => schedule.counselor_id === user.id
           );
         }
-        
+
         setSchedules(schedulesData);
         setFilteredSchedules(schedulesData);
       }
@@ -71,7 +71,7 @@ const MyScheduleManagementPage = () => {
     }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
+      filtered = filtered.filter(s =>
         s.hari.toLowerCase().includes(query) ||
         s.jam_mulai.toLowerCase().includes(query) ||
         s.jam_selesai.toLowerCase().includes(query)
@@ -226,10 +226,12 @@ const MyScheduleManagementPage = () => {
           {[
             { label: 'Total Jadwal', value: schedules.length, icon: FiCalendar, color: 'bg-blue-500' },
             { label: 'Aktif', value: schedules.filter(s => s.is_active).length, icon: FiCheck, color: 'bg-green-500' },
-            { label: 'Slot Tersedia', value: schedules.reduce((acc, s) => {
-              const slots = generateTimeSlots(s);
-              return acc + slots.length;
-            }, 0), icon: FiClock, color: 'bg-purple-500' },
+            {
+              label: 'Slot Tersedia', value: schedules.reduce((acc, s) => {
+                const slots = generateTimeSlots(s);
+                return acc + slots.length;
+              }, 0), icon: FiClock, color: 'bg-purple-500'
+            },
             { label: 'Hari Aktif', value: new Set(schedules.filter(s => s.is_active).map(s => s.hari)).size, icon: FiInfo, color: 'bg-yellow-500' },
           ].map((stat, index) => (
             <motion.div

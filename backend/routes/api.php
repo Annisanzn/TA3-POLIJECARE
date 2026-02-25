@@ -77,25 +77,33 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Konselor routes
     Route::middleware(RoleMiddleware::class . ':konselor')->prefix('konselor')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json([
-                'success' => true,
-                'message' => 'Konselor Dashboard',
-                'data' => [
-                    'role' => 'konselor',
-                    'dashboard' => 'konselor'
-                ]
-            ]);
-        });
+        // Dashboard stats
+        Route::get('/dashboard', [\App\Http\Controllers\API\KonselorDashboardController::class, 'stats']);
 
-        // Complaint management routes (assigned only)
-        Route::get('/complaints', [ComplaintController::class, 'index']);
-        Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+        // Pengaduan yang terkait konselor ini
+        Route::get('/pengaduan', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
 
-        // Materials management routes
-        Route::get('/materials', [MaterialController::class, 'index']);
-        Route::post('/materials', [MaterialController::class, 'store']);
-        Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
+        // Jadwal Konseling milik konselor (counseling sessions where counselor_id = me)
+        Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
+        Route::put('/jadwal/{id}/approve',  [\App\Http\Controllers\API\CounselingController::class, 'approve']);
+        Route::put('/jadwal/{id}/reject',   [\App\Http\Controllers\API\CounselingController::class, 'reject']);
+        Route::put('/jadwal/{id}/complete', [\App\Http\Controllers\API\CounselingController::class, 'updateStatus']);
+
+        // Materi milik konselor (filter by uploaded_by handled in MaterialController)
+        Route::get('/materials',                [MaterialController::class, 'index']);
+        Route::post('/materials',               [MaterialController::class, 'store']);
+        Route::put('/materials/{material}',     [MaterialController::class, 'update']);
+        Route::delete('/materials/{material}',  [MaterialController::class, 'destroy']);
+
+        // Complaint update (status & jadwal) untuk konselor yang menangani pengaduan tersebut
+        Route::patch('/complaints/{complaint}/status',   [ComplaintController::class, 'updateStatus']);
+        Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
+
+        // Slot jadwal ketersediaan konselor (konselor kelola jadwal sendiri)
+        Route::get('/counselor-schedules',        [CounselorScheduleController::class, 'index']);
+        Route::post('/counselor-schedules',       [CounselorScheduleController::class, 'store']);
+        Route::put('/counselor-schedules/{id}',   [CounselorScheduleController::class, 'update']);
+        Route::delete('/counselor-schedules/{id}',[CounselorScheduleController::class, 'destroy']);
     });
     
     // Operator routes

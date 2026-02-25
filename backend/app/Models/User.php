@@ -72,4 +72,12 @@ class User extends Authenticatable
     {
         return $this->role === 'operator';
     }
+
+    /**
+     * Get the schedules for the counselor.
+     */
+    public function counselorSchedules()
+    {
+        return $this->hasMany(CounselorSchedule::class, 'counselor_id');
+    }
 }
