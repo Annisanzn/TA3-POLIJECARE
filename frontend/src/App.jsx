@@ -20,10 +20,12 @@ import CounselorScheduleManagementPage from './pages/operator/counselor-schedule
 import CounselingRequestPage from './pages/user/counseling-request';
 import CounselorCounselingDashboard from './pages/konselor/counseling-dashboard';
 import MyScheduleManagementPage from './pages/konselor/my-schedule-management';
+import ArticleManagementPage from './pages/operator/article-management';
 import NewLoginPage from './pages/NewLoginPage';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
 import NewProtectedRoute from './components/NewProtectedRoute';
+import ArticleDetail from './components/ArticleDetail';
 
 function App() {
   return (
@@ -38,11 +40,14 @@ function App() {
             <Route path="/services" element={<LandingPage />} />
             <Route path="/articles" element={<LandingPage />} />
             <Route path="/contact" element={<LandingPage />} />
-            
+
+            {/* Article Detail - public reading page */}
+            <Route path="/artikel/:slug" element={<ArticleDetail />} />
+
             {/* New Login System Routes */}
             <Route path="/login-new" element={<NewLoginPage />} />
             <Route path="/redirect-new" element={<NewRedirectDashboard />} />
-            
+
             {/* New Protected Dashboard Routes */}
             <Route
               path="/dashboard"
@@ -52,7 +57,7 @@ function App() {
                 </NewProtectedRoute>
               }
             />
-            
+
             <Route
               path="/admin/dashboard"
               element={
@@ -61,7 +66,7 @@ function App() {
                 </NewProtectedRoute>
               }
             />
-            
+
             <Route
               path="/konselor/dashboard"
               element={
@@ -70,7 +75,7 @@ function App() {
                 </NewProtectedRoute>
               }
             />
-            
+
             <Route
               path="/operator/dashboard"
               element={
@@ -104,6 +109,15 @@ function App() {
               element={
                 <NewProtectedRoute requiredRole="operator">
                   <MaterialsManagement />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/operator/article-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <ArticleManagementPage />
                 </NewProtectedRoute>
               }
             />

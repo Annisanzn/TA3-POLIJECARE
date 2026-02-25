@@ -37,7 +37,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
         { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
         { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '/operator/counseling-management' },
         { name: 'Jadwal Konselor', icon: <FiClock />, path: '/konselor/counseling-dashboard' },
-        { name: 'Manajemen Pengumuman', icon: <FiBell />, path: '#' },
+        { name: 'Manajemen Artikel', icon: <FiBell />, path: '/operator/article-management' },
       ]
     },
     {
@@ -102,11 +102,10 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
                 <li key={itemIdx}>
                   <Link
                     to={item.path}
-                    className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 ${
-                      isActive(item.path)
+                    className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 ${isActive(item.path)
                         ? 'bg-gray-800/10 text-gray-800 border-l-4 border-[#6666DE]'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
                       {item.icon}

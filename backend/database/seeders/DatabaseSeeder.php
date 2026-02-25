@@ -82,26 +82,35 @@ class DatabaseSeeder extends Seeder
 
         // Create test users with specific roles
         $users = [
+            // ── AKUN UTAMA OPERATOR ─── (selalu ada setelah migrate:fresh)
             [
-                'name' => 'Ahmad Mahasiswa',
-                'email' => '2021001@student.polije.ac.id',
+                'name'     => 'Operator PolijeCare',
+                'email'    => 'operator@polije.ac.id',
+                'password' => Hash::make('Polije2024!'),
+                'role'     => 'operator',
+                'nim'      => null,
+            ],
+            // ── AKUN SEEDER DEMO ───
+            [
+                'name'     => 'Ahmad Mahasiswa',
+                'email'    => '2021001@student.polije.ac.id',
                 'password' => Hash::make('Password1111'),
-                'role' => 'user',
-                'nim' => '2021001',
+                'role'     => 'user',
+                'nim'      => '2021001',
             ],
             [
-                'name' => 'Siti Konselor',
-                'email' => 'siti@polije.ac.id',
+                'name'     => 'Siti Konselor',
+                'email'    => 'siti@polije.ac.id',
                 'password' => Hash::make('Password1111'),
-                'role' => 'konselor',
-                'nim' => null,
+                'role'     => 'konselor',
+                'nim'      => null,
             ],
             [
-                'name' => 'Budi Operator',
-                'email' => 'budi@polije.ac.id',
+                'name'     => 'Budi Operator',
+                'email'    => 'budi@polije.ac.id',
                 'password' => Hash::make('Password1111'),
-                'role' => 'operator',
-                'nim' => null,
+                'role'     => 'operator',
+                'nim'      => null,
             ],
         ];
 

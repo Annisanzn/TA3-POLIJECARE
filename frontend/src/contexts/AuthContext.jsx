@@ -31,7 +31,7 @@ const authReducer = (state, action) => {
         isLoading: true,
         error: null,
       };
-    
+
     case AUTH_ACTIONS.LOGIN_SUCCESS:
       return {
         ...state,
@@ -41,7 +41,7 @@ const authReducer = (state, action) => {
         token: action.payload.token,
         error: null,
       };
-    
+
     case AUTH_ACTIONS.LOGIN_FAILURE:
       return {
         ...state,
@@ -51,7 +51,7 @@ const authReducer = (state, action) => {
         token: null,
         error: action.payload,
       };
-    
+
     case AUTH_ACTIONS.LOGOUT:
       return {
         ...state,
@@ -61,13 +61,13 @@ const authReducer = (state, action) => {
         isLoading: false,
         error: null,
       };
-    
+
     case AUTH_ACTIONS.LOAD_USER_START:
       return {
         ...state,
         isLoading: true,
       };
-    
+
     case AUTH_ACTIONS.LOAD_USER_SUCCESS:
       return {
         ...state,
@@ -75,7 +75,7 @@ const authReducer = (state, action) => {
         isAuthenticated: true,
         isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.LOAD_USER_FAILURE:
       return {
         ...state,
@@ -84,13 +84,13 @@ const authReducer = (state, action) => {
         token: null,
         isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.CLEAR_ERROR:
       return {
         ...state,
         error: null,
       };
-    
+
     default:
       return state;
   }
@@ -116,12 +116,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem('token');
-      
+
       if (token) {
         // Set token immediately to prevent white screen
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         dispatch({ type: AUTH_ACTIONS.LOAD_USER_START });
-        
+
         try {
           const response = await axios.get('/api/user');
           if (response.data.success) {
@@ -161,19 +161,19 @@ export const AuthProvider = ({ children }) => {
       console.log('🔍 Credentials:', { email: credentials.email, password: '***' });
 
       const response = await axios.post('/api/login', credentials);
-      
+
       console.log('🔍 Auth response:', response.data);
       console.log('🔍 Response status:', response.status);
-      
+
       if (response.data && response.data.success) {
         const { token, user } = response.data;
-        
+
         // Store token
         localStorage.setItem('token', token);
-        
+
         // Set axios header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
+
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
           payload: { token, user },
@@ -187,14 +187,11 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ Auth error:', error);
-      
-      // Handle different error types
+
+      // Handle different error types dari real axios error
       let errorMessage = 'Login gagal. Silakan coba lagi.';
-      
-      // Check if error has the structure from our axios interceptor
-      if (error && typeof error === 'object' && error.message && error.success === false) {
-        errorMessage = error.message;
-      } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+
+      if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED' || error.code === 'ERR_CONNECTION_REFUSED') {
         errorMessage = 'Tidak dapat terhubung ke server. Pastikan backend berjalan.';
       } else if (error.response?.status === 401) {
         errorMessage = error.response.data?.message || 'Email atau password salah.';
@@ -205,7 +202,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: errorMessage,
@@ -252,11 +249,11 @@ export const AuthProvider = ({ children }) => {
 // Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 };
 

@@ -14,7 +14,7 @@ const NewLoginPage = () => {
   const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [debugInfo, setDebugInfo] = useState(null);
-  
+
   const navigate = useNavigate();
 
   // Validate email format
@@ -50,7 +50,7 @@ const NewLoginPage = () => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -58,7 +58,7 @@ const NewLoginPage = () => {
         [name]: ''
       }));
     }
-    
+
     // Clear login error when user starts typing
     if (loginError) {
       setLoginError('');
@@ -68,9 +68,9 @@ const NewLoginPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log('🔍 Starting new login process...');
-    
+
     if (!validateForm()) {
       console.log('❌ Form validation failed');
       return;
@@ -83,7 +83,7 @@ const NewLoginPage = () => {
     try {
       console.log('📤 Sending login request to /login-new');
       console.log('Request data:', { email: formData.email, password: '***' });
-      
+
       // Make API call to new login endpoint
       const response = await api.post('/login-new', {
         email: formData.email,
@@ -93,7 +93,7 @@ const NewLoginPage = () => {
       console.log('✅ Login response received:', response);
       console.log('Response status:', response.status);
       console.log('Response data:', response.data);
-      
+
       setDebugInfo({
         type: 'success',
         data: response
@@ -101,22 +101,22 @@ const NewLoginPage = () => {
 
       // Access the actual data from axios response
       const responseData = response.data;
-      
+
       if (responseData.success) {
         console.log('✅ Login successful!');
         console.log('User data:', responseData.user);
         console.log('Token:', responseData.token ? 'Received' : 'Missing');
-        
+
         // Save token and user data to localStorage
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('user', JSON.stringify(responseData.user));
-        
+
         console.log('💾 Token saved to localStorage');
-        
+
         // Redirect based on role
         const role = responseData.user?.role || 'user';
         console.log(`🔄 Redirecting based on role: ${role}`);
-        
+
         switch (role) {
           case 'admin':
             navigate('/admin/dashboard');
@@ -145,35 +145,34 @@ const NewLoginPage = () => {
       console.error('Error status:', error.response?.status);
       console.error('Error data:', error.response?.data);
       console.error('Error message:', error.message);
-      
+
       let errorMessage = 'Login gagal. Silakan coba lagi.';
-      
+
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
+        // Server merespon dengan status di luar 2xx
         console.error('Server responded with error:', error.response.status);
         errorMessage = error.response?.data?.message || `Server error: ${error.response.status}`;
-        
+
         setDebugInfo({
           type: 'error',
           status: error.response.status,
           data: error.response.data
         });
       } else if (error.request) {
-        // The request was made but no response was received
-        console.error('No response received:', error.request);
-        errorMessage = 'Server tidak merespon. Periksa koneksi internet atau server mungkin sedang down.';
-        
+        // Request terkirim tapi tidak ada response (network error / server mati)
+        console.error('No response received - server mungkin tidak berjalan');
+        errorMessage = 'Server tidak merespon. Pastikan backend (php artisan serve) sedang berjalan.';
+
         setDebugInfo({
           type: 'network',
           message: 'No response from server'
         });
       } else {
-        // Something happened in setting up the request
+        // Error dalam setup request
         console.error('Request setup error:', error.message);
         errorMessage = error.message || 'Gagal membuat permintaan login.';
       }
-      
+
       setLoginError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -242,7 +241,7 @@ const NewLoginPage = () => {
           repeatType: "reverse"
         }}
       />
-      
+
       <motion.div
         className="w-full max-w-md z-10"
         initial="hidden"
@@ -303,9 +302,8 @@ const NewLoginPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`pl-10 w-full px-4 py-3 rounded-xl border-2 ${
-                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-300'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                  className={`pl-10 w-full px-4 py-3 rounded-xl border-2 ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                   placeholder="contoh@polije.ac.id"
                   disabled={isLoading}
                 />
@@ -340,9 +338,8 @@ const NewLoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`pl-10 pr-10 w-full px-4 py-3 rounded-xl border-2 ${
-                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-300'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                  className={`pl-10 pr-10 w-full px-4 py-3 rounded-xl border-2 ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                   placeholder="Masukkan password"
                   disabled={isLoading}
                 />
@@ -395,11 +392,10 @@ const NewLoginPage = () => {
             <motion.button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-4 px-4 rounded-xl font-semibold text-white shadow-lg ${
-                isLoading
-                  ? 'bg-gradient-to-r from-blue-400 to-indigo-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800'
-              } focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-all duration-300`}
+              className={`w-full py-4 px-4 rounded-xl font-semibold text-white shadow-lg ${isLoading
+                ? 'bg-gradient-to-r from-blue-400 to-indigo-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800'
+                } focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-all duration-300`}
               whileHover={!isLoading ? { scale: 1.02, y: -2 } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
               animate={!isLoading ? {
@@ -430,7 +426,7 @@ const NewLoginPage = () => {
 
           {/* Debug Info (for development) */}
           {debugInfo && (
-            <motion.div 
+            <motion.div
               className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -448,8 +444,8 @@ const NewLoginPage = () => {
           {/* Footer Links */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="text-center text-sm text-gray-600">
-          
-              
+
+
               {/* Button Kembali ke Landing Page */}
               <div className="mb-4">
                 <button
@@ -462,12 +458,12 @@ const NewLoginPage = () => {
                   Kembali ke Landing Page
                 </button>
               </div>
-              
+
             </div>
           </div>
         </motion.div>
 
-        
+
       </motion.div>
     </div>
   );

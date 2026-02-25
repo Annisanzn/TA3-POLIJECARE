@@ -8,6 +8,10 @@ const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5173,
+    strictPort: true, // Gagal jika port 5173 sudah dipakai, daripada pindah ke port lain
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
