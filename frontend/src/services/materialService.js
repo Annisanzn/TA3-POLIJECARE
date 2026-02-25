@@ -28,7 +28,8 @@ const materialService = {
     if (!filePath) return '#';
     // Encode the file path to handle spaces and special characters
     const encodedPath = encodeURIComponent(filePath);
-    return `${axios.defaults.baseURL}/storage/${encodedPath}`;
+    const baseUrl = axios.defaults.baseURL.replace(/\/api$/, '');
+    return `${baseUrl}/storage/${encodedPath}`;
   },
 };
 

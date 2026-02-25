@@ -61,7 +61,7 @@ const KONSELOR_MENU = [
 /* ── Role metadata ───────────────────────────────────────────────────────────── */
 const ROLE_META = {
   operator: { label: 'Operator Dashboard', color: '#6666DE' },
-  konselor: { label: 'Konselor Dashboard', color: '#059669' },
+  konselor: { label: 'Konselor Dashboard', color: '#4F46E5' },
 };
 
 /* ── Sidebar Component ───────────────────────────────────────────────────────── */
