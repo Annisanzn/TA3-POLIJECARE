@@ -4,18 +4,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
-  withCredentials: false, // Changed to false to fix CORS
+  timeout: 30000,
+  withCredentials: false,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// Request interceptor
+// Request interceptor — tambahkan token auth jika ada
 api.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -27,32 +26,21 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor — kembalikan response asli, jangan ubah struktur error
 api.interceptors.response.use(
   (response) => {
-    // Return the full response, not just data
+    // Kembalikan full response tanpa modifikasi
     return response;
   },
   (error) => {
-    const { response } = error;
-    
-    // Handle unauthorized
-    if (response?.status === 401) {
+    // Handle 401 — hapus token invalid
+    if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      // Don't redirect automatically, let the component handle it
     }
-    
-    // Create a consistent error structure
-    const errorData = {
-      success: false,
-      message: response?.data?.message || 'Terjadi kesalahan pada server',
-      errors: response?.data?.errors || null,
-      status: response?.status || 500,
-      data: response?.data || null
-    };
-    
-    // Return a rejected promise with consistent structure
-    return Promise.reject(errorData);
+
+    // Jangan ubah struktur error — biarkan komponen yang menanganinya
+    // Ini penting agar error.response, error.response.data, dll tetap ada
+    return Promise.reject(error);
   }
 );
 

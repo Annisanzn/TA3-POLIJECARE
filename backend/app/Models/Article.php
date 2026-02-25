@@ -17,14 +17,16 @@ class Article extends Model
         'image',
         'content',
         'is_published',
+        'is_active',
         'published_at',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
+        'is_active'    => 'boolean',
         'published_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
     ];
 
     /**
@@ -48,12 +50,15 @@ class Article extends Model
     }
 
     /**
-     * Scope to get only published articles.
+     * Scope: artikel yang boleh tampil di landing page publik.
+     * Harus is_active = true, is_published = true, dan published_at <= now().
      */
     public function scopePublished($query)
     {
-        return $query->where('is_published', true)
-                    ->where('published_at', '<=', now());
+        return $query->where('is_active', true)
+                     ->where('is_published', true)
+                     ->whereNotNull('published_at')
+                     ->where('published_at', '<=', now());
     }
 
     /**
@@ -75,8 +80,8 @@ class Article extends Model
     /**
      * Get the formatted published date.
      */
-    public function getFormattedPublishedAtAttribute(): string
+    public function getFormattedPublishedAtAttribute(): ?string
     {
-        return $this->published_at->format('d M Y');
+        return $this->published_at?->format('d M Y');
     }
 }

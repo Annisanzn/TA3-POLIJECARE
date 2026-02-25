@@ -2,15 +2,15 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:8000', // Backend URL
-  timeout: 10000,
+  baseURL: 'http://127.0.0.1:8000',
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor — tambahkan token auth
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -24,37 +24,27 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor — jangan ubah struktur error
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    const { response } = error;
-    
-    // Handle 401 Unauthorized - only redirect if not already on home page
-    if (response?.status === 401 && window.location.pathname !== '/') {
+    // Handle 401 Unauthorized — hapus token dan redirect jika bukan di halaman home
+    if (error.response?.status === 401 && window.location.pathname !== '/') {
       localStorage.removeItem('token');
       delete api.defaults.headers.common['Authorization'];
-      console.log('🔐 Token expired, redirecting to home...');
+      console.log('🔐 Token expired or invalid, redirecting to home...');
+      window.location.href = '/';
     }
-    
+
     // Handle 403 Forbidden
-    if (response?.status === 403) {
+    if (error.response?.status === 403) {
       console.error('Access forbidden - insufficient permissions');
     }
-    
-    // Create a consistent error structure
-    const errorData = {
-      success: false,
-      message: response?.data?.message || 'Terjadi kesalahan pada server',
-      errors: response?.data?.errors || null,
-      status: response?.status || 500,
-      data: response?.data || null
-    };
-    
-    // Return a rejected promise with consistent structure
-    return Promise.reject(errorData);
+
+    // Jangan ubah struktur error — biarkan error asli terpropagasi
+    return Promise.reject(error);
   }
 );
 

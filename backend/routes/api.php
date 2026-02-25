@@ -10,8 +10,10 @@ use App\Http\Controllers\API\ComplaintController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\ViolenceCategoryController;
 use App\Http\Controllers\API\CounselingController;
+use App\Http\Controllers\API\CounselorScheduleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
+use App\Http\Controllers\API\AdminArticleController;
 use App\Http\Middleware\RoleMiddleware;
 
 Route::get('/test', function () {
@@ -23,8 +25,19 @@ Route::get('/test', function () {
 // Test route without authentication
 Route::get('/test-users', [UserController::class, 'index']);
 
-// Articles
-Route::get('/articles', [ArticleController::class, 'index']);
+// Articles (public) — hanya tampil yang aktif & sudah publish, limit 6
+Route::get('/articles', function () {
+    try {
+        $articles = \App\Models\Article::published()->latest()->limit(6)->get();
+        return response()->json([
+            'success' => true,
+            'data'    => \App\Http\Resources\ArticleResource::collection($articles),
+            'meta'    => ['total' => $articles->count()],
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Gagal mengambil artikel'], 500);
+    }
+});
 Route::get('/articles/{slug}', [ArticleController::class, 'show']);
 
 // Contact
@@ -113,6 +126,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/materials', [MaterialController::class, 'store']);
         Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
 
+        // Article management routes (operator admin)
+        Route::prefix('admin')->group(function () {
+            Route::get('/articles', [AdminArticleController::class, 'index']);
+            Route::post('/articles', [AdminArticleController::class, 'store']);
+            Route::put('/articles/{id}', [AdminArticleController::class, 'update']);
+            Route::post('/articles/{id}/update', [AdminArticleController::class, 'update']); // FormData fallback
+            Route::delete('/articles/{id}', [AdminArticleController::class, 'destroy']);
+            Route::patch('/articles/{id}/toggle', [AdminArticleController::class, 'toggle']);
+        });
+
         // Violence categories management routes
         Route::get('/categories', [ViolenceCategoryController::class, 'index']);
         Route::post('/categories', [ViolenceCategoryController::class, 'store']);
@@ -129,6 +152,17 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}/reject', [CounselingController::class, 'reject']);
             Route::put('/{id}/status', [CounselingController::class, 'updateStatus']);
             Route::get('/statistics', [CounselingController::class, 'statistics']);
+        });
+
+        // Counselor schedule management routes
+        Route::prefix('counselor-schedules')->group(function () {
+            Route::get('/', [CounselorScheduleController::class, 'index']);
+            Route::post('/', [CounselorScheduleController::class, 'store']);
+            Route::get('/{id}', [CounselorScheduleController::class, 'show']);
+            Route::put('/{id}', [CounselorScheduleController::class, 'update']);
+            Route::delete('/{id}', [CounselorScheduleController::class, 'destroy']);
+            Route::get('/counselors/with-schedules', [CounselorScheduleController::class, 'getCounselorsWithSchedules']);
+            Route::get('/{counselorId}/available-slots/{day}', [CounselorScheduleController::class, 'getAvailableSlots']);
         });
     });
 

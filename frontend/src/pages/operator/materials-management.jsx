@@ -252,16 +252,16 @@ const MaterialsManagement = () => {
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Materi</h1>
+              <p className="text-gray-600 mt-1">Kelola materi pelatihan dan panduan konseling</p>
+            </div>
+          </div>
+        </header>
+
         <main className="flex-1 p-6 overflow-x-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Manajemen Materi</h1>
-            <p className="text-gray-600">Kelola materi pelatihan dan panduan konseling</p>
-          </motion.div>
 
           {/* Alerts */}
           <AnimatePresence>
