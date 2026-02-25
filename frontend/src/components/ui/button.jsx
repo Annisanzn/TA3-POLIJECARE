@@ -52,6 +52,8 @@ export const Component = ({
   subtitle,
   size = "md",
   className = "",
+  gradientDark,   // intentionally consumed here, not passed to DOM
+  gradient,       // same
   ...props
 }) => {
   const sizes = {

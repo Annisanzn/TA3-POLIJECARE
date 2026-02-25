@@ -26,6 +26,9 @@ import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
 import NewProtectedRoute from './components/NewProtectedRoute';
 import ArticleDetail from './components/ArticleDetail';
+import KonselorJadwal from './pages/konselor/jadwal-konseling';
+import KonselorPengaduan from './pages/konselor/pengaduan';
+import KonselorMateri from './pages/konselor/materi';
 
 function App() {
   return (
@@ -70,8 +73,38 @@ function App() {
             <Route
               path="/konselor/dashboard"
               element={
-                <NewProtectedRoute requiredRole={['konselor', 'operator']}>
+                <NewProtectedRoute requiredRole="konselor">
                   <KonselorDashboard />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Konselor: Jadwal */}
+            <Route
+              path="/konselor/jadwal"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <KonselorJadwal />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Konselor: Pengaduan */}
+            <Route
+              path="/konselor/pengaduan"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <KonselorPengaduan />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Konselor: Materi */}
+            <Route
+              path="/konselor/materi"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <KonselorMateri />
                 </NewProtectedRoute>
               }
             />

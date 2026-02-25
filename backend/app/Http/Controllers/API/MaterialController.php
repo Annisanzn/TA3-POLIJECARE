@@ -15,10 +15,8 @@ class MaterialController extends Controller
     {
         $query = Material::with('uploader:id,name,role');
 
-        // Role-based access
-        if (auth()->user()->role === 'konselor') {
-            $query->where('uploaded_by', auth()->id());
-        }
+        // Konselor dapat melihat semua materi (tidak dibatasi by uploaded_by)
+        // Filter hanya berlaku jika ada query params spesifik
 
         // Search
         if ($request->filled('search')) {
