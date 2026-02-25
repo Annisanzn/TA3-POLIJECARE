@@ -7,7 +7,7 @@ import violenceCategoryService from '../../services/violenceCategoryService';
 
 const MaterialsManagement = () => {
   console.log('🚀 MaterialsManagement component rendering...');
-  
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [materials, setMaterials] = useState([]);
   const [pagination, setPagination] = useState({
@@ -28,7 +28,7 @@ const MaterialsManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [violenceCategories, setViolenceCategories] = useState([]);
-  
+
   console.log('📊 Current state:', {
     materialsCount: materials.length,
     isLoading,
@@ -77,7 +77,7 @@ const MaterialsManagement = () => {
       setErrorMessage('');
       console.log('🔍 Fetching materials data...');
       console.log('🔑 Token exists:', !!localStorage.getItem('token'));
-      
+
       const params = {
         page: currentPage,
         per_page: itemsPerPage,
@@ -92,7 +92,7 @@ const MaterialsManagement = () => {
       console.log('✅ Materials API Response:', response);
       console.log('✅ Response type:', typeof response);
       console.log('✅ Response keys:', response ? Object.keys(response) : 'null');
-      
+
       // API returns {materials: [...], pagination: {...}} directly
       if (response && response.materials) {
         setMaterials(response.materials);
@@ -129,7 +129,7 @@ const MaterialsManagement = () => {
       submitData.append('deskripsi', formData.deskripsi);
       submitData.append('tipe', formData.tipe);
       submitData.append('kategori', formData.kategori);
-      
+
       if (formData.tipe === 'file' && formData.file) {
         submitData.append('file', formData.file);
       } else if (formData.tipe === 'link') {
@@ -138,7 +138,7 @@ const MaterialsManagement = () => {
 
       const response = await materialService.createMaterial(submitData);
       console.log('Create Material Response:', response);
-      
+
       // Check if response has success field
       if (response && response.success === true) {
         setSuccessMessage('Materi berhasil ditambahkan!');
@@ -148,10 +148,10 @@ const MaterialsManagement = () => {
       } else {
         console.error('Create Material Error:', response);
         // Handle different response formats
-        const errorMessage = response?.message || 
-                          response?.data?.message || 
-                          response?.error || 
-                          'Gagal menambahkan materi.';
+        const errorMessage = response?.message ||
+          response?.data?.message ||
+          response?.error ||
+          'Gagal menambahkan materi.';
         setErrorMessage(errorMessage);
       }
     } catch (error) {
@@ -170,17 +170,17 @@ const MaterialsManagement = () => {
 
       const response = await materialService.deleteMaterial(selectedMaterial.unique_id);
       console.log('Delete Material Response:', response);
-      
+
       if (response && response.success === true) {
         setSuccessMessage('Materi berhasil dihapus!');
         setShowDeleteModal(false);
         setSelectedMaterial(null);
         fetchMaterials();
       } else {
-        const errorMessage = response?.message || 
-                          response?.data?.message || 
-                          response?.error || 
-                          'Gagal menghapus materi.';
+        const errorMessage = response?.message ||
+          response?.data?.message ||
+          response?.error ||
+          'Gagal menghapus materi.';
         setErrorMessage(errorMessage);
       }
     } catch (error) {
@@ -208,7 +208,7 @@ const MaterialsManagement = () => {
       console.log('✅ Categories API Response:', response);
       console.log('✅ Categories type:', typeof response);
       console.log('✅ Categories keys:', response ? Object.keys(response) : 'null');
-      
+
       if (response && response.categories) {
         setViolenceCategories(response.categories);
         console.log('✅ Violence categories loaded:', response.categories.length, 'items');
@@ -231,19 +231,25 @@ const MaterialsManagement = () => {
     return <FiFile className="w-4 h-4" />;
   };
 
-  const openFile = (material) => {
+  const viewMaterial = (material) => {
     if (material.tipe === 'file') {
       const fileUrl = materialService.getFileUrl(material.file_path);
-      // Create a temporary link and trigger download
+      window.open(fileUrl, '_blank');
+    } else {
+      window.open(material.link, '_blank');
+    }
+  };
+
+  const downloadMaterial = (material) => {
+    if (material.tipe === 'file') {
+      const fileUrl = materialService.getFileUrl(material.file_path);
       const link = document.createElement('a');
       link.href = fileUrl;
       link.target = '_blank';
-      link.download = material.judul; // Use judul as filename
+      link.download = material.judul;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
-      window.open(material.link, '_blank');
     }
   };
 
@@ -493,31 +499,35 @@ const MaterialsManagement = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              material.tipe === 'file' 
-                                ? 'bg-blue-100 text-blue-800' 
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${material.tipe === 'file'
+                                ? 'bg-blue-100 text-blue-800'
                                 : 'bg-green-100 text-green-800'
-                            }`}>
+                              }`}>
                               {material.tipe === 'file' ? 'File' : 'Link'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => openFile(material)}
-                              className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-colors"
-                            >
-                              {material.tipe === 'file' ? (
-                                <>
-                                  {getFileIcon(material.file_path)}
-                                  <span className="text-sm">Lihat</span>
-                                </>
-                              ) : (
-                                <>
-                                  <FiExternalLink className="w-4 h-4" />
-                                  <span className="text-sm">Buka</span>
-                                </>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => viewMaterial(material)}
+                                className="flex items-center gap-1.5 text-purple-600 hover:text-purple-800 transition-colors bg-purple-50 px-3 py-1.5 rounded-lg text-sm font-medium"
+                              >
+                                {material.tipe === 'file' ? (
+                                  <><FiEye className="w-4 h-4" /> Buka</>
+                                ) : (
+                                  <><FiExternalLink className="w-4 h-4" /> Buka Link</>
+                                )}
+                              </button>
+                              {material.tipe === 'file' && (
+                                <button
+                                  onClick={() => downloadMaterial(material)}
+                                  className="flex items-center gap-1.5 text-green-600 hover:text-green-800 transition-colors bg-green-50 px-3 py-1.5 rounded-lg text-sm font-medium"
+                                  title="Download File"
+                                >
+                                  <FiDownload className="w-4 h-4" /> Unduh
+                                </button>
                               )}
-                            </button>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{material.uploader?.name}</div>

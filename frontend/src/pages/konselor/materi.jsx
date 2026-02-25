@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiPlus, FiTrash2, FiSearch, FiX, FiFile,
     FiLink, FiEye, FiExternalLink, FiAlertCircle,
-    FiCheck, FiFilter, FiUpload, FiRefreshCw,
+    FiCheck, FiFilter, FiUpload, FiRefreshCw, FiDownload
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 
@@ -31,7 +31,8 @@ const konselorMaterialService = {
     getFileUrl(filePath) {
         if (!filePath) return '#';
         const encodedPath = encodeURIComponent(filePath);
-        return `${axios.defaults.baseURL}/storage/${encodedPath}`;
+        const baseUrl = axios.defaults.baseURL.replace(/\/api$/, '');
+        return `${baseUrl}/storage/${encodedPath}`;
     },
 };
 
@@ -151,14 +152,21 @@ const KonselorMateri = () => {
         return <FiFile className="w-4 h-4" />;
     };
 
-    const openFile = (material) => {
+    const viewMaterial = (material) => {
+        if (material.tipe === 'file') {
+            const fileUrl = konselorMaterialService.getFileUrl(material.file_path);
+            window.open(fileUrl, '_blank');
+        } else {
+            window.open(material.link, '_blank');
+        }
+    };
+
+    const downloadMaterial = (material) => {
         if (material.tipe === 'file') {
             const fileUrl = konselorMaterialService.getFileUrl(material.file_path);
             const link = document.createElement('a');
             link.href = fileUrl; link.target = '_blank'; link.download = material.judul;
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        } else {
-            window.open(material.link, '_blank');
         }
     };
 
@@ -288,17 +296,23 @@ const KonselorMateri = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <button onClick={() => openFile(m)} className="flex items-center gap-2 text-green-700 hover:text-green-900 transition-colors text-sm">
-                                                            {m.tipe === 'file' ? <>{getFileIcon(m.file_path)}<span>Lihat</span></> : <><FiExternalLink className="w-4 h-4" /><span>Buka</span></>}
-                                                        </button>
+                                                        <div className="flex items-center gap-3">
+                                                            <button onClick={() => viewMaterial(m)} className="flex items-center gap-1.5 text-green-700 hover:text-green-900 transition-colors bg-green-50 px-3 py-1.5 text-sm font-medium rounded-lg">
+                                                                {m.tipe === 'file' ? <>{getFileIcon(m.file_path)}<span>Buka</span></> : <><FiExternalLink className="w-4 h-4" /><span>Buka Link</span></>}
+                                                            </button>
+                                                            {m.tipe === 'file' && (
+                                                                <button onClick={() => downloadMaterial(m)} className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 text-sm font-medium rounded-lg" title="Download File">
+                                                                    <FiDownload className="w-4 h-4" /><span>Unduh</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID') : '-'}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                         <div className="flex items-center gap-2">
-                                                            <button onClick={() => openFile(m)} className="p-1 text-blue-600 hover:text-blue-800" title="Lihat"><FiEye className="w-4 h-4" /></button>
-                                                            <button onClick={() => { setSelectedMaterial(m); setShowDeleteModal(true); }} className="p-1 text-red-600 hover:text-red-800" title="Hapus"><FiTrash2 className="w-4 h-4" /></button>
+                                                            <button onClick={() => { setSelectedMaterial(m); setShowDeleteModal(true); }} className="p-1 px-3 py-1.5 bg-red-50 rounded-lg text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors flex items-center justify-center" title="Hapus"><FiTrash2 className="w-4 h-4 mr-1" /> Hapus</button>
                                                         </div>
                                                     </td>
                                                 </motion.tr>

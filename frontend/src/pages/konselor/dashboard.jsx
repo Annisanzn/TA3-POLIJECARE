@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../api/axios';
+import ChartSection from '../../components/ChartSection';
 import {
   FiCalendar, FiClock, FiCheckCircle, FiXCircle,
   FiUsers, FiBook, FiAlertCircle, FiRefreshCw,
@@ -108,9 +109,9 @@ const KonselorDashboard = () => {
           </p>
 
           {/* Welcome Banner */}
-          <div className="rounded-2xl p-6 mb-8 text-white" style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}>
-            <h2 className="text-2xl font-bold mb-1">Selamat Datang, {user?.name || 'Konselor'}! 👋</h2>
-            <p className="opacity-80 text-sm">
+          <div className="rounded-2xl p-6 mb-8 text-gray-800" style={{ backgroundColor: '#E6E6FA' }}>
+            <h2 className="text-2xl font-bold mb-1 text-gray-900">Selamat Datang, {user?.name || 'Konselor'}! 👋</h2>
+            <p className="opacity-80 text-sm text-gray-700">
               {j.pending > 0
                 ? `Anda memiliki ${j.pending} jadwal menunggu konfirmasi.`
                 : 'Semua jadwal sudah dikonfirmasi. Tetap semangat!'}
@@ -118,13 +119,13 @@ const KonselorDashboard = () => {
             <div className="flex gap-3 mt-4">
               <Link
                 to="/konselor/jadwal"
-                className="px-4 py-2 bg-white text-green-700 text-sm font-semibold rounded-xl hover:bg-green-50 transition-colors"
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
               >
                 Lihat Jadwal
               </Link>
               <Link
                 to="/konselor/pengaduan"
-                className="px-4 py-2 bg-white/20 text-white text-sm font-semibold rounded-xl hover:bg-white/30 transition-colors"
+                className="px-4 py-2 bg-white text-indigo-700 border border-indigo-200 text-sm font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-sm"
               >
                 Lihat Pengaduan
               </Link>
@@ -143,6 +144,11 @@ const KonselorDashboard = () => {
             <StatCard loading={loading} title="Hari Ini" value={j.today} sub="Session hari ini" icon={<FiCalendar size={22} className="text-purple-600" />} color="bg-purple-50" />
             <StatCard loading={loading} title="Akan Datang" value={j.upcoming} sub="Jadwal mendatang" icon={<FiClock size={22} className="text-orange-600" />} color="bg-orange-50" />
             <StatCard loading={loading} title="Total Materi" value={stats?.materi ?? '—'} sub="Materi milik saya" icon={<FiBook size={22} className="text-teal-600" />} color="bg-teal-50" />
+          </div>
+
+          {/* Charts Section */}
+          <div className="mb-8">
+            <ChartSection />
           </div>
 
           {/* Quick Links */}

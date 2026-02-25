@@ -163,7 +163,7 @@ class MaterialController extends Controller
         if (auth()->user()->role !== 'operator' && $material->uploaded_by !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. You can only delete your own materials.',
+                'message' => 'Mohon maaf, Anda tidak dapat menghapus materi milik orang lain. Anda hanya bisa menghapus materi milik sendiri.',
             ], 403);
         }
 

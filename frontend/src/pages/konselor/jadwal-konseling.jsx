@@ -42,26 +42,26 @@ const generateTimeSlots = (schedule) => {
 
 /* ── Schedule Form ─────────────────────────────────────────────────────────── */
 const ScheduleForm = ({ data, onChange }) => (
-    <div className="space-y-4">
+    <div className="space-y-5">
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Hari</label>
-            <select name="hari" value={data.hari} onChange={onChange} required className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500">
+            <select name="hari" value={data.hari} onChange={onChange} required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
                 {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
         </div>
         <div className="grid grid-cols-2 gap-4">
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
-                <input type="time" name="jam_mulai" value={data.jam_mulai} onChange={onChange} required className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500" />
+                <input type="time" name="jam_mulai" value={data.jam_mulai} onChange={onChange} required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jam Selesai</label>
-                <input type="time" name="jam_selesai" value={data.jam_selesai} onChange={onChange} required className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500" />
+                <input type="time" name="jam_selesai" value={data.jam_selesai} onChange={onChange} required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
             </div>
         </div>
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Durasi Slot (menit)</label>
-            <input type="number" name="slot_duration" value={data.slot_duration} onChange={onChange} min="15" max="120" step="15" required className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500" />
+            <input type="number" name="slot_duration" value={data.slot_duration} onChange={onChange} min="15" max="120" step="15" required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
         </div>
         <div className="flex items-center gap-2">
             <input type="checkbox" id="is_active" name="is_active" checked={data.is_active} onChange={onChange} className="h-4 w-4 text-green-600 border-gray-300 rounded" />
@@ -321,8 +321,8 @@ const KonselorJadwalKonselor = () => {
                         <form onSubmit={handleAdd}>
                             <ScheduleForm data={formData} onChange={handleInputChange} />
                             <div className="flex gap-3 mt-6">
-                                <button type="button" onClick={() => setAddModal(false)} disabled={submitting} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm hover:bg-gray-50">Batal</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-60">{submitting ? 'Menyimpan...' : 'Simpan'}</button>
+                                <button type="button" onClick={() => setAddModal(false)} disabled={submitting} className="flex-1 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors">Batal</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-green-600 text-white border border-transparent rounded-xl text-sm font-medium hover:bg-green-700 shadow-sm disabled:opacity-60 transition-colors">{submitting ? 'Menyimpan...' : 'Simpan'}</button>
                             </div>
                         </form>
                     </div>
@@ -338,8 +338,8 @@ const KonselorJadwalKonselor = () => {
                         <form onSubmit={handleEdit}>
                             <ScheduleForm data={formData} onChange={handleInputChange} />
                             <div className="flex gap-3 mt-6">
-                                <button type="button" onClick={() => setEditModal({ open: false, schedule: null })} disabled={submitting} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm hover:bg-gray-50">Batal</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-60">{submitting ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
+                                <button type="button" onClick={() => setEditModal({ open: false, schedule: null })} disabled={submitting} className="flex-1 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors">Batal</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-green-600 text-white border border-transparent rounded-xl text-sm font-medium hover:bg-green-700 shadow-sm disabled:opacity-60 transition-colors">{submitting ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
                             </div>
                         </form>
                     </div>
