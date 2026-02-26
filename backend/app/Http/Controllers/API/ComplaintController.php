@@ -61,6 +61,7 @@ class ComplaintController extends Controller
                     'victim_name' => $c->victim_name,
                     'victim_relationship' => $c->victim_relationship,
                     'location' => $c->location,
+                    'description' => $c->description,
                     'status' => $c->status,
                     'counseling_schedule' => optional($c->counseling_schedule)->toDateTimeString(),
                     'urgency_level' => $c->urgency_level,

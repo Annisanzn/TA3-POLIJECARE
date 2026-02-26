@@ -9,13 +9,12 @@ export const konselorComplaintService = {
     },
 
     updateStatus: async (id, status) => {
-        // Reuse operator endpoint for status update (konselor has permission via role check on backend)
-        const response = await axios.patch(`/operator/complaints/${id}/status`, { status });
+        const response = await axios.patch(`/konselor/complaints/${id}/status`, { status });
         return response;
     },
 
     schedule: async (id, payload) => {
-        const response = await axios.patch(`/operator/complaints/${id}/schedule`, payload);
+        const response = await axios.patch(`/konselor/complaints/${id}/schedule`, payload);
         return response;
     },
 };

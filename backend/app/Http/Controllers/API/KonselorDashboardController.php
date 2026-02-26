@@ -65,36 +65,26 @@ class KonselorDashboardController extends Controller
     {
         $userId = Auth::id();
 
-        // Ambil complaint IDs yang terkait dengan counseling sessions konselor ini
-        $counselingIds = CounselingSchedule::where('counselor_id', $userId)
-            ->pluck('complaint_id')
-            ->filter()
-            ->unique()
-            ->toArray();
-
-        if (empty($counselingIds)) {
-            return response()->json([
-                'success' => true,
-                'data'    => [],
-                'message' => 'Belum ada pengaduan yang ditangani',
-            ]);
-        }
-
-        $complaints = \App\Models\Complaint::with(['user', 'category', 'counselingSchedule'])
-            ->whereIn('id', $counselingIds)
+        $complaints = \App\Models\Complaint::with(['user', 'violenceCategory'])
+            ->where('counselor_id', $userId)
             ->latest()
             ->get()
             ->map(function ($c) {
                 return [
-                    'id'          => $c->id,
-                    'mahasiswa'   => $c->user?->name ?? 'Mahasiswa',
-                    'nim'         => $c->user?->nim ?? '-',
-                    'kategori'    => $c->category?->name ?? '-',
-                    'deskripsi'   => $c->description ?? '',
-                    'status'      => $c->status,
-                    'catatan'     => $c->catatan ?? '',
-                    'created_at'  => $c->created_at,
-                    'updated_at'  => $c->updated_at,
+                    'id'                  => $c->id,
+                    'report_id'           => $c->report_id,
+                    'user_name'           => $c->user?->name ?? 'Mahasiswa',
+                    'nim'                 => $c->user?->nim ?? '-',
+                    'kategori'            => $c->violenceCategory?->name ?? '-',
+                    'victim_type'         => $c->victim_type,
+                    'victim_name'         => $c->victim_name,
+                    'location'            => $c->location,
+                    'counseling_schedule' => optional($c->counseling_schedule)->toDateTimeString(),
+                    'deskripsi'           => $c->description ?? '',
+                    'status'              => $c->status,
+                    'catatan'             => $c->catatan ?? '',
+                    'created_at'          => $c->created_at,
+                    'updated_at'          => $c->updated_at,
                 ];
             });
 

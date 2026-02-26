@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'satgas_phone' => env('SATGAS_PPKS_PHONE'),
+    ],
+
 ];
