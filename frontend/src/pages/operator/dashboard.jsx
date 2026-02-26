@@ -1,12 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import SummaryCard from '../../components/SummaryCard';
 import ChartSection from '../../components/ChartSection';
 import ActivityList from '../../components/ActivityList';
+import api from '../../api/axios';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const OperatorDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [stats, setStats] = useState({
+    summary: { new: 0, processing: 0, completed: 0, total: 0 },
+    quickStats: { activeUsers: 24, satisfaction: '98%', avgResponseTime: '45m' }
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const resp = await api.get('/operator/dashboard');
+      if (resp.data.success) {
+        setStats(resp.data.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch dashboard stats', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -15,35 +40,35 @@ const OperatorDashboard = () => {
   const summaryData = [
     {
       title: 'Laporan Baru',
-      value: '7',
+      value: isLoading ? '...' : stats.summary.new,
       icon: 'new',
-      badge: '+16%',
-      trend: '+16%',
-      description: '7 laporan belum diproses'
+      badge: '', // Removed hardcoded trend for realism
+      trend: '',
+      description: `${stats.summary.new} laporan belum diproses`
     },
     {
       title: 'Laporan Diproses',
-      value: '2',
+      value: isLoading ? '...' : stats.summary.processing,
       icon: 'processing',
-      badge: '-33%',
-      trend: '-33%',
-      description: '2 dalam penanganan'
+      badge: '',
+      trend: '',
+      description: `${stats.summary.processing} dalam penanganan`
     },
     {
       title: 'Laporan Selesai',
-      value: '3',
+      value: isLoading ? '...' : stats.summary.completed,
       icon: 'completed',
-      badge: '+50%',
-      trend: '+50%',
-      description: '3 telah diselesaikan'
+      badge: '',
+      trend: '',
+      description: `${stats.summary.completed} telah diselesaikan`
     },
     {
       title: 'Total Laporan',
-      value: '12',
+      value: isLoading ? '...' : stats.summary.total,
       icon: 'total',
-      badge: '+20%',
-      trend: '+20%',
-      description: '12 total laporan'
+      badge: '',
+      trend: '',
+      description: `${stats.summary.total} total laporan`
     }
   ];
 
@@ -60,17 +85,26 @@ const OperatorDashboard = () => {
           {/* Welcome Banner */}
           <div className="mb-8">
             <div className="bg-gradient-to-r from-[#E6E6FA] to-[#D6D6EA] rounded-2xl p-8 text-gray-800">
-              <h1 className="text-2xl font-bold mb-2">Selamat Datang, Operator!</h1>
-              <p className="opacity-90 mb-4">
-                Anda memiliki <span className="font-bold">7 laporan baru</span> yang membutuhkan perhatian segera.
-                Pantau aktivitas sistem dan kelola laporan dengan efisien.
-              </p>
-              <div className="flex items-center space-x-4">
-                <button className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors">
-                  Tinjau Laporan Baru
-                </button>
-                <button className="bg-gray-800/20 hover:bg-gray-800/30 text-gray-800 px-5 py-2.5 rounded-xl font-medium transition-colors">
-                  Lihat Statistik
+              <div className="flex justify-between items-start">
+                <div>
+                  <h1 className="text-2xl font-bold mb-2">Selamat Datang, Operator!</h1>
+                  <p className="opacity-90 mb-4">
+                    Anda memiliki <span className="font-bold">{stats.summary.new} laporan baru</span> yang membutuhkan perhatian segera.
+                    Pantau aktivitas sistem dan kelola laporan dengan efisien.
+                  </p>
+                  <div className="flex items-center space-x-4">
+                    <button className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors">
+                      Tinjau Laporan Baru
+                    </button>
+                  </div>
+                </div>
+                <button
+                  onClick={fetchDashboardData}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white rounded-xl text-sm font-medium transition-colors"
+                >
+                  <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
+                  Refresh
                 </button>
               </div>
             </div>

@@ -202,7 +202,7 @@ const KonselorPengaduan = () => {
                             <table className="w-full min-w-[1000px]">
                                 <thead>
                                     <tr className="bg-gray-50">
-                                        {['ID Laporan', 'Nama Pelapor', 'Korban', 'Tempat Kejadian', 'Tanggal', 'Status', 'Jadwal Konseling', 'Aksi'].map(h => (
+                                        {['ID Laporan', 'Nama Pelapor', 'Korban', 'Tempat Kejadian', 'Tanggal', 'Deskripsi', 'Status', 'Jadwal Konseling', 'Aksi'].map(h => (
                                             <th key={h} className="text-left py-4 px-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                                         ))}
                                     </tr>
@@ -210,7 +210,7 @@ const KonselorPengaduan = () => {
                                 <tbody className="divide-y divide-gray-100">
                                     {isLoading ? Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            {Array(8).fill(0).map((__, j) => <td key={j} className="py-4 px-5"><div className="h-4 bg-gray-200 rounded w-24" /></td>)}
+                                            {Array(9).fill(0).map((__, j) => <td key={j} className="py-4 px-5"><div className="h-4 bg-gray-200 rounded w-24" /></td>)}
                                         </tr>
                                     )) : complaints.length > 0 ? complaints.map(c => (
                                         <tr key={c.id} className="hover:bg-gray-50 transition-colors">
@@ -220,6 +220,9 @@ const KonselorPengaduan = () => {
                                             <td className="py-3 px-5 text-sm text-gray-700">{c.location}</td>
                                             <td className="py-3 px-5 text-sm text-gray-500 whitespace-nowrap">
                                                 {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                                            </td>
+                                            <td className="py-3 px-5 text-sm text-gray-700 max-w-xs truncate" title={c.deskripsi}>
+                                                {c.deskripsi || '-'}
                                             </td>
                                             <td className="py-3 px-5"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadge(c.status)}`}>{c.status}</span></td>
                                             <td className="py-3 px-5 text-sm text-gray-500">

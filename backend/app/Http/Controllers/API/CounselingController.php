@@ -81,8 +81,8 @@ class CounselingController extends Controller
      */
     public function getCounselors()
     {
-        $counselors = User::where('role', 'counselor')
-            ->select('id', 'name', 'email', 'nim')
+        $counselors = User::where('role', 'konselor')
+            ->select('id', 'name', 'email', 'nim', 'profile_photo', 'bio')
             ->get();
 
         return response()->json([
@@ -173,12 +173,16 @@ class CounselingController extends Controller
             'complaint_id' => 'nullable|exists:complaints,id',
             'jenis_pengaduan' => 'nullable|string|max:255',
             'tanggal' => 'required|date|after_or_equal:today',
-            'jam_mulai' => 'required|date_format:H:i',
-            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+            'jam_mulai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jam_selesai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'metode' => ['required', Rule::in(['online', 'offline'])],
             'lokasi' => 'nullable|string|max:255',
             'meeting_link' => 'nullable|string|max:500',
         ]);
+
+        // Normalize time to H:i format
+        $jamMulai = substr($request->jam_mulai, 0, 5);
+        $jamSelesai = substr($request->jam_selesai, 0, 5);
 
         if ($validator->fails()) {
             return response()->json([
@@ -191,14 +195,14 @@ class CounselingController extends Controller
         // Check for double booking
         $hasConflict = CounselingSchedule::where('counselor_id', $request->counselor_id)
             ->where('tanggal', $request->tanggal)
-            ->timeOverlap($request->jam_mulai, $request->jam_selesai)
+            ->timeOverlap($jamMulai, $jamSelesai)
             ->whereIn('status', ['pending', 'approved'])
             ->exists();
 
         if ($hasConflict) {
             return response()->json([
                 'success' => false,
-                'message' => 'The selected time slot is already booked or has a scheduling conflict'
+                'message' => 'Slot waktu ini sudah dipesan. Silakan pilih jadwal lain.'
             ], 409);
         }
 
@@ -209,13 +213,23 @@ class CounselingController extends Controller
             'complaint_id' => $request->complaint_id,
             'jenis_pengaduan' => $request->jenis_pengaduan,
             'tanggal' => $request->tanggal,
-            'jam_mulai' => $request->jam_mulai,
-            'jam_selesai' => $request->jam_selesai,
+            'jam_mulai' => $jamMulai,
+            'jam_selesai' => $jamSelesai,
             'metode' => $request->metode,
             'lokasi' => $request->lokasi,
             'meeting_link' => $request->meeting_link,
             'status' => CounselingSchedule::STATUS_PENDING,
         ]);
+
+        if ($request->complaint_id) {
+            $complaint = \App\Models\Complaint::find($request->complaint_id);
+            if ($complaint) {
+                $complaint->update([
+                    'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00',
+                    'status'              => 'scheduled'
+                ]);
+            }
+        }
 
         // Send email notifications
         $notificationService = new CounselingNotificationService();

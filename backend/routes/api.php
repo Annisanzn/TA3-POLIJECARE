@@ -73,6 +73,20 @@ Route::middleware('auth:sanctum')->group(function () {
                 ]
             ]);
         });
+        // Complaints (Histori Pengaduan)
+        Route::get('/complaints', [\App\Http\Controllers\API\UserComplaintController::class, 'index']);
+        Route::post('/complaints', [\App\Http\Controllers\API\UserComplaintController::class, 'store']);
+        Route::post('/reports', [\App\Http\Controllers\API\UserComplaintController::class, 'store']); // Alias for new architecture
+        Route::get('/complaints/{id}', [\App\Http\Controllers\API\UserComplaintController::class, 'show']);
+        
+        // Data Reference Form
+        Route::get('/categories', function () {
+            $categories = \App\Models\ViolenceCategory::orderBy('name')->get(['unique_id', 'name']);
+            return response()->json(['success' => true, 'data' => $categories]);
+        });
+        Route::get('/counselors', [\App\Http\Controllers\API\CounselingController::class, 'getCounselors']);
+        Route::get('/counselor-schedules', [\App\Http\Controllers\API\CounselorScheduleController::class, 'index']);
+        Route::post('/counselings', [\App\Http\Controllers\API\CounselingController::class, 'store']);
     });
     
     // Konselor routes
@@ -143,6 +157,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/articles/{id}', [AdminArticleController::class, 'destroy']);
             Route::patch('/articles/{id}/toggle', [AdminArticleController::class, 'toggle']);
         });
+
+        // Dashboard Statistics
+        Route::get('/dashboard', [\App\Http\Controllers\API\OperatorDashboardController::class, 'index']);
 
         // Violence categories management routes
         Route::get('/categories', [ViolenceCategoryController::class, 'index']);

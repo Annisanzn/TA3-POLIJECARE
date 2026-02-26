@@ -30,6 +30,9 @@ class CounselorScheduleController extends Controller
         } else {
             // Mahasiswa hanya bisa melihat jadwal aktif
             $query->active();
+            if ($request->has('counselor_id')) {
+                $query->where('counselor_id', $request->counselor_id);
+            }
         }
 
         // Filter hari
@@ -45,6 +48,43 @@ class CounselorScheduleController extends Controller
         $schedules = $query->orderBy('hari')
             ->orderBy('jam_mulai')
             ->get();
+
+        // Cross-check booked slots for mahasiswa view
+        if ($user->role !== 'konselor' && $user->role !== 'operator') {
+            $dayMap = [
+                'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4,
+                'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0,
+                'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4,
+                'Friday' => 5, 'Saturday' => 6, 'Sunday' => 0,
+            ];
+
+            $schedules = $schedules->map(function ($slot) use ($dayMap) {
+                // Calculate the next occurrence date of this day
+                $dayNum = $dayMap[$slot->hari] ?? null;
+                if ($dayNum !== null) {
+                    $today = now();
+                    $diff = $dayNum - $today->dayOfWeek;
+                    if ($diff <= 0) $diff += 7;
+                    $nextDate = $today->copy()->addDays($diff)->toDateString();
+
+                    // Check if this slot is already booked on that date
+                    // Use TIME() to handle format differences (H:i vs H:i:s)
+                    $slotTime = is_object($slot->jam_mulai) ? $slot->jam_mulai->format('H:i:s') : $slot->jam_mulai;
+                    $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $slot->counselor_id)
+                        ->where('tanggal', $nextDate)
+                        ->whereRaw('TIME(jam_mulai) = TIME(?)', [$slotTime])
+                        ->whereIn('status', ['pending', 'approved'])
+                        ->exists();
+
+                    $slot->is_booked = $isBooked;
+                    $slot->next_date = $nextDate;
+                } else {
+                    $slot->is_booked = false;
+                    $slot->next_date = null;
+                }
+                return $slot;
+            });
+        }
 
         return response()->json([
             'success' => true,

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import { ScrollParticles } from './components/ui/scroll-particles';
+import Sidebar from './components/layout/Sidebar';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -14,6 +15,10 @@ import OperatorDashboard from './pages/operator/dashboard';
 import UserManagementPage from './pages/operator/user-management';
 import ComplaintsManagementPage from './pages/operator/complaints-management';
 import MaterialsManagement from './pages/operator/materials-management';
+import HistoriPengaduan from './pages/user/histori-pengaduan';
+import DetailPengaduan from './pages/user/detail-pengaduan';
+import BuatLaporan from './pages/user/buat-laporan';
+import CreateComplaintPage from './pages/user/CreateComplaintPage';
 import ViolenceCategoriesManagement from './pages/operator/violence-categories-management';
 import CounselingManagementPage from './pages/operator/counseling-management';
 import CounselorScheduleManagementPage from './pages/operator/counselor-schedule-management';
@@ -218,9 +223,41 @@ function App() {
             <Route
               path="/user/dashboard"
               element={
-                <ProtectedRoute requiredRole="user">
+                <NewProtectedRoute requiredRole="user">
                   <UserDashboard />
-                </ProtectedRoute>
+                </NewProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/buat-laporan"
+              element={
+                <NewProtectedRoute requiredRole="user">
+                  <BuatLaporan />
+                </NewProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/report/create"
+              element={
+                <NewProtectedRoute requiredRole="user">
+                  <CreateComplaintPage />
+                </NewProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/histori-pengaduan"
+              element={
+                <NewProtectedRoute requiredRole="user">
+                  <HistoriPengaduan />
+                </NewProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/histori-pengaduan/:id"
+              element={
+                <NewProtectedRoute requiredRole="user">
+                  <DetailPengaduan />
+                </NewProtectedRoute>
               }
             />
             {/* Routes di bawah ini sudah digantikan oleh NewProtectedRoute di atas */}

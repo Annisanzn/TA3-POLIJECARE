@@ -54,6 +54,7 @@ export const Component = ({
   className = "",
   gradientDark,   // intentionally consumed here, not passed to DOM
   gradient,       // same
+  gradientLight,  // same
   ...props
 }) => {
   const sizes = {

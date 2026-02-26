@@ -123,16 +123,17 @@ const ComplaintsManagementPage = () => {
         complaintService.getComplaintStats(),
       ]);
 
-      setComplaints(listRes.data || []);
+      const pageData = listRes.data || {};
+      setComplaints(pageData.data || []);
       setPagination({
-        current_page: listRes.current_page || currentPage,
-        last_page: listRes.last_page || 1,
-        per_page: listRes.per_page || perPage,
-        total: listRes.total || 0,
+        current_page: pageData.current_page || currentPage,
+        last_page: pageData.last_page || 1,
+        per_page: pageData.per_page || perPage,
+        total: pageData.total || 0,
       });
 
-      if (statsRes?.success) {
-        setStats(statsRes.data);
+      if (statsRes?.data?.success) {
+        setStats(statsRes.data.data || {});
       }
     } catch (error) {
       setComplaints([]);
@@ -356,6 +357,7 @@ const ComplaintsManagementPage = () => {
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Korban</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Tempat Kejadian</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Tanggal</th>
+                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Deskripsi</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Status</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Jadwal Konseling</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Konselor</th>
@@ -371,6 +373,7 @@ const ComplaintsManagementPage = () => {
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-24" /></td>
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-40" /></td>
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-24" /></td>
+                        <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-48" /></td>
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-20" /></td>
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-28" /></td>
                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 rounded w-24" /></td>
@@ -386,6 +389,9 @@ const ComplaintsManagementPage = () => {
                         <td className="py-4 px-6 text-sm text-gray-700">{c.location}</td>
                         <td className="py-4 px-6 text-sm text-gray-700">
                           {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                        </td>
+                        <td className="py-4 px-6 text-sm text-gray-700 max-w-xs truncate" title={c.description}>
+                          {c.description || '-'}
                         </td>
                         <td className="py-4 px-6">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(c.status)} transition-transform duration-200`}>{c.status}</span>
@@ -539,11 +545,10 @@ const ComplaintsManagementPage = () => {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                          currentPage === pageNum
-                            ? 'bg-purple-600 text-white'
-                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg font-medium transition-colors text-xs sm:text-sm ${currentPage === pageNum
+                          ? 'bg-purple-600 text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         {pageNum}
                       </button>

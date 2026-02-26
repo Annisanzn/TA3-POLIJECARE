@@ -58,10 +58,33 @@ const KONSELOR_MENU = [
   },
 ];
 
+const USER_MENU = [
+  {
+    category: 'UTAMA',
+    items: [
+      { name: 'Dashboard', icon: <FiHome />, path: '/user/dashboard' },
+    ],
+  },
+  {
+    category: 'LAYANAN PENGADUAN',
+    items: [
+      { name: 'Buat Laporan', icon: <FiFileText />, path: '/user/buat-laporan' },
+      { name: 'Histori Pengaduan', icon: <FiClock />, path: '/user/histori-pengaduan' },
+    ],
+  },
+  {
+    category: 'AKUN',
+    items: [
+      { name: 'Profil Saya', icon: <FiUser />, path: '#' },
+    ],
+  },
+];
+
 /* ── Role metadata ───────────────────────────────────────────────────────────── */
 const ROLE_META = {
   operator: { label: 'Operator Dashboard', color: '#6666DE' },
   konselor: { label: 'Konselor Dashboard', color: '#4F46E5' },
+  user: { label: 'User Dashboard', color: '#8B5CF6' },
 };
 
 /* ── Sidebar Component ───────────────────────────────────────────────────────── */
@@ -71,8 +94,8 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
   const { user, logout } = useAuth();
   const role = user?.role || 'operator';
 
-  const menuSections = role === 'konselor' ? KONSELOR_MENU : OPERATOR_MENU;
-  const meta = ROLE_META[role] || ROLE_META.operator;
+  const menuSections = role === 'konselor' ? KONSELOR_MENU : (role === 'user' ? USER_MENU : OPERATOR_MENU);
+  const meta = ROLE_META[role] || ROLE_META.user;
 
   const isActive = (path) => location.pathname === path;
 
@@ -122,7 +145,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
       </div>
 
       {/* ── Menu ── */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4">
         {menuSections.map((section, idx) => (
           <div key={idx} className="mb-6">
             {!collapsed && (

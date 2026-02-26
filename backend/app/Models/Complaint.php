@@ -15,9 +15,14 @@ class Complaint extends Model
         'user_id',
         'counselor_id',
         'violence_category_id',
+        'title',
+        'description',
         'victim_type',
         'victim_name',
         'victim_relationship',
+        'chronology',
+        'ip_address',
+        'user_agent',
         'location',
         'latitude',
         'longitude',
@@ -26,6 +31,13 @@ class Complaint extends Model
         'urgency_level',
         'is_anonymous',
     ];
+
+    protected $appends = ['report_reference'];
+
+    public function getReportReferenceAttribute()
+    {
+        return $this->report_id;
+    }
 
     protected $casts = [
         'counseling_schedule' => 'datetime',
@@ -47,8 +59,8 @@ class Complaint extends Model
 
     public static function generateReportId(): string
     {
-        $year = now()->year;
-        $prefix = "RPT-{$year}-";
+        $date = now()->format('Ymd');
+        $prefix = "LPR-{$date}-";
 
         return DB::transaction(function () use ($prefix) {
             $last = DB::table('complaints')
