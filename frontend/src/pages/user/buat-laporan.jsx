@@ -97,17 +97,27 @@ const BuatLaporan = () => {
     const mapRef = useRef(null);
 
     // Schedule Selection State
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
+    // Multi-slot Selection State (max 2 consecutive slots)
+    const [selectedSlots, setSelectedSlots] = useState([]); // array of slot IDs
     const [scheduleSubmitted, setScheduleSubmitted] = useState(false);
     const [realSchedules, setRealSchedules] = useState([]);
     const [loadingSchedules, setLoadingSchedules] = useState(false);
 
+    // Method Selection State
+    const [scheduleMethod, setScheduleMethod] = useState('offline');
+    const [scheduleLocation, setScheduleLocation] = useState('Ruang Konseling Satgas PPKS Polije');
+    const [scheduleLink, setScheduleLink] = useState('');
+
     const handleScheduleSubmit = async () => {
-        if (!selectedSchedule || !createdComplaintId) return;
+        if (selectedSlots.length === 0 || !createdComplaintId) return;
 
         setLoadingSchedules(true);
         try {
-            const sch = realSchedules.find(s => s.id === selectedSchedule);
+            // Get selected slot objects in order
+            const selectedScheds = selectedSlots
+                .map(id => realSchedules.find(s => s.id === id))
+                .filter(Boolean)
+                .sort((a, b) => (a.jam_mulai > b.jam_mulai ? 1 : -1));
 
             // Extract HH:mm from various possible time formats
             const extractTime = (timeVal) => {
@@ -144,18 +154,26 @@ const BuatLaporan = () => {
                 return localDate.toISOString().split('T')[0];
             };
 
+            // Merge: first slot start → last slot end
+            const firstSlot = selectedScheds[0];
+            const lastSlot = selectedScheds[selectedScheds.length - 1];
+
             // Use backend-computed next_date if available, otherwise calculate
-            const tanggal = sch.next_date || getNextDateFromDayName(sch.hari);
+            const tanggal = firstSlot.next_date || getNextDateFromDayName(firstSlot.hari);
+
+            const slotCount = selectedScheds.length;
+            const durationNote = slotCount > 1 ? ` (${slotCount} slot — ${slotCount * (firstSlot.durasi_menit || 60)} menit)` : '';
 
             const payload = {
                 counselor_id: Number(formData.counselor_id),
                 complaint_id: Number(createdComplaintId),
-                jenis_pengaduan: `Tindak Lanjut Laporan ${formData.title.substring(0, 50)}`,
+                jenis_pengaduan: `Tindak Lanjut Laporan ${formData.title.substring(0, 50)}${durationNote}`,
                 tanggal: tanggal,
-                jam_mulai: extractTime(sch.jam_mulai),
-                jam_selesai: extractTime(sch.jam_selesai),
-                metode: "offline",
-                lokasi: "Ruang Konseling Satgas PPKS Polije"
+                jam_mulai: extractTime(firstSlot.jam_mulai),
+                jam_selesai: extractTime(lastSlot.jam_selesai),
+                metode: scheduleMethod,
+                lokasi: scheduleMethod === 'offline' ? scheduleLocation : null,
+                meeting_link: scheduleMethod === 'online' ? scheduleLink : null,
             };
             console.log("Schedule booking payload:", payload);
 
@@ -179,7 +197,7 @@ const BuatLaporan = () => {
 
             setScheduleSubmitted(true);
             setTimeout(() => {
-                navigate('/user/report/history');
+                navigate('/user/histori-pengaduan');
             }, 2000);
         } catch (error) {
             console.error("Schedule error:", error);
@@ -424,103 +442,186 @@ const BuatLaporan = () => {
                             </div>
 
                             <div>
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">Pilih Waktu Yang Tersedia</h2>
-
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="border-b-2 border-gray-100">
-                                                <th className="py-3 px-4 font-semibold text-gray-700">Tanggal</th>
-                                                <th className="py-3 px-4 font-semibold text-gray-700">Waktu Tersedia</th>
-                                                <th className="py-3 px-4 font-semibold text-gray-700">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loadingSchedules ? (
-                                                <tr>
-                                                    <td colSpan="3" className="py-6 text-center text-sm text-gray-500">
-                                                        Sedang memuat jadwal konselor...
-                                                    </td>
-                                                </tr>
-                                            ) : realSchedules.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="3" className="py-6 text-center text-sm text-gray-500">
-                                                        Belum ada jadwal konsultasi tambahan yang tersedia untuk konselor ini.
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                                realSchedules.map(sch => {
-                                                    // Map backend structure to UI requirement
-                                                    const isAvailable = sch.is_active && !sch.is_booked;
-                                                    const statusText = sch.is_booked ? 'Sudah Dipesan' : (isAvailable ? 'Tersedia' : 'Berhalangan');
-
-                                                    // Helper to format day name if sch.hari is in English
-                                                    const formatDay = (dayStr) => {
-                                                        const days = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' };
-                                                        return days[dayStr.toLowerCase()] || dayStr;
-                                                    };
-
-                                                    return (
-                                                        <tr
-                                                            key={sch.id}
-                                                            onClick={() => isAvailable && setSelectedSchedule(sch.id)}
-                                                            className={`border-b border-gray-100 transition-colors ${!isAvailable ? 'opacity-50 cursor-not-allowed bg-gray-50' :
-                                                                selectedSchedule === sch.id ? 'bg-purple-100 cursor-pointer' : 'hover:bg-gray-50 cursor-pointer'
-                                                                }`}
-                                                        >
-                                                            <td className="py-4 px-4 text-sm text-gray-900">
-                                                                <div className="flex items-center gap-3">
-                                                                    {isAvailable && (
-                                                                        <input
-                                                                            type="radio"
-                                                                            className="w-4 h-4 text-[#2e1065] focus:ring-[#2e1065] cursor-pointer"
-                                                                            checked={selectedSchedule === sch.id}
-                                                                            readOnly
-                                                                        />
-                                                                    )}
-                                                                    {!isAvailable && <div className="w-4 h-4" />}
-                                                                    {formatDay(sch.hari)} {/* Tanggal atau Hari rutin */}
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-4 px-4 text-sm text-gray-700">
-                                                                {(() => {
-                                                                    const extractT = (v) => { const s = String(v || ''); return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); };
-                                                                    return `${extractT(sch.jam_mulai)} - ${extractT(sch.jam_selesai)} WIB`;
-                                                                })()}
-                                                            </td>
-                                                            <td className="py-4 px-4 text-sm">
-                                                                {isAvailable ? (
-                                                                    <span className="flex items-center text-green-600 font-medium">
-                                                                        <div className="bg-green-600 text-white rounded-sm w-4 h-4 flex items-center justify-center mr-2">
-                                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                                                        </div>
-                                                                        {statusText}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="flex items-center text-red-600 font-medium">
-                                                                        <div className="bg-red-100 text-red-600 rounded-sm w-4 h-4 flex items-center justify-center mr-2 font-bold leading-none">
-                                                                            ×
-                                                                        </div>
-                                                                        {statusText}
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            )}
-                                        </tbody>
-                                    </table>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="text-lg font-bold text-gray-800">Pilih Waktu Yang Tersedia</h2>
+                                    <span className="text-xs text-gray-500">{selectedSlots.length}/2 slot dipilih</span>
                                 </div>
+
+                                {/* Multi-slot tip */}
+                                <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl flex gap-2 text-sm">
+                                    <span className="text-purple-600 flex-shrink-0">💡</span>
+                                    <span className="text-purple-700">Anda dapat memilih <strong>1 atau 2 slot waktu</strong>. Pilih 2 slot berturutan jika Anda merasa 1 slot (± 60 menit) belum cukup untuk menyampaikan permasalahan Anda. Slot yang dipilih akan digabung menjadi satu sesi.</span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {loadingSchedules ? (
+                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
+                                            Sedang memuat ketersediaan jadwal...
+                                        </div>
+                                    ) : realSchedules.length === 0 ? (
+                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <div className="text-4xl mb-2">📅</div>
+                                            Belum ada jadwal konsultasi yang tersedia untuk konselor ini.
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            // Group schedules by date
+                                            const grouped = realSchedules.reduce((acc, sch) => {
+                                                const key = sch.next_date || sch.hari;
+                                                if (!acc[key]) {
+                                                    acc[key] = {
+                                                        hari: sch.hari,
+                                                        next_date: sch.next_date,
+                                                        slots: []
+                                                    };
+                                                }
+                                                acc[key].slots.push(sch);
+                                                return acc;
+                                            }, {});
+
+                                            const extractT = (v) => { const s = String(v || ''); return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); };
+
+                                            const formatDay = (dayStr) => {
+                                                const days = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' };
+                                                return days[dayStr.toLowerCase()] || dayStr;
+                                            };
+
+                                            return Object.values(grouped).map((group, gIdx) => (
+                                                <div key={gIdx} className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden">
+                                                    {/* Group Header */}
+                                                    <div className="bg-gradient-to-r from-gray-50 to-white px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
+                                                                <Calendar className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-gray-900 text-sm">{formatDay(group.hari)}</p>
+                                                                {group.next_date && (
+                                                                    <p className="text-xs text-purple-600 font-medium tracking-wide">
+                                                                        {new Date(group.next_date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Slots Grid */}
+                                                    <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                        {group.slots.map(sch => {
+                                                            const isAvailable = sch.is_active && !sch.is_booked;
+                                                            const isSelected = selectedSlots.includes(sch.id);
+                                                            const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
+
+                                                            const toggleSlot = () => {
+                                                                if (!isAvailable) return;
+                                                                if (isSelected) {
+                                                                    setSelectedSlots(prev => prev.filter(id => id !== sch.id));
+                                                                } else if (selectedSlots.length < 2) {
+                                                                    if (selectedSlots.length === 1) {
+                                                                        const firstId = selectedSlots[0];
+                                                                        const firstSch = realSchedules.find(s => s.id === firstId);
+                                                                        if (firstSch) {
+                                                                            const thisDate = sch.next_date || sch.hari;
+                                                                            const firstDate = firstSch.next_date || firstSch.hari;
+                                                                            if (thisDate !== firstDate) {
+                                                                                alert("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
+                                                                                return;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    setSelectedSlots(prev => [...prev, sch.id]);
+                                                                }
+                                                            };
+
+                                                            return (
+                                                                <button
+                                                                    key={sch.id}
+                                                                    type="button"
+                                                                    onClick={toggleSlot}
+                                                                    disabled={isDisabled && !isSelected}
+                                                                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                                                                        ${isSelected
+                                                                            ? 'border-purple-600 bg-purple-50 shadow-md ring-2 ring-purple-100 outline-none'
+                                                                            : isAvailable
+                                                                                ? 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5'
+                                                                                : 'border-slate-100 bg-slate-50 opacity-60'
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    {isSelected && (
+                                                                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center shadow-sm">
+                                                                            <CheckCircle className="w-3 h-3" />
+                                                                        </div>
+                                                                    )}
+                                                                    <span className={`text-sm font-bold ${isSelected ? 'text-purple-900' : isAvailable ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
+                                                                        {extractT(sch.jam_mulai)}
+                                                                    </span>
+                                                                    <span className={`text-[10px] mt-1 font-medium px-2 py-0.5 rounded-full ${isSelected ? 'bg-purple-200 text-purple-800' : isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500'}`}>
+                                                                        {isSelected ? 'Dipilih' : isAvailable ? 'Tersedia' : 'Penuh'}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ));
+                                        })()
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Pilihan Metode Konseling */}
+                            <div className="mt-8">
+                                <h2 className="text-lg font-bold text-gray-800 mb-4">Metode Konseling</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'offline' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
+                                        <div className="flex items-center">
+                                            <input type="radio" name="schedule_method" value="offline" checked={scheduleMethod === 'offline'} onChange={() => setScheduleMethod('offline')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
+                                            <span className="ml-3 font-bold text-gray-800">Tatap Muka (Offline)</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan langsung di lokasi yang ditentukan</p>
+                                    </label>
+
+                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'online' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
+                                        <div className="flex items-center">
+                                            <input type="radio" name="schedule_method" value="online" checked={scheduleMethod === 'online'} onChange={() => setScheduleMethod('online')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
+                                            <span className="ml-3 font-bold text-gray-800">Daring (Online)</span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan virtual melalui Video Conference</p>
+                                    </label>
+                                </div>
+
+                                {scheduleMethod === 'offline' && (
+                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi Pertemuan <span className="text-red-500">*</span></label>
+                                        <input type="text" value={scheduleLocation} onChange={(e) => setScheduleLocation(e.target.value)} placeholder="Contoh: Ruang Konseling Gedung A" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" required />
+                                    </div>
+                                )}
+
+                                {scheduleMethod === 'online' && (
+                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Link Pertemuan (Opsional)</label>
+                                        <input type="text" value={scheduleLink} onChange={(e) => setScheduleLink(e.target.value)} placeholder="Contoh: https://meet.google.com/xxx-yyy-zzz" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" />
+                                        <p className="text-xs text-gray-500 mt-2">Biarkan kosong jika Anda ingin menggunakan platform dari Konselor Anda.</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-6 flex justify-center">
                                 <button
                                     onClick={handleScheduleSubmit}
-                                    disabled={!selectedSchedule}
-                                    className="px-8 py-3 bg-[#1e1b4b] text-white font-medium rounded-xl hover:bg-[#2e1065] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                                    disabled={selectedSlots.length === 0 || loadingSchedules}
+                                    className="px-8 py-3 bg-[#1e1b4b] text-white font-medium rounded-xl hover:bg-[#2e1065] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
                                 >
-                                    Konfirmasi Jadwal & Kirim Permintaan Konseling
+                                    {loadingSchedules ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        "Konfirmasi Jadwal & Kirim Permintaan Konseling"
+                                    )}
                                 </button>
                             </div>
                         </div>

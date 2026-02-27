@@ -58,32 +58,74 @@ class CounselorScheduleController extends Controller
                 'Friday' => 5, 'Saturday' => 6, 'Sunday' => 0,
             ];
 
-            $schedules = $schedules->map(function ($slot) use ($dayMap) {
+            $schedules = $schedules->flatMap(function ($slot) use ($dayMap) {
                 // Calculate the next occurrence date of this day
                 $dayNum = $dayMap[$slot->hari] ?? null;
+                $nextDate = null;
+
                 if ($dayNum !== null) {
                     $today = now();
                     $diff = $dayNum - $today->dayOfWeek;
                     if ($diff <= 0) $diff += 7;
                     $nextDate = $today->copy()->addDays($diff)->toDateString();
+                }
 
-                    // Check if this slot is already booked on that date
-                    // Use TIME() to handle format differences (H:i vs H:i:s)
-                    $slotTime = is_object($slot->jam_mulai) ? $slot->jam_mulai->format('H:i:s') : $slot->jam_mulai;
+                if (!$nextDate) {
+                    $slot->is_booked = false;
+                    $slot->next_date = null;
+                    return [$slot];
+                }
+
+                // Split into 60-minute blocks (or slot_duration if specified)
+                $chunkDuration = $slot->slot_duration ?? 60;
+                $startTimeStr = is_object($slot->jam_mulai) ? $slot->jam_mulai->format('H:i') : substr($slot->jam_mulai, 0, 5);
+                $endTimeStr = is_object($slot->jam_selesai) ? $slot->jam_selesai->format('H:i') : substr($slot->jam_selesai, 0, 5);
+                
+                $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                
+                $chunks = [];
+                // Generate chunks until the start time of the next chunk would exceed endTime
+                while ($startTime->copy()->addMinutes($chunkDuration)->lte($endTime)) {
+                    $chunkSlot = clone $slot;
+                    $chunkSlot->id = $slot->id . '_' . $startTime->format('Hi'); // Unique virtual ID
+                    $chunkSlot->jam_mulai = $startTime->format('H:i:s');
+                    $chunkEnd = $startTime->copy()->addMinutes($chunkDuration);
+                    $chunkSlot->jam_selesai = $chunkEnd->format('H:i:s');
+                    $chunkSlot->durasi_menit = $chunkDuration;
+                    
+                    // Check if *this particular chunk* is booked
                     $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $slot->counselor_id)
                         ->where('tanggal', $nextDate)
-                        ->whereRaw('TIME(jam_mulai) = TIME(?)', [$slotTime])
+                        ->timeOverlap($chunkSlot->jam_mulai, $chunkSlot->jam_selesai)
+                        ->whereIn('status', ['pending', 'approved'])
+                        ->exists();
+
+                    $chunkSlot->is_booked = $isBooked;
+                    $chunkSlot->next_date = $nextDate;
+                    
+                    $chunks[] = $chunkSlot;
+                    
+                    // Move to the next chunk
+                    $startTime->addMinutes($chunkDuration);
+                }
+                
+                // If duration was too short to make a chunk, return as is
+                if (empty($chunks)) {
+                    $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $slot->counselor_id)
+                        ->where('tanggal', $nextDate)
+                        ->timeOverlap($startTimeStr, $endTimeStr)
                         ->whereIn('status', ['pending', 'approved'])
                         ->exists();
 
                     $slot->is_booked = $isBooked;
                     $slot->next_date = $nextDate;
-                } else {
-                    $slot->is_booked = false;
-                    $slot->next_date = null;
+                    $slot->durasi_menit = $startTime->diffInMinutes($endTime);
+                    return [$slot];
                 }
-                return $slot;
-            });
+
+                return $chunks;
+            })->values();
         }
 
         return response()->json([

@@ -4,6 +4,8 @@ import Sidebar from '../../components/layout/Sidebar';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../api/axios';
 import ChartSection from '../../components/ChartSection';
+import CounselingCalendar from '../../components/CounselingCalendar';
+import DashboardNotification from '../../components/DashboardNotification';
 import {
   FiCalendar, FiClock, FiCheckCircle, FiXCircle,
   FiUsers, FiBook, FiAlertCircle, FiRefreshCw,
@@ -83,14 +85,17 @@ const KonselorDashboard = () => {
                 Selamat datang, <span className="font-medium text-green-700">{user?.name || 'Konselor'}</span>!
               </p>
             </div>
-            <button
-              onClick={fetchStats}
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              <DashboardNotification role="konselor" />
+              <button
+                onClick={fetchStats}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+            </div>
           </div>
         </header>
 
@@ -146,9 +151,9 @@ const KonselorDashboard = () => {
             <StatCard loading={loading} title="Total Materi" value={stats?.materi ?? '—'} sub="Materi milik saya" icon={<FiBook size={22} className="text-teal-600" />} color="bg-teal-50" />
           </div>
 
-          {/* Charts Section */}
+          {/* Calendar Section */}
           <div className="mb-8">
-            <ChartSection />
+            <CounselingCalendar role="konselor" />
           </div>
 
           {/* Quick Links */}

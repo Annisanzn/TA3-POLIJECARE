@@ -36,8 +36,8 @@ const Topbar = () => {
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
                     className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all ${activeFilter === filter
-                        ? 'bg-white text-[#6666DE] shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white text-[#6666DE] shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
                       }`}
                   >
                     {filter}
@@ -55,13 +55,6 @@ const Topbar = () => {
               <FiChevronDown className="ml-1" />
             </button>
 
-            {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-              <FiBell size={20} />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </button>
 
             {/* Profile Dropdown */}
             <div className="flex items-center space-x-3">

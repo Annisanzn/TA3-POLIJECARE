@@ -86,7 +86,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
         Route::get('/counselors', [\App\Http\Controllers\API\CounselingController::class, 'getCounselors']);
         Route::get('/counselor-schedules', [\App\Http\Controllers\API\CounselorScheduleController::class, 'index']);
+        Route::get('/counselings', [\App\Http\Controllers\API\CounselingController::class, 'userSchedules']);
         Route::post('/counselings', [\App\Http\Controllers\API\CounselingController::class, 'store']);
+        Route::get('/counseling-schedule', [\App\Http\Controllers\API\CounselingController::class, 'userSchedules']);
     });
     
     // Konselor routes

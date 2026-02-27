@@ -1,14 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiFileText, FiClock, FiCheckCircle, FiPlus } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import { useAuth } from '../../hooks/useAuth';
+import userComplaintService from '../../services/userComplaintService';
+import dayjs from 'dayjs';
+import 'dayjs/locale/id';
 
 const UserDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [stats, setStats] = useState({
+    total: 0,
+    processing: 0,
+    resolved: 0
+  });
+  const [recentComplaints, setRecentComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Ambil maksimal 100 laporan untuk menghitung statistik status
+        const res = await userComplaintService.getHistoriPengaduan({ per_page: 100 });
+        const complaints = res.data || [];
+
+        setRecentComplaints(complaints.slice(0, 3));
+        setStats({
+          total: res.meta?.total || complaints.length,
+          processing: complaints.filter(c => c.status === 'processing').length,
+          resolved: complaints.filter(c => c.status === 'resolved').length
+        });
+      } catch (error) {
+        console.error('Failed to fetch dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -44,6 +80,7 @@ const UserDashboard = () => {
           {/* Quick Actions / Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <motion.div
+              onClick={() => navigate('/user/histori-pengaduan')}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -52,13 +89,14 @@ const UserDashboard = () => {
                 <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
                   <FiFileText className="w-6 h-6 text-[#8B5CF6]" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">3</span>
+                <span className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.total}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Total Pengaduan</h3>
               <p className="text-sm text-gray-500">Histori laporan Anda</p>
             </motion.div>
 
             <motion.div
+              onClick={() => navigate('/user/histori-pengaduan')}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -67,13 +105,14 @@ const UserDashboard = () => {
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                   <FiClock className="w-6 h-6 text-blue-500" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">1</span>
+                <span className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.processing}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Sedang Diproses</h3>
               <p className="text-sm text-gray-500">Laporan dalam penanganan</p>
             </motion.div>
 
             <motion.div
+              onClick={() => navigate('/user/histori-pengaduan')}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -82,7 +121,7 @@ const UserDashboard = () => {
                 <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
                   <FiCheckCircle className="w-6 h-6 text-green-500" />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">2</span>
+                <span className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.resolved}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Telah Selesai</h3>
               <p className="text-sm text-gray-500">Laporan diselesaikan</p>
@@ -98,27 +137,41 @@ const UserDashboard = () => {
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Aktivitas Laporan Terbaru</h3>
             <div className="space-y-4">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+              {loading ? (
+                <div className="text-center text-gray-500 py-4">Memuat data terbaru...</div>
+              ) : recentComplaints.length === 0 ? (
+                <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-xl border border-gray-100">
+                  Anda belum memiliki laporan pengaduan.
+                </div>
+              ) : recentComplaints.map((item) => (
+                <div key={item.id} onClick={() => navigate(`/user/histori-pengaduan/${item.id}`)} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer gap-4 sm:gap-0">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
                       <FiFileText className="w-5 h-5 text-gray-500" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">Tindak Kekerasan Verbal - Kelas {item}</h4>
-                      <p className="text-sm text-gray-500">2 hari yang lalu oleh Anda</p>
+                      <h4 className="font-medium text-gray-900 line-clamp-1" title={item.title}>{item.title}</h4>
+                      <p className="text-sm text-gray-500">
+                        {dayjs(item.created_at).locale('id').fromNow ? dayjs(item.created_at).locale('id').fromNow() : dayjs(item.created_at).locale('id').format('DD MMM YYYY')}
+                      </p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1.5 text-xs font-semibold rounded-lg ${item === 1 ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                    {item === 1 ? 'Diproses' : 'Selesai'}
+                  <span className={`px-3 py-1.5 text-xs font-semibold rounded-lg self-start sm:self-auto ${item.status === 'resolved' ? 'bg-green-100 text-green-700' :
+                      item.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                        item.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                          'bg-yellow-100 text-yellow-700'
+                    }`}>
+                    {item.status === 'resolved' ? 'Selesai' :
+                      item.status === 'processing' ? 'Diproses' :
+                        item.status === 'rejected' ? 'Ditolak' : 'Pending'}
                   </span>
                 </div>
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-              <button className="text-[#8B5CF6] text-sm font-medium hover:text-purple-700 hover:underline">
+              <Link to="/user/histori-pengaduan" className="text-[#8B5CF6] text-sm font-medium hover:text-purple-700 hover:underline">
                 Lihat Semua Histori Pengaduan
-              </button>
+              </Link>
             </div>
           </motion.div>
         </main>
