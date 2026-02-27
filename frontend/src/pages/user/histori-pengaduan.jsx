@@ -140,8 +140,8 @@ const HistoriPengaduan = () => {
                                             </motion.tr>
                                         ) : (
                                             complaints.filter(c =>
-                                                c.title.toLowerCase().includes(search.toLowerCase()) ||
-                                                c.report_reference.toLowerCase().includes(search.toLowerCase())
+                                                (c.title || '').toLowerCase().includes(search.toLowerCase()) ||
+                                                (c.report_reference || '').toLowerCase().includes(search.toLowerCase())
                                             ).map((item, index) => (
                                                 <motion.tr
                                                     key={item.id}

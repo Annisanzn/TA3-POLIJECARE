@@ -16,7 +16,7 @@ class UserComplaintController extends Controller
         $perPage = $request->query('per_page', 10);
         
         // Eager load with specific columns to avoid N+1 and protect sensitive data
-        $complaints = Complaint::with(['counselor:id,name', 'violenceCategory:id,name'])
+        $complaints = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
             ->where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
@@ -38,7 +38,7 @@ class UserComplaintController extends Controller
      */
     public function show($id)
     {
-        $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:id,name'])
+        $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
             ->find($id);
             
         if (!$complaint) {

@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     FiArrowLeft, FiClock, FiFileText, FiUser,
-    FiAlertCircle, FiLock, FiInfo, FiActivity, FiTag
+    FiAlertCircle, FiLock, FiInfo, FiActivity, FiTag,
+    FiCheckCircle, FiRefreshCw, FiCalendar, FiMapPin, FiWifi
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import userComplaintService from '../../services/userComplaintService';
+import api from '../../api/axios';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 
@@ -19,6 +21,7 @@ const DetailPengaduan = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [counselingSchedule, setCounselingSchedule] = useState(null);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -26,6 +29,17 @@ const DetailPengaduan = () => {
                 setLoading(true);
                 const res = await userComplaintService.getDetailPengaduan(id);
                 setComplaint(res.data);
+                // Fetch counseling schedule for this complaint
+                try {
+                    const schedRes = await api.get(`/user/counseling-schedule?complaint_id=${id}`);
+                    const schedData = schedRes.data?.data || schedRes.data;
+                    const items = Array.isArray(schedData?.data) ? schedData.data
+                        : Array.isArray(schedData) ? schedData : [];
+                    // Get the latest schedule
+                    setCounselingSchedule(items.length > 0 ? items[items.length - 1] : null);
+                } catch {
+                    // No schedule yet — that's OK
+                }
             } catch (err) {
                 setError(err.response?.data?.message || 'Gagal memuat detail laporan.');
             } finally {
@@ -37,18 +51,32 @@ const DetailPengaduan = () => {
 
     const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
-    const getStatusInfo = (status) => {
+    // 4-Step counseling schedule status tracker
+    const COUNSELING_STEPS = [
+        { key: 'pending', label: 'Menunggu\nPersetujuan', color: 'bg-red-500', ring: 'ring-red-300', text: 'text-red-600' },
+        { key: 'approved', label: 'Disetujui', color: 'bg-green-500', ring: 'ring-green-300', text: 'text-green-600' },
+        { key: 'reschedule', label: 'Jadwalkan\nUlang', color: 'bg-yellow-400', ring: 'ring-yellow-300', text: 'text-yellow-600' },
+        { key: 'completed', label: 'Selesai', color: 'bg-blue-500', ring: 'ring-blue-300', text: 'text-blue-600' },
+    ];
+
+    const getCounselingStepIndex = (status) => {
         switch (status) {
-            case 'pending':
-                return { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', barState: 1 };
-            case 'processing':
-                return { label: 'Diproses', color: 'bg-blue-100 text-blue-800', barState: 2 };
-            case 'resolved':
-                return { label: 'Selesai', color: 'bg-green-100 text-green-800', barState: 3 };
-            case 'rejected':
-                return { label: 'Ditolak', color: 'bg-red-100 text-red-800', barState: 0 };
-            default:
-                return { label: '-', color: 'bg-gray-100 text-gray-800', barState: 1 };
+            case 'pending': return 0;
+            case 'approved': return 1;
+            case 'rejected': return 2; // maps to "Jadwalkan Ulang"
+            case 'cancelled': return 2;
+            case 'completed': return 3;
+            default: return -1;
+        }
+    };
+
+    const getComplaintStatusInfo = (status) => {
+        switch (status) {
+            case 'pending': return { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' };
+            case 'processing': return { label: 'Diproses', color: 'bg-blue-100 text-blue-800' };
+            case 'resolved': return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
+            case 'rejected': return { label: 'Ditolak', color: 'bg-red-100 text-red-800' };
+            default: return { label: '-', color: 'bg-gray-100 text-gray-800' };
         }
     };
 
@@ -95,7 +123,8 @@ const DetailPengaduan = () => {
         );
     }
 
-    const statusInfo = getStatusInfo(complaint.status);
+    const statusInfo = getComplaintStatusInfo(complaint.status);
+    const counselingStepIdx = counselingSchedule ? getCounselingStepIndex(counselingSchedule.status) : -1;
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -163,21 +192,65 @@ const DetailPengaduan = () => {
                                     </div>
                                 </div>
 
-                                {/* Status Progress Bar */}
-                                {statusInfo.barState > 0 && (
-                                    <div className="mt-8 pt-6 border-t border-gray-50">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Progress Laporan</p>
-                                        </div>
+                                {/* 4-Step Counseling Status Tracker */}
+                                {counselingSchedule ? (
+                                    <div className="mt-6 pt-6 border-t border-gray-100">
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-5">Status Jadwal Konseling</p>
                                         <div className="relative">
-                                            <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-gray-100">
-                                                <div style={{ width: `${(statusInfo.barState / 3) * 100}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-[#8B5CF6] transition-all duration-1000"></div>
+                                            {/* Connector line */}
+                                            <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 z-0" style={{ left: '12.5%', right: '12.5%' }} />
+                                            <div className="flex justify-between relative z-10">
+                                                {COUNSELING_STEPS.map((step, idx) => {
+                                                    const isCurrent = idx === counselingStepIdx;
+                                                    const isDone = idx < counselingStepIdx;
+                                                    const isActive = isCurrent || isDone;
+                                                    return (
+                                                        <div key={step.key} className="flex flex-col items-center w-1/4">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all
+                                                                ${isActive ? step.color + ' ring-4 ' + step.ring : 'bg-gray-200 text-gray-400'}
+                                                                ${isCurrent ? 'scale-110 shadow-lg' : ''}`}>
+                                                                {isDone ? <FiCheckCircle size={16} /> : idx + 1}
+                                                            </div>
+                                                            <p className={`text-center text-[10px] mt-2 font-semibold leading-tight whitespace-pre-line
+                                                                ${isCurrent ? step.text : isDone ? 'text-gray-500' : 'text-gray-300'}`}>
+                                                                {step.label}
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
-                                            <div className="flex justify-between text-xs font-medium text-gray-400 px-1">
-                                                <span className={statusInfo.barState >= 1 ? 'text-[#8B5CF6]' : ''}>Pending</span>
-                                                <span className={statusInfo.barState >= 2 ? 'text-[#8B5CF6]' : ''}>Diproses</span>
-                                                <span className={statusInfo.barState >= 3 ? 'text-[#8B5CF6]' : ''}>Selesai</span>
+                                        </div>
+                                        {/* Schedule details */}
+                                        <div className="mt-5 p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-2 text-sm">
+                                            <div className="flex items-center gap-2 text-gray-700">
+                                                <FiCalendar size={14} className="text-indigo-500" />
+                                                <span className="font-medium">Tanggal:</span>
+                                                <span>{counselingSchedule.tanggal ? dayjs(counselingSchedule.tanggal).format('DD MMMM YYYY') : '-'}</span>
+                                                <span className="text-gray-400">·</span>
+                                                <FiClock size={14} className="text-indigo-500" />
+                                                <span>{counselingSchedule.jam_mulai?.substring(0, 5)} – {counselingSchedule.jam_selesai?.substring(0, 5)} WIB</span>
                                             </div>
+                                            <div className="flex items-center gap-2 text-gray-700">
+                                                {counselingSchedule.metode === 'online'
+                                                    ? <FiWifi size={14} className="text-blue-500" />
+                                                    : <FiMapPin size={14} className="text-green-500" />}
+                                                <span className="font-medium capitalize">{counselingSchedule.metode}:</span>
+                                                <span className="text-gray-600">{counselingSchedule.metode === 'online' ? (counselingSchedule.meeting_link || 'Link akan dikirimkan') : (counselingSchedule.lokasi || '-')}</span>
+                                            </div>
+                                            {counselingSchedule.status === 'rejected' && counselingSchedule.rejection_reason && (
+                                                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                    <p className="text-xs font-bold text-yellow-700 mb-1">Alasan Penjadwalan Ulang:</p>
+                                                    <p className="text-xs text-yellow-600">{counselingSchedule.rejection_reason}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-6 pt-6 border-t border-gray-100">
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Status Jadwal Konseling</p>
+                                        <div className="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-center">
+                                            <FiCalendar size={20} className="mx-auto mb-2 text-gray-300" />
+                                            <p className="text-xs text-gray-400">Belum ada jadwal konseling yang terhubung ke laporan ini</p>
                                         </div>
                                     </div>
                                 )}

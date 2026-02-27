@@ -93,6 +93,29 @@ class CounselingController extends Controller
     }
 
     /**
+     * Get counseling schedules belonging to the logged-in user (mahasiswa)
+     * Filterable by complaint_id
+     */
+    public function userSchedules(Request $request)
+    {
+        $user = Auth::user();
+        $query = CounselingSchedule::with(['counselor:id,name', 'complaint:id,title'])
+            ->where('user_id', $user->id);
+
+        if ($request->has('complaint_id') && $request->complaint_id) {
+            $query->where('complaint_id', $request->complaint_id);
+        }
+
+        $schedules = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $schedules,
+            'message' => 'Counseling schedules retrieved'
+        ]);
+    }
+
+    /**
      * Get available time slots for a counselor on a specific date
      */
     public function getAvailableSlots(Request $request)

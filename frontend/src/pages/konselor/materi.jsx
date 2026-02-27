@@ -276,7 +276,7 @@ const KonselorMateri = () => {
                                 <table className="w-full">
                                     <thead className="bg-gray-50 border-b border-gray-200">
                                         <tr>
-                                            {['ID', 'Judul Materi', 'Kategori', 'Tipe', 'File/Link', 'Tanggal', 'Aksi'].map(h => (
+                                            {['ID', 'Judul Materi', 'Kategori', 'Tipe', 'File/Link', 'Diupload Oleh', 'Tanggal', 'Aksi'].map(h => (
                                                 <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                                             ))}
                                         </tr>
@@ -306,6 +306,10 @@ const KonselorMateri = () => {
                                                                 </button>
                                                             )}
                                                         </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm text-gray-900">{m.uploader?.name || '-'}</div>
+                                                        <div className="text-xs text-gray-500 capitalize">{m.uploader?.role || ''}</div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID') : '-'}

@@ -3,9 +3,11 @@ import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import SummaryCard from '../../components/SummaryCard';
 import ChartSection from '../../components/ChartSection';
+import CounselingCalendar from '../../components/CounselingCalendar';
 import ActivityList from '../../components/ActivityList';
 import api from '../../api/axios';
 import { FiRefreshCw } from 'react-icons/fi';
+import DashboardNotification from '../../components/DashboardNotification';
 
 const OperatorDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -98,14 +100,17 @@ const OperatorDashboard = () => {
                     </button>
                   </div>
                 </div>
-                <button
-                  onClick={fetchDashboardData}
-                  disabled={isLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white rounded-xl text-sm font-medium transition-colors"
-                >
-                  <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
-                  Refresh
-                </button>
+                <div className="flex items-center gap-2">
+                  <DashboardNotification role="operator" />
+                  <button
+                    onClick={fetchDashboardData}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white rounded-xl text-sm font-medium transition-colors"
+                  >
+                    <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
+                    Refresh
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -128,6 +133,11 @@ const OperatorDashboard = () => {
           {/* Charts Section */}
           <div className="mb-8">
             <ChartSection />
+          </div>
+
+          {/* Counseling Calendar */}
+          <div className="mb-8">
+            <CounselingCalendar role="operator" />
           </div>
 
           {/* Activity List */}

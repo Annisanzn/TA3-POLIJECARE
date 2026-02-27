@@ -110,7 +110,9 @@ const CounselorScheduleManagementPage = () => {
   const handleAddSchedule = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/operator/counselor-schedules', formData);
+      // Pastikan slot_duration bertipe number
+      const payload = { ...formData, slot_duration: parseInt(formData.slot_duration, 10) };
+      const response = await axios.post('/operator/counselor-schedules', payload);
       if (response.data.success) {
         toast.success('Jadwal berhasil ditambahkan');
         setAddModal(false);
@@ -125,7 +127,12 @@ const CounselorScheduleManagementPage = () => {
         fetchSchedules();
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Gagal menambahkan jadwal';
+      let errorMsg = err.response?.data?.message || 'Gagal menambahkan jadwal';
+      if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        const errorList = Object.values(errors).flat().join(', ');
+        errorMsg = `${errorMsg}: ${errorList}`;
+      }
       toast.error(errorMsg);
     }
   };
@@ -133,14 +140,20 @@ const CounselorScheduleManagementPage = () => {
   const handleEditSchedule = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`/operator/counselor-schedules/${editModal.schedule.id}`, formData);
+      const payload = { ...formData, slot_duration: parseInt(formData.slot_duration, 10) };
+      const response = await axios.put(`/operator/counselor-schedules/${editModal.schedule.id}`, payload);
       if (response.data.success) {
         toast.success('Jadwal berhasil diperbarui');
         setEditModal({ open: false, schedule: null });
         fetchSchedules();
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Gagal memperbarui jadwal';
+      let errorMsg = err.response?.data?.message || 'Gagal memperbarui jadwal';
+      if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        const errorList = Object.values(errors).flat().join(', ');
+        errorMsg = `${errorMsg}: ${errorList}`;
+      }
       toast.error(errorMsg);
     }
   };
