@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiCalendar, FiClock, FiUser, FiVideo, FiMapPin,
@@ -17,7 +16,7 @@ const CounselingRequestPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Form state
   const [counselors, setCounselors] = useState([]);
   const [selectedCounselor, setSelectedCounselor] = useState('');
@@ -81,7 +80,7 @@ const CounselingRequestPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedCounselor || !selectedDate || !selectedSlot || !method) {
       setError('Harap lengkapi semua field yang wajib diisi');
       return;
@@ -100,7 +99,7 @@ const CounselingRequestPage = () => {
     try {
       setIsLoading(true);
       setError('');
-      
+
       const scheduleData = {
         counselor_id: selectedCounselor,
         complaint_id: complaintId || null,
@@ -114,7 +113,7 @@ const CounselingRequestPage = () => {
       };
 
       const response = await counselingService.requestSchedule(scheduleData);
-      
+
       if (response.success) {
         setSuccess('Permintaan jadwal konseling berhasil dikirim!');
         // Reset form
@@ -317,13 +316,12 @@ const CounselingRequestPage = () => {
                           type="button"
                           onClick={() => setSelectedSlot(slot)}
                           disabled={!slot.available || isLoading}
-                          className={`p-3 rounded-lg border transition-all ${
-                            selectedSlot?.jam_mulai === slot.jam_mulai
+                          className={`p-3 rounded-lg border transition-all ${selectedSlot?.jam_mulai === slot.jam_mulai
                               ? 'border-blue-500 bg-blue-50 text-blue-700'
                               : slot.available
-                              ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                              : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
-                          }`}
+                                ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                            }`}
                         >
                           <div className="text-sm font-medium">{slot.display}</div>
                           <div className="text-xs mt-1">
@@ -393,19 +391,16 @@ const CounselingRequestPage = () => {
                 <button
                   type="button"
                   onClick={() => setMethod('online')}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    method === 'online'
+                  className={`p-4 rounded-xl border-2 transition-all ${method === 'online'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      method === 'online' ? 'bg-blue-100' : 'bg-gray-100'
-                    }`}>
-                      <FiVideo className={`w-5 h-5 ${
-                        method === 'online' ? 'text-blue-600' : 'text-gray-600'
-                      }`} />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${method === 'online' ? 'bg-blue-100' : 'bg-gray-100'
+                      }`}>
+                      <FiVideo className={`w-5 h-5 ${method === 'online' ? 'text-blue-600' : 'text-gray-600'
+                        }`} />
                     </div>
                     <div className="text-left">
                       <p className="font-medium text-gray-900">Online</p>
@@ -423,19 +418,16 @@ const CounselingRequestPage = () => {
                 <button
                   type="button"
                   onClick={() => setMethod('offline')}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    method === 'offline'
+                  className={`p-4 rounded-xl border-2 transition-all ${method === 'offline'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      method === 'offline' ? 'bg-blue-100' : 'bg-gray-100'
-                    }`}>
-                      <FiMapPin className={`w-5 h-5 ${
-                        method === 'offline' ? 'text-blue-600' : 'text-gray-600'
-                      }`} />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${method === 'offline' ? 'bg-blue-100' : 'bg-gray-100'
+                      }`}>
+                      <FiMapPin className={`w-5 h-5 ${method === 'offline' ? 'text-blue-600' : 'text-gray-600'
+                        }`} />
                     </div>
                     <div className="text-left">
                       <p className="font-medium text-gray-900">Offline</p>

@@ -25,7 +25,7 @@ class KonselorDashboardController extends Controller
         $pending        = (clone $jadwalQuery)->where('status', 'pending')->count();
         $approved       = (clone $jadwalQuery)->where('status', 'approved')->count();
         $completed      = (clone $jadwalQuery)->where('status', 'completed')->count();
-        $cancelled      = (clone $jadwalQuery)->where('status', 'cancelled')->count();
+        $rejected       = (clone $jadwalQuery)->where('status', 'rejected')->count();
         $today          = (clone $jadwalQuery)->whereDate('tanggal', today())->count();
         $upcoming       = (clone $jadwalQuery)
             ->whereDate('tanggal', '>', today())
@@ -46,7 +46,7 @@ class KonselorDashboardController extends Controller
                     'pending'   => $pending,
                     'approved'  => $approved,
                     'completed' => $completed,
-                    'cancelled' => $cancelled,
+                    'rejected' => $rejected,
                     'today'     => $today,
                     'upcoming'  => $upcoming,
                 ],

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import {
     AlertCircle, ArrowLeft, Shield, User, FileText,
     MapPin, Calendar, Paperclip, CheckCircle, Search
@@ -525,7 +526,7 @@ const BuatLaporan = () => {
                                                                             const thisDate = sch.next_date || sch.hari;
                                                                             const firstDate = firstSch.next_date || firstSch.hari;
                                                                             if (thisDate !== firstDate) {
-                                                                                alert("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
+                                                                                toast.error("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
                                                                                 return;
                                                                             }
                                                                         }

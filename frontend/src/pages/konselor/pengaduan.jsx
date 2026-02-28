@@ -24,7 +24,7 @@ const KonselorPengaduan = () => {
     const [complaints, setComplaints] = useState([]);
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
 
-    const [stats, setStats] = useState({ total: 0, pending: 0, process: 0, completed: 0 });
+    const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, completed: 0 });
 
     const [detailModal, setDetailModal] = useState({ open: false, complaint: null });
     const [statusModal, setStatusModal] = useState({ open: false, complaint: null, status: 'pending' });
@@ -36,7 +36,7 @@ const KonselorPengaduan = () => {
     const statsData = useMemo(() => [
         { title: 'Total Pengaduan', value: String(stats.total ?? 0), icon: <FiFileText size={20} />, color: 'from-purple-500 to-purple-600' },
         { title: 'Pending', value: String(stats.pending ?? 0), icon: <FiAlertCircle size={20} />, color: 'from-yellow-500 to-yellow-600' },
-        { title: 'Sedang Diproses', value: String(stats.process ?? 0), icon: <FiEdit size={20} />, color: 'from-blue-500 to-blue-600' },
+        { title: 'Sedang Diproses', value: String(stats.approved ?? 0), icon: <FiEdit size={20} />, color: 'from-blue-500 to-blue-600' },
         { title: 'Selesai', value: String(stats.completed ?? 0), icon: <FiCheckCircle size={20} />, color: 'from-green-500 to-green-600' },
     ], [stats]);
 
@@ -44,7 +44,7 @@ const KonselorPengaduan = () => {
 
     const getStatusBadge = (status) => {
         const s = String(status || '').toLowerCase();
-        const map = { pending: 'bg-yellow-100 text-yellow-800', process: 'bg-blue-100 text-blue-800', scheduled: 'bg-purple-100 text-purple-800', completed: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
+        const map = { pending: 'bg-yellow-100 text-yellow-800', approved: 'bg-blue-100 text-blue-800', completed: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
         return map[s] || 'bg-gray-100 text-gray-800';
     };
 
@@ -65,7 +65,7 @@ const KonselorPengaduan = () => {
             setStats({
                 total: arr.length,
                 pending: arr.filter(c => c.status === 'pending').length,
-                process: arr.filter(c => c.status === 'process').length,
+                approved: arr.filter(c => c.status === 'approved').length,
                 completed: arr.filter(c => c.status === 'completed').length,
             });
             if (data.current_page) {
@@ -179,10 +179,9 @@ const KonselorPengaduan = () => {
                                 <select className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" value={statusFilter} onChange={e => { setCurrentPage(1); setStatusFilter(e.target.value); }}>
                                     <option value="all">Semua Status</option>
                                     <option value="pending">Pending</option>
-                                    <option value="process">Process</option>
-                                    <option value="scheduled">Scheduled</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="approved">Diproses / Disetujui</option>
+                                    <option value="completed">Selesai</option>
+                                    <option value="rejected">Ditolak / Jadwalkan Ulang</option>
                                 </select>
                                 <select className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" value={urgencyFilter} onChange={e => { setCurrentPage(1); setUrgency(e.target.value); }}>
                                     <option value="all">Semua Urgensi</option>
@@ -332,7 +331,7 @@ const KonselorPengaduan = () => {
                                 <div className="px-6 py-5">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                     <select value={statusModal.status} onChange={e => setStatusModal(p => ({ ...p, status: e.target.value }))} disabled={isSubmitting} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 text-sm">
-                                        <option value="pending">Pending</option><option value="process">Process</option><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="rejected">Rejected</option>
+                                        <option value="pending">Pending</option><option value="approved">Diproses / Disetujui</option><option value="completed">Selesai</option><option value="rejected">Ditolak / Jadwalkan Ulang</option>
                                     </select>
                                     <div className="flex gap-3 mt-5">
                                         <button onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending' })} disabled={isSubmitting} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-gray-700 text-sm hover:bg-gray-50">Batal</button>

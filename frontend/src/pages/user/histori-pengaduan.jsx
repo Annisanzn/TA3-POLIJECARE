@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiFileText, FiRefreshCw, FiEye, FiLock, FiFilter, FiSearch } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import userComplaintService from '../../services/userComplaintService';
@@ -12,6 +12,14 @@ const HistoriPengaduan = () => {
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const location = useLocation();
+
+    // Status filter dari URL
+    const [statusFilter, setStatusFilter] = useState(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('status') || '';
+    });
+
     const [pagination, setPagination] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -39,12 +47,12 @@ const HistoriPengaduan = () => {
         switch (status) {
             case 'pending':
                 return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">Pending</span>;
-            case 'processing':
-                return <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Diproses</span>;
-            case 'resolved':
+            case 'approved':
+                return <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Diproses / Disetujui</span>;
+            case 'completed':
                 return <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Selesai</span>;
             case 'rejected':
-                return <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">Ditolak</span>;
+                return <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">Ditolak / Jadwalkan Ulang</span>;
             default:
                 return <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">-</span>;
         }
@@ -90,15 +98,31 @@ const HistoriPengaduan = () => {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
                         {/* Header controls */}
                         <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <div className="relative w-full sm:w-72">
-                                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Cari referensi atau judul..."
-                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border-transparent focus:bg-white focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded-xl text-sm transition-all"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                            <div className="flex flex-col sm:flex-row gap-4 w-full">
+                                <div className="relative w-full sm:w-72">
+                                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Cari referensi atau judul..."
+                                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-transparent focus:bg-white focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded-xl text-sm transition-all"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="relative w-full sm:w-48">
+                                    <select
+                                        className="w-full px-4 py-2 bg-gray-50 border-transparent focus:bg-white focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded-xl text-sm transition-all text-gray-700 appearance-none"
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                    >
+                                        <option value="">Semua Status</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Diproses / Disetujui</option>
+                                        <option value="completed">Selesai</option>
+                                        <option value="rejected">Ditolak / Jadwalkan Ulang</option>
+                                    </select>
+                                    <FiFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                </div>
                             </div>
                         </div>
 
@@ -139,10 +163,19 @@ const HistoriPengaduan = () => {
                                                 </td>
                                             </motion.tr>
                                         ) : (
-                                            complaints.filter(c =>
-                                                (c.title || '').toLowerCase().includes(search.toLowerCase()) ||
-                                                (c.report_reference || '').toLowerCase().includes(search.toLowerCase())
-                                            ).map((item, index) => (
+                                            complaints.filter(c => {
+                                                const matchesSearch = (c.title || '').toLowerCase().includes(search.toLowerCase()) ||
+                                                    (c.report_reference || '').toLowerCase().includes(search.toLowerCase());
+
+                                                // Jika filter di set processing, bisa jadi gabungan processing & pending untuk link dashboard
+                                                // Tapi agar konsisten difilter UI, kita buat strict match.
+                                                // Dashboard bisa link status=processing, dan user bisa ganti ke Semua Status.
+                                                const matchesStatus = statusFilter === '' ? true :
+                                                    c.status === statusFilter ||
+                                                    (statusFilter === 'approved' && (c.status === 'approved' || c.status === 'pending'));
+
+                                                return matchesSearch && matchesStatus;
+                                            }).map((item, index) => (
                                                 <motion.tr
                                                     key={item.id}
                                                     initial={{ opacity: 0, y: 10 }}
