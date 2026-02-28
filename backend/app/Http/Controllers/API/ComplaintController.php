@@ -85,16 +85,18 @@ class ComplaintController extends Controller
 
         $total = (clone $baseQuery)->count();
         $pending = (clone $baseQuery)->where('status', 'pending')->count();
-        $process = (clone $baseQuery)->where('status', 'process')->count();
+        $approved = (clone $baseQuery)->where('status', 'approved')->count();
         $completed = (clone $baseQuery)->where('status', 'completed')->count();
+        $rejected = (clone $baseQuery)->where('status', 'rejected')->count();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'total' => $total,
                 'pending' => $pending,
-                'process' => $process,
+                'approved' => $approved,
                 'completed' => $completed,
+                'rejected' => $rejected,
             ],
         ]);
     }
@@ -102,7 +104,7 @@ class ComplaintController extends Controller
     public function updateStatus(Request $request, Complaint $complaint)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,process,scheduled,completed,rejected',
+            'status' => 'required|in:pending,approved,completed,rejected',
         ]);
 
         $complaint->update([
@@ -126,7 +128,7 @@ class ComplaintController extends Controller
         $complaint->update([
             'counselor_id' => $validated['counselor_id'] ?? $complaint->counselor_id,
             'counseling_schedule' => $validated['counseling_schedule'],
-            'status' => 'scheduled',
+            'status' => 'approved',
         ]);
 
         return response()->json([

@@ -33,8 +33,8 @@ const UserDashboard = () => {
         setRecentComplaints(complaints.slice(0, 3));
         setStats({
           total: res.meta?.total || complaints.length,
-          processing: complaints.filter(c => c.status === 'processing').length,
-          resolved: complaints.filter(c => c.status === 'resolved').length
+          processing: complaints.filter(c => c.status === 'approved' || c.status === 'pending').length,
+          resolved: complaints.filter(c => c.status === 'completed').length
         });
       } catch (error) {
         console.error('Failed to fetch dashboard data', error);
@@ -96,7 +96,7 @@ const UserDashboard = () => {
             </motion.div>
 
             <motion.div
-              onClick={() => navigate('/user/histori-pengaduan')}
+              onClick={() => navigate('/user/histori-pengaduan?status=approved')}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -112,7 +112,7 @@ const UserDashboard = () => {
             </motion.div>
 
             <motion.div
-              onClick={() => navigate('/user/histori-pengaduan')}
+              onClick={() => navigate('/user/histori-pengaduan?status=completed')}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -156,14 +156,14 @@ const UserDashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1.5 text-xs font-semibold rounded-lg self-start sm:self-auto ${item.status === 'resolved' ? 'bg-green-100 text-green-700' :
-                      item.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                        item.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                          'bg-yellow-100 text-yellow-700'
+                  <span className={`px-3 py-1.5 text-xs font-semibold rounded-lg self-start sm:self-auto ${item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                    item.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                      item.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
                     }`}>
-                    {item.status === 'resolved' ? 'Selesai' :
-                      item.status === 'processing' ? 'Diproses' :
-                        item.status === 'rejected' ? 'Ditolak' : 'Pending'}
+                    {item.status === 'completed' ? 'Selesai' :
+                      item.status === 'approved' ? 'Diproses / Disetujui' :
+                        item.status === 'rejected' ? 'Jadwalkan Ulang / Ditolak' : 'Pending'}
                   </span>
                 </div>
               ))}

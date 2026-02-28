@@ -248,8 +248,7 @@ class CounselingController extends Controller
             $complaint = \App\Models\Complaint::find($request->complaint_id);
             if ($complaint) {
                 $complaint->update([
-                    'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00',
-                    'status'              => 'scheduled'
+                    'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00'
                 ]);
             }
         }
@@ -294,6 +293,14 @@ class CounselingController extends Controller
             'status' => CounselingSchedule::STATUS_APPROVED,
             'approved_at' => now(),
         ]);
+
+        // Sync to complaint
+        if ($schedule->complaint_id) {
+            $complaint = \App\Models\Complaint::find($schedule->complaint_id);
+            if ($complaint) {
+                $complaint->update(['status' => 'approved']);
+            }
+        }
 
         // Send approval notification email
         $notificationService = new CounselingNotificationService();
@@ -348,6 +355,14 @@ class CounselingController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
+        // Sync to complaint
+        if ($schedule->complaint_id) {
+            $complaint = \App\Models\Complaint::find($schedule->complaint_id);
+            if ($complaint) {
+                $complaint->update(['status' => 'rejected']);
+            }
+        }
+
         // Send rejection notification email
         $notificationService = new CounselingNotificationService();
         $notificationService->sendRejectionNotification($schedule, $request->rejection_reason);
@@ -376,7 +391,7 @@ class CounselingController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => ['required', Rule::in(['completed', 'cancelled'])],
+            'status' => ['required', Rule::in(['completed', 'rejected'])],
         ]);
 
         if ($validator->fails()) {
@@ -390,6 +405,14 @@ class CounselingController extends Controller
         $schedule->update([
             'status' => $request->status,
         ]);
+
+        // Sync to complaint
+        if ($schedule->complaint_id && in_array($request->status, ['completed', 'rejected'])) {
+            $complaint = \App\Models\Complaint::find($schedule->complaint_id);
+            if ($complaint) {
+                $complaint->update(['status' => $request->status]);
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -419,7 +442,6 @@ class CounselingController extends Controller
             'approved' => $query->clone()->where('status', 'approved')->count(),
             'rejected' => $query->clone()->where('status', 'rejected')->count(),
             'completed' => $query->clone()->where('status', 'completed')->count(),
-            'cancelled' => $query->clone()->where('status', 'cancelled')->count(),
         ];
 
         return response()->json([

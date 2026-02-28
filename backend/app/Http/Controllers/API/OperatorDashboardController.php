@@ -15,10 +15,10 @@ class OperatorDashboardController extends Controller
     {
         try {
             // Count complaints based on status
-            // Status in DB usually: 'pending' (baru), 'processing' (diproses), 'resolved' (selesai), 'rejected'
+            // Status in DB usually: 'pending' (baru), 'approved' (diproses), 'completed' (selesai), 'rejected'
             $newReports = Complaint::where('status', 'pending')->count();
-            $processingReports = Complaint::where('status', 'processing')->count();
-            $completedReports = Complaint::where('status', 'resolved')->count();
+            $approvedReports = Complaint::where('status', 'approved')->count();
+            $completedReports = Complaint::where('status', 'completed')->count();
             $totalReports = Complaint::count();
 
             // Calculate active users (dummy for now, can be updated later)
@@ -30,7 +30,7 @@ class OperatorDashboardController extends Controller
                 'data' => [
                     'summary' => [
                         'new' => $newReports,
-                        'processing' => $processingReports,
+                        'approved' => $approvedReports,
                         'completed' => $completedReports,
                         'total' => $totalReports,
                     ],

@@ -40,7 +40,7 @@ const ComplaintsManagementPage = () => {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
-    process: 0,
+    approved: 0,
     completed: 0,
   });
 
@@ -69,7 +69,7 @@ const ComplaintsManagementPage = () => {
       },
       {
         title: 'Sedang Diproses',
-        value: String(stats.process ?? 0),
+        value: String(stats.approved ?? 0),
         icon: <FiEdit size={20} />,
         color: 'from-blue-500 to-blue-600',
       },
@@ -92,10 +92,8 @@ const ComplaintsManagementPage = () => {
     switch (s) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'process':
+      case 'approved':
         return 'bg-blue-100 text-blue-800';
-      case 'scheduled':
-        return 'bg-purple-100 text-purple-800';
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'rejected':
@@ -294,10 +292,9 @@ const ComplaintsManagementPage = () => {
                   >
                     <option value="all">Semua Status</option>
                     <option value="pending">Pending</option>
-                    <option value="process">Process</option>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="completed">Completed</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="approved">Diproses / Disetujui</option>
+                    <option value="completed">Selesai</option>
+                    <option value="rejected">Ditolak / Jadwalkan Ulang</option>
                   </select>
                 </div>
 
@@ -634,10 +631,9 @@ const ComplaintsManagementPage = () => {
                     disabled={isSubmitting}
                   >
                     <option value="pending">Pending</option>
-                    <option value="process">Process</option>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="completed">Completed</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="approved">Diproses / Disetujui</option>
+                    <option value="completed">Selesai</option>
+                    <option value="rejected">Ditolak / Jadwalkan Ulang</option>
                   </select>
 
                   <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-5">

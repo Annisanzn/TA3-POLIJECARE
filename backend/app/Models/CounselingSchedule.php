@@ -40,7 +40,6 @@ class CounselingSchedule extends Model
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_COMPLETED = 'completed';
-    public const STATUS_CANCELLED = 'cancelled';
 
     /**
      * Method constants
@@ -105,11 +104,11 @@ class CounselingSchedule extends Model
     }
 
     /**
-     * Check if the schedule is cancelled
+     * Check if the schedule is cancelled (mapped to rejected now)
      */
     public function isCancelled(): bool
     {
-        return $this->status === self::STATUS_CANCELLED;
+        return $this->status === self::STATUS_REJECTED;
     }
 
     /**
@@ -216,7 +215,6 @@ class CounselingSchedule extends Model
             self::STATUS_APPROVED => 'success',
             self::STATUS_REJECTED => 'danger',
             self::STATUS_COMPLETED => 'info',
-            self::STATUS_CANCELLED => 'secondary',
             default => 'secondary',
         };
     }

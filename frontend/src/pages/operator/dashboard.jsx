@@ -12,7 +12,7 @@ import DashboardNotification from '../../components/DashboardNotification';
 const OperatorDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({
-    summary: { new: 0, processing: 0, completed: 0, total: 0 },
+    summary: { new: 0, approved: 0, completed: 0, total: 0 },
     quickStats: { activeUsers: 24, satisfaction: '98%', avgResponseTime: '45m' }
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -50,11 +50,11 @@ const OperatorDashboard = () => {
     },
     {
       title: 'Laporan Diproses',
-      value: isLoading ? '...' : stats.summary.processing,
-      icon: 'processing',
+      value: isLoading ? '...' : stats.summary.approved,
+      icon: 'approved',
       badge: '',
       trend: '',
-      description: `${stats.summary.processing} dalam penanganan`
+      description: `${stats.summary.approved} dalam penanganan`
     },
     {
       title: 'Laporan Selesai',

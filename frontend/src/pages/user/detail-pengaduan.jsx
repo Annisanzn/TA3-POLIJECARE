@@ -73,8 +73,8 @@ const DetailPengaduan = () => {
     const getComplaintStatusInfo = (status) => {
         switch (status) {
             case 'pending': return { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' };
-            case 'processing': return { label: 'Diproses', color: 'bg-blue-100 text-blue-800' };
-            case 'resolved': return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
+            case 'approved': return { label: 'Diproses / Disetujui', color: 'bg-blue-100 text-blue-800' };
+            case 'completed': return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
             case 'rejected': return { label: 'Ditolak', color: 'bg-red-100 text-red-800' };
             default: return { label: '-', color: 'bg-gray-100 text-gray-800' };
         }
