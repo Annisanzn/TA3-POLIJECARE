@@ -17,6 +17,11 @@ export const complaintService = {
     return response;
   },
 
+  getComplaintById: async (id) => {
+    const response = await axios.get(`/operator/complaints/${id}`);
+    return response;
+  },
+
   getComplaintStats: async () => {
     const response = await axios.get('/operator/complaints-stats');
     return response;

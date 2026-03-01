@@ -14,6 +14,7 @@ import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
 import UserManagementPage from './pages/operator/user-management';
 import ComplaintsManagementPage from './pages/operator/complaints-management';
+import OperatorComplaintDetail from './pages/operator/complaint-detail';
 import MaterialsManagement from './pages/operator/materials-management';
 import HistoriPengaduan from './pages/user/histori-pengaduan';
 import DetailPengaduan from './pages/user/detail-pengaduan';
@@ -33,6 +34,7 @@ import NewProtectedRoute from './components/NewProtectedRoute';
 import ArticleDetail from './components/ArticleDetail';
 import KonselorJadwal from './pages/konselor/jadwal-konseling';
 import KonselorPengaduan from './pages/konselor/pengaduan';
+import KonselorComplaintDetail from './pages/konselor/complaint-detail';
 import KonselorMateri from './pages/konselor/materi';
 
 function App() {
@@ -104,6 +106,25 @@ function App() {
               }
             />
 
+            <Route
+              path="/konselor/complaint-detail/:id"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <KonselorComplaintDetail />
+                </NewProtectedRoute>
+              }
+            />
+
+            {/* Konselor: Jadwal Konseling */}
+            <Route
+              path="/konselor/counseling-dashboard"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <CounselorCounselingDashboard />
+                </NewProtectedRoute>
+              }
+            />
+
             {/* Konselor: Materi */}
             <Route
               path="/konselor/materi"
@@ -138,6 +159,15 @@ function App() {
               element={
                 <NewProtectedRoute requiredRole="operator">
                   <ComplaintsManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/operator/complaint-detail/:id"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <OperatorComplaintDetail />
                 </NewProtectedRoute>
               }
             />

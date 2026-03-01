@@ -22,7 +22,7 @@ class CounselingController extends Controller
         $query = CounselingSchedule::with(['user', 'counselor', 'complaint']);
 
         // Role-based filtering
-        if ($user->role === 'counselor') {
+        if ($user->role === 'konselor') {
             $query->where('counselor_id', $user->id);
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
@@ -273,7 +273,7 @@ class CounselingController extends Controller
         $schedule = CounselingSchedule::findOrFail($id);
 
         // Check permission
-        if (!($user->role === 'operator' || ($user->role === 'counselor' && $schedule->counselor_id === $user->id))) {
+        if (!($user->role === 'operator' || ($user->role === 'konselor' && $schedule->counselor_id === $user->id))) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to approve this schedule'
@@ -322,7 +322,7 @@ class CounselingController extends Controller
         $schedule = CounselingSchedule::findOrFail($id);
 
         // Check permission
-        if (!($user->role === 'operator' || ($user->role === 'counselor' && $schedule->counselor_id === $user->id))) {
+        if (!($user->role === 'operator' || ($user->role === 'konselor' && $schedule->counselor_id === $user->id))) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to reject this schedule'
@@ -430,7 +430,7 @@ class CounselingController extends Controller
         $query = CounselingSchedule::query();
 
         // Role-based filtering
-        if ($user->role === 'counselor') {
+        if ($user->role === 'konselor') {
             $query->where('counselor_id', $user->id);
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
