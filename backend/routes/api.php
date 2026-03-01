@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/materials/{material}',  [MaterialController::class, 'destroy']);
 
         // Complaint update (status & jadwal) untuk konselor yang menangani pengaduan tersebut
+        Route::get('/complaints/{complaint}',            [ComplaintController::class, 'show']);
         Route::patch('/complaints/{complaint}/status',   [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 
@@ -141,6 +142,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Complaint management routes
         Route::get('/complaints', [ComplaintController::class, 'index']);
+        Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']);
         Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
         Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);

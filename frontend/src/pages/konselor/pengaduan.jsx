@@ -3,13 +3,19 @@ import Sidebar from '../../components/layout/Sidebar';
 import {
     FiFileText, FiSearch, FiFilter,
     FiChevronLeft, FiChevronRight,
-    FiAlertCircle, FiCheckCircle,
     FiCalendar, FiEdit, FiEye, FiRefreshCw,
+    FiUser, FiMapPin, FiClock, FiAlertCircle, FiCheckCircle
 } from 'react-icons/fi';
 import { konselorComplaintService } from '../../services/konselorComplaintService';
+import { useNavigate } from 'react-router-dom';
 
 const KonselorPengaduan = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const navigate = useNavigate();
+
+    const navigateToDetail = (id) => {
+        navigate(`/konselor/complaint-detail/${id}`);
+    };
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -26,7 +32,6 @@ const KonselorPengaduan = () => {
 
     const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, completed: 0 });
 
-    const [detailModal, setDetailModal] = useState({ open: false, complaint: null });
     const [statusModal, setStatusModal] = useState({ open: false, complaint: null, status: 'pending' });
     const [scheduleModal, setScheduleModal] = useState({ open: false, complaint: null, counseling_schedule: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -229,7 +234,7 @@ const KonselorPengaduan = () => {
                                             </td>
                                             <td className="py-3 px-5">
                                                 <div className="flex items-center gap-1">
-                                                    <button onClick={() => setDetailModal({ open: true, complaint: c })} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" title="Detail"><FiEye size={15} /></button>
+                                                    <button onClick={() => navigateToDetail(c.id)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" title="Detail"><FiEye size={15} /></button>
                                                     <button onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Ubah Status"><FiEdit size={15} /></button>
                                                     <button onClick={() => setScheduleModal({ open: true, complaint: c, counseling_schedule: c.counseling_schedule ? c.counseling_schedule.replace(' ', 'T') : '' })} className="p-2 text-green-700 hover:bg-green-50 rounded-lg" title="Jadwalkan"><FiCalendar size={15} /></button>
                                                 </div>
@@ -256,10 +261,37 @@ const KonselorPengaduan = () => {
                                         </div>
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(c.status)}`}>{c.status}</span>
                                     </div>
-                                    <p className="text-sm text-gray-700 mb-1"><span className="text-gray-400 text-xs">Pelapor</span> · {c.user_name || '-'}</p>
-                                    <p className="text-sm text-gray-700 mb-3"><span className="text-gray-400 text-xs">Lokasi</span> · {c.location}</p>
+                                    <div className="mt-4 grid grid-cols-1 gap-3 mb-4">
+                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                                            <FiUser className="text-blue-500 shrink-0" />
+                                            <span className="truncate">
+                                                <span className="text-gray-500 text-xs mr-1">Pelapor:</span> {c.user_name || '-'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                                            <FiAlertCircle className="text-orange-500 shrink-0" />
+                                            <span className="truncate">
+                                                <span className="text-gray-500 text-xs mr-1">Korban:</span> {getVictimLabel(c)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                                            <FiMapPin className="text-red-500 shrink-0" />
+                                            <span className="truncate" title={c.location}>
+                                                <span className="text-gray-500 text-xs mr-1">Tempat:</span> {c.location}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                                            <FiCalendar className="text-purple-500 shrink-0" />
+                                            <span className="truncate">
+                                                <span className="text-gray-500 text-xs mr-1">Konseling:</span> {c.counseling_schedule ? new Date(c.counseling_schedule).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Belum Dijadwalkan'}
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => setDetailModal({ open: true, complaint: c })} className="flex-1 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm">Detail</button>
+                                        <button onClick={() => navigateToDetail(c.id)} className="flex-1 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm">Detail</button>
                                         <button onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })} className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg text-sm">Status</button>
                                         <button onClick={() => setScheduleModal({ open: true, complaint: c, counseling_schedule: c.counseling_schedule ? c.counseling_schedule.replace(' ', 'T') : '' })} className="flex-1 py-1.5 bg-green-600 text-white rounded-lg text-sm">Jadwal</button>
                                     </div>
@@ -305,12 +337,97 @@ const KonselorPengaduan = () => {
                                     <p className="text-sm text-gray-500 mt-0.5">{detailModal.complaint?.report_id}</p>
                                 </div>
                                 <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                                    <div><p className="text-xs text-gray-400">Nama Pelapor</p><p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.user_name || '-'}</p></div>
-                                    <div><p className="text-xs text-gray-400">Korban</p><p className="font-medium text-gray-900 mt-1">{getVictimLabel(detailModal.complaint || {})}</p></div>
-                                    <div className="sm:col-span-2"><p className="text-xs text-gray-400">Tempat Kejadian</p><p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.location}</p></div>
-                                    <div><p className="text-xs text-gray-400">Status</p><span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(detailModal.complaint?.status)}`}>{detailModal.complaint?.status}</span></div>
-                                    <div><p className="text-xs text-gray-400">Urgensi</p><p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.urgency_level || '-'}</p></div>
-                                    <div className="sm:col-span-2"><p className="text-xs text-gray-400">Jadwal Konseling</p><p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.counseling_schedule ? new Date(detailModal.complaint.counseling_schedule).toLocaleString('id-ID') : '-'}</p></div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">ID / Report ID</p>
+                                        <p className="font-medium text-gray-900 mt-1">#{detailModal.complaint?.id} / {detailModal.complaint?.report_id}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Status</p>
+                                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(detailModal.complaint?.status)}`}>{detailModal.complaint?.status}</span>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-400">Pelapor</p>
+                                        <p className="font-medium text-gray-900 mt-1">
+                                            {detailModal.complaint?.user_name}
+                                            {detailModal.complaint?.is_anonymous ? ' (Anonim)' : ''}
+                                            <span className="text-gray-400 text-xs ml-1">UID: {detailModal.complaint?.user_id}</span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Kategori Kekerasan</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.violence_category_name || '-'}</p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-400">Korban</p>
+                                        <p className="font-medium text-gray-900 mt-1">{getVictimLabel(detailModal.complaint || {})}</p>
+                                        <p className="text-xs text-gray-400 mt-1">{detailModal.complaint?.victim_name} ({detailModal.complaint?.victim_relationship})</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Urgensi</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.urgency_level || '-'}</p>
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <p className="text-xs text-gray-400">Judul Laporan</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.title || '-'}</p>
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <p className="text-xs text-gray-400">Deskripsi Kejadian</p>
+                                        <p className="font-medium text-gray-900 mt-1 whitespace-pre-wrap">{detailModal.complaint?.description}</p>
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <p className="text-xs text-gray-400">Kronologi Singkat</p>
+                                        <p className="font-medium text-gray-900 mt-1 whitespace-pre-wrap">{detailModal.complaint?.chronology || '-'}</p>
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <p className="text-xs text-gray-400">Tempat Kejadian / Koordinat</p>
+                                        <p className="font-medium text-gray-900 mt-1">
+                                            {detailModal.complaint?.location} <br />
+                                            <span className="text-xs text-gray-400">Lat: {detailModal.complaint?.latitude || '-'}, Long: {detailModal.complaint?.longitude || '-'}</span>
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-400">Jadwal Konseling</p>
+                                        <p className="font-medium text-gray-900 mt-1">
+                                            {detailModal.complaint?.counseling_schedule
+                                                ? new Date(detailModal.complaint.counseling_schedule).toLocaleString('id-ID')
+                                                : '-'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Konselor Bertugas</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.counselor_name || '-'} <span className="text-gray-400 text-xs">(ID: {detailModal.complaint?.counselor_id || '-'})</span></p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-400">Bukti Kejadian</p>
+                                        {detailModal.complaint?.file_path ? (
+                                            <a href={`http://127.0.0.1:8000/storage/${detailModal.complaint.file_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mt-1 inline-block font-medium">Lihat Lampiran</a>
+                                        ) : (
+                                            <p className="font-medium text-gray-900 mt-1">-</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Jejak Digital</p>
+                                        <p className="text-xs text-gray-900 mt-1 truncate" title={detailModal.complaint?.user_agent}>
+                                            IP: {detailModal.complaint?.ip_address || '-'}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs text-gray-400">Dibuat Pada</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.created_at}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-400">Terakhir Diperbarui</p>
+                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.updated_at || '-'}</p>
+                                    </div>
                                 </div>
                                 <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
                                     <button onClick={() => setDetailModal({ open: false, complaint: null })} className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 text-sm">Tutup</button>

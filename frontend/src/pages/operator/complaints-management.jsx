@@ -11,11 +11,16 @@ import {
   FiCalendar,
   FiEdit,
   FiEye,
+  FiMapPin,
+  FiClock,
+  FiUser
 } from 'react-icons/fi';
 import { complaintService } from '../../services/complaintService';
+import { useNavigate } from 'react-router-dom';
 
 const ComplaintsManagementPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -44,7 +49,6 @@ const ComplaintsManagementPage = () => {
     completed: 0,
   });
 
-  const [detailModal, setDetailModal] = useState({ open: false, complaint: null });
   const [statusModal, setStatusModal] = useState({ open: false, complaint: null, status: 'pending' });
   const [scheduleModal, setScheduleModal] = useState({ open: false, complaint: null, counseling_schedule: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -158,8 +162,6 @@ const ComplaintsManagementPage = () => {
     setDateFrom('');
     setDateTo('');
   };
-
-  const openDetail = (complaint) => setDetailModal({ open: true, complaint });
 
   const openStatus = (complaint) =>
     setStatusModal({ open: true, complaint, status: complaint.status || 'pending' });
@@ -402,7 +404,7 @@ const ComplaintsManagementPage = () => {
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => openDetail(c)}
+                              onClick={() => navigateToDetail(c.id)}
                               className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                               title="Detail"
                             >
@@ -461,34 +463,39 @@ const ComplaintsManagementPage = () => {
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(c.status)}`}>{c.status}</span>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
-                      <div>
-                        <p className="text-xs text-gray-500">Nama Pelapor</p>
-                        <p className="text-gray-800 font-medium">{c.user_name || '-'}</p>
+                    <div className="mt-4 grid grid-cols-1 gap-3">
+                      <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                        <FiUser className="text-blue-500 shrink-0" />
+                        <span className="truncate">
+                          <span className="text-gray-500 text-xs mr-1">Pelapor:</span> {c.user_name || '-'}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Korban</p>
-                        <p className="text-gray-800 font-medium">{getVictimLabel(c)}</p>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                        <FiAlertCircle className="text-orange-500 shrink-0" />
+                        <span className="truncate">
+                          <span className="text-gray-500 text-xs mr-1">Korban:</span> {getVictimLabel(c)}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Tempat Kejadian</p>
-                        <p className="text-gray-800 font-medium">{c.location}</p>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                        <FiMapPin className="text-red-500 shrink-0" />
+                        <span className="truncate" title={c.location}>
+                          <span className="text-gray-500 text-xs mr-1">Terapat:</span> {c.location}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Jadwal Konseling</p>
-                        <p className="text-gray-800 font-medium">
-                          {c.counseling_schedule ? new Date(c.counseling_schedule).toLocaleString('id-ID') : '-'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Konselor</p>
-                        <p className="text-gray-800 font-medium">{c.counselor_name || '-'}</p>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                        <FiCalendar className="text-purple-500 shrink-0" />
+                        <span className="truncate">
+                          <span className="text-gray-500 text-xs mr-1">Konseling:</span> {c.counseling_schedule ? new Date(c.counseling_schedule).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Belum Dijadwalkan'}
+                        </span>
                       </div>
                     </div>
 
                     <div className="mt-4 flex flex-col gap-2">
                       <button
-                        onClick={() => openDetail(c)}
+                        onClick={() => navigateToDetail(c.id)}
                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
                       >
                         Detail
@@ -563,56 +570,6 @@ const ComplaintsManagementPage = () => {
               </div>
             )}
           </div>
-
-          {detailModal.open && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setDetailModal({ open: false, complaint: null })} />
-              <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl border border-gray-100">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900">Detail Pengaduan</h3>
-                  <p className="text-sm text-gray-600 mt-1">{detailModal.complaint?.report_id}</p>
-                </div>
-                <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-xs text-gray-500">Nama Pelapor</p>
-                    <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.user_name || '-'}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Korban</p>
-                    <p className="font-medium text-gray-900 mt-1">{getVictimLabel(detailModal.complaint || {})}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-xs text-gray-500">Tempat Kejadian</p>
-                    <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(detailModal.complaint?.status)}`}>{detailModal.complaint?.status}</span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Urgensi</p>
-                    <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.urgency_level || '-'}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-xs text-gray-500">Jadwal Konseling</p>
-                    <p className="font-medium text-gray-900 mt-1">
-                      {detailModal.complaint?.counseling_schedule
-                        ? new Date(detailModal.complaint.counseling_schedule).toLocaleString('id-ID')
-                        : '-'}
-                    </p>
-                  </div>
-                </div>
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
-                  <button
-                    onClick={() => setDetailModal({ open: false, complaint: null })}
-                    className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Tutup
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {statusModal.open && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
