@@ -93,12 +93,7 @@ class UserComplaintController extends Controller
         try {
             $attachmentPath = null;
             if ($request->hasFile('attachment')) {
-                // To maintain current DB schema if 'attachment' field isn't there, we just store it
-                // Actually if db does not have 'attachment', this might throw strict error depending on laravel version/model fillable.
-                // We'll ignore the attachment from create array if it doesn't exist in Model,
-                // but since we don't know if 'attachment' is in 'complaints' table, let's omit the physical save to avoid 500 if the column isn't there, just to be safe.
-                // If the user adds 'attachment' later, they can uncomment it.
-                // For now let's just upload it.
+                // Store the file in 'public/complaint_attachments' directory
                 $attachmentPath = $request->file('attachment')->store('complaint_attachments', 'public');
             }
 
@@ -118,7 +113,8 @@ class UserComplaintController extends Controller
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
                 // 'incident_date' => $validated['incident_date'], // Un-comment if column exists
-                // 'file_path' => $attachmentPath, // Un-comment if column exists
+                'file_path' => $attachmentPath,
+
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'status' => 'pending',

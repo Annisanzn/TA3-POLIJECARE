@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import {
     FiArrowLeft, FiClock, FiFileText, FiUser,
     FiAlertCircle, FiLock, FiInfo, FiActivity, FiTag,
-    FiCheckCircle, FiRefreshCw, FiCalendar, FiMapPin, FiWifi
+    FiCheckCircle, FiRefreshCw, FiCalendar, FiMapPin, FiWifi,
+    FiShield, FiLink
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
@@ -259,6 +260,34 @@ const DetailPengaduan = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 bg-gray-50/30">
                                 {/* Left Column: Detail Utama */}
                                 <div className="col-span-2 p-6 md:p-8">
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-white rounded-xl border border-gray-100 shadow-sm mb-8">
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kategori Kekerasan</h3>
+                                            <div className="flex items-center gap-2 text-gray-900 font-medium">
+                                                <FiShield className="text-[#8B5CF6]" />
+                                                {complaint.violenceCategory?.name || complaint.violence_category_name || '-'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tingkat Urgensi</h3>
+                                            {getUrgencyBadge(complaint.urgency_level)}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lokasi Kejadian</h3>
+                                            <div className="flex items-start gap-2 text-gray-900">
+                                                <FiMapPin className="text-red-500 mt-0.5 shrink-0" />
+                                                <span className="font-medium">{complaint.location || '-'}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Koordinat GPS</h3>
+                                            <p className="text-sm text-gray-700 font-mono bg-gray-50 px-3 py-1.5 rounded border border-gray-200 inline-block">
+                                                {complaint.latitude && complaint.longitude ? `${complaint.latitude}, ${complaint.longitude}` : 'Tidak dilampirkan'}
+                                            </p>
+                                        </div>
+                                    </div>
+
                                     <section className="mb-10 text-gray-800">
                                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                                             <FiFileText className="text-[#8B5CF6]" /> Deskripsi Kejadian
@@ -268,7 +297,7 @@ const DetailPengaduan = () => {
                                         </div>
                                     </section>
 
-                                    <section className="text-gray-800">
+                                    <section className="text-gray-800 mb-10">
                                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                                             <FiActivity className="text-[#8B5CF6]" /> Kronologi Rinci
                                         </h3>
@@ -276,6 +305,25 @@ const DetailPengaduan = () => {
                                             {complaint.chronology || <span className="text-gray-400 italic">Tidak ada rincian kronologi yang dilampirkan.</span>}
                                         </div>
                                     </section>
+
+                                    {complaint.file_path && (
+                                        <section className="text-gray-800">
+                                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                                                <FiLink className="text-[#8B5CF6]" /> Lampiran Bukti
+                                            </h3>
+                                            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                                                <a
+                                                    href={`http://127.0.0.1:8000/storage/${complaint.file_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 font-medium text-sm"
+                                                >
+                                                    <FiLink size={16} />
+                                                    Lihat Dokumen / Media Lampiran
+                                                </a>
+                                            </div>
+                                        </section>
+                                    )}
                                 </div>
 
                                 {/* Right Column: Metadata Korban & Teknis */}

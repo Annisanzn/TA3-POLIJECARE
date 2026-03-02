@@ -81,7 +81,7 @@ const CounselorScheduleManagementPage = () => {
 
   const fetchCounselors = async () => {
     try {
-      const response = await axios.get('/operator/users/counselors');
+      const response = await axios.get('/operator/counseling/counselors');
       if (response.data.success) {
         setCounselors(response.data.data);
       }

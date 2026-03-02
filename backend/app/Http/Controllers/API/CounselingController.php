@@ -229,28 +229,39 @@ class CounselingController extends Controller
             ], 409);
         }
 
-        // Create the schedule
-        $schedule = CounselingSchedule::create([
-            'user_id' => $user->id,
-            'counselor_id' => $request->counselor_id,
-            'complaint_id' => $request->complaint_id,
-            'jenis_pengaduan' => $request->jenis_pengaduan,
-            'tanggal' => $request->tanggal,
-            'jam_mulai' => $jamMulai,
-            'jam_selesai' => $jamSelesai,
-            'metode' => $request->metode,
-            'lokasi' => $request->lokasi,
-            'meeting_link' => $request->meeting_link,
-            'status' => CounselingSchedule::STATUS_PENDING,
-        ]);
+        // Create the schedule inside try-catch to properly handle duplicate constraint
+        try {
+            $schedule = CounselingSchedule::create([
+                'user_id' => $user->id,
+                'counselor_id' => $request->counselor_id,
+                'complaint_id' => $request->complaint_id,
+                'jenis_pengaduan' => $request->jenis_pengaduan,
+                'tanggal' => $request->tanggal,
+                'jam_mulai' => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'metode' => $request->metode,
+                'lokasi' => $request->lokasi,
+                'meeting_link' => $request->meeting_link,
+                'status' => CounselingSchedule::STATUS_PENDING,
+            ]);
 
-        if ($request->complaint_id) {
-            $complaint = \App\Models\Complaint::find($request->complaint_id);
-            if ($complaint) {
-                $complaint->update([
-                    'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00'
-                ]);
+            if ($request->complaint_id) {
+                $complaint = \App\Models\Complaint::find($request->complaint_id);
+                if ($complaint) {
+                    $complaint->update([
+                        'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00'
+                    ]);
+                }
             }
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorCode = $e->errorInfo[1] ?? null;
+            if ($errorCode == 1062) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Slot waktu ini sudah dipesan oleh Anda (atau sudah ada di jadwal). Silakan pilih slot lain.'
+                ], 409);
+            }
+            throw $e;
         }
 
         // Send email notifications
