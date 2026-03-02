@@ -203,15 +203,27 @@ class CounselingController extends Controller
             'meeting_link' => 'nullable|string|max:500',
         ]);
 
-        // Normalize time to H:i format
-        $jamMulai = substr($request->jam_mulai, 0, 5);
-        $jamSelesai = substr($request->jam_selesai, 0, 5);
-
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
                 'message' => 'Validation failed'
+            ], 422);
+        }
+
+        // Normalize time to H:i format
+        $jamMulai = substr($request->jam_mulai, 0, 5);
+        $jamSelesai = substr($request->jam_selesai, 0, 5);
+
+        // Validasi durasi maksimal 2 jam (120 menit)
+        $startMinutes = intval(substr($jamMulai, 0, 2)) * 60 + intval(substr($jamMulai, 3, 2));
+        $endMinutes = intval(substr($jamSelesai, 0, 2)) * 60 + intval(substr($jamSelesai, 3, 2));
+        $diffMinutes = $endMinutes - $startMinutes;
+
+        if ($diffMinutes <= 0 || $diffMinutes > 120) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Durasi konseling tidak valid. Maksimal 2 jam berturutan.'
             ], 422);
         }
 
