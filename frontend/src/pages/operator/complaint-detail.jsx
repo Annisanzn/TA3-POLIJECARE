@@ -230,10 +230,10 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                     <div>
                                         <p className="text-xs text-gray-500 mb-1">Status Korban</p>
                                         <p className="font-medium text-gray-900 border-b border-dashed border-gray-200 pb-2">
-                                            {complaint.victim_type === 'sendiri' ? 'Diri Sendiri (Pelapor)' : 'Orang Lain'}
+                                            {complaint.victim_type === 'self' ? 'Diri Sendiri (Pelapor)' : 'Orang Lain'}
                                         </p>
                                     </div>
-                                    {complaint.victim_type !== 'sendiri' && (
+                                    {complaint.victim_type !== 'self' && (
                                         <>
                                             <div>
                                                 <p className="text-xs text-gray-500 mb-1">Nama Korban (Pihak Lain)</p>

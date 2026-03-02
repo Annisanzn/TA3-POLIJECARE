@@ -116,7 +116,7 @@ const BuatLaporan = () => {
         try {
             // Get selected slot objects in order
             const selectedScheds = selectedSlots
-                .map(id => realSchedules.find(s => s.id === id))
+                .map(slotUid => realSchedules.find(s => `${s.id}-${s.jam_mulai}` === slotUid))
                 .filter(Boolean)
                 .sort((a, b) => (a.jam_mulai > b.jam_mulai ? 1 : -1));
 
@@ -510,18 +510,19 @@ const BuatLaporan = () => {
                                                     {/* Slots Grid */}
                                                     <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                                         {group.slots.map(sch => {
+                                                            const slotUid = `${sch.id}-${sch.jam_mulai}`;
                                                             const isAvailable = sch.is_active && !sch.is_booked;
-                                                            const isSelected = selectedSlots.includes(sch.id);
+                                                            const isSelected = selectedSlots.includes(slotUid);
                                                             const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
 
                                                             const toggleSlot = () => {
                                                                 if (!isAvailable) return;
                                                                 if (isSelected) {
-                                                                    setSelectedSlots(prev => prev.filter(id => id !== sch.id));
+                                                                    setSelectedSlots(prev => prev.filter(id => id !== slotUid));
                                                                 } else if (selectedSlots.length < 2) {
                                                                     if (selectedSlots.length === 1) {
                                                                         const firstId = selectedSlots[0];
-                                                                        const firstSch = realSchedules.find(s => s.id === firstId);
+                                                                        const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
                                                                         if (firstSch) {
                                                                             const thisDate = sch.next_date || sch.hari;
                                                                             const firstDate = firstSch.next_date || firstSch.hari;
@@ -531,13 +532,13 @@ const BuatLaporan = () => {
                                                                             }
                                                                         }
                                                                     }
-                                                                    setSelectedSlots(prev => [...prev, sch.id]);
+                                                                    setSelectedSlots(prev => [...prev, slotUid]);
                                                                 }
                                                             };
 
                                                             return (
                                                                 <button
-                                                                    key={sch.id}
+                                                                    key={`${sch.id}-${group.next_date || group.hari}-${gIdx}-${sch.jam_mulai}`}
                                                                     type="button"
                                                                     onClick={toggleSlot}
                                                                     disabled={isDisabled && !isSelected}

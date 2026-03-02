@@ -30,6 +30,7 @@ class Complaint extends Model
         'counseling_schedule',
         'urgency_level',
         'is_anonymous',
+        'file_path',
     ];
 
     protected $appends = ['report_reference'];

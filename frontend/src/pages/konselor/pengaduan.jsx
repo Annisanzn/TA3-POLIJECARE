@@ -120,34 +120,36 @@ const KonselorPengaduan = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-[#F8FAFC]">
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-white border-b border-gray-200 px-6 py-4">
+                <header className="bg-white border-b border-gray-200 px-6 py-5 sticky top-0 z-30">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Pengaduan</h1>
-                            <p className="text-gray-600 mt-1">Kelola laporan pengaduan mahasiswa yang ditangani Anda</p>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Pengaduan</h1>
+                            <p className="text-gray-600">Kelola laporan pengaduan mahasiswa yang ditangani Anda</p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="relative w-full sm:w-80">
-                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input
-                                    type="text" placeholder="Cari ID laporan / lokasi..."
-                                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                    value={searchQuery}
-                                    onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
-                                />
-                            </div>
-                            <button onClick={fetchData} disabled={isLoading} className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">
-                                <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={fetchData}
+                                disabled={isLoading}
+                                className="p-2.5 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+                                title="Refresh Data"
+                            >
+                                <FiRefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+                            </button>
+                            <button
+                                onClick={resetFilter}
+                                className="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-2xl text-sm font-bold hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+                            >
+                                Reset
                             </button>
                         </div>
                     </div>
                 </header>
 
-                <main className="flex-1 p-6 overflow-x-auto">
+                <main className="flex-1 p-6 lg:p-10">
                     {errorMessage && !isLoading && (
                         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
                             <div className="flex items-center gap-3 text-red-700">
@@ -156,330 +158,332 @@ const KonselorPengaduan = () => {
                         </div>
                     )}
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                        {statsData.map((stat, idx) => (
-                            <div key={idx} className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-gray-500 text-sm">{stat.title}</p>
-                                        <p className="text-3xl font-bold text-gray-900 mt-1">{isLoading ? '—' : stat.value}</p>
-                                    </div>
-                                    <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} text-white`}>{stat.icon}</div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Total Laporan</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.total || 0}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <FiFileText className="w-6 h-6 text-purple-600" />
                                 </div>
                             </div>
-                        ))}
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-sm text-gray-600">Keseluruhan laporan</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Menunggu</p>
+                                    <p className="text-3xl font-bold text-yellow-600">{stats.pending || 0}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <FiAlertCircle className="w-6 h-6 text-yellow-600" />
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-sm text-gray-600">Perlu tindak lanjut</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Diproses</p>
+                                    <p className="text-3xl font-bold text-blue-600">{stats.approved || 0}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <FiEdit className="w-6 h-6 text-blue-600" />
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-sm text-gray-600">Sedang ditindaklanjuti</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Selesai</p>
+                                    <p className="text-3xl font-bold text-emerald-600">{stats.completed || 0}</p>
+                                </div>
+                                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                                    <FiCheckCircle className="w-6 h-6 text-emerald-600" />
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-sm text-gray-600">Penanganan tuntas</p>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Table card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        {/* Filters bar */}
-                        <div className="px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            <div>
-                                <h2 className="text-base font-bold text-gray-900">Data Pengaduan</h2>
-                                <p className="text-gray-500 text-xs mt-0.5">Menampilkan {complaints.length} laporan</p>
+                    {/* Advanced Filter Component */}
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100/80 p-8 mb-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="space-y-1.5 lg:col-span-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Pencarian</label>
+                                <div className="relative">
+                                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        placeholder="Cari ID laporan / lokasi..."
+                                        className="w-full pl-11 pr-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none"
+                                    />
+                                </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <FiFilter className="text-gray-400 hidden sm:block" size={16} />
-                                <select className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" value={statusFilter} onChange={e => { setCurrentPage(1); setStatusFilter(e.target.value); }}>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Status</label>
+                                <select
+                                    value={statusFilter}
+                                    onChange={e => setStatusFilter(e.target.value)}
+                                    className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all appearance-none cursor-pointer"
+                                >
                                     <option value="all">Semua Status</option>
                                     <option value="pending">Pending</option>
                                     <option value="approved">Diproses / Disetujui</option>
                                     <option value="completed">Selesai</option>
                                     <option value="rejected">Ditolak / Jadwalkan Ulang</option>
                                 </select>
-                                <select className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" value={urgencyFilter} onChange={e => { setCurrentPage(1); setUrgency(e.target.value); }}>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Urgensi</label>
+                                <select
+                                    value={urgencyFilter}
+                                    onChange={e => setUrgency(e.target.value)}
+                                    className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all appearance-none cursor-pointer"
+                                >
                                     <option value="all">Semua Urgensi</option>
                                     <option value="low">Low</option>
                                     <option value="medium">Medium</option>
                                     <option value="high">High</option>
                                     <option value="critical">Critical</option>
                                 </select>
-                                <input type="date" value={dateFrom} onChange={e => { setCurrentPage(1); setDateFrom(e.target.value); }} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" />
-                                <input type="date" value={dateTo} onChange={e => { setCurrentPage(1); setDateTo(e.target.value); }} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500" />
-                                <button onClick={resetFilter} className="px-3 py-1.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Reset</button>
+                            </div>
+
+                            <div className="lg:col-span-2 space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Rentang Tanggal</label>
+                                <div className="flex gap-3 items-center">
+                                    <input
+                                        type="date"
+                                        value={dateFrom}
+                                        onChange={e => setDateFrom(e.target.value)}
+                                        className="flex-1 bg-gray-50/50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-purple-500/10 outline-none transition-all shadow-inner"
+                                    />
+                                    <span className="text-gray-300 font-bold">—</span>
+                                    <input
+                                        type="date"
+                                        value={dateTo}
+                                        onChange={e => setDateTo(e.target.value)}
+                                        className="flex-1 bg-gray-50/50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-purple-500/10 outline-none transition-all shadow-inner"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-2 flex items-end">
+                                <button
+                                    onClick={() => fetchData()}
+                                    className="w-full py-3.5 bg-purple-600 text-white rounded-2xl text-sm font-bold hover:bg-purple-700 active:scale-[0.98] transition-all shadow-lg shadow-purple-200 flex items-center justify-center gap-2"
+                                >
+                                    <FiFilter size={16} /> Terapkan Filter
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Desktop Table */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="w-full min-w-[1000px]">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        {['ID Laporan', 'Nama Pelapor', 'Korban', 'Tempat Kejadian', 'Tanggal', 'Deskripsi', 'Status', 'Jadwal Konseling', 'Aksi'].map(h => (
-                                            <th key={h} className="text-left py-4 px-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {isLoading ? Array.from({ length: 5 }).map((_, i) => (
-                                        <tr key={i} className="animate-pulse">
-                                            {Array(9).fill(0).map((__, j) => <td key={j} className="py-4 px-5"><div className="h-4 bg-gray-200 rounded w-24" /></td>)}
-                                        </tr>
-                                    )) : complaints.length > 0 ? complaints.map(c => (
-                                        <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="py-3 px-5 text-sm font-semibold text-gray-900">{c.report_id}</td>
-                                            <td className="py-3 px-5 text-sm text-gray-700">{c.user_name || '-'}</td>
-                                            <td className="py-3 px-5 text-sm text-gray-700">{getVictimLabel(c)}</td>
-                                            <td className="py-3 px-5 text-sm text-gray-700">{c.location}</td>
-                                            <td className="py-3 px-5 text-sm text-gray-500 whitespace-nowrap">
-                                                {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
-                                            </td>
-                                            <td className="py-3 px-5 text-sm text-gray-700 max-w-xs truncate" title={c.deskripsi}>
-                                                {c.deskripsi || '-'}
-                                            </td>
-                                            <td className="py-3 px-5"><span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadge(c.status)}`}>{c.status}</span></td>
-                                            <td className="py-3 px-5 text-sm text-gray-500">
-                                                {c.counseling_schedule ? new Date(c.counseling_schedule).toLocaleString('id-ID') : '-'}
-                                            </td>
-                                            <td className="py-3 px-5">
-                                                <div className="flex items-center gap-1">
-                                                    <button onClick={() => navigateToDetail(c.id)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" title="Detail"><FiEye size={15} /></button>
-                                                    <button onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Ubah Status"><FiEdit size={15} /></button>
-                                                    <button onClick={() => setScheduleModal({ open: true, complaint: c, counseling_schedule: c.counseling_schedule ? c.counseling_schedule.replace(' ', 'T') : '' })} className="p-2 text-green-700 hover:bg-green-50 rounded-lg" title="Jadwalkan"><FiCalendar size={15} /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan={8} className="py-16 text-center text-gray-500">
-                                            <FiFileText size={40} className="mx-auto mb-3 opacity-40" />
-                                            <p>Belum ada laporan pengaduan yang ditangani.</p>
-                                        </td></tr>
-                                    )}
-                                </tbody>
-                            </table>
+                    {/* Main Content Grid */}
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-sm">
+                            <div className="relative w-16 h-16">
+                                <div className="absolute inset-0 border-4 border-purple-50 rounded-full"></div>
+                                <div className="absolute inset-0 border-4 border-purple-600 rounded-full border-t-transparent animate-spin"></div>
+                            </div>
+                            <p className="mt-6 text-gray-500 font-bold tracking-tight animate-pulse">Menyiapkan data pengaduan...</p>
                         </div>
-
-                        {/* Mobile cards */}
-                        <div className="md:hidden p-4 space-y-3">
-                            {!isLoading && complaints.map(c => (
-                                <div key={c.id} className="border border-gray-100 rounded-xl p-4 bg-white">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <p className="font-bold text-sm text-gray-900">{c.report_id}</p>
-                                            <p className="text-xs text-gray-400">{c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</p>
+                    ) : complaints.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-sm">
+                            <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6">
+                                <FiFileText size={32} className="text-gray-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada data</h3>
+                            <p className="text-gray-500 max-w-xs text-center font-medium">Tidak dapat menemukan pengaduan yang sesuai dengan filter pencarian Anda</p>
+                            <button onClick={resetFilter} className="mt-8 px-6 py-2.5 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all">Lihat Semua Data</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {complaints.map(c => (
+                                <div key={c.id} className="group bg-white rounded-[32px] shadow-sm hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-2 border border-gray-100/80 transition-all duration-300 overflow-hidden flex flex-col h-full">
+                                    <div className="p-7 flex-1">
+                                        <div className="flex items-start justify-between mb-6">
+                                            <div className="flex items-center gap-3.5">
+                                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center shadow-inner">
+                                                    <FiFileText className="text-purple-600" size={20} />
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <h3 className="text-base font-bold text-gray-900 leading-tight truncate" title={c.report_id}>{c.report_id}</h3>
+                                                    <p className="text-xs text-gray-400 font-medium truncate italic">{c.user_name || 'Tanpa Nama'}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(c.status)}`}>{c.status}</span>
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-2xl">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                                                    <FiUser size={14} className="text-blue-500" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase leading-none mb-1">Korban</p>
+                                                    <p className="text-xs font-bold text-gray-700">{getVictimLabel(c)}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-2xl">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                                                    <FiMapPin size={14} className="text-rose-500" />
+                                                </div>
+                                                <div className="overflow-hidden pr-2">
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase leading-none mb-1">Lokasi</p>
+                                                    <p className="text-xs font-bold text-gray-700 truncate" title={c.location}>{c.location}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mt-6">
+                                                <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusBadge(c.status)}`}>
+                                                    {c.status}
+                                                </span>
+                                                <span className="text-[10px] font-bold text-gray-400">
+                                                    {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="mt-4 grid grid-cols-1 gap-3 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
-                                            <FiUser className="text-blue-500 shrink-0" />
-                                            <span className="truncate">
-                                                <span className="text-gray-500 text-xs mr-1">Pelapor:</span> {c.user_name || '-'}
-                                            </span>
-                                        </div>
 
-                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
-                                            <FiAlertCircle className="text-orange-500 shrink-0" />
-                                            <span className="truncate">
-                                                <span className="text-gray-500 text-xs mr-1">Korban:</span> {getVictimLabel(c)}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
-                                            <FiMapPin className="text-red-500 shrink-0" />
-                                            <span className="truncate" title={c.location}>
-                                                <span className="text-gray-500 text-xs mr-1">Tempat:</span> {c.location}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
-                                            <FiCalendar className="text-purple-500 shrink-0" />
-                                            <span className="truncate">
-                                                <span className="text-gray-500 text-xs mr-1">Konseling:</span> {c.counseling_schedule ? new Date(c.counseling_schedule).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Belum Dijadwalkan'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => navigateToDetail(c.id)} className="flex-1 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm">Detail</button>
-                                        <button onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })} className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg text-sm">Status</button>
-                                        <button onClick={() => setScheduleModal({ open: true, complaint: c, counseling_schedule: c.counseling_schedule ? c.counseling_schedule.replace(' ', 'T') : '' })} className="flex-1 py-1.5 bg-green-600 text-white rounded-lg text-sm">Jadwal</button>
+                                    <div className="px-7 py-5 bg-gray-50/50 border-t border-gray-100 flex grid grid-cols-3 gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => navigateToDetail(c.id)}
+                                            className="py-2.5 px-2 bg-white border border-gray-200 text-gray-600 hover:border-gray-500 hover:bg-gray-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                                        >
+                                            <FiEye size={14} /> DETAIL
+                                        </button>
+                                        <button
+                                            onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })}
+                                            className="py-2.5 px-2 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                                        >
+                                            <FiEdit size={14} /> STATUS
+                                        </button>
+                                        <button
+                                            onClick={() => setScheduleModal({ open: true, complaint: c, counseling_schedule: c.counseling_schedule ? c.counseling_schedule.replace(' ', 'T') : '' })}
+                                            className="py-2.5 px-2 bg-white border border-gray-200 text-purple-600 hover:border-purple-500 hover:bg-purple-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                                        >
+                                            <FiCalendar size={14} /> JADWAL
+                                        </button>
                                     </div>
                                 </div>
                             ))}
-                            {!isLoading && complaints.length === 0 && (
-                                <div className="py-10 text-center text-gray-500">
-                                    <FiFileText size={36} className="mx-auto mb-3 opacity-40" />
-                                    <p>Belum ada laporan.</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Pagination */}
-                        {!isLoading && complaints.length > 0 && totalPages > 1 && (
-                            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                                <p className="text-sm text-gray-500">Halaman {currentPage} dari {totalPages} — total {pagination.total}</p>
-                                <div className="flex items-center gap-1">
-                                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50">
-                                        <FiChevronLeft size={14} />
-                                    </button>
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let n = totalPages <= 5 ? i + 1 : currentPage <= 3 ? i + 1 : currentPage >= totalPages - 2 ? totalPages - 4 + i : currentPage - 2 + i;
-                                        return (
-                                            <button key={n} onClick={() => setCurrentPage(n)} className={`w-9 h-9 rounded-lg text-sm font-medium ${currentPage === n ? 'bg-green-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{n}</button>
-                                        );
-                                    })}
-                                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50">
-                                        <FiChevronRight size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Detail Modal */}
-                    {detailModal.open && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/40" onClick={() => setDetailModal({ open: false, complaint: null })} />
-                            <div className="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl border border-gray-100">
-                                <div className="px-6 py-4 border-b border-gray-100">
-                                    <h3 className="text-lg font-bold text-gray-900">Detail Pengaduan</h3>
-                                    <p className="text-sm text-gray-500 mt-0.5">{detailModal.complaint?.report_id}</p>
-                                </div>
-                                <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p className="text-xs text-gray-400">ID / Report ID</p>
-                                        <p className="font-medium text-gray-900 mt-1">#{detailModal.complaint?.id} / {detailModal.complaint?.report_id}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Status</p>
-                                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(detailModal.complaint?.status)}`}>{detailModal.complaint?.status}</span>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-gray-400">Pelapor</p>
-                                        <p className="font-medium text-gray-900 mt-1">
-                                            {detailModal.complaint?.user_name}
-                                            {detailModal.complaint?.is_anonymous ? ' (Anonim)' : ''}
-                                            <span className="text-gray-400 text-xs ml-1">UID: {detailModal.complaint?.user_id}</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Kategori Kekerasan</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.violence_category_name || '-'}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-gray-400">Korban</p>
-                                        <p className="font-medium text-gray-900 mt-1">{getVictimLabel(detailModal.complaint || {})}</p>
-                                        <p className="text-xs text-gray-400 mt-1">{detailModal.complaint?.victim_name} ({detailModal.complaint?.victim_relationship})</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Urgensi</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.urgency_level || '-'}</p>
-                                    </div>
-
-                                    <div className="sm:col-span-2">
-                                        <p className="text-xs text-gray-400">Judul Laporan</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.title || '-'}</p>
-                                    </div>
-
-                                    <div className="sm:col-span-2">
-                                        <p className="text-xs text-gray-400">Deskripsi Kejadian</p>
-                                        <p className="font-medium text-gray-900 mt-1 whitespace-pre-wrap">{detailModal.complaint?.description}</p>
-                                    </div>
-
-                                    <div className="sm:col-span-2">
-                                        <p className="text-xs text-gray-400">Kronologi Singkat</p>
-                                        <p className="font-medium text-gray-900 mt-1 whitespace-pre-wrap">{detailModal.complaint?.chronology || '-'}</p>
-                                    </div>
-
-                                    <div className="sm:col-span-2">
-                                        <p className="text-xs text-gray-400">Tempat Kejadian / Koordinat</p>
-                                        <p className="font-medium text-gray-900 mt-1">
-                                            {detailModal.complaint?.location} <br />
-                                            <span className="text-xs text-gray-400">Lat: {detailModal.complaint?.latitude || '-'}, Long: {detailModal.complaint?.longitude || '-'}</span>
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-gray-400">Jadwal Konseling</p>
-                                        <p className="font-medium text-gray-900 mt-1">
-                                            {detailModal.complaint?.counseling_schedule
-                                                ? new Date(detailModal.complaint.counseling_schedule).toLocaleString('id-ID')
-                                                : '-'}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Konselor Bertugas</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.counselor_name || '-'} <span className="text-gray-400 text-xs">(ID: {detailModal.complaint?.counselor_id || '-'})</span></p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-gray-400">Bukti Kejadian</p>
-                                        {detailModal.complaint?.file_path ? (
-                                            <a href={`http://127.0.0.1:8000/storage/${detailModal.complaint.file_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mt-1 inline-block font-medium">Lihat Lampiran</a>
-                                        ) : (
-                                            <p className="font-medium text-gray-900 mt-1">-</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Jejak Digital</p>
-                                        <p className="text-xs text-gray-900 mt-1 truncate" title={detailModal.complaint?.user_agent}>
-                                            IP: {detailModal.complaint?.ip_address || '-'}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-gray-400">Dibuat Pada</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.created_at}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400">Terakhir Diperbarui</p>
-                                        <p className="font-medium text-gray-900 mt-1">{detailModal.complaint?.updated_at || '-'}</p>
-                                    </div>
-                                </div>
-                                <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
-                                    <button onClick={() => setDetailModal({ open: false, complaint: null })} className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 text-sm">Tutup</button>
-                                </div>
-                            </div>
                         </div>
                     )}
 
-                    {/* Status Modal */}
-                    {statusModal.open && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/40" onClick={() => !isSubmitting && setStatusModal({ open: false, complaint: null, status: 'pending' })} />
-                            <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl border border-gray-100">
-                                <div className="px-6 py-4 border-b border-gray-100">
-                                    <h3 className="text-lg font-bold text-gray-900">Ubah Status</h3>
-                                    <p className="text-sm text-gray-500">{statusModal.complaint?.report_id}</p>
+                    {/* Pagination Controls */}
+                    {!isLoading && totalPages > 1 && (
+                        <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-6 rounded-[32px] border border-gray-100/80 shadow-sm">
+                            <p className="text-sm font-medium text-gray-400 italic">
+                                Showing <span className="font-bold text-gray-900 not-italic">{((currentPage - 1) * perPage) + 1}</span> to <span className="font-bold text-gray-900 not-italic">{Math.min(currentPage * perPage, pagination.total || complaints.length)}</span> of <span className="font-bold text-gray-900 not-italic">{pagination.total || complaints.length}</span> entries
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-purple-600 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all"
+                                >
+                                    <FiChevronLeft size={20} />
+                                </button>
+                                <div className="flex items-center gap-1.5 px-4">
+                                    <span className="text-sm font-black text-gray-900">{currentPage}</span>
+                                    <span className="text-sm font-bold text-gray-300">/</span>
+                                    <span className="text-sm font-bold text-gray-400">{totalPages}</span>
                                 </div>
-                                <div className="px-6 py-5">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select value={statusModal.status} onChange={e => setStatusModal(p => ({ ...p, status: e.target.value }))} disabled={isSubmitting} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 text-sm">
-                                        <option value="pending">Pending</option><option value="approved">Diproses / Disetujui</option><option value="completed">Selesai</option><option value="rejected">Ditolak / Jadwalkan Ulang</option>
-                                    </select>
-                                    <div className="flex gap-3 mt-5">
-                                        <button onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending' })} disabled={isSubmitting} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-gray-700 text-sm hover:bg-gray-50">Batal</button>
-                                        <button onClick={submitStatus} disabled={isSubmitting} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-60">{isSubmitting ? 'Menyimpan...' : 'Simpan'}</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Schedule Modal */}
-                    {scheduleModal.open && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/40" onClick={() => !isSubmitting && setScheduleModal({ open: false, complaint: null, counseling_schedule: '' })} />
-                            <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl border border-gray-100">
-                                <div className="px-6 py-4 border-b border-gray-100">
-                                    <h3 className="text-lg font-bold text-gray-900">Jadwalkan Konseling</h3>
-                                    <p className="text-sm text-gray-500">{scheduleModal.complaint?.report_id}</p>
-                                </div>
-                                <div className="px-6 py-5">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal &amp; Waktu</label>
-                                    <input type="datetime-local" value={scheduleModal.counseling_schedule} onChange={e => setScheduleModal(p => ({ ...p, counseling_schedule: e.target.value }))} disabled={isSubmitting} className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-green-500 text-sm" />
-                                    <div className="flex gap-3 mt-5">
-                                        <button onClick={() => setScheduleModal({ open: false, complaint: null, counseling_schedule: '' })} disabled={isSubmitting} className="flex-1 py-2.5 border border-gray-300 rounded-xl text-gray-700 text-sm hover:bg-gray-50">Batal</button>
-                                        <button onClick={submitSchedule} disabled={isSubmitting} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-60">{isSubmitting ? 'Menyimpan...' : 'Simpan'}</button>
-                                    </div>
-                                </div>
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-purple-600 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all"
+                                >
+                                    <FiChevronRight size={20} />
+                                </button>
                             </div>
                         </div>
                     )}
                 </main>
+
+                {/* Modern Status Modal */}
+                {statusModal.open && statusModal.complaint && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isSubmitting && setStatusModal({ open: false, complaint: null, status: 'pending' })} />
+                        <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
+                            <div className="w-20 h-20 bg-blue-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
+                                <FiEdit className="text-blue-600" size={40} />
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight text-center">Ubah Status</h3>
+                            <p className="text-gray-500 text-sm mb-8 font-medium text-center">{statusModal.complaint?.report_id}</p>
+
+                            <div className="space-y-4 mb-8">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Pilih Status Baru</label>
+                                <select
+                                    value={statusModal.status}
+                                    onChange={(e) => setStatusModal((p) => ({ ...p, status: e.target.value }))}
+                                    className="w-full px-5 py-4 bg-gray-50/50 border-2 border-gray-100 rounded-[24px] text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-pointer font-medium"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Diproses / Disetujui</option>
+                                    <option value="completed">Selesai</option>
+                                    <option value="rejected">Ditolak / Jadwalkan Ulang</option>
+                                </select>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button disabled={isSubmitting} onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
+                                <button disabled={isSubmitting} onClick={submitStatus} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modern Schedule Modal */}
+                {scheduleModal.open && scheduleModal.complaint && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isSubmitting && setScheduleModal({ open: false, complaint: null, counseling_schedule: '' })} />
+                        <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
+                            <div className="w-20 h-20 bg-purple-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
+                                <FiCalendar className="text-purple-600" size={40} />
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Konseling</h3>
+                            <p className="text-gray-500 text-sm mb-8 font-medium text-center">{scheduleModal.complaint?.report_id}</p>
+
+                            <div className="space-y-4 mb-8">
+                                <label className="text-xs font-bold text-gray-500 uppercase px-1">Tanggal & Waktu</label>
+                                <input
+                                    type="datetime-local"
+                                    value={scheduleModal.counseling_schedule}
+                                    onChange={(e) => setScheduleModal((p) => ({ ...p, counseling_schedule: e.target.value }))}
+                                    className="w-full px-5 py-4 bg-gray-50/50 border-2 border-gray-100 rounded-[24px] text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-medium"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button disabled={isSubmitting} onClick={() => setScheduleModal({ open: false, complaint: null, counseling_schedule: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
+                                <button disabled={isSubmitting} onClick={submitSchedule} className="flex-1 py-4 bg-purple-600 text-white rounded-3xl text-sm font-black hover:bg-purple-700 shadow-xl shadow-purple-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
