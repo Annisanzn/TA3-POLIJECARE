@@ -530,6 +530,17 @@ const BuatLaporan = () => {
                                                                                 toast.error("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
                                                                                 return;
                                                                             }
+
+                                                                            // Periksa apakah slot berturutan
+                                                                            const firstStart = extractT(firstSch.jam_mulai);
+                                                                            const firstEnd = extractT(firstSch.jam_selesai);
+                                                                            const thisStart = extractT(sch.jam_mulai);
+                                                                            const thisEnd = extractT(sch.jam_selesai);
+
+                                                                            if (firstEnd !== thisStart && thisEnd !== firstStart) {
+                                                                                toast.error("Slot kedua harus berturutan dengan slot pertama (misal: 13:00-14:00 dan 14:00-15:00).");
+                                                                                return;
+                                                                            }
                                                                         }
                                                                     }
                                                                     setSelectedSlots(prev => [...prev, slotUid]);
