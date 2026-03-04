@@ -423,108 +423,146 @@ const ArticleManagementPage = () => {
                         ))}
                     </div>
 
-                    {/* Table Card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    {/* Premium Table Card */}
+                    <div className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 overflow-hidden relative">
+                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
                         {/* Filter bar */}
-                        <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">Daftar Artikel</h2>
-                                <p className="text-gray-500 text-sm mt-0.5">Menampilkan {articles.length} artikel</p>
+                                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Daftar Artikel</h2>
+                                <p className="text-gray-500 text-sm mt-1 font-medium">
+                                    Menampilkan <span className="text-gray-900">{articles.length}</span> dari {pagination.total} artikel
+                                </p>
                             </div>
-                            <select
-                                value={statusFilter}
-                                onChange={e => { setCurrentPage(1); setStatusFilter(e.target.value); }}
-                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            >
-                                <option value="all">Semua Status</option>
-                                <option value="published">Publish</option>
-                                <option value="scheduled">Terjadwal</option>
-                                <option value="draft">Draft</option>
-                                <option value="inactive">Nonaktif</option>
-                            </select>
+                            <div className="relative group">
+                                <select
+                                    value={statusFilter}
+                                    onChange={e => { setCurrentPage(1); setStatusFilter(e.target.value); }}
+                                    className="pl-4 pr-10 py-2.5 bg-gray-50 border-0 ring-1 ring-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:ring-gray-300 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="all">Semua Status</option>
+                                    <option value="published">Publish</option>
+                                    <option value="scheduled">Terjadwal</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="inactive">Nonaktif</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[800px]">
+                            <table className="w-full text-left min-w-[800px]">
                                 <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700 w-20">Gambar</th>
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Judul</th>
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Tgl Publish</th>
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Status</th>
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Dibuat</th>
-                                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Aksi</th>
+                                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                                        <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase w-20">Cover</th>
+                                        <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Konten</th>
+                                        <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Status & Visibilitas</th>
+                                        <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Waktu</th>
+                                        <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-right">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-gray-50">
                                     {isLoading ? (
-                                        Array.from({ length: 5 }).map((_, i) => (
-                                            <tr key={i} className="animate-pulse">
-                                                {[80, 200, 120, 80, 100, 120].map((w, j) => (
-                                                    <td key={j} className="py-4 px-4">
-                                                        <div className={`h-4 bg-gray-200 rounded`} style={{ width: w }} />
-                                                    </td>
-                                                ))}
+                                        Array.from({ length: 5 }).map((_, idx) => (
+                                            <tr key={idx} className="animate-pulse bg-white">
+                                                <td className="py-4 px-6">
+                                                    <div className="w-16 h-12 bg-gray-200 rounded-xl"></div>
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <div className="space-y-2">
+                                                        <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                                                        <div className="h-3 w-32 bg-gray-100 rounded"></div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <div className="h-6 w-24 bg-gray-200 rounded-lg"></div>
+                                                </td>
+                                                <td className="py-4 px-6 hidden md:table-cell">
+                                                    <div className="space-y-2">
+                                                        <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                                                        <div className="h-3 w-20 bg-gray-100 rounded"></div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-6 text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+                                                        <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : articles.length > 0 ? articles.map(article => (
-                                        <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={article.id} className="group bg-white hover:bg-slate-50/80 transition-all duration-300">
                                             {/* Gambar */}
-                                            <td className="py-3 px-4">
-                                                {article.image ? (
-                                                    <img src={article.image} alt={article.title} className="w-14 h-10 object-cover rounded-lg border border-gray-200" />
-                                                ) : (
-                                                    <div className="w-14 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                        <FiImage size={16} className="text-gray-400" />
-                                                    </div>
-                                                )}
+                                            <td className="py-4 px-6">
+                                                <div className="relative w-16 h-12 rounded-xl overflow-hidden shadow-sm group-hover:shadow border border-gray-200 transition-all shrink-0">
+                                                    {article.image ? (
+                                                        <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                                            <FiImage size={18} className="text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
-                                            {/* Judul */}
-                                            <td className="py-3 px-4">
-                                                <p className="font-medium text-gray-900 text-sm line-clamp-1">{article.title}</p>
-                                                <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{article.excerpt}</p>
+                                            {/* Konten */}
+                                            <td className="py-4 px-6">
+                                                <p className="font-bold text-gray-900 text-sm line-clamp-1 group-hover:text-indigo-600 transition-colors uppercase-first">{article.title}</p>
+                                                <p className="text-[11px] font-medium text-gray-400 mt-1 line-clamp-1">{article.excerpt || 'Tidak ada ringkasan'}</p>
                                             </td>
-                                            {/* Tgl Publish */}
-                                            <td className="py-3 px-4 text-sm text-gray-700">{fmtDate(article.published_at)}</td>
                                             {/* Status */}
-                                            <td className="py-3 px-4">
-                                                <StatusBadge label={article.status_label} />
-                                            </td>
-                                            {/* Dibuat */}
-                                            <td className="py-3 px-4 text-sm text-gray-500">{fmtDate(article.created_at)}</td>
-                                            {/* Aksi */}
-                                            <td className="py-3 px-4">
-                                                <div className="flex items-center gap-1">
-                                                    {/* Toggle aktif */}
+                                            <td className="py-4 px-6">
+                                                <div className="flex flex-col gap-2 items-start">
+                                                    <span>
+                                                        <StatusBadge label={article.status_label} />
+                                                    </span>
                                                     <button
                                                         onClick={() => handleToggle(article)}
                                                         disabled={togglingId === article.id}
-                                                        title={article.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                                                        className={`p-1.5 rounded-lg transition-colors ${article.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
+                                                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors ${article.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'}`}
                                                     >
-                                                        {togglingId === article.id
-                                                            ? <div className="w-4 h-4 border-2 border-gray-300 border-t-purple-500 rounded-full animate-spin" />
-                                                            : article.is_active ? <FiToggleRight size={20} /> : <FiToggleLeft size={20} />
-                                                        }
+                                                        {togglingId === article.id ? (
+                                                            <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                                        ) : article.is_active ? (
+                                                            <>
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                                <span>PUBLIK</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                                                                <span>SEMBUNYIKAN</span>
+                                                            </>
+                                                        )}
                                                     </button>
-                                                    {/* Edit */}
+                                                </div>
+                                            </td>
+                                            {/* Waktu */}
+                                            <td className="py-4 px-6 hidden md:table-cell">
+                                                <div className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                                                    <span title="Diterbitkan">{fmtDate(article.published_at)}</span>
+                                                </div>
+                                                <div className="text-[11px] text-gray-400 mt-0.5 block">Dibuat: {fmtDate(article.created_at)}</div>
+                                            </td>
+                                            {/* Aksi */}
+                                            <td className="py-4 px-6 text-right">
+                                                <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => setModal({ open: true, mode: 'edit', article })}
-                                                        title="Edit"
-                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="Edit Artikel"
+                                                        className="p-2 sm:p-2.5 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
                                                     >
                                                         <FiEdit size={16} />
                                                     </button>
-                                                    {/* Hapus */}
                                                     <button
                                                         onClick={() => setDeleteConfirm({ open: true, article })}
                                                         disabled={deletingId === article.id}
-                                                        title="Hapus"
-                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Hapus Artikel"
+                                                        className="p-2 sm:p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300 disabled:opacity-50"
                                                     >
                                                         {deletingId === article.id
-                                                            ? <div className="w-4 h-4 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin" />
+                                                            ? <div className="w-4 h-4 border-2 border-rose-300 border-t-rose-600 rounded-full animate-spin" />
                                                             : <FiTrash2 size={16} />
                                                         }
                                                     </button>
@@ -533,10 +571,14 @@ const ArticleManagementPage = () => {
                                         </tr>
                                     )) : (
                                         <tr>
-                                            <td colSpan={6} className="py-16 text-center text-gray-400">
-                                                <FiFileText size={40} className="mx-auto mb-3 opacity-40" />
-                                                <p className="text-lg font-medium">Belum ada artikel</p>
-                                                <p className="text-sm mt-1">Klik "Tambah Artikel" untuk membuat artikel pertama</p>
+                                            <td colSpan={5} className="py-16 text-center text-gray-400">
+                                                <div className="inline-flex flex-col items-center justify-center">
+                                                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-gray-100">
+                                                        <FiFileText className="text-3xl text-gray-400" />
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Artikel Tidak Ditemukan</h3>
+                                                    <p className="text-sm text-gray-500 max-w-sm">Klik "Tambah Artikel" di atas untuk membuat artikel pertama Anda.</p>
+                                                </div>
                                             </td>
                                         </tr>
                                     )}
@@ -544,40 +586,47 @@ const ArticleManagementPage = () => {
                             </table>
                         </div>
 
-                        {/* Pagination */}
+                        {/* Pagination (Premium) */}
                         {!isLoading && articles.length > 0 && (
-                            <div className="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <p className="text-sm text-gray-500">
-                                    Halaman {pagination.current_page} dari {totalPages} — {pagination.total} artikel
-                                </p>
-                                <div className="flex items-center gap-2">
+                            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="text-sm font-medium text-gray-500">
+                                    Menampilkan <span className="text-gray-900 font-bold">{(currentPage - 1) * 10 + 1}</span> hingga <span className="text-gray-900 font-bold">{Math.min(currentPage * 10, pagination.total)}</span> dari <span className="text-gray-900 font-bold">{pagination.total}</span> artikel
+                                </div>
+                                <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 w-fit">
                                     <button
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
-                                        className="p-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                                        className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
                                     >
                                         <FiChevronLeft size={16} />
                                     </button>
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let n;
-                                        if (totalPages <= 5) n = i + 1;
-                                        else if (currentPage <= 3) n = i + 1;
-                                        else if (currentPage >= totalPages - 2) n = totalPages - 4 + i;
-                                        else n = currentPage - 2 + i;
-                                        return (
-                                            <button
-                                                key={n}
-                                                onClick={() => setCurrentPage(n)}
-                                                className={`w-9 h-9 rounded-lg font-medium text-sm ${currentPage === n ? 'bg-purple-600 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                                            >
-                                                {n}
-                                            </button>
-                                        );
-                                    })}
+
+                                    <div className="flex items-center">
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            let n;
+                                            if (totalPages <= 5) n = i + 1;
+                                            else if (currentPage <= 3) n = i + 1;
+                                            else if (currentPage >= totalPages - 2) n = totalPages - 4 + i;
+                                            else n = currentPage - 2 + i;
+                                            return (
+                                                <button
+                                                    key={n}
+                                                    onClick={() => setCurrentPage(n)}
+                                                    className={`min-w-[32px] h-8 px-2 mx-0.5 rounded-lg text-sm font-bold transition-all ${currentPage === n
+                                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-200'
+                                                            : 'text-gray-600 hover:bg-gray-100'
+                                                        }`}
+                                                >
+                                                    {n}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
                                     <button
                                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                         disabled={currentPage === totalPages}
-                                        className="p-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                                        className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
                                     >
                                         <FiChevronRight size={16} />
                                     </button>
@@ -600,29 +649,50 @@ const ArticleManagementPage = () => {
 
             {/* Modal Konfirmasi Hapus */}
             {deleteConfirm.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteConfirm({ open: false, article: null })} />
-                    <div className="relative w-full max-w-sm rounded-2xl bg-white shadow-xl p-6">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FiTrash2 size={22} className="text-red-600" />
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 text-center">Hapus Artikel?</h3>
-                        <p className="text-sm text-gray-500 text-center mt-2">
-                            Artikel <strong>"{deleteConfirm.article?.title}"</strong> akan dihapus permanen beserta gambarnya. Tindakan ini tidak dapat dibatalkan.
-                        </p>
-                        <div className="flex gap-3 mt-6">
-                            <button
-                                onClick={() => setDeleteConfirm({ open: false, article: null })}
-                                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700"
-                            >
-                                Hapus
-                            </button>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        onClick={() => !deletingId && setDeleteConfirm({ open: false, article: null })}
+                    />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
+                        <div className="flex flex-col items-center text-center mt-4">
+                            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4 ring-8 ring-rose-50">
+                                <FiAlertCircle size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Artikel?</h3>
+                            <p className="text-gray-500 text-sm mb-6">
+                                Apakah Anda yakin ingin menghapus artikel <br />
+                                <span className="font-bold text-gray-800">"{deleteConfirm.article?.title}"</span>?
+                                <br /><span className="text-rose-500 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
+                            </p>
+
+                            <div className="flex justify-center gap-3 w-full">
+                                <button
+                                    onClick={() => setDeleteConfirm({ open: false, article: null })}
+                                    disabled={deletingId !== null}
+                                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all disabled:opacity-50"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={deletingId !== null}
+                                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium hover:from-rose-600 hover:to-red-700 focus:ring-4 focus:ring-rose-100 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                                >
+                                    {deletingId !== null ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            <span className="ml-2">Menghapus...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FiTrash2 size={18} />
+                                            <span>Ya, Hapus</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

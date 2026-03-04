@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiCheck, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiCheck, FiAlertCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import violenceCategoryService from '../../services/violenceCategoryService';
 
@@ -39,7 +39,7 @@ const ViolenceCategoriesManagement = () => {
       setIsLoading(true);
       setErrorMessage('');
       console.log('🔍 Fetching categories data...');
-      
+
       const params = {
         page: currentPage,
         per_page: itemsPerPage,
@@ -51,7 +51,7 @@ const ViolenceCategoriesManagement = () => {
 
       const response = await violenceCategoryService.getCategories(params);
       console.log('✅ Categories API Response:', response);
-      
+
       // API returns {categories: [...], pagination: {...}} directly
       if (response && response.categories) {
         setCategories(response.categories);
@@ -83,17 +83,17 @@ const ViolenceCategoriesManagement = () => {
 
       const response = await violenceCategoryService.createCategory(formData);
       console.log('Create Category Response:', response);
-      
+
       if (response && response.success === true) {
         setSuccessMessage('Kategori berhasil ditambahkan!');
         setShowAddModal(false);
         resetForm();
         fetchCategories();
       } else {
-        const errorMessage = response?.message || 
-                          response?.data?.message || 
-                          response?.error || 
-                          'Gagal menambahkan kategori.';
+        const errorMessage = response?.message ||
+          response?.data?.message ||
+          response?.error ||
+          'Gagal menambahkan kategori.';
         setErrorMessage(errorMessage);
       }
     } catch (error) {
@@ -111,17 +111,17 @@ const ViolenceCategoriesManagement = () => {
 
       const response = await violenceCategoryService.updateCategory(selectedCategory.unique_id, formData);
       console.log('Update Category Response:', response);
-      
+
       if (response && response.success === true) {
         setSuccessMessage('Kategori berhasil diperbarui!');
         setShowEditModal(false);
         resetForm();
         fetchCategories();
       } else {
-        const errorMessage = response?.message || 
-                          response?.data?.message || 
-                          response?.error || 
-                          'Gagal memperbarui kategori.';
+        const errorMessage = response?.message ||
+          response?.data?.message ||
+          response?.error ||
+          'Gagal memperbarui kategori.';
         setErrorMessage(errorMessage);
       }
     } catch (error) {
@@ -140,17 +140,17 @@ const ViolenceCategoriesManagement = () => {
 
       const response = await violenceCategoryService.deleteCategory(selectedCategory.unique_id);
       console.log('Delete Category Response:', response);
-      
+
       if (response && response.success === true) {
         setSuccessMessage('Kategori berhasil dihapus!');
         setShowDeleteModal(false);
         setSelectedCategory(null);
         fetchCategories();
       } else {
-        const errorMessage = response?.message || 
-                          response?.data?.message || 
-                          response?.error || 
-                          'Gagal menghapus kategori.';
+        const errorMessage = response?.message ||
+          response?.data?.message ||
+          response?.error ||
+          'Gagal menghapus kategori.';
         setErrorMessage(errorMessage);
       }
     } catch (error) {
@@ -285,60 +285,55 @@ const ViolenceCategoriesManagement = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+            className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 overflow-hidden relative"
           >
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
             {isLoading ? (
               <div className="p-8">
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div key={i} className="animate-pulse flex gap-4">
+                      <div className="h-12 w-12 bg-gray-200 rounded-xl"></div>
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             ) : categories.length === 0 ? (
-              <div className="p-8 text-center">
-                <FiAlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada kategori</h3>
-                <p className="text-gray-600 mb-4">Mulai dengan menambahkan kategori kekerasan</p>
+              <div className="p-16 text-center">
+                <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                  <FiAlertCircle className="w-10 h-10 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada kategori</h3>
+                <p className="text-gray-500 mb-6 max-w-sm mx-auto">Mulai dengan menambahkan kategori kekerasan untuk mengelompokkan laporan.</p>
                 <button
                   onClick={() => {
                     resetForm();
                     setShowAddModal(true);
                   }}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-purple-200 transition-all flex items-center gap-2 mx-auto"
                 >
+                  <FiPlus className="w-5 h-5" />
                   Tambah Kategori
                 </button>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nama Kategori
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Deskripsi
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Jumlah Laporan
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tanggal Dibuat
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aksi
-                      </th>
+                <table className="w-full text-left min-w-[800px]">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">ID</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Kategori</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-center">Jumlah Laporan</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Tanggal Dibuat</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-50">
                     <AnimatePresence>
                       {categories.map((category, index) => (
                         <motion.tr
@@ -347,55 +342,53 @@ const ViolenceCategoriesManagement = () => {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20 }}
                           transition={{ delay: index * 0.05 }}
-                          className="hover:bg-gray-50 transition-colors"
+                          className="group bg-white hover:bg-slate-50/80 transition-all duration-300"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-mono text-purple-600 font-medium">
+                          <td className="py-4 px-6">
+                            <div className="text-xs font-mono font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md inline-block">
                               {category.unique_id}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {category.name}
+                          <td className="py-4 px-6">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+                                <FiAlertCircle size={20} />
+                              </div>
+                              <div className="min-w-0 pr-4">
+                                <div className="text-sm font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">{category.name}</div>
+                                <div className="text-[11px] text-gray-500 mt-1 line-clamp-2">{category.description || '-'}</div>
+                              </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-600 max-w-xs truncate">
-                              {category.description || '-'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              category.complaints_count > 0
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
+                          <td className="py-4 px-6 text-center">
+                            <span className={`inline-flex items-center justify-center min-w-[2rem] px-2.5 py-1 rounded-lg text-xs font-bold ${category.complaints_count > 0
+                                ? 'bg-purple-100 text-purple-700 border border-purple-200 shadow-sm'
+                                : 'bg-gray-100 text-gray-500 border border-gray-200'
+                              }`}>
                               {category.complaints_count || 0}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {formatDate(category.created_at)}
+                          <td className="py-4 px-6 hidden md:table-cell">
+                            <div className="text-sm font-medium text-gray-800">
+                              {formatDate(category.created_at)}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <div className="flex items-center gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
                                 onClick={() => openEditModal(category)}
-                                className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded"
-                                title="Edit"
+                                className="p-2 sm:p-2.5 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
+                                title="Edit Kategori"
                               >
-                                <FiEdit2 className="w-4 h-4" />
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                <FiEdit2 size={16} />
+                              </button>
+                              <button
                                 onClick={() => openDeleteModal(category)}
-                                className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded"
-                                title="Hapus"
+                                className="p-2 sm:p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300 delay-75"
+                                title="Hapus Kategori"
                               >
-                                <FiTrash2 className="w-4 h-4" />
-                              </motion.button>
+                                <FiTrash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </motion.tr>
@@ -405,42 +398,57 @@ const ViolenceCategoriesManagement = () => {
                 </table>
               </div>
             )}
-          </motion.div>
 
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-6 flex items-center justify-between"
-            >
-              <div className="text-sm text-gray-600">
-                Menampilkan {((currentPage - 1) * itemsPerPage) + 1} hingga{' '}
-                {Math.min(currentPage * itemsPerPage, pagination.total)} dari{' '}
-                {pagination.total} kategori
+            {/* Pagination (Premium) */}
+            {!isLoading && pagination.total > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-sm font-medium text-gray-500">
+                  Menampilkan <span className="text-gray-900 font-bold">{((currentPage - 1) * itemsPerPage) + 1}</span> hingga <span className="text-gray-900 font-bold">{Math.min(currentPage * itemsPerPage, pagination.total)}</span> dari <span className="text-gray-900 font-bold">{pagination.total}</span> kategori
+                </div>
+                {pagination.total_pages > 1 && (
+                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 w-fit">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                    >
+                      <FiChevronLeft size={16} />
+                    </button>
+
+                    <div className="flex items-center">
+                      {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                        let n;
+                        if (pagination.total_pages <= 5) n = i + 1;
+                        else if (currentPage <= 3) n = i + 1;
+                        else if (currentPage >= pagination.total_pages - 2) n = pagination.total_pages - 4 + i;
+                        else n = currentPage - 2 + i;
+                        return (
+                          <button
+                            key={n}
+                            onClick={() => setCurrentPage(n)}
+                            className={`min-w-[32px] h-8 px-2 mx-0.5 rounded-lg text-sm font-bold transition-all ${currentPage === n
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-200'
+                                : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                          >
+                            {n}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(pagination.total_pages, prev + 1))}
+                      disabled={currentPage === pagination.total_pages}
+                      className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                    >
+                      <FiChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1 text-sm">
-                  {currentPage} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(pagination.total_pages, prev + 1))}
-                  disabled={currentPage === pagination.total_pages}
-                  className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
-            </motion.div>
-          )}
+            )}
+          </motion.div>
 
           {/* Add Modal */}
           <AnimatePresence>
@@ -599,42 +607,56 @@ const ViolenceCategoriesManagement = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
                 onClick={() => setShowDeleteModal(false)}
               >
                 <motion.div
-                  initial={{ scale: 0.9, y: 20 }}
+                  initial={{ scale: 0.95, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
-                  exit={{ scale: 0.9, y: 20 }}
-                  transition={{ type: "spring", stiffness: 100 }}
-                  className="bg-white rounded-xl p-6 w-full max-w-md"
+                  exit={{ scale: 0.95, y: 20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="text-center mb-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FiTrash2 className="w-6 h-6 text-red-600" />
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
+                  <div className="flex flex-col items-center text-center mt-4">
+                    <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4 ring-8 ring-rose-50">
+                      <FiAlertCircle size={32} />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">
-                      Hapus Kategori
-                    </h2>
-                    <p className="text-gray-600">
-                      Apakah Anda yakin ingin menghapus kategori "{selectedCategory.name}"?
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Hapus Kategori?
+                    </h3>
+                    <p className="text-gray-500 text-sm mb-6">
+                      Apakah Anda yakin ingin menghapus kategori <br />
+                      <span className="font-bold text-gray-800">"{selectedCategory.name}"</span>?
+                      <br /><span className="text-rose-500 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
                     </p>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setShowDeleteModal(false)}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      onClick={handleDeleteCategory}
-                      disabled={isLoading}
-                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {isLoading ? 'Menghapus...' : 'Hapus'}
-                    </button>
+                    <div className="flex justify-center gap-3 w-full">
+                      <button
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={isLoading}
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all disabled:opacity-50"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        onClick={handleDeleteCategory}
+                        disabled={isLoading}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium hover:from-rose-600 hover:to-red-700 focus:ring-4 focus:ring-rose-100 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="ml-2">Menghapus...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FiTrash2 size={18} />
+                            <span>Ya, Hapus</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>

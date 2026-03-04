@@ -33,6 +33,9 @@ const UserManagementPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -63,7 +66,7 @@ const UserManagementPage = () => {
       setErrorMessage('');
       console.log('🔍 Fetching user data...');
       console.log('🔑 Token exists:', !!localStorage.getItem('token'));
-      
+
       // Fetch stats
       const statsResponse = await userService.getUserStats();
       console.log('📊 Stats response:', statsResponse);
@@ -81,7 +84,7 @@ const UserManagementPage = () => {
         search: searchQuery,
         role: roleFilter === 'all' ? 'all' : roleFilter
       });
-      
+
       console.log('👥 Users response:', usersResponse);
 
       // Check if response has success property
@@ -143,15 +146,33 @@ const UserManagementPage = () => {
     setShowUserModal(true);
   };
 
-  const handleDeleteUser = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
-      try {
-        setErrorMessage('');
-        await userService.deleteUser(id);
-        fetchData(); // Refresh data
-      } catch (error) {
-        setErrorMessage(error?.message || 'Gagal menghapus pengguna.');
-      }
+  const handleDeleteUser = (id) => {
+    const user = users.find(u => u.id === id);
+    if (user) {
+      setUserToDelete(user);
+      setShowDeleteModal(true);
+    }
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      setErrorMessage('');
+      await userService.deleteUser(userToDelete.id);
+
+      // Refresh data
+      await fetchData();
+
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+    } catch (error) {
+      setErrorMessage(error?.message || 'Gagal menghapus pengguna.');
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -395,27 +416,31 @@ const UserManagementPage = () => {
             ))}
           </div>
 
-          {/* Table Section */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Table Header with Filters */}
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          {/* Premium Table Section */}
+          <div className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 overflow-hidden relative">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+            {/* Header Toolbar */}
+            <div className="px-6 py-5 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-900">Data Pengguna</h2>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">
-                  Menampilkan {users.length} pengguna
+                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Direktori Pengguna</h2>
+                <p className="text-gray-500 text-sm mt-1 font-medium">
+                  Menampilkan <span className="text-gray-900">{users.length}</span> dari {pagination.total} pengguna
                 </p>
               </div>
-              
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4 lg:mt-0">
+
+              <div className="flex flex-wrap items-center gap-3">
                 {/* Role Filter */}
-                <div className="flex items-center space-x-2">
-                  <FiFilter className="text-gray-400 hidden sm:block" />
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiFilter className="text-gray-400 group-focus-within:text-purple-500 transition-colors" />
+                  </div>
                   <select
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full sm:w-auto"
+                    className="pl-9 pr-8 py-2.5 bg-gray-50 border-0 ring-1 ring-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:ring-gray-300 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all appearance-none cursor-pointer"
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
                   >
-                    <option value="all">Semua Role</option>
+                    <option value="all">Semua Peran</option>
                     <option value="konselor">Konselor</option>
                     <option value="operator">Operator</option>
                     <option value="user">Pengguna</option>
@@ -423,20 +448,21 @@ const UserManagementPage = () => {
                 </div>
 
                 {/* Export Buttons */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 bg-gray-50 p-1 ring-1 ring-gray-200 rounded-xl">
                   <button
                     onClick={exportCsv}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all"
                   >
-                    <FiDownload size={14} className="sm:size-4" />
-                    <span className="hidden sm:inline">Ekspor</span>
+                    <FiDownload size={14} />
+                    <span className="hidden sm:inline font-medium">CSV</span>
                   </button>
+                  <div className="w-px h-4 bg-gray-300"></div>
                   <button
                     onClick={printTable}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all"
                   >
-                    <FiPrinter size={14} className="sm:size-4" />
-                    <span className="hidden sm:inline">Cetak</span>
+                    <FiPrinter size={14} />
+                    <span className="hidden sm:inline font-medium">Cetak</span>
                   </button>
                 </div>
               </div>
@@ -444,96 +470,118 @@ const UserManagementPage = () => {
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] sm:min-w-0">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700">ID</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700">Nama</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700 hidden sm:table-cell">Email</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700 hidden md:table-cell">Status Email</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700">Role</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700 hidden lg:table-cell">NIM</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700 hidden md:table-cell">Tanggal Dibuat</th>
-                    <th className="text-left py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm font-semibold text-gray-700">Aksi</th>
+                  <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Pengguna</th>
+                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Kontak & Status</th>
+                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Peran</th>
+                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden lg:table-cell">Identitas</th>
+                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-50">
                   {isLoading ? (
-                    // Loading Skeleton
-                    Array.from({ length: 6 }).map((_, index) => (
-                      <tr key={index} className="animate-pulse">
-                        <td className="py-3 px-4 sm:py-4 sm:px-6"><div className="h-4 bg-gray-200 rounded"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6"><div className="h-4 bg-gray-200 rounded w-24 sm:w-32"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 hidden sm:table-cell"><div className="h-4 bg-gray-200 rounded w-32 sm:w-40"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 hidden md:table-cell"><div className="h-4 bg-gray-200 rounded w-20 sm:w-24"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6"><div className="h-4 bg-gray-200 rounded w-16 sm:w-20"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 hidden lg:table-cell"><div className="h-4 bg-gray-200 rounded w-20 sm:w-24"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 hidden md:table-cell"><div className="h-4 bg-gray-200 rounded w-24 sm:w-28"></div></td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6"><div className="h-4 bg-gray-200 rounded w-16 sm:w-20"></div></td>
+                    // Premium Skeleton
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <tr key={index} className="animate-pulse bg-white">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-gray-200"></div>
+                            <div className="space-y-2">
+                              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                              <div className="h-3 w-16 bg-gray-100 rounded"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 hidden md:table-cell">
+                          <div className="space-y-2">
+                            <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                            <div className="h-4 w-20 bg-gray-100 rounded-full"></div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="h-6 w-20 bg-gray-200 rounded-lg"></div>
+                        </td>
+                        <td className="py-4 px-6 hidden lg:table-cell">
+                          <div className="space-y-2">
+                            <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                            <div className="h-3 w-16 bg-gray-100 rounded"></div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex justify-end gap-2">
+                            <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+                            <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   ) : users.length > 0 ? (
                     users.map((user) => (
                       <tr
                         key={user.id}
-                        className="hover:bg-gray-50 transition-colors duration-150"
+                        className="group bg-white hover:bg-slate-50/80 transition-all duration-300"
                       >
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm text-gray-900 font-medium">#{user.id}</td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6">
-                          <div className="flex items-center">
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mr-2 sm:mr-3">
-                              <span className="text-purple-600 font-bold text-xs sm:text-sm">
-                                {user.name.charAt(0)}
-                              </span>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="relative shrink-0">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.2)] transition-all duration-300">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${user.email_verified_at ? 'bg-emerald-400' : 'bg-amber-400'} shadow-sm`}></div>
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-900 text-sm sm:text-base">{user.name}</span>
-                              <div className="text-gray-500 text-xs sm:hidden">{user.email}</div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors truncate">{user.name}</div>
+                              <div className="text-[11px] font-medium text-gray-400 mt-0.5">ID: #{user.id}</div>
+                              {/* Mobile email fallback */}
+                              <div className="text-[11px] text-gray-500 md:hidden mt-0.5 truncate max-w-[150px]">{user.email}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm text-gray-700 hidden sm:table-cell">{user.email}</td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 hidden md:table-cell">
-                          <div className="flex items-center">
+                        <td className="py-4 px-6 hidden md:table-cell">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
+                              {user.email}
+                            </span>
                             {user.email_verified_at ? (
-                              <>
-                                <FiCheckCircle className="text-green-500 mr-2 size-3 sm:size-4" />
-                                <span className="text-green-700 text-xs sm:text-sm font-medium">Terverifikasi</span>
-                              </>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit border border-emerald-200/50">
+                                <FiCheckCircle size={10} /> TERVERIFIKASI
+                              </span>
                             ) : (
-                              <>
-                                <FiAlertCircle className="text-yellow-500 mr-2 size-3 sm:size-4" />
-                                <span className="text-yellow-700 text-xs sm:text-sm font-medium">Belum Verifikasi</span>
-                              </>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit border border-amber-200/50">
+                                <FiAlertCircle size={10} /> BELUM VERIFIKASI
+                              </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                        <td className="py-4 px-6">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest border ${user.role === 'konselor' ? 'bg-blue-50/50 text-blue-600 border-blue-200' :
+                            user.role === 'operator' ? 'bg-indigo-50/50 text-indigo-600 border-indigo-200' :
+                              'bg-gray-50 text-gray-600 border-gray-200'
+                            }`}>
                             {user.role}
                           </span>
                         </td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm text-gray-700 hidden lg:table-cell">
-                          {user.nim || '-'}
+                        <td className="py-4 px-6 hidden lg:table-cell">
+                          <div className="text-sm font-semibold text-gray-800">{user.nim || '-'}</div>
+                          <div className="text-[11px] text-gray-400 mt-0.5 block">Tergabung: {new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                         </td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6 text-xs sm:text-sm text-gray-700 hidden md:table-cell">
-                          {new Date(user.created_at).toLocaleDateString('id-ID')}
-                        </td>
-                        <td className="py-3 px-4 sm:py-4 sm:px-6">
-                          <div className="flex items-center space-x-1 sm:space-x-2">
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <button
                               onClick={() => handleEditUser(user.id)}
-                              className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Edit"
+                              className="p-2 sm:p-2.5 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
+                              title="Edit Pengguna"
                             >
-                              <FiEdit size={14} className="sm:size-4" />
+                              <FiEdit size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user.id)}
-                              className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Hapus"
+                              className="p-2 sm:p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
+                              title="Hapus Pengguna"
                             >
-                              <FiTrash2 size={14} className="sm:size-4" />
+                              <FiTrash2 size={16} />
                             </button>
                           </div>
                         </td>
@@ -541,11 +589,13 @@ const UserManagementPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="8" className="py-8 sm:py-12 text-center">
-                        <div className="text-gray-500">
-                          <FiUsers className="mx-auto text-3xl sm:text-4xl mb-3 opacity-50" />
-                          <p className="text-base sm:text-lg">Tidak ada data pengguna</p>
-                          <p className="text-xs sm:text-sm mt-1">Coba ubah filter pencarian Anda</p>
+                      <td colSpan="5" className="py-16 text-center">
+                        <div className="inline-flex flex-col items-center justify-center">
+                          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-gray-100">
+                            <FiUsers className="text-3xl text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-1">Pengguna Tidak Ditemukan</h3>
+                          <p className="text-sm text-gray-500 max-w-sm">Kami tidak dapat menemukan pengguna yang sesuai dengan kriteria filter Anda saat ini.</p>
                         </div>
                       </td>
                     </tr>
@@ -554,55 +604,56 @@ const UserManagementPage = () => {
               </table>
             </div>
 
-            {/* Pagination */}
+            {/* Pagination Component (Premium) */}
             {!isLoading && users.length > 0 && (
-              <div className="px-4 sm:px-6 py-4 border-t border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div className="text-xs sm:text-sm text-gray-600 mb-4 lg:mb-0">
-                  Halaman {pagination.current_page || currentPage} dari {totalPages} — total {pagination.total} pengguna
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-sm font-medium text-gray-500">
+                  Menampilkan <span className="text-gray-900 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> hingga <span className="text-gray-900 font-bold">{Math.min(currentPage * itemsPerPage, pagination.total)}</span> dari <span className="text-gray-900 font-bold">{pagination.total}</span> pengguna
                 </div>
-                
-                <div className="flex items-center space-x-1 sm:space-x-2">
+
+                <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 w-fit">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-1.5 sm:p-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
                   >
-                    <FiChevronLeft size={16} className="sm:size-5" />
+                    <FiChevronLeft size={16} />
                   </button>
-                  
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                          currentPage === pageNum
-                            ? 'bg-purple-600 text-white'
-                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                  
+
+                  <div className="flex items-center">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`min-w-[32px] h-8 px-2 mx-0.5 rounded-lg text-sm font-bold transition-all ${currentPage === pageNum
+                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-200'
+                            : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-1.5 sm:p-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
                   >
-                    <FiChevronRight size={16} className="sm:size-5" />
+                    <FiChevronRight size={16} />
                   </button>
                 </div>
               </div>
@@ -745,6 +796,57 @@ const UserManagementPage = () => {
             </div>
           </div>
         )}
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => !isDeleting && setShowDeleteModal(false)}
+            />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
+              <div className="flex flex-col items-center text-center mt-4">
+                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4 ring-8 ring-rose-50">
+                  <FiAlertCircle size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Pengguna</h3>
+                <p className="text-gray-500 text-sm mb-6">
+                  Apakah Anda yakin ingin menghapus pengguna <br />
+                  <span className="font-bold text-gray-800">{userToDelete?.name}</span>?
+                  <br /><span className="text-rose-500 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
+                </p>
+
+                <div className="flex justify-center gap-3 w-full">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={isDeleting}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all disabled:opacity-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={confirmDeleteUser}
+                    disabled={isDeleting}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium hover:from-rose-600 hover:to-red-700 focus:ring-4 focus:ring-rose-100 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="ml-2">Menghapus...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiTrash2 size={18} />
+                        <span>Ya, Hapus</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
