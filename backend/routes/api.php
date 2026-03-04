@@ -101,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Jadwal Konseling milik konselor (counseling sessions where counselor_id = me)
         Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
+        Route::get('/jadwal/{id}', [\App\Http\Controllers\API\CounselingController::class, 'show']);
         Route::put('/jadwal/{id}/approve',  [\App\Http\Controllers\API\CounselingController::class, 'approve']);
         Route::put('/jadwal/{id}/reject',   [\App\Http\Controllers\API\CounselingController::class, 'reject']);
         Route::put('/jadwal/{id}/complete', [\App\Http\Controllers\API\CounselingController::class, 'updateStatus']);
@@ -177,6 +178,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/counselors', [CounselingController::class, 'getCounselors']);
             Route::get('/available-slots', [CounselingController::class, 'getAvailableSlots']);
             Route::post('/request', [CounselingController::class, 'store']);
+            Route::get('/{id}', [CounselingController::class, 'show']);
             Route::put('/{id}/approve', [CounselingController::class, 'approve']);
             Route::put('/{id}/reject', [CounselingController::class, 'reject']);
             Route::put('/{id}/status', [CounselingController::class, 'updateStatus']);

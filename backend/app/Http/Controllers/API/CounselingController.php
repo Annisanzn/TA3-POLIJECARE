@@ -77,8 +77,74 @@ class CounselingController extends Controller
     }
 
     /**
-     * Get available counselors
+     * Get detail of a single counseling schedule (with complaint info)
      */
+    public function show($id)
+    {
+        $user = Auth::user();
+        $schedule = CounselingSchedule::with(['user', 'counselor', 'complaint'])->findOrFail($id);
+
+        // Role-based access
+        if ($user->role === 'konselor' && $schedule->counselor_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to view this schedule'
+            ], 403);
+        } elseif ($user->role === 'user' && $schedule->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to view this schedule'
+            ], 403);
+        }
+
+        $complaint = $schedule->complaint;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id'                => $schedule->id,
+                'status'            => $schedule->status,
+                'tanggal'           => $schedule->tanggal,
+                'jam_mulai'         => $schedule->jam_mulai,
+                'jam_selesai'       => $schedule->jam_selesai,
+                'metode'            => $schedule->metode,
+                'lokasi'            => $schedule->lokasi,
+                'meeting_link'      => $schedule->meeting_link,
+                'jenis_pengaduan'   => $schedule->jenis_pengaduan,
+                'alasan_penolakan'  => $schedule->alasan_penolakan ?? $schedule->rejection_reason ?? null,
+                'approved_at'       => $schedule->approved_at,
+                'created_at'        => $schedule->created_at,
+                'user' => $schedule->user ? [
+                    'id'    => $schedule->user->id,
+                    'name'  => $schedule->user->name,
+                    'email' => $schedule->user->email,
+                    'nim'   => $schedule->user->nim ?? null,
+                ] : null,
+                'counselor' => $schedule->counselor ? [
+                    'id'    => $schedule->counselor->id,
+                    'name'  => $schedule->counselor->name,
+                    'email' => $schedule->counselor->email,
+                ] : null,
+                'complaint' => $complaint ? [
+                    'id'            => $complaint->id,
+                    'report_id'     => $complaint->report_id,
+                    'title'         => $complaint->title,
+                    'description'   => $complaint->description,
+                    'chronology'    => $complaint->chronology,
+                    'urgency_level' => $complaint->urgency_level,
+                    'location'      => $complaint->location,
+                    'status'        => $complaint->status,
+                    'file_path'     => $complaint->file_path,
+                    'is_anonymous'  => $complaint->is_anonymous,
+                    'victim_type'   => $complaint->victim_type,
+                    'victim_name'   => $complaint->victim_name,
+                ] : null,
+            ],
+            'message' => 'Counseling schedule retrieved successfully'
+        ]);
+    }
+
+
     public function getCounselors()
     {
         $counselors = User::where('role', 'konselor')
