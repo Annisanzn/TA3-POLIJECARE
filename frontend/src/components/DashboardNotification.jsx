@@ -116,7 +116,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                 title: `${pendingSessions.length} permintaan sesi menunggu konfirmasi`,
                 body: 'Segera tinjau dan setujui permintaan konseling',
                 sub: '',
-                link: role === 'konselor' ? '/konselor/jadwal' : '/operator/counseling-management',
+                link: role === 'konselor' ? '/konselor/pengaduan' : '/operator/complaints-management',
             });
         }
 

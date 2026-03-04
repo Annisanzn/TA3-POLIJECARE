@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiFileText, FiLink, FiEye, FiDownload, FiFile, FiUpload, FiExternalLink, FiAlertCircle, FiCheck, FiFilter } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiFileText, FiLink, FiEye, FiDownload, FiFile, FiUpload, FiExternalLink, FiAlertCircle, FiCheck, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import materialService from '../../services/materialService';
 import violenceCategoryService from '../../services/violenceCategoryService';
@@ -416,65 +416,53 @@ const MaterialsManagement = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+            className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 overflow-hidden relative"
           >
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
             {isLoading ? (
               <div className="p-8">
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div key={i} className="animate-pulse flex gap-4">
+                      <div className="h-12 w-12 bg-gray-200 rounded-xl"></div>
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             ) : materials.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiFile className="w-8 h-8 text-gray-400" />
+              <div className="p-16 text-center">
+                <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                  <FiFile className="w-10 h-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada materi</h3>
-                <p className="text-gray-500 mb-4">Mulai dengan menambahkan materi pertama</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada materi</h3>
+                <p className="text-gray-500 mb-6 max-w-sm mx-auto">Mulai dengan menambahkan materi pertama untuk bahan edukasi atau panduan.</p>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-purple-200 transition-all flex items-center gap-2 mx-auto"
                 >
+                  <FiPlus className="w-5 h-5" />
                   Tambah Materi
                 </button>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Judul Materi
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Kategori
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tipe
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        File/Link
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Uploader
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tanggal
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aksi
-                      </th>
+                <table className="w-full text-left min-w-[800px]">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">ID</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Judul Materi</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Kategori & Tipe</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Uploader</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Tanggal</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-50">
                     <AnimatePresence>
                       {materials.map((material, index) => (
                         <motion.tr
@@ -483,77 +471,82 @@ const MaterialsManagement = () => {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20 }}
                           transition={{ delay: index * 0.05 }}
-                          className="hover:bg-gray-50 transition-colors"
+                          className="group bg-white hover:bg-slate-50/80 transition-all duration-300"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-mono text-purple-600 font-medium">
+                          <td className="py-4 px-6">
+                            <div className="text-xs font-mono font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-md inline-block">
                               {material.unique_id}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{material.judul}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
-                              {material.kategori}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${material.tipe === 'file'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                              }`}>
-                              {material.tipe === 'file' ? 'File' : 'Link'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => viewMaterial(material)}
-                                className="flex items-center gap-1.5 text-purple-600 hover:text-purple-800 transition-colors bg-purple-50 px-3 py-1.5 rounded-lg text-sm font-medium"
-                              >
-                                {material.tipe === 'file' ? (
-                                  <><FiEye className="w-4 h-4" /> Buka</>
-                                ) : (
-                                  <><FiExternalLink className="w-4 h-4" /> Buka Link</>
+                          <td className="py-4 px-6">
+                            <div className="flex items-start gap-3">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${material.tipe === 'file' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                                {material.tipe === 'file' ? <FiFileText size={20} /> : <FiLink size={20} />}
+                              </div>
+                              <div className="min-w-0 pr-4">
+                                <div className="text-sm font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-2">{material.judul}</div>
+                                {material.deskripsi && (
+                                  <div className="text-[11px] text-gray-500 mt-1 line-clamp-1">{material.deskripsi}</div>
                                 )}
-                              </button>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col gap-1.5 items-start">
+                              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 rounded-md truncate max-w-[150px]" title={material.kategori}>
+                                {material.kategori}
+                              </span>
+                              <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md ${material.tipe === 'file'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                                : 'bg-green-50 text-green-700 border border-green-100'
+                                }`}>
+                                {material.tipe === 'file' ? 'File Upload' : 'Tautan/Link'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                {material.uploader?.name?.charAt(0) || 'U'}
+                              </div>
+                              <div>
+                                <div className="text-sm font-semibold text-gray-900">{material.uploader?.name || 'Administrator'}</div>
+                                <div className="text-[11px] text-gray-500">{material.uploader?.role || 'Admin'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 hidden md:table-cell">
+                            <div className="text-sm font-medium text-gray-800">
+                              {new Date(material.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
                               {material.tipe === 'file' && (
                                 <button
                                   onClick={() => downloadMaterial(material)}
-                                  className="flex items-center gap-1.5 text-green-600 hover:text-green-800 transition-colors bg-green-50 px-3 py-1.5 rounded-lg text-sm font-medium"
+                                  className="p-2 sm:p-2.5 text-emerald-500 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
                                   title="Download File"
                                 >
-                                  <FiDownload className="w-4 h-4" /> Unduh
+                                  <FiDownload size={16} />
                                 </button>
                               )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{material.uploader?.name}</div>
-                            <div className="text-xs text-gray-500">{material.uploader?.role}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(material.created_at).toLocaleDateString('id-ID')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <div className="flex items-center gap-2">
                               <button
-                                onClick={() => openFile(material)}
-                                className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
-                                title="Lihat"
+                                onClick={() => viewMaterial(material)}
+                                className="p-2 sm:p-2.5 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300 delay-75"
+                                title={material.tipe === 'file' ? "Buka Materi" : "Buka Link"}
                               >
-                                <FiEye className="w-4 h-4" />
+                                {material.tipe === 'file' ? <FiEye size={16} /> : <FiExternalLink size={16} />}
                               </button>
                               <button
                                 onClick={() => {
                                   setSelectedMaterial(material);
                                   setShowDeleteModal(true);
                                 }}
-                                className="p-1 text-red-600 hover:text-red-800 transition-colors"
-                                title="Hapus"
+                                className="p-2 sm:p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300 delay-100"
+                                title="Hapus Materi"
                               >
-                                <FiTrash2 className="w-4 h-4" />
+                                <FiTrash2 size={16} />
                               </button>
                             </div>
                           </td>
@@ -564,41 +557,57 @@ const MaterialsManagement = () => {
                 </table>
               </div>
             )}
-          </motion.div>
 
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 flex items-center justify-between"
-            >
-              <div className="text-sm text-gray-700">
-                Menampilkan {((currentPage - 1) * itemsPerPage) + 1} hingga{' '}
-                {Math.min(currentPage * itemsPerPage, pagination.total)} dari {pagination.total} materi
+            {/* Pagination (Premium) */}
+            {!isLoading && pagination.total > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-sm font-medium text-gray-500">
+                  Menampilkan <span className="text-gray-900 font-bold">{((currentPage - 1) * itemsPerPage) + 1}</span> hingga <span className="text-gray-900 font-bold">{Math.min(currentPage * itemsPerPage, pagination.total)}</span> dari <span className="text-gray-900 font-bold">{pagination.total}</span> materi
+                </div>
+                {pagination.total_pages > 1 && (
+                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 w-fit">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                    >
+                      <FiChevronLeft size={16} />
+                    </button>
+
+                    <div className="flex items-center">
+                      {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                        let n;
+                        if (pagination.total_pages <= 5) n = i + 1;
+                        else if (currentPage <= 3) n = i + 1;
+                        else if (currentPage >= pagination.total_pages - 2) n = pagination.total_pages - 4 + i;
+                        else n = currentPage - 2 + i;
+                        return (
+                          <button
+                            key={n}
+                            onClick={() => setCurrentPage(n)}
+                            className={`min-w-[32px] h-8 px-2 mx-0.5 rounded-lg text-sm font-bold transition-all ${currentPage === n
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-200'
+                                : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                          >
+                            {n}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(pagination.total_pages, prev + 1))}
+                      disabled={currentPage === pagination.total_pages}
+                      className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                    >
+                      <FiChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1 text-sm">
-                  {currentPage} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(pagination.total_pages, prev + 1))}
-                  disabled={currentPage === pagination.total_pages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            </motion.div>
-          )}
+            )}
+          </motion.div>
         </main>
       </div>
 
@@ -755,30 +764,44 @@ const MaterialsManagement = () => {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-xl p-6 w-full max-w-sm"
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-center">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiTrash2 className="w-6 h-6 text-red-600" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
+              <div className="flex flex-col items-center text-center mt-4">
+                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4 ring-8 ring-rose-50">
+                  <FiAlertCircle size={32} />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800 mb-2">Hapus Materi</h2>
-                <p className="text-gray-600 mb-6">
-                  Apakah Anda yakin ingin menghapus materi "{selectedMaterial.judul}"?
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Materi?</h3>
+                <p className="text-gray-500 text-sm mb-6">
+                  Apakah Anda yakin ingin menghapus materi <br />
+                  <span className="font-bold text-gray-800">"{selectedMaterial.judul}"</span>?
+                  <br /><span className="text-rose-500 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
                 </p>
-                <div className="flex gap-2">
+                <div className="flex justify-center gap-3 w-full">
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={isLoading}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all disabled:opacity-50"
                   >
                     Batal
                   </button>
                   <button
                     onClick={handleDeleteMaterial}
                     disabled={isLoading}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium hover:from-rose-600 hover:to-red-700 focus:ring-4 focus:ring-rose-100 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                   >
-                    {isLoading ? 'Menghapus...' : 'Hapus'}
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="ml-2">Menghapus...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiTrash2 size={18} />
+                        <span>Ya, Hapus</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
