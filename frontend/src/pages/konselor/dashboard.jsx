@@ -151,6 +151,11 @@ const KonselorDashboard = () => {
             <StatCard loading={loading} title="Total Materi" value={stats?.materi ?? '—'} sub="Materi milik saya" icon={<FiBook size={22} className="text-teal-600" />} color="bg-teal-50" />
           </div>
 
+          {/* Charts Section */}
+          <div className="mb-8">
+            <ChartSection />
+          </div>
+
           {/* Calendar Section */}
           <div className="mb-8">
             <CounselingCalendar role="konselor" />

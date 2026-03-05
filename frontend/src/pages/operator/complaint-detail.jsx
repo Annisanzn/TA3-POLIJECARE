@@ -191,20 +191,28 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                         </div>
                                     </div>
 
-                                    {complaint.file_path && (
-                                        <div>
-                                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lampiran Bukti</h3>
-                                            <a
-                                                href={`http://127.0.0.1:8000/storage/${complaint.file_path}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 font-medium text-sm"
-                                            >
-                                                <FiLink size={16} />
-                                                Lihat Dokumen / Media Lampiran
-                                            </a>
-                                        </div>
-                                    )}
+                                    <div>
+                                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lampiran Bukti</h3>
+                                        {complaint.file_path ? (
+                                            <div className="space-y-3">
+                                                <p className="text-xs text-gray-500">Dokumen/media bukti dilampirkan oleh pelapor.</p>
+                                                <a
+                                                    href={`http://127.0.0.1:8000/storage/${complaint.file_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors border border-indigo-200 font-medium text-sm shadow-sm"
+                                                >
+                                                    <FiLink size={16} />
+                                                    Lihat Dokumen / Media Lampiran
+                                                </a>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-500 text-sm italic">
+                                                <FiFileText size={16} className="text-gray-400 shrink-0" />
+                                                Tidak ada lampiran bukti dari pelapor
+                                            </div>
+                                        )}
+                                    </div>
 
                                 </div>
                             </div>

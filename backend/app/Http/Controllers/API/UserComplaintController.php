@@ -14,21 +14,35 @@ class UserComplaintController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 10);
-        
-        // Eager load with specific columns to avoid N+1 and protect sensitive data
-        $complaints = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
-            ->where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
-            
+        $search  = $request->query('search', '');
+        $status  = $request->query('status', '');
+
+        $query = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
+            ->where('user_id', auth()->id());
+
+        // Search by title or report_id
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('report_id', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if (!empty($status) && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $complaints = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
         return response()->json([
             'success' => true,
             'data' => $complaints->items(),
             'meta' => [
                 'current_page' => $complaints->currentPage(),
-                'last_page' => $complaints->lastPage(),
-                'per_page' => $complaints->perPage(),
-                'total' => $complaints->total(),
+                'last_page'    => $complaints->lastPage(),
+                'per_page'     => $complaints->perPage(),
+                'total'        => $complaints->total(),
             ]
         ]);
     }
