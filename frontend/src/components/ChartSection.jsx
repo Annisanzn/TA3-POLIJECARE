@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FiBarChart2, FiPieChart, FiUsers } from 'react-icons/fi';
+import { FiBarChart2, FiPieChart, FiUsers, FiX, FiMap } from 'react-icons/fi';
 
 // Komponen Donut Chart sederhana
 const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   let cumulativePercent = 0;
-  
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -14,7 +14,7 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
           const strokeDasharray = `${percent} ${100 - percent}`;
           const rotation = cumulativePercent * 3.6;
           cumulativePercent += percent;
-          
+
           return (
             <circle
               key={index}
@@ -49,7 +49,7 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
           Total
         </text>
       </svg>
-      
+
       {/* Legend */}
       <div className="absolute -right-40 top-0 space-y-2">
         {data.map((item, index) => (
@@ -69,6 +69,7 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
 
 const ChartSection = () => {
   const [activeYear, setActiveYear] = useState('2024');
+  const [showMapModal, setShowMapModal] = useState(false);
 
   const years = ['Semua', '2023', '2024', '2025'];
 
@@ -118,11 +119,10 @@ const ChartSection = () => {
               <button
                 key={year}
                 onClick={() => setActiveYear(year)}
-                className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
-                  activeYear === year
-                    ? 'bg-white text-purple-700 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${activeYear === year
+                  ? 'bg-white text-purple-700 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 {year}
               </button>
@@ -149,13 +149,12 @@ const ChartSection = () => {
                     <span className="text-sm text-gray-500 ml-2">({item.value} laporan)</span>
                   </div>
                 </div>
-                
+
                 {/* Bar Container */}
                 <div className="relative h-8 rounded-lg bg-gray-100 overflow-hidden">
                   <div
-                    className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${
-                      isHighest ? 'bg-gradient-to-r from-purple-600 to-purple-700' : 'bg-gradient-to-r from-purple-400 to-purple-500'
-                    }`}
+                    className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${isHighest ? 'bg-gradient-to-r from-purple-600 to-purple-700' : 'bg-gradient-to-r from-purple-400 to-purple-500'
+                      }`}
                     style={{ width: `${item.value}%` }}
                   >
                     {/* Label inside bar for larger bars */}
@@ -165,7 +164,7 @@ const ChartSection = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Label outside bar for smaller bars */}
                   {item.value <= 20 && (
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -173,7 +172,7 @@ const ChartSection = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Additional info */}
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>{item.value} laporan</span>
@@ -183,7 +182,7 @@ const ChartSection = () => {
             );
           })}
         </div>
-        
+
         {/* Summary */}
         <div className="mt-4 p-3 bg-purple-50 rounded-lg">
           <div className="flex items-center justify-between">
@@ -236,49 +235,37 @@ const ChartSection = () => {
                 <span className="font-medium text-gray-900">{item.month}</span>
                 <span className="text-sm text-gray-500">Total: {item.laki + item.perempuan}%</span>
               </div>
-              
-              <div className="flex items-end space-x-4 h-32">
+
+              <div className="flex items-end space-x-4 h-40">
                 {/* Laki-laki Bar */}
                 <div className="flex-1">
-                  <div className="text-center mb-1">
-                    <span className="text-xs font-medium text-gray-700">{item.laki}%</span>
+                  <div className="text-center mb-2 flex flex-col items-center">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-500">Laki-laki</span>
+                    <span className="text-sm font-bold text-[#3B82F6]">{item.laki}%</span>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full flex justify-center">
                     <div
                       className="w-full bg-[#3B82F6] rounded-t-lg transition-all duration-500 ease-out"
                       style={{ height: `${item.laki * 2}px` }}
-                    >
-                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 rounded-full bg-[#3B82F6]"></div>
-                          <span className="text-xs font-bold text-gray-900">Laki</span>
-                        </div>
-                      </div>
-                    </div>
+                    ></div>
                   </div>
                 </div>
-                
+
                 {/* Perempuan Bar */}
                 <div className="flex-1">
-                  <div className="text-center mb-1">
-                    <span className="text-xs font-medium text-gray-700">{item.perempuan}%</span>
+                  <div className="text-center mb-2 flex flex-col items-center">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-500">Perempuan</span>
+                    <span className="text-sm font-bold text-[#8B5CF6]">{item.perempuan}%</span>
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full flex justify-center">
                     <div
                       className="w-full bg-[#8B5CF6] rounded-t-lg transition-all duration-500 ease-out"
                       style={{ height: `${item.perempuan * 2}px` }}
-                    >
-                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
-                          <span className="text-xs font-bold text-gray-900">Perempuan</span>
-                        </div>
-                      </div>
-                    </div>
+                    ></div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Comparison */}
               <div className="flex justify-between text-xs text-gray-500 pt-2">
                 <div className="flex items-center space-x-2">
@@ -289,10 +276,9 @@ const ChartSection = () => {
                   <div className="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
                   <span>Perempuan: {item.perempuan}%</span>
                 </div>
-                <div className={`font-medium ${
-                  item.laki > item.perempuan ? 'text-blue-600' :
+                <div className={`font-medium ${item.laki > item.perempuan ? 'text-blue-600' :
                   item.laki < item.perempuan ? 'text-purple-600' : 'text-gray-600'
-                }`}>
+                  }`}>
                   Selisih: {Math.abs(item.laki - item.perempuan)}%
                 </div>
               </div>
@@ -355,18 +341,17 @@ const ChartSection = () => {
               const percentage = (item.value / 50) * 100;
               const isHighest = index === 0;
               const isSecond = index === 1;
-              
+
               return (
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                        isHighest
-                          ? 'bg-red-100 text-red-700 border border-red-200'
-                          : isSecond
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isHighest
+                        ? 'bg-red-100 text-red-700 border border-red-200'
+                        : isSecond
                           ? 'bg-orange-100 text-orange-700 border border-orange-200'
                           : 'bg-gray-100 text-gray-700 border border-gray-200'
-                      }`}>
+                        }`}>
                         {index + 1}
                       </div>
                       <div className="flex-1">
@@ -378,33 +363,36 @@ const ChartSection = () => {
                       <div className="font-bold text-gray-900 text-lg">{item.percentage}</div>
                     </div>
                   </div>
-                  
+
                   {/* Horizontal Bar */}
                   <div className="relative h-6 rounded-lg bg-gray-100 overflow-hidden">
                     <div
-                      className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${
-                        isHighest
-                          ? 'bg-gradient-to-r from-red-500 to-red-600'
-                          : isSecond
+                      className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${isHighest
+                        ? 'bg-gradient-to-r from-red-500 to-red-600'
+                        : isSecond
                           ? 'bg-gradient-to-r from-orange-500 to-orange-600'
                           : 'bg-gradient-to-r from-amber-500 to-amber-600'
-                      }`}
+                        }`}
                       style={{
                         width: `${percentage}%`
                       }}
                     >
-                      {/* Percentage label inside bar */}
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <span className="text-xs font-bold text-white">{item.percentage}</span>
+                      {/* Percentage label inside bar (only if width is large enough) */}
+                      {percentage > 15 && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <span className="text-xs font-bold text-white">{item.percentage}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Percentage text outside the bar for smaller portions */}
+                    {percentage <= 15 && (
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                        <span className="text-xs font-medium text-gray-700">{percentage.toFixed(1)}%</span>
                       </div>
-                    </div>
-                    
-                    {/* Background percentage text */}
-                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                      <span className="text-xs font-medium text-gray-700">{percentage.toFixed(1)}%</span>
-                    </div>
+                    )}
                   </div>
-                  
+
                   {/* Quick stats */}
                   <div className="flex justify-between text-xs text-gray-500">
                     <div className="flex items-center space-x-2">
@@ -414,10 +402,9 @@ const ChartSection = () => {
                       ></div>
                       <span>{item.value} dari 50 total kasus</span>
                     </div>
-                    <span className={`font-medium ${
-                      isHighest ? 'text-red-600' :
+                    <span className={`font-medium ${isHighest ? 'text-red-600' :
                       isSecond ? 'text-orange-600' : 'text-gray-600'
-                    }`}>
+                      }`}>
                       Peringkat {index + 1}
                     </span>
                   </div>
@@ -427,19 +414,107 @@ const ChartSection = () => {
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="text-sm text-gray-500">
               <span className="font-medium">Insight:</span> 60% kasus terjadi di Gedung A & B
             </div>
-            <button className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 group">
-              <span>Lihat peta sebaran</span>
-              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button
+              onClick={() => setShowMapModal(true)}
+              className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 group px-4 py-2 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+            >
+              <FiMap className="w-4 h-4 mr-1" />
+              <span>Lihat Detail Peta Wilayah Kampus</span>
+              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
         </div>
       </div>
+
+      {/* Map Modal */}
+      {showMapModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                  <FiMap className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Peta Sebaran Kasus</h3>
+                  <p className="text-sm text-gray-500">Distribusi wilayah rawan kekerasan</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMapModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content - Map Image */}
+            <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+              <div className="relative w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white aspect-video flex items-center justify-center">
+                {/* Fallback image if map image is missing or a placeholder */}
+                {/* Background placeholder if map image is missing */}
+                <div className="absolute inset-0 bg-gray-100 flex flex-col justify-center items-center text-gray-400">
+                  <FiMap className="w-16 h-16 mb-4 text-gray-300" />
+                  <p className="font-semibold text-gray-500">Peta Kampus</p>
+                  <p className="text-sm">Gambar peta belum tersedia</p>
+                </div>
+
+                {/* Fallback image if map image is missing or a placeholder */}
+                <img
+                  src="/Gambar1.jpg" // Menggunakan gambar yang ada di folder public
+                  alt="Peta Wilayah Kampus"
+                  className="relative w-full h-full object-cover z-0 opacity-20 filter grayscale" // Opacity dikurangi jika itu bukan peta sungguhan
+                  onError={(e) => {
+                    e.target.style.display = 'none'; // Sembunyikan gambar jika gagal dimuat, akan menampilkan placeholder div di belakangnya
+                  }}
+                />
+
+                {/* Interactive markers (optional, can be positioned absolute on top of the image) */}
+                <div className="absolute top-[30%] left-[45%] group cursor-pointer">
+                  <div className="absolute -inset-2 bg-red-400 rounded-full animate-ping opacity-75"></div>
+                  <div className="w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-md relative z-10"></div>
+
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                    <p className="font-bold text-sm mb-1">Gedung B (Fakultas)</p>
+                    <p className="text-gray-300">18 Kasus tercatat</p>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
+
+                <div className="absolute top-[60%] right-[30%] group cursor-pointer">
+                  <div className="absolute -inset-2 bg-red-400 rounded-full animate-ping opacity-75 hidden group-hover:block"></div>
+                  <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-md relative z-10"></div>
+
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                    <p className="font-bold text-sm mb-1">Gedung A (Rektorat)</p>
+                    <p className="text-gray-300">12 Kasus tercatat</p>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end">
+              <button
+                onClick={() => setShowMapModal(false)}
+                className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+              >
+                Tutup Peta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

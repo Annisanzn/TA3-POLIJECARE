@@ -1,60 +1,45 @@
-import React, { useState } from 'react';
-import { FiSearch, FiBell, FiUser, FiChevronDown, FiFilter } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiBell, FiChevronDown } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
 const Topbar = () => {
   const { user } = useAuth();
-  const [activeFilter, setActiveFilter] = useState('Semua');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [greeting, setGreeting] = useState('');
 
-  const filters = ['Semua', 'Baru', 'Diproses', 'Selesai'];
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Selamat Pagi');
+    else if (hour < 15) setGreeting('Selamat Siang');
+    else if (hour < 18) setGreeting('Selamat Sore');
+    else setGreeting('Selamat Malam');
+  }, []);
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200">
       <div className="px-6 py-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Left Section: Search and Filters */}
+          {/* Left Section: Breadcrumb and Greeting */}
           <div className="flex flex-col md:flex-row md:items-center gap-4">
-            {/* Search Input */}
-            <div className="relative">
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cari laporan, pengguna, atau aktivitas..."
-                className="pl-12 pr-4 py-3 w-full md:w-80 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#E6E6FA] focus:border-transparent transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="flex items-center text-sm text-gray-600">
+              <span className="text-[#6666DE] font-medium">Dashboard</span>
+              <span className="mx-2">/</span>
+              <span className="capitalize">{user?.role === 'user' ? 'Layanan' : user?.role}</span>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900">Overview</span>
             </div>
-
-            {/* Filter Buttons */}
-            <div className="flex items-center space-x-2">
-              <FiFilter className="text-gray-500" />
-              <div className="flex bg-gray-100 rounded-full p-1">
-                {filters.map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all ${activeFilter === filter
-                      ? 'bg-white text-[#6666DE] shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <div className="hidden md:block h-6 w-px bg-gray-300"></div>
+            <p className="text-sm font-medium text-gray-800">
+              {greeting}, <span className="text-[#6666DE]">{user?.name || 'User'}</span>! 👋
+            </p>
           </div>
 
           {/* Right Section: Actions and Profile */}
           <div className="flex items-center space-x-4">
-            {/* View All Reports Button */}
-            <button className="bg-[#E6E6FA] hover:bg-[#D6D6EA] text-gray-800 px-5 py-2.5 rounded-xl font-medium flex items-center space-x-2 transition-colors">
-              <span>Lihat Semua Laporan</span>
-              <FiChevronDown className="ml-1" />
+            {/* Notifications */}
+            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
+              <FiBell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
             </button>
-
 
             {/* Profile Dropdown */}
             <div className="flex items-center space-x-3">
@@ -72,15 +57,6 @@ const Topbar = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="mt-4 flex items-center text-sm text-gray-600">
-          <span className="text-[#6666DE] font-medium">Dashboard</span>
-          <span className="mx-2">/</span>
-          <span className="capitalize">{user?.role === 'user' ? 'Layanan' : user?.role}</span>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">Overview</span>
         </div>
       </div>
     </div>
