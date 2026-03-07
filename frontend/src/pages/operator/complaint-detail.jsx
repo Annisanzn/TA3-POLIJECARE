@@ -111,7 +111,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
                 <Topbar />
 
-                <main className="p-6 max-w-7xl mx-auto">
+                <main className="p-6 w-full">
                     {/* Header Action */}
                     <div className="mb-6 flex items-center gap-4">
                         <button
