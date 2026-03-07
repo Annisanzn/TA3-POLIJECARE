@@ -67,10 +67,11 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const LocationMarker = ({ position, setPosition }) => {
+const LocationMarker = ({ position, setPosition, onMapClick }) => {
     useMapEvents({
         click(e) {
             setPosition(e.latlng);
+            if (onMapClick) onMapClick(e.latlng);
         },
     });
 
@@ -202,7 +203,7 @@ const BuatLaporan = () => {
             }, 2000);
         } catch (error) {
             console.error("Schedule error:", error);
-            alert(error.message || "Gagal mengamankan jadwal. Silakan coba lagi.");
+            toast.error(error.message || "Gagal mengamankan jadwal. Silakan coba lagi.", { position: 'top-center' });
         } finally {
             setLoadingSchedules(false);
         }
@@ -246,13 +247,33 @@ const BuatLaporan = () => {
                 }
                 setFormData(prev => ({ ...prev, location: display_name.split(',')[0] }));
             } else {
-                alert('Lokasi tidak ditemukan. Coba nama spesifik seperti "Gedung JTI Polije" atau "Fasilkom Unej".');
+                toast.error('Lokasi tidak ditemukan. Coba nama spesifik seperti "Gedung JTI Polije" atau "Fasilkom Unej".', {
+                    duration: 4000,
+                    position: 'top-center'
+                });
             }
         } catch (error) {
             console.error('Error pencarian peta:', error);
-            alert('Gagal mencari lokasi. Coba lagi nanti.');
+            toast.error('Gagal mencari lokasi. Coba lagi nanti.', { position: 'top-center' });
         } finally {
             setIsSearchingMap(false);
+        }
+    };
+
+    const handleMapClick = async (latlng) => {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
+            const data = await res.json();
+            if (data && data.display_name) {
+                const parts = data.display_name.split(',');
+                const locationName = parts.length > 2 ? `${parts[0].trim()}, ${parts[1].trim()}, ${parts[2].trim()}` : data.display_name;
+                setFormData(prev => ({ ...prev, location: locationName }));
+                setMapSearchQuery(locationName);
+                toast.success('Lokasi berhasil didapatkan dari peta.', { position: 'top-center' });
+            }
+        } catch (error) {
+            console.error("Reverse geocode error:", error);
+            toast.error('Gagal mendapatkan nama lokasi dari peta.', { position: 'top-center' });
         }
     };
 
@@ -328,7 +349,7 @@ const BuatLaporan = () => {
         if (file) {
             // Basic validate
             if (file.size > 10 * 1024 * 1024) {
-                alert("Ukuran file maksimal 10MB");
+                toast.error("Ukuran file maksimal 10MB", { position: 'top-center' });
                 return;
             }
             setFormData(prev => ({ ...prev, attachment: file }));
@@ -418,7 +439,7 @@ const BuatLaporan = () => {
         const pickedCounselor = counselors.find(c => c.id === formData.counselor_id) || {};
         return (
             <UserLayout user={currentUser}>
-                <div className="max-w-5xl mx-auto p-4 md:p-8">
+                <div className="w-full p-4 md:p-8">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
                         <div className="px-8 py-6 border-b border-gray-100 bg-[#1e1b4b]">
@@ -647,7 +668,7 @@ const BuatLaporan = () => {
     if (scheduleSubmitted) {
         return (
             <UserLayout user={currentUser}>
-                <div className="max-w-4xl mx-auto p-4 md:p-8 text-center mt-20">
+                <div className="w-full p-4 md:p-8 text-center mt-20">
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Jadwal Berhasil Dikonfirmasi!</h2>
                     <p className="text-gray-500">Permintaan konseling Anda telah dikirim ke konselor terkait.</p>
@@ -659,7 +680,7 @@ const BuatLaporan = () => {
 
     return (
         <UserLayout user={currentUser}>
-            <div className="max-w-6xl mx-auto p-4 md:p-8">
+            <div className="w-full p-4 md:p-8">
 
                 {/* HEADER */}
                 <div className="mb-8">
@@ -994,7 +1015,7 @@ const BuatLaporan = () => {
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                         />
-                                        <LocationMarker position={mapPosition} setPosition={setMapPosition} />
+                                        <LocationMarker position={mapPosition} setPosition={setMapPosition} onMapClick={handleMapClick} />
                                     </MapContainer>
                                 </div>
                                 {mapPosition && (

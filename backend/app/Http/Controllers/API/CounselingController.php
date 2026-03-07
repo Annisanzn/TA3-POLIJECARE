@@ -32,6 +32,14 @@ class CounselingController extends Controller
         // Apply filters
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
+        } else {
+            // Default: Only show schedules that are already approved, completed, or rejected, NOT pending!
+            // Wait, if it's the dashboard we might want to see pending? 
+            // In counselor dash we DO want to see pending.
+            // The user requested: "Jika belum di Approve/Setjui, jangan di masukkan ke Jadwal Konseling, Ketika sudah di approve/setujui baru masuk ke tabel atau menu Jadwal Konseling"
+            // So if they are in "Jadwal Konseling" menu (which is the dashboard), they only want to see approved ones?
+            // "Ketika sudah di approve/setujui baru masuk ke tabel atau menu Jadwal Konseling" -> only approved!
+            $query->whereIn('status', ['approved', 'completed', 'rejected', 'cancelled']);
         }
 
         if ($request->has('counselor_id') && $request->counselor_id) {

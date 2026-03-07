@@ -135,7 +135,7 @@ const DetailPengaduan = () => {
                 <Topbar />
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 md:p-8">
-                    <div className="max-w-5xl mx-auto">
+                    <div className="w-full">
                         {/* Header / Back Navigation */}
                         <div className="mb-6 flex items-center justify-between">
                             <Link

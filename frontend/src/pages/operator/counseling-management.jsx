@@ -335,7 +335,6 @@ const CounselingManagementPage = () => {
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
                   className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer">
                   <option value="all">Semua Status</option>
-                  <option value="pending">Menunggu</option>
                   <option value="approved">Disetujui</option>
                   <option value="rejected">Ditolak</option>
                   <option value="completed">Selesai</option>
