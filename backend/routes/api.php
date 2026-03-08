@@ -63,16 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // User routes
     Route::middleware(RoleMiddleware::class . ':user')->prefix('user')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json([
-                'success' => true,
-                'message' => 'User Dashboard',
-                'data' => [
-                    'role' => 'user',
-                    'dashboard' => 'student'
-                ]
-            ]);
-        });
+        Route::get('/dashboard', [\App\Http\Controllers\API\UserDashboardController::class, 'index']);
         // Complaints (Histori Pengaduan)
         Route::get('/complaints', [\App\Http\Controllers\API\UserComplaintController::class, 'index']);
         Route::post('/complaints', [\App\Http\Controllers\API\UserComplaintController::class, 'store']);
@@ -95,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(RoleMiddleware::class . ':konselor')->prefix('konselor')->group(function () {
         // Dashboard stats
         Route::get('/dashboard', [\App\Http\Controllers\API\KonselorDashboardController::class, 'stats']);
+        Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
 
         // Pengaduan yang terkait konselor ini
         Route::get('/pengaduan', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
@@ -165,6 +157,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Dashboard Statistics
         Route::get('/dashboard', [\App\Http\Controllers\API\OperatorDashboardController::class, 'index']);
+        Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
 
         // Violence categories management routes
         Route::get('/categories', [ViolenceCategoryController::class, 'index']);

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiBarChart2, FiPieChart, FiUsers, FiX, FiMap } from 'react-icons/fi';
+import api from '../api/axios';
+import { useAuth } from '../hooks/useAuth';
 
 // Komponen Donut Chart sederhana
 const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
@@ -67,19 +69,57 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
   );
 };
 
+const CHART_COLORS = ['#7C3AED', '#A78BFA', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899', '#14B8A6'];
+
 const ChartSection = () => {
   const [activeYear, setActiveYear] = useState('2024');
   const [showMapModal, setShowMapModal] = useState(false);
+  const { user } = useAuth();
+
+  // Dynamic state for category distribution chart
+  const [categoryData, setCategoryData] = useState([]);
+  const [loadingCategory, setLoadingCategory] = useState(true);
 
   const years = ['Semua', '2023', '2024', '2025'];
 
-  // Data untuk kategori kekerasan (dengan warna hex untuk donut chart)
-  const categoryData = [
-    { name: 'Perundungan', value: 45, color: '#7C3AED', percentage: '45%', hexColor: '#7C3AED' },
-    { name: 'Verbal', value: 30, color: '#A78BFA', percentage: '30%', hexColor: '#A78BFA' },
-    { name: 'Fisik', value: 15, color: '#10B981', percentage: '15%', hexColor: '#10B981' },
-    { name: 'Non-Fisik', value: 10, color: '#F59E0B', percentage: '10%', hexColor: '#F59E0B' },
-  ];
+  // Fetch category distribution data from API
+  useEffect(() => {
+    const fetchCategoryDistribution = async () => {
+      try {
+        setLoadingCategory(true);
+        // Determine API prefix based on user role
+        const rolePrefix = user?.role === 'konselor' ? '/konselor' : '/operator';
+        const res = await api.get(`${rolePrefix}/dashboard/report-category-distribution`);
+
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          const total = res.data.data.reduce((sum, item) => sum + item.jumlah, 0);
+          const transformed = res.data.data.map((item, index) => {
+            const pct = total > 0 ? ((item.jumlah / total) * 100).toFixed(0) : 0;
+            return {
+              name: item.kategori,
+              value: total > 0 ? Math.round((item.jumlah / total) * 100) : 0,
+              rawCount: item.jumlah,
+              color: CHART_COLORS[index % CHART_COLORS.length],
+              percentage: `${pct}%`,
+              hexColor: CHART_COLORS[index % CHART_COLORS.length],
+            };
+          });
+          setCategoryData(transformed);
+        }
+      } catch (error) {
+        console.error('Failed to fetch category distribution', error);
+        setCategoryData([]);
+      } finally {
+        setLoadingCategory(false);
+      }
+    };
+
+    fetchCategoryDistribution();
+  }, [user?.role]);
+
+  // Compute dynamic totals
+  const totalReports = categoryData.reduce((sum, item) => sum + (item.rawCount || 0), 0);
+  const highestCategory = categoryData.length > 0 ? categoryData.reduce((max, item) => item.rawCount > max.rawCount ? item : max, categoryData[0]) : null;
 
   // Data untuk distribusi gender - format baru untuk stacked bar
   const genderData = [
@@ -114,88 +154,100 @@ const ChartSection = () => {
               <p className="text-sm text-gray-500">Distribusi jenis laporan kekerasan</p>
             </div>
           </div>
-          <div className="flex bg-gray-100 rounded-full p-1">
-            {years.map((year) => (
-              <button
-                key={year}
-                onClick={() => setActiveYear(year)}
-                className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${activeYear === year
-                  ? 'bg-white text-purple-700 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-                  }`}
-              >
-                {year}
-              </button>
+        </div>
+
+        {/* Loading State */}
+        {loadingCategory ? (
+          <div className="space-y-4 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  <div className="h-4 bg-gray-200 rounded w-16"></div>
+                </div>
+                <div className="h-8 bg-gray-100 rounded-lg w-full"></div>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* Horizontal Bar Chart */}
-        <div className="space-y-4">
-          {categoryData.map((item, index) => {
-            const isHighest = item.value === Math.max(...categoryData.map(d => d.value));
-            return (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: item.hexColor }}
-                    ></div>
-                    <span className="font-medium text-gray-900">{item.name}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-bold text-gray-900">{item.percentage}</span>
-                    <span className="text-sm text-gray-500 ml-2">({item.value} laporan)</span>
-                  </div>
-                </div>
-
-                {/* Bar Container */}
-                <div className="relative h-8 rounded-lg bg-gray-100 overflow-hidden">
-                  <div
-                    className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${isHighest ? 'bg-gradient-to-r from-purple-600 to-purple-700' : 'bg-gradient-to-r from-purple-400 to-purple-500'
-                      }`}
-                    style={{ width: `${item.value}%` }}
-                  >
-                    {/* Label inside bar for larger bars */}
-                    {item.value > 20 && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <span className="text-xs font-medium text-white">{item.percentage}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Label outside bar for smaller bars */}
-                  {item.value <= 20 && (
-                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                      <span className="text-xs font-medium text-gray-700">{item.percentage}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Additional info */}
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>{item.value} laporan</span>
-                  <span>{item.percentage} dari total 100 kasus</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Summary */}
-        <div className="mt-4 p-3 bg-purple-50 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">
-              Kategori tertinggi: <span className="font-bold text-purple-700">Perundungan (45%)</span>
-            </span>
-            <span className="text-sm text-gray-500">Total: 100 kasus</span>
+        ) : categoryData.length === 0 ? (
+          /* Empty State */
+          <div className="text-center py-16 px-4">
+            <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FiPieChart className="w-7 h-7 text-purple-300" />
+            </div>
+            <p className="text-gray-500 font-medium text-base">Belum ada laporan yang masuk.</p>
+            <p className="text-gray-400 text-sm mt-1">Grafik akan muncul otomatis ketika ada data laporan.</p>
           </div>
-        </div>
+        ) : (
+          /* Horizontal Bar Chart */
+          <>
+            <div className="space-y-4">
+              {categoryData.map((item, index) => {
+                const isHighest = item.rawCount === Math.max(...categoryData.map(d => d.rawCount));
+                return (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.hexColor }}
+                        ></div>
+                        <span className="font-medium text-gray-900">{item.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-gray-900">{item.percentage}</span>
+                        <span className="text-sm text-gray-500 ml-2">({item.rawCount} laporan)</span>
+                      </div>
+                    </div>
+
+                    {/* Bar Container */}
+                    <div className="relative h-8 rounded-lg bg-gray-100 overflow-hidden">
+                      <div
+                        className={`absolute left-0 top-0 h-full rounded-lg transition-all duration-800 ease-out ${isHighest ? 'bg-gradient-to-r from-purple-600 to-purple-700' : 'bg-gradient-to-r from-purple-400 to-purple-500'
+                          }`}
+                        style={{ width: `${item.value}%` }}
+                      >
+                        {/* Label inside bar for larger bars */}
+                        {item.value > 20 && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <span className="text-xs font-medium text-white">{item.percentage}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Label outside bar for smaller bars */}
+                      {item.value <= 20 && (
+                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                          <span className="text-xs font-medium text-gray-700">{item.percentage}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Additional info */}
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>{item.rawCount} laporan</span>
+                      <span>{item.percentage} dari total {totalReports} kasus</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Summary */}
+            <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  Kategori tertinggi: <span className="font-bold text-purple-700">{highestCategory?.name} ({highestCategory?.percentage})</span>
+                </span>
+                <span className="text-sm text-gray-500">Total: {totalReports} kasus</span>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="mt-6 pt-6 border-t border-gray-100">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Total laporan: 100 kasus</span>
+            <span className="text-sm text-gray-500">Total laporan: {totalReports} kasus</span>
             <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
               Lihat detail →
             </button>

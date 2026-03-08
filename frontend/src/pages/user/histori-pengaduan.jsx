@@ -37,8 +37,8 @@ const StatCard = ({ label, value, icon: Icon, color, sub }) => (
             <Icon size={22} className="text-white" />
         </div>
         <div>
-            <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
-            <p className="text-3xl font-black text-gray-900 leading-none">{value}</p>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
+            <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
             {sub && <p className="text-xs text-gray-400 mt-1 font-medium">{sub}</p>}
         </div>
     </div>
@@ -113,15 +113,15 @@ const HistoriPengaduan = () => {
                     {/* ── Page Header ─────────────────────────────────────────────── */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                         <div>
-                            <p className="text-[11px] font-black text-violet-500 uppercase tracking-[0.2em] mb-2">Riwayat Saya</p>
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Histori Pengaduan</h1>
+                            <p className="text-[11px] font-bold text-violet-500 uppercase tracking-[0.2em] mb-2">Riwayat Saya</p>
+                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Histori Pengaduan</h1>
                             <p className="text-gray-500 text-sm mt-1 font-medium">
                                 Daftar laporan tindak kekerasan yang pernah Anda ajukan
                             </p>
                         </div>
                         <button
                             onClick={() => fetchComplaints(currentPage)}
-                            className="inline-flex items-center gap-2.5 px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all shadow-sm font-bold text-sm active:scale-95"
+                            className="inline-flex items-center gap-2.5 px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all shadow-sm font-semibold text-sm active:scale-95"
                         >
                             <FiRefreshCw className={loading ? 'animate-spin' : ''} size={16} />
                             Refresh
@@ -209,7 +209,7 @@ const HistoriPengaduan = () => {
                                                 {/* Header: Ref ID + anonim flag */}
                                                 <div className="flex items-start justify-between mb-5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="font-mono text-[11px] font-black text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-xl tracking-wide">
+                                                        <span className="font-mono text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-xl tracking-wide">
                                                             {item.report_reference || `#${item.id}`}
                                                         </span>
                                                         {item.is_anonymous && (
@@ -219,13 +219,13 @@ const HistoriPengaduan = () => {
                                                         )}
                                                     </div>
                                                     {/* Urgency badge */}
-                                                    <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${urgencyCfg.cls}`}>
+                                                    <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-widest ${urgencyCfg.cls}`}>
                                                         {urgencyCfg.label}
                                                     </span>
                                                 </div>
 
                                                 {/* Judul */}
-                                                <h3 className="text-base font-black text-gray-900 leading-snug mb-1 truncate" title={item.title}>
+                                                <h3 className="text-base font-bold text-gray-900 leading-snug mb-1 truncate" title={item.title}>
                                                     {item.title || '-'}
                                                 </h3>
                                                 <p className="text-xs text-gray-400 font-medium flex items-center gap-1.5 mb-5">
@@ -240,8 +240,8 @@ const HistoriPengaduan = () => {
                                                             <FiShield size={13} className="text-violet-500" />
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Kategori</p>
-                                                            <p className="text-xs font-bold text-gray-800 truncate">
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Kategori</p>
+                                                            <p className="text-xs font-semibold text-gray-800 truncate">
                                                                 {item.violence_category?.name || item.violence_category?.kategori || 'Kategori Umum'}
                                                             </p>
                                                         </div>
@@ -252,8 +252,8 @@ const HistoriPengaduan = () => {
                                                             <FiUser size={13} className="text-blue-500" />
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Konselor</p>
-                                                            <p className="text-xs font-bold text-gray-800 truncate">
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Konselor</p>
+                                                            <p className="text-xs font-semibold text-gray-800 truncate">
                                                                 {item.counselor?.name || 'Belum ditugaskan'}
                                                             </p>
                                                         </div>
@@ -261,14 +261,14 @@ const HistoriPengaduan = () => {
 
                                                     <div className="flex items-center justify-between mt-2">
                                                         {/* Status badge */}
-                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${statusCfg.cls}`}>
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${statusCfg.cls}`}>
                                                             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusCfg.dot}`} />
                                                             {statusCfg.label}
                                                         </span>
                                                         {/* Tanggal */}
                                                         <div className="flex items-center gap-1.5 text-gray-400">
                                                             <FiCalendar size={12} className="shrink-0" />
-                                                            <span className="text-[10px] font-bold text-gray-500">
+                                                            <span className="text-[10px] font-semibold text-gray-500">
                                                                 {dayjs(item.created_at).format('DD MMM YYYY')}
                                                             </span>
                                                         </div>
@@ -280,7 +280,7 @@ const HistoriPengaduan = () => {
                                             <div className="px-7 py-5 bg-gray-50/50 border-t border-gray-100 opacity-90 group-hover:opacity-100 transition-opacity">
                                                 <Link
                                                     to={`/user/histori-pengaduan/${item.id}`}
-                                                    className="w-full py-2.5 px-4 bg-white border border-gray-200 text-violet-600 hover:border-violet-500 hover:bg-violet-50 rounded-2xl text-[11px] font-black transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                                                    className="w-full py-2.5 px-4 bg-white border border-gray-200 text-violet-600 hover:border-violet-500 hover:bg-violet-50 rounded-2xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
                                                 >
                                                     <FiEye size={14} /> LIHAT DETAIL
                                                 </Link>
