@@ -40,7 +40,7 @@ const Services = () => {
       features: ['Form Terstruktur', 'Upload Bukti Aman', 'Tracking Status'],
       buttonText: 'Isi Form Laporan',
       buttonColor: 'bg-[#191970] hover:bg-blue-900',
-      buttonLink: '/artikel',
+      buttonLink: '/login-new?from=form-laporan',
       gradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
       iconColor: 'text-[#191970] dark:text-blue-400',
       spotlightColor: 'rgba(139, 92, 246, 0.2)' // Purple glow for Form

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiAlertCircle, FiEye, FiEyeOff, FiLogIn } from 'react-icons/fi';
 import api from '../api/axios';
@@ -16,6 +16,8 @@ const NewLoginPage = () => {
   const [debugInfo, setDebugInfo] = useState(null);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromFormLaporan = searchParams.get('from') === 'form-laporan';
 
   // Validate email format
   const validateEmail = (email) => {
@@ -277,6 +279,29 @@ const NewLoginPage = () => {
               </span>
             </div>
           </motion.div>
+
+          {/* Info Banner for Form Laporan redirect */}
+          {fromFormLaporan && (
+            <motion.div
+              className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <FiAlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-semibold text-blue-800">
+                    Silakan login terlebih dahulu
+                  </p>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Gunakan <span className="font-semibold">email Polije</span> Anda (contoh: <span className="font-mono text-xs bg-blue-100 px-1.5 py-0.5 rounded">nama@polije.ac.id</span>) untuk mengakses Form Pengaduan.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Login Form */}
           <motion.form
