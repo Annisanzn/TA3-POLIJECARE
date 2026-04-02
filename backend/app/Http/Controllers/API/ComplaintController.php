@@ -73,6 +73,7 @@ class ComplaintController extends Controller
                     'latitude' => $c->latitude,
                     'longitude' => $c->longitude,
                     'status' => $c->status,
+                    'rejection_reason' => $c->rejection_reason,
                     'counseling_schedule' => optional($c->counseling_schedule)->toDateTimeString(),
                     'urgency_level' => $c->urgency_level,
                     'is_anonymous' => $c->is_anonymous,
@@ -144,6 +145,7 @@ class ComplaintController extends Controller
                 'latitude' => $complaint->latitude,
                 'longitude' => $complaint->longitude,
                 'status' => $complaint->status,
+                'rejection_reason' => $complaint->rejection_reason,
                 'counseling_schedule' => optional($complaint->counseling_schedule)->toDateTimeString(),
                 'urgency_level' => $complaint->urgency_level,
                 'is_anonymous' => $complaint->is_anonymous,
@@ -187,10 +189,12 @@ class ComplaintController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,approved,completed,rejected',
+            'rejection_reason' => 'nullable|string',
         ]);
 
         $complaint->update([
             'status' => $validated['status'],
+            'rejection_reason' => $validated['rejection_reason'] ?? $complaint->rejection_reason,
         ]);
 
         // Sync status to associated counseling schedules

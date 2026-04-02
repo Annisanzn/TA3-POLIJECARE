@@ -86,6 +86,12 @@ const counselingService = {
     return response.data;
   },
 
+  // Reassign counselor (operator only)
+  async reassignCounselor(id, counselorId) {
+    const response = await axios.put(`/operator/counseling/${id}/reassign`, { counselor_id: counselorId });
+    return response.data;
+  },
+
   // Get statistics - accessible by all authenticated users
   async getStatistics() {
     const response = await axios.get('/counseling/statistics');

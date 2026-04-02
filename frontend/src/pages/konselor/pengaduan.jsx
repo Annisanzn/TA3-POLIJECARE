@@ -32,7 +32,7 @@ const KonselorPengaduan = () => {
 
     const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, completed: 0 });
 
-    const [statusModal, setStatusModal] = useState({ open: false, complaint: null, status: 'pending' });
+    const [statusModal, setStatusModal] = useState({ open: false, complaint: null, status: 'pending', rejection_reason: '' });
     const [scheduleModal, setScheduleModal] = useState({ open: false, complaint: null, counseling_schedule: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -92,8 +92,12 @@ const KonselorPengaduan = () => {
         if (!statusModal.complaint?.id) return;
         try {
             setIsSubmitting(true);
-            await konselorComplaintService.updateStatus(statusModal.complaint.id, statusModal.status);
-            setStatusModal({ open: false, complaint: null, status: 'pending' });
+            const payload = { status: statusModal.status };
+            if (statusModal.status === 'rejected') {
+                payload.rejection_reason = statusModal.rejection_reason;
+            }
+            await konselorComplaintService.updateStatus(statusModal.complaint.id, payload);
+            setStatusModal({ open: false, complaint: null, status: 'pending', rejection_reason: '' });
             fetchData();
         } catch {
             setErrorMessage('Gagal mengubah status.');
@@ -373,7 +377,7 @@ const KonselorPengaduan = () => {
                                             <FiEye size={14} /> DETAIL
                                         </button>
                                         <button
-                                            onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending' })}
+                                            onClick={() => setStatusModal({ open: true, complaint: c, status: c.status || 'pending', rejection_reason: c.rejection_reason || '' })}
                                             className="py-2.5 px-2 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
                                         >
                                             <FiEdit size={14} /> STATUS
@@ -424,7 +428,7 @@ const KonselorPengaduan = () => {
                 {/* Modern Status Modal */}
                 {statusModal.open && statusModal.complaint && (
                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isSubmitting && setStatusModal({ open: false, complaint: null, status: 'pending' })} />
+                        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isSubmitting && setStatusModal({ open: false, complaint: null, status: 'pending', rejection_reason: '' })} />
                         <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
                             <div className="w-20 h-20 bg-blue-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
                                 <FiEdit className="text-blue-600" size={40} />
@@ -447,9 +451,23 @@ const KonselorPengaduan = () => {
                                 </select>
                             </div>
 
+                            {statusModal.status === 'rejected' && (
+                                <div className="space-y-4 mb-8">
+                                    <label className="text-xs font-bold text-gray-500 uppercase px-1">Alasan Penolakan <span className="text-rose-500">*</span></label>
+                                    <textarea
+                                        value={statusModal.rejection_reason}
+                                        onChange={(e) => setStatusModal((p) => ({ ...p, rejection_reason: e.target.value }))}
+                                        placeholder="Berikan alasan mengapa laporan ditolak (akan dikirimkan ke pelapor)..."
+                                        rows={4}
+                                        className="w-full px-5 py-4 bg-gray-50/50 border-2 border-gray-100 rounded-[24px] text-sm focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all resize-none font-medium"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                            )}
+
                             <div className="flex gap-4">
-                                <button disabled={isSubmitting} onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-                                <button disabled={isSubmitting} onClick={submitStatus} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
+                                <button disabled={isSubmitting} onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending', rejection_reason: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
+                                <button disabled={isSubmitting || (statusModal.status === 'rejected' && !statusModal.rejection_reason.trim())} onClick={submitStatus} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
                             </div>
                         </div>
                     </div>

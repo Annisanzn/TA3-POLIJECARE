@@ -44,12 +44,50 @@ const CounselorCounselingDashboard = () => {
 
   // Modal state
   const [detailModal, setDetailModal] = useState({ open: false, schedule: null, loading: false });
+  const [feedbackNotes, setFeedbackNotes] = useState('');
+  const [feedbackAttachment, setFeedbackAttachment] = useState(null);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
   const [stats, setStats] = useState({
     total: 0, pending: 0, approved: 0, completed: 0, cancelled: 0, today: 0, upcoming: 0,
   });
 
+  // Handle Feedback Submission
+  const handleSubmitFeedback = async (e) => {
+    e.preventDefault();
+    if (!detailModal.schedule || !feedbackNotes.trim()) return;
+    
+    setIsSubmittingFeedback(true);
+    const formData = new FormData();
+    formData.append('feedback_notes', feedbackNotes);
+    if (feedbackAttachment) {
+      formData.append('feedback_attachment', feedbackAttachment);
+    }
+
+    try {
+      const res = await axios.post(`/konselor/jadwal/${detailModal.schedule.id}/feedback`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        setSuccess('Berhasil mengirimkan feedback dan menyelesaikan sesi!');
+        setDetailModal({ open: false, schedule: null, loading: false });
+        fetchSchedules(pagination.current_page);
+        fetchStatistics();
+      } else {
+        setError(res.data.message || 'Gagal mengirim feedback');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Gagal mengirim feedback');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   // Open detail modal with full data from API
   const openDetailModal = async (schedule) => {
+    setFeedbackNotes('');
+    setFeedbackAttachment(null);
     setDetailModal({ open: true, schedule, loading: true });
     try {
       const res = await axios.get(`/konselor/jadwal/${schedule.id}`);
@@ -802,6 +840,60 @@ const CounselorCounselingDashboard = () => {
                           <div className="p-6 bg-rose-50 rounded-[32px] border border-rose-100">
                             <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-2"><FiXCircle size={14} /> Catatan Penolakan</p>
                             <p className="text-sm font-medium text-rose-900 leading-relaxed italic">"{detailModal.schedule.alasan_penolakan}"</p>
+                          </div>
+                        )}
+
+                        {detailModal.schedule?.status === 'approved' && (
+                          <div className="p-6 bg-white rounded-[32px] border border-blue-200 shadow-sm mt-6">
+                            <h4 className="text-sm font-black text-blue-900 uppercase tracking-widest mb-4 flex items-center gap-2"><FiCheckCircle size={16} /> Selesaikan Sesi & Feedback</h4>
+                            <p className="text-xs text-gray-500 mb-4">Berikan catatan hasil konseling dan unggah bukti sesi (opsional) untuk menyelesaikan jadwal ini.</p>
+                            <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                              <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Catatan Konseling <span className="text-red-500">*</span></label>
+                                <textarea
+                                  required rows={4}
+                                  className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                  placeholder="Hasil analisis, saran, atau tindak lanjut..."
+                                  value={feedbackNotes} onChange={e => setFeedbackNotes(e.target.value)}
+                                ></textarea>
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-2">Bukti/Dokumen Sesi (Opsional)</label>
+                                <input
+                                  type="file" accept=".jpg,.jpeg,.png,.pdf,.mp3,.mp4"
+                                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                  onChange={e => setFeedbackAttachment(e.target.files[0])}
+                                />
+                                <p className="text-xs text-gray-400 mt-1">Format: JPG, PNG, PDF, MP3, MP4. (Maks 20MB)</p>
+                              </div>
+                              <button
+                                type="submit" disabled={isSubmittingFeedback || !feedbackNotes.trim()}
+                                className="w-full py-4 mt-2 bg-blue-600 text-white rounded-[24px] text-sm font-black hover:bg-blue-700 transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                              >
+                                {isSubmittingFeedback ? <FiLoader className="animate-spin" /> : <FiCheck />}
+                                SIMPAN FEEDBACK & SELESAIKAN
+                              </button>
+                            </form>
+                          </div>
+                        )}
+
+                        {detailModal.schedule?.status === 'completed' && detailModal.schedule?.feedback_notes && (
+                          <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6">
+                            <h4 className="text-sm font-black text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Konseling (Feedback)</h4>
+                            <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                              {detailModal.schedule.feedback_notes}
+                            </div>
+                            {detailModal.schedule.feedback_attachment && (
+                              <div className="mt-4">
+                                <a
+                                  href={`http://127.0.0.1:8000/storage/${detailModal.schedule.feedback_attachment}`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold transition-colors"
+                                >
+                                  <FiExternalLink size={14} /> Lihat/Unduh Bukti Sesi
+                                </a>
+                              </div>
+                            )}
                           </div>
                         )}
                       </>

@@ -27,8 +27,9 @@ export const complaintService = {
     return response;
   },
 
-  updateStatus: async (id, status) => {
-    const response = await axios.patch(`/operator/complaints/${id}/status`, { status });
+  updateStatus: async (id, data) => {
+    const payload = typeof data === 'string' ? { status: data } : data;
+    const response = await axios.patch(`/operator/complaints/${id}/status`, payload);
     return response;
   },
 

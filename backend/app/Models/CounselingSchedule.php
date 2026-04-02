@@ -24,6 +24,8 @@ class CounselingSchedule extends Model
         'status',
         'rejection_reason',
         'approved_at',
+        'feedback_notes',
+        'feedback_attachment',
     ];
 
     protected $casts = [

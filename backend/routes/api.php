@@ -97,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/jadwal/{id}/approve',  [\App\Http\Controllers\API\CounselingController::class, 'approve']);
         Route::put('/jadwal/{id}/reject',   [\App\Http\Controllers\API\CounselingController::class, 'reject']);
         Route::put('/jadwal/{id}/complete', [\App\Http\Controllers\API\CounselingController::class, 'updateStatus']);
+        Route::post('/jadwal/{id}/feedback', [\App\Http\Controllers\API\CounselingController::class, 'submitFeedback']);
 
         // Materi milik konselor (filter by uploaded_by handled in MaterialController)
         Route::get('/materials',                [MaterialController::class, 'index']);
@@ -175,6 +176,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}/approve', [CounselingController::class, 'approve']);
             Route::put('/{id}/reject', [CounselingController::class, 'reject']);
             Route::put('/{id}/status', [CounselingController::class, 'updateStatus']);
+            Route::put('/{id}/reassign', [CounselingController::class, 'reassignCounselor']);
             Route::get('/statistics', [CounselingController::class, 'statistics']);
         });
 
