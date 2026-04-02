@@ -5,105 +5,29 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class UserComplaintController extends Controller
+class PublicComplaintController extends Controller
 {
-    /**
-     * Display a listing of complaints for the authenticated user.
-     */
-    public function index(Request $request)
-    {
-        $perPage = $request->query('per_page', 10);
-        $search  = $request->query('search', '');
-        $status  = $request->query('status', '');
-
-        $query = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
-            ->where('user_id', auth()->id());
-
-        // Search by title or report_id
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('report_id', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by status
-        if (!empty($status) && $status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        $complaints = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json([
-            'success' => true,
-            'data' => $complaints->items(),
-            'meta' => [
-                'current_page' => $complaints->currentPage(),
-                'last_page'    => $complaints->lastPage(),
-                'per_page'     => $complaints->perPage(),
-                'total'        => $complaints->total(),
-            ]
-        ]);
-    }
-
-    /**
-     * Display the specified complaint for the authenticated user.
-     */
-    public function show($id)
-    {
-        $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
-            ->find($id);
-            
-        if (!$complaint) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Laporan tidak ditemukan.'
-            ], 404);
-        }
-
-        // Authorization format: Return 403 if it doesn't belong to the logged-in user
-        if ($complaint->user_id !== auth()->id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak memiliki akses ke laporan ini.'
-            ], 403);
-        }
-
-        // Optional policy: mask IP addressing if it was marked as anonymous when returning back to user
-        if ($complaint->is_anonymous) {
-            $complaint->ip_address = null;
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $complaint
-        ]);
-    }
-
-    /**
-     * Store a newly created complaint in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'guest_name' => 'required|string|max:255',
+            'guest_email' => 'nullable|email|max:255',
+            'guest_phone' => 'required|string|max:20',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'violence_category_id' => 'required|exists:violence_categories,unique_id',
             'victim_type' => 'required|in:self,other',
             'victim_name' => 'required_if:victim_type,other|nullable|string|max:255',
             'victim_relationship' => 'required_if:victim_type,other|nullable|string|max:255',
-            'is_external_victim' => 'boolean',
             'suspect_name' => 'required|string|max:255',
             'suspect_status' => 'required|string|max:255',
             'suspect_affiliation' => 'required|string|max:255',
             'suspect_phone' => 'nullable|string|max:30',
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
-            'counselor_id' => 'required|exists:users,id',
-            'is_anonymous' => 'boolean',
             'location' => 'required|string|max:255',
-            'incident_date' => 'required|date',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
@@ -113,7 +37,6 @@ class UserComplaintController extends Controller
         try {
             $attachmentPath = null;
             if ($request->hasFile('attachment')) {
-                // Store the file in 'public/complaint_attachments' directory
                 $attachmentPath = $request->file('attachment')->store('complaint_attachments', 'public');
             }
 
@@ -123,15 +46,18 @@ class UserComplaintController extends Controller
             }
 
             $complaint = Complaint::create([
-                'user_id' => auth()->id(),
-                'counselor_id' => $validated['counselor_id'],
+                'user_id' => null, // Guest report
+                'counselor_id' => null, // Unassigned
+                'guest_name' => $validated['guest_name'],
+                'guest_email' => $validated['guest_email'] ?? null,
+                'guest_phone' => $validated['guest_phone'],
                 'violence_category_id' => $validated['violence_category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'victim_type' => $validated['victim_type'],
                 'victim_name' => $validated['victim_name'] ?? null,
                 'victim_relationship' => $validated['victim_relationship'] ?? null,
-                'is_external_victim' => $request->boolean('is_external_victim', false),
+                'is_external_victim' => true,
                 'victim_identity_proof' => $identityProofPath,
                 'suspect_name' => $validated['suspect_name'],
                 'suspect_status' => $validated['suspect_status'],
@@ -139,31 +65,26 @@ class UserComplaintController extends Controller
                 'suspect_phone' => $validated['suspect_phone'] ?? null,
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
-                'is_anonymous' => $request->boolean('is_anonymous', false),
+                'is_anonymous' => false, // Guest reports inherently anonymized relative to system, but they provide a name to Satgas
                 'location' => $validated['location'],
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
-                // 'incident_date' => $validated['incident_date'], // Un-comment if column exists
                 'file_path' => $attachmentPath,
-
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'status' => 'pending',
             ]);
 
-            // Load relations for WhatsApp notification
-            $complaint->load(['user', 'violenceCategory']);
-
-            // Send WhatsApp notification to Satgas PPKS (non-blocking)
+            // Notify via WA (optional)
             try {
                 \App\Services\WhatsAppNotificationService::notifyNewComplaint($complaint);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('WhatsApp notification failed: ' . $e->getMessage());
+                Log::warning('WhatsApp notification failed: ' . $e->getMessage());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Laporan berhasil dibuat.',
+                'message' => 'Laporan publik berhasil dibuat. Nomor Registrasi: ' . $complaint->report_id,
                 'data' => $complaint
             ], 201);
         } catch (\Exception $e) {

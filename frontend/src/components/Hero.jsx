@@ -18,7 +18,7 @@ const Hero = ({ heroData }) => {
   return (
     <section
       id="hero"
-      className="min-h-screen flex items-center bg-soft-white relative overflow-hidden pt-16 transition-colors duration-300"
+      className="min-h-screen flex items-center bg-soft-white relative overflow-hidden pt-28 transition-colors duration-300"
     >
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -125,7 +125,7 @@ const Hero = ({ heroData }) => {
               >
                 <ReportButton
                   icon={<Icon icon="solar:phone-calling-bold-duotone" />}
-                  title="Butuh Bantuan Darurat"
+                  title="Bantuan Darurat"
                   size="sm"
                   className="rounded-full bg-red-600 hover:bg-red-700 border-0"
                   gradientLight={{ from: "from-red-600", via: "via-red-600", to: "to-red-600" }}
@@ -133,25 +133,43 @@ const Hero = ({ heroData }) => {
                   onClick={() => window.open('https://wa.me/6281234567890', '_blank')}
                 />
               </motion.div>
+            </motion.div>
 
-              <motion.div
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ReportButton
-                  icon={<Icon icon="solar:document-add-bold-duotone" />}
-                  title="Buat Laporan"
-                  size="sm"
-                  className="rounded-full bg-[#191970] hover:bg-blue-900 border-0"
-                  gradientLight={{ from: "from-[#191970]", via: "via-[#191970]", to: "to-[#191970]" }}
-                  gradientDark={{ from: "from-[#191970]", via: "via-[#191970]", to: "to-[#191970]" }}
-                  onClick={() => navigate('/artikel')}
-                />
-              </motion.div>
+            {/* Announcement Banner */}
+            <motion.div
+              className="mt-6 p-6 bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100 rounded-3xl shadow-sm relative overflow-hidden"
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.9 }}
+            >
+              <div className="absolute -top-4 -right-4 p-4 opacity-5">
+                <Icon icon="solar:info-circle-bold-duotone" className="w-40 h-40 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <Icon icon="solar:info-circle-bold-duotone" className="text-blue-600 w-6 h-6" />
+                Informasi Pelaporan
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed max-w-lg mb-6">
+                Bagi <strong>Sivitas Akademika Polije</strong> silahkan login terlebih dahulu. Namun, jika Anda berasal dari <strong>Masyarakat Umum / Kampus Lain</strong>, Anda dapat membuat laporan langsung tanpa login.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 relative z-10">
+                <button
+                  onClick={() => navigate('/login-new')}
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold bg-[#191970] hover:bg-blue-900 transition-all text-white shadow-lg shadow-blue-900/20"
+                >
+                  <Icon icon="solar:login-2-bold-duotone" className="w-5 h-5" />
+                  Login & Lapor (Polije)
+                </button>
+                <button
+                  onClick={() => navigate('/lapor-umum')}
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+                >
+                  <Icon icon="solar:document-add-bold-duotone" className="w-5 h-5" />
+                  Lapor Tanpa Login (Umum)
+                </button>
+              </div>
             </motion.div>
 
             {/* Trust Indicators */}

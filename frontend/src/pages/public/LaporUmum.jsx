@@ -5,8 +5,9 @@ import {
     AlertCircle, ArrowLeft, Shield, User, FileText,
     MapPin, Calendar, Paperclip, CheckCircle, Search
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import UserLayout from '../../components/user/UserLayout';
+
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -80,9 +81,9 @@ const LocationMarker = ({ position, setPosition, onMapClick }) => {
     );
 };
 
-const BuatLaporan = () => {
+const LaporUmum = () => {
     const navigate = useNavigate();
-    const { user: currentUser } = useAuth();
+    
 
     const [categories, setCategories] = useState([]);
     const [counselors, setCounselors] = useState([]);
@@ -97,117 +98,6 @@ const BuatLaporan = () => {
     const [mapSearchQuery, setMapSearchQuery] = useState('');
     const [isSearchingMap, setIsSearchingMap] = useState(false);
     const mapRef = useRef(null);
-
-    // Schedule Selection State
-    // Multi-slot Selection State (max 2 consecutive slots)
-    const [selectedSlots, setSelectedSlots] = useState([]); // array of slot IDs
-    const [scheduleSubmitted, setScheduleSubmitted] = useState(false);
-    const [realSchedules, setRealSchedules] = useState([]);
-    const [loadingSchedules, setLoadingSchedules] = useState(false);
-
-    // Method Selection State
-    const [scheduleMethod, setScheduleMethod] = useState('offline');
-    const [scheduleLocation, setScheduleLocation] = useState('Ruang Konseling Satgas PPKS Polije');
-    const [scheduleLink, setScheduleLink] = useState('');
-
-    const handleScheduleSubmit = async () => {
-        if (selectedSlots.length === 0 || !createdComplaintId) return;
-
-        setLoadingSchedules(true);
-        try {
-            // Get selected slot objects in order
-            const selectedScheds = selectedSlots
-                .map(slotUid => realSchedules.find(s => `${s.id}-${s.jam_mulai}` === slotUid))
-                .filter(Boolean)
-                .sort((a, b) => (a.jam_mulai > b.jam_mulai ? 1 : -1));
-
-            // Extract HH:mm from various possible time formats
-            const extractTime = (timeVal) => {
-                if (!timeVal) return '09:00';
-                const str = String(timeVal);
-                // If ISO datetime like "2026-01-01T09:00:00.000000Z"
-                if (str.includes('T')) {
-                    const timePart = str.split('T')[1];
-                    return timePart.substring(0, 5);
-                }
-                // If already "09:00:00" or "09:00"
-                return str.substring(0, 5);
-            };
-
-            // Helper to get next concrete date from day name (Indonesian + English)
-            const getNextDateFromDayName = (dayStr) => {
-                const map = {
-                    'minggu': 0, 'sunday': 0,
-                    'senin': 1, 'monday': 1,
-                    'selasa': 2, 'tuesday': 2,
-                    'rabu': 3, 'wednesday': 3,
-                    'kamis': 4, 'thursday': 4,
-                    'jumat': 5, 'friday': 5,
-                    'sabtu': 6, 'saturday': 6,
-                };
-                const target = map[dayStr.toLowerCase()];
-                if (target === undefined) return new Date().toISOString().split('T')[0];
-                const today = new Date();
-                let diff = target - today.getDay();
-                if (diff <= 0) diff += 7;
-                today.setDate(today.getDate() + diff);
-                const offset = today.getTimezoneOffset();
-                const localDate = new Date(today.getTime() - (offset * 60 * 1000));
-                return localDate.toISOString().split('T')[0];
-            };
-
-            // Merge: first slot start → last slot end
-            const firstSlot = selectedScheds[0];
-            const lastSlot = selectedScheds[selectedScheds.length - 1];
-
-            // Use backend-computed next_date if available, otherwise calculate
-            const tanggal = firstSlot.next_date || getNextDateFromDayName(firstSlot.hari);
-
-            const slotCount = selectedScheds.length;
-            const durationNote = slotCount > 1 ? ` (${slotCount} slot — ${slotCount * (firstSlot.durasi_menit || 60)} menit)` : '';
-
-            const payload = {
-                counselor_id: Number(formData.counselor_id),
-                complaint_id: Number(createdComplaintId),
-                jenis_pengaduan: `Tindak Lanjut Laporan ${formData.title.substring(0, 50)}${durationNote}`,
-                tanggal: tanggal,
-                jam_mulai: extractTime(firstSlot.jam_mulai),
-                jam_selesai: extractTime(lastSlot.jam_selesai),
-                metode: scheduleMethod,
-                lokasi: scheduleMethod === 'offline' ? scheduleLocation : null,
-                meeting_link: scheduleMethod === 'online' ? scheduleLink : null,
-            };
-            console.log("Schedule booking payload:", payload);
-
-            const res = await fetch(`${API_BASE_URL}/user/counselings`, {
-                method: 'POST',
-                headers: {
-                    ...getAuthHeaders(),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!res.ok) {
-                const errBody = await res.json().catch(() => null);
-                console.error("Schedule API error:", res.status, errBody);
-                const errMsg = errBody?.message || errBody?.errors
-                    ? `${errBody.message || ''}${errBody.errors ? ' — ' + Object.values(errBody.errors).flat().join(', ') : ''}`
-                    : `Server error ${res.status}`;
-                throw new Error(errMsg);
-            }
-
-            setScheduleSubmitted(true);
-            setTimeout(() => {
-                navigate('/user/histori-pengaduan');
-            }, 2000);
-        } catch (error) {
-            console.error("Schedule error:", error);
-            toast.error(error.message || "Gagal mengamankan jadwal. Silakan coba lagi.", { position: 'top-center' });
-        } finally {
-            setLoadingSchedules(false);
-        }
-    };
 
     const handleMapSearch = async () => {
         if (!mapSearchQuery.trim()) return;
@@ -278,16 +168,19 @@ const BuatLaporan = () => {
     };
 
     const [formData, setFormData] = useState({
+        guest_name: '',
+        guest_email: '',
+        guest_phone: '',
         victim_type: 'self',
         victim_name: '',
         victim_relationship: '',
-        is_external_victim: false,
+        is_external_victim: true, // enforced
         victim_identity_proof: null,
         suspect_name: '',
         suspect_status: 'Mahasiswa',
         suspect_affiliation: '',
         suspect_phone: '',
-        counselor_id: '',
+        counselor_id: '', // Empty
         urgency_level: 'medium',
         is_anonymous: false,
         title: '',
@@ -299,9 +192,7 @@ const BuatLaporan = () => {
     });
 
     const getAuthHeaders = () => {
-        const token = localStorage.getItem('token');
         return {
-            Authorization: `Bearer ${token}`,
             Accept: 'application/json'
         };
     };
@@ -320,8 +211,8 @@ const BuatLaporan = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Categories
-                const catRes = await fetch(`${API_BASE_URL}/user/categories`, {
+                // Fetch Categories public endpoint
+                const catRes = await fetch(`${API_BASE_URL}/public-categories`, {
                     method: 'GET',
                     headers: getAuthHeaders(),
                 });
@@ -376,10 +267,13 @@ const BuatLaporan = () => {
             payload.append('violence_category_id', formData.violence_category_id);
             payload.append('victim_type', formData.victim_type);
 
+            payload.append('guest_name', formData.guest_name);
+            payload.append('guest_email', formData.guest_email);
+            payload.append('guest_phone', formData.guest_phone);
             if (formData.victim_type === 'other') {
                 payload.append('victim_name', formData.victim_name);
                 payload.append('victim_relationship', formData.victim_relationship);
-                payload.append('is_external_victim', formData.is_external_victim ? "1" : "0");
+                payload.append('is_external_victim', "1");
                 if (formData.victim_identity_proof) {
                     payload.append('victim_identity_proof', formData.victim_identity_proof);
                 }
@@ -401,12 +295,10 @@ const BuatLaporan = () => {
             if (formData.longitude) payload.append('longitude', formData.longitude);
             if (formData.attachment) payload.append('attachment', formData.attachment);
 
-            const response = await fetch(`${API_BASE_URL}/user/reports`, {
+            const response = await fetch(`${API_BASE_URL}/public-complaints`, {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
                     Accept: 'application/json'
-                    // Don't set Content-Type for FormData, browser does it automatically with boundary.
                 },
                 body: payload,
             });
@@ -423,25 +315,6 @@ const BuatLaporan = () => {
             }
 
             setSuccess(true);
-
-            // Will show the Schedule Selection Screen now!
-            // Fetch real counselor schedules
-            setLoadingSchedules(true);
-            try {
-                const schedRes = await fetch(`${API_BASE_URL}/user/counselor-schedules?counselor_id=${formData.counselor_id}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                const schedData = await schedRes.json();
-                if (schedRes.ok && schedData.data) {
-                    setRealSchedules(schedData.data);
-                }
-            } catch (err) {
-                console.error("Failed to fetch schedules:", err);
-            } finally {
-                setLoadingSchedules(false);
-            }
-
         } catch (err) {
             console.error('Submit form error:', err);
             setSubmitError(err.message || 'Gagal mengirim laporan. Silakan coba lagi.');
@@ -450,258 +323,32 @@ const BuatLaporan = () => {
         }
     };
 
-    if (success && !scheduleSubmitted) {
-        const pickedCounselor = counselors.find(c => c.id === formData.counselor_id) || {};
+    
+    if (success) {
         return (
-            <UserLayout user={currentUser}>
-                <div className="w-full p-4 md:p-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-                        <div className="px-8 py-6 border-b border-gray-100 bg-[#1e1b4b]">
-                            <h1 className="text-xl font-bold text-white">Pilih Jadwal Konsultasi</h1>
-                        </div>
-
-                        <div className="p-8 space-y-8">
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-bold text-gray-900">Halo, terima kasih telah mengajukan laporan.</h3>
-                                <p className="text-sm text-gray-700">Langkah selanjutnya, silakan pilih jadwal temu yang sesuai dengan waktu Anda dan Konselor <strong>{pickedCounselor.name}</strong>.</p>
-                                <p className="text-sm text-[#2e1065] font-semibold">Konseling bersifat rahasia dan aman, dilakukan secara tatap muka maupun online sesuai kesepakatan.</p>
-                            </div>
-
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">Profil Singkat</h2>
-                                <div className="text-sm text-gray-700 space-y-2">
-                                    <p><span className="text-gray-500 inline-block w-32">Nama:</span> {pickedCounselor.name}</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Bidang:</span> {pickedCounselor.bio || 'Konseling Umum'}</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Pengalaman:</span> 5+ tahun mendampingi mahasiswa dan tenaga pengajar</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Metode Konseling:</span> Tatap muka / Online</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <h2 className="text-lg font-bold text-gray-800">Pilih Waktu Yang Tersedia</h2>
-                                    <span className="text-xs text-gray-500">{selectedSlots.length}/2 slot dipilih</span>
-                                </div>
-
-                                {/* Multi-slot tip */}
-                                <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl flex gap-2 text-sm">
-                                    <span className="text-purple-600 flex-shrink-0">💡</span>
-                                    <span className="text-purple-700">Anda dapat memilih <strong>1 atau 2 slot waktu</strong>. Pilih 2 slot berturutan jika Anda merasa 1 slot (± 60 menit) belum cukup untuk menyampaikan permasalahan Anda. Slot yang dipilih akan digabung menjadi satu sesi.</span>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {loadingSchedules ? (
-                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                            <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
-                                            Sedang memuat ketersediaan jadwal...
-                                        </div>
-                                    ) : realSchedules.length === 0 ? (
-                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                            <div className="text-4xl mb-2">📅</div>
-                                            Belum ada jadwal konsultasi yang tersedia untuk konselor ini.
-                                        </div>
-                                    ) : (
-                                        (() => {
-                                            // Group schedules by date
-                                            const grouped = realSchedules.reduce((acc, sch) => {
-                                                const key = sch.next_date || sch.hari;
-                                                if (!acc[key]) {
-                                                    acc[key] = {
-                                                        hari: sch.hari,
-                                                        next_date: sch.next_date,
-                                                        slots: []
-                                                    };
-                                                }
-                                                acc[key].slots.push(sch);
-                                                return acc;
-                                            }, {});
-
-                                            const extractT = (v) => { const s = String(v || ''); return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); };
-
-                                            const formatDay = (dayStr) => {
-                                                const days = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' };
-                                                return days[dayStr.toLowerCase()] || dayStr;
-                                            };
-
-                                            return Object.values(grouped).map((group, gIdx) => (
-                                                <div key={gIdx} className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden">
-                                                    {/* Group Header */}
-                                                    <div className="bg-gradient-to-r from-gray-50 to-white px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
-                                                                <Calendar className="w-5 h-5" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-gray-900 text-sm">{formatDay(group.hari)}</p>
-                                                                {group.next_date && (
-                                                                    <p className="text-xs text-purple-600 font-medium tracking-wide">
-                                                                        {new Date(group.next_date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Slots Grid */}
-                                                    <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                                        {group.slots.map(sch => {
-                                                            const slotUid = `${sch.id}-${sch.jam_mulai}`;
-                                                            const isAvailable = sch.is_active && !sch.is_booked;
-                                                            const isSelected = selectedSlots.includes(slotUid);
-                                                            const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
-
-                                                            const toggleSlot = () => {
-                                                                if (!isAvailable) return;
-                                                                if (isSelected) {
-                                                                    setSelectedSlots(prev => prev.filter(id => id !== slotUid));
-                                                                } else if (selectedSlots.length < 2) {
-                                                                    if (selectedSlots.length === 1) {
-                                                                        const firstId = selectedSlots[0];
-                                                                        const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
-                                                                        if (firstSch) {
-                                                                            const thisDate = sch.next_date || sch.hari;
-                                                                            const firstDate = firstSch.next_date || firstSch.hari;
-                                                                            if (thisDate !== firstDate) {
-                                                                                toast.error("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
-                                                                                return;
-                                                                            }
-
-                                                                            // Periksa apakah slot berturutan
-                                                                            const firstStart = extractT(firstSch.jam_mulai);
-                                                                            const firstEnd = extractT(firstSch.jam_selesai);
-                                                                            const thisStart = extractT(sch.jam_mulai);
-                                                                            const thisEnd = extractT(sch.jam_selesai);
-
-                                                                            if (firstEnd !== thisStart && thisEnd !== firstStart) {
-                                                                                toast.error("Slot kedua harus berturutan dengan slot pertama (misal: 13:00-14:00 dan 14:00-15:00).");
-                                                                                return;
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    setSelectedSlots(prev => [...prev, slotUid]);
-                                                                }
-                                                            };
-
-                                                            return (
-                                                                <button
-                                                                    key={`${sch.id}-${group.next_date || group.hari}-${gIdx}-${sch.jam_mulai}`}
-                                                                    type="button"
-                                                                    onClick={toggleSlot}
-                                                                    disabled={isDisabled && !isSelected}
-                                                                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                                                                        ${isSelected
-                                                                            ? 'border-purple-600 bg-purple-50 shadow-md ring-2 ring-purple-100 outline-none'
-                                                                            : isAvailable
-                                                                                ? 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5'
-                                                                                : 'border-slate-100 bg-slate-50 opacity-60'
-                                                                        }
-                                                                    `}
-                                                                >
-                                                                    {isSelected && (
-                                                                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center shadow-sm">
-                                                                            <CheckCircle className="w-3 h-3" />
-                                                                        </div>
-                                                                    )}
-                                                                    <span className={`text-sm font-bold ${isSelected ? 'text-purple-900' : isAvailable ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
-                                                                        {extractT(sch.jam_mulai)}
-                                                                    </span>
-                                                                    <span className={`text-[10px] mt-1 font-medium px-2 py-0.5 rounded-full ${isSelected ? 'bg-purple-200 text-purple-800' : isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500'}`}>
-                                                                        {isSelected ? 'Dipilih' : isAvailable ? 'Tersedia' : 'Penuh'}
-                                                                    </span>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            ));
-                                        })()
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Pilihan Metode Konseling */}
-                            <div className="mt-8">
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">Metode Konseling</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'offline' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
-                                        <div className="flex items-center">
-                                            <input type="radio" name="schedule_method" value="offline" checked={scheduleMethod === 'offline'} onChange={() => setScheduleMethod('offline')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                            <span className="ml-3 font-bold text-gray-800">Tatap Muka (Offline)</span>
-                                        </div>
-                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan langsung di lokasi yang ditentukan</p>
-                                    </label>
-
-                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'online' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
-                                        <div className="flex items-center">
-                                            <input type="radio" name="schedule_method" value="online" checked={scheduleMethod === 'online'} onChange={() => setScheduleMethod('online')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                            <span className="ml-3 font-bold text-gray-800">Daring (Online)</span>
-                                        </div>
-                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan virtual melalui Video Conference</p>
-                                    </label>
-                                </div>
-
-                                {scheduleMethod === 'offline' && (
-                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi Pertemuan <span className="text-red-500">*</span></label>
-                                        <input type="text" value={scheduleLocation} onChange={(e) => setScheduleLocation(e.target.value)} placeholder="Contoh: Ruang Konseling Gedung A" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" required />
-                                    </div>
-                                )}
-
-                                {scheduleMethod === 'online' && (
-                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Link Pertemuan (Opsional)</label>
-                                        <input type="text" value={scheduleLink} onChange={(e) => setScheduleLink(e.target.value)} placeholder="Contoh: https://meet.google.com/xxx-yyy-zzz" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" />
-                                        <p className="text-xs text-gray-500 mt-2">Biarkan kosong jika Anda ingin menggunakan platform dari Konselor Anda.</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="pt-6 flex justify-center">
-                                <button
-                                    onClick={handleScheduleSubmit}
-                                    disabled={selectedSlots.length === 0 || loadingSchedules}
-                                    className="px-8 py-3 bg-[#1e1b4b] text-white font-medium rounded-xl hover:bg-[#2e1065] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
-                                >
-                                    {loadingSchedules ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            Memproses...
-                                        </>
-                                    ) : (
-                                        "Konfirmasi Jadwal & Kirim Permintaan Konseling"
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </UserLayout>
-        );
-    }
-
-    if (scheduleSubmitted) {
-        return (
-            <UserLayout user={currentUser}>
-                <div className="w-full p-4 md:p-8 text-center mt-20">
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+                <Navbar />
+                <div className="flex-grow w-full max-w-3xl mx-auto p-4 md:p-8 text-center mt-20">
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Jadwal Berhasil Dikonfirmasi!</h2>
-                    <p className="text-gray-500">Permintaan konseling Anda telah dikirim ke konselor terkait.</p>
-                    <p className="text-sm text-gray-400 mt-4 rounded-full bg-gray-100 px-4 py-2 inline-block">Mengalihkan ke halaman riwayat...</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Laporan Berhasil Terkirim!</h2>
+                    <p className="text-gray-500 mb-4">Laporan Anda telah masuk ke sistem Satgas PPKPT Politeknik Negeri Jember. Tim Satgas akan segera meninjau laporan Anda dan menghubungi Anda melalui kontak yang telah diberikan.</p>
+                    <button onClick={() => navigate('/')} className="px-6 py-2 bg-[#8b5cf6] text-white rounded-xl hover:bg-purple-700">Kembali ke Beranda</button>
                 </div>
-            </UserLayout>
+                <Footer />
+            </div>
         );
     }
-
     return (
-        <UserLayout user={currentUser}>
-            <div className="w-full p-4 md:p-8">
+        <div className="min-h-screen bg-gray-50 flex flex-col pt-8">
+            <Navbar />
+            <div className="w-full flex-grow pt-16">
+            <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-8">
 
                 {/* HEADER */}
                 <div className="mb-8">
                     <button
                         type="button"
-                        onClick={() => navigate('/user/dashboard')}
+                        onClick={() => navigate('/')}
                         className="flex items-center text-gray-500 hover:text-[#8b5cf6] mb-4 transition-colors font-medium text-sm"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -730,30 +377,41 @@ const BuatLaporan = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
 
-                    {/* DATA PELAPOR */}
+                    {/* DATA PELAPOR (TAMU) */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                             <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                                <User className="w-5 h-5 mr-2 text-[#8b5cf6]" /> Data Pelapor
+                                <User className="w-5 h-5 mr-2 text-[#8b5cf6]" /> Kontak Pelapor
                             </h2>
-                            <p className="text-xs text-gray-500 mt-1">Identitas pelapor diambil secara otomatis dari sistem Polije</p>
+                            <p className="text-xs text-gray-500 mt-1">Silakan masukkan kontak yang bisa dihubungi oleh Satgas PPKPT (Identitas Anda TETAP DIRAHSIAKAN)</p>
                         </div>
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="text-xs text-gray-500 font-medium block mb-1">Nama Lengkap</label>
-                                <div className="font-semibold text-gray-900">{currentUser?.name || 'Pengguna 1'}</div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pelapor <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text" name="guest_name" required
+                                    value={formData.guest_name} onChange={handleInputChange}
+                                    placeholder="Masukkan nama Anda (atau anonim)"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                />
                             </div>
                             <div>
-                                <label className="text-xs text-gray-500 font-medium block mb-1">NIM / NIP</label>
-                                <div className="font-semibold text-gray-900">{currentUser?.nim || '-'}</div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon/WhatsApp <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text" name="guest_phone" required
+                                    value={formData.guest_phone} onChange={handleInputChange}
+                                    placeholder="Contoh: 08123456789"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                />
                             </div>
                             <div>
-                                <label className="text-xs text-gray-500 font-medium block mb-1">Program Studi</label>
-                                <div className="font-semibold text-gray-900">{currentUser?.prodi || currentUser?.department || '-'}</div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-gray-500 font-medium block mb-1">Semester</label>
-                                <div className="font-semibold text-gray-900">{currentUser?.semester || '-'}</div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Email <span className="text-gray-400 font-normal">(Opsional)</span></label>
+                                <input
+                                    type="email" name="guest_email"
+                                    value={formData.guest_email} onChange={handleInputChange}
+                                    placeholder="kamu@email.com"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                />
                             </div>
                         </div>
                     </section>
@@ -891,7 +549,7 @@ const BuatLaporan = () => {
 
                     {/* PEMILIHAN KONSELOR & INFORMASI TAMBAHAN */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hidden">
                             <h2 className="text-lg font-bold text-gray-800 mb-1">Pemilihan Konselor</h2>
                             <p className="text-xs text-gray-500 mb-4">Pilih konselor yang akan menangani laporan ini</p>
 
@@ -1154,7 +812,7 @@ const BuatLaporan = () => {
                     {/* SUBMIT BUTTON */}
                     <div className="flex justify-end pt-4 pb-12">
                         <button
-                            type="button" onClick={() => navigate('/user/dashboard')}
+                            type="button" onClick={() => navigate('/')}
                             className="px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 transition-colors mr-4"
                         >
                             Batal
@@ -1170,8 +828,10 @@ const BuatLaporan = () => {
 
                 </form>
             </div>
-        </UserLayout>
+        </div>
+            <Footer />
+        </div>
     );
 };
 
-export default BuatLaporan;
+export default LaporUmum;

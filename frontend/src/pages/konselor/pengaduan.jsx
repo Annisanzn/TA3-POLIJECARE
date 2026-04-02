@@ -358,6 +358,35 @@ const KonselorPengaduan = () => {
                                                 </div>
                                             </div>
 
+                                            {/* WA Button — shows for any complaint with a phone on record */}
+                                            {(() => {
+                                                const phone = c.user_id ? c.user_phone : c.guest_phone;
+                                                if (!phone) return null;
+                                                const isGuest = !c.user_id;
+                                                const greeting = isGuest ? (c.guest_name || 'Bapak/Ibu') : c.user_name;
+                                                const template = isGuest
+                                                    ? `Halo ${greeting},\n\nPerkenalkan kami dari Satuan Tugas Pencegahan dan Penanganan Kekerasan di Kampus (Satgas PPKPT) Politeknik Negeri Jember.\n\nKami telah menerima laporan pengaduan Anda dengan nomor registrasi *${c.report_id}* dan saat ini sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, kami akan menjadwalkan sesi konsultasi/konseling bersama. Mohon informasikan kepada kami, pada *hari dan waktu* apa Anda bisa ditemui atau dihubungi untuk konsultasi lanjutan?\n\nTerima kasih atas kepercayaan Anda kepada kami. 🙏`
+                                                    : `Halo ${greeting},\n\nPerkenalkan kami dari Satgas PPKPT Politeknik Negeri Jember.\n\nTerkait laporan Anda dengan nomor *${c.report_id}*, kami ingin menginformasikan bahwa laporan Anda sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, mohon informasikan kepada kami pada *hari dan waktu* yang nyaman bagi Anda untuk sesi konsultasi/konseling.\n\nTerima kasih. 🙏`;
+                                                const label = isGuest ? 'WA Pelapor Umum' : 'WA Pelapor';
+                                                return (
+                                                    <a
+                                                        href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(template)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2.5 p-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 rounded-xl border border-[#25D366]/30 transition-colors mt-3"
+                                                        onClick={e => e.stopPropagation()}
+                                                    >
+                                                        <svg viewBox="0 0 32 32" className="w-5 h-5 shrink-0 fill-[#25D366]" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M16 2C8.268 2 2 8.268 2 16c0 2.52.693 4.881 1.9 6.912L2 30l7.302-1.876A13.934 13.934 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.5a11.43 11.43 0 0 1-5.824-1.594l-.417-.248-4.337 1.114 1.138-4.228-.272-.435A11.453 11.453 0 0 1 4.5 16C4.5 9.649 9.649 4.5 16 4.5S27.5 9.649 27.5 16 22.351 27.5 16 27.5zm6.29-8.474c-.344-.172-2.034-1.003-2.349-1.118-.315-.115-.545-.172-.774.172-.23.344-.888 1.118-1.09 1.347-.2.229-.4.258-.745.086-.344-.172-1.452-.535-2.767-1.707-1.022-.913-1.712-2.04-1.913-2.384-.2-.344-.021-.53.15-.701.155-.154.344-.4.516-.6.172-.2.229-.344.344-.573.115-.23.057-.43-.029-.602-.086-.172-.774-1.866-1.06-2.556-.279-.671-.563-.58-.774-.59l-.66-.012c-.23 0-.602.086-.917.43s-1.204 1.176-1.204 2.87 1.233 3.33 1.405 3.56c.172.23 2.428 3.71 5.882 5.205.823.355 1.465.567 1.966.725.826.263 1.578.226 2.172.137.663-.099 2.034-.831 2.32-1.634.287-.803.287-1.491.2-1.634-.086-.143-.315-.229-.66-.4z"/>
+                                                        </svg>
+                                                        <div>
+                                                            <p className="text-[9px] font-black text-[#128C7E] uppercase leading-none mb-0.5">{label}</p>
+                                                            <p className="text-xs font-bold text-[#075E54]">{phone}</p>
+                                                        </div>
+                                                    </a>
+                                                );
+                                            })()}
+
                                             <div className="flex items-center justify-between mt-6">
                                                 <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusBadge(c.status)}`}>
                                                     {c.status}

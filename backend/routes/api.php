@@ -53,6 +53,13 @@ Route::get('/counseling-test', [CounselingController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-new', [NewLoginController::class, 'login']);
 
+// Public routes
+Route::post('/public-complaints', [\App\Http\Controllers\API\PublicComplaintController::class, 'store']);
+Route::get('/public-categories', function () {
+    $categories = \App\Models\ViolenceCategory::orderBy('name')->get(['unique_id', 'name']);
+    return response()->json(['success' => true, 'data' => $categories]);
+});
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // New login protected routes

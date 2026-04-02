@@ -9,6 +9,7 @@ import Sidebar from './components/layout/Sidebar';
 
 // Pages
 import LandingPage from './pages/LandingPage';
+import LaporUmum from './pages/public/LaporUmum';
 import UserDashboard from './pages/user/dashboard';
 import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
@@ -50,6 +51,7 @@ function App() {
             <Route path="/services" element={<LandingPage />} />
             <Route path="/articles" element={<LandingPage />} />
             <Route path="/contact" element={<LandingPage />} />
+            <Route path="/lapor-umum" element={<LaporUmum />} />
 
             {/* Article Detail - public reading page */}
             <Route path="/artikel/:slug" element={<ArticleDetail />} />

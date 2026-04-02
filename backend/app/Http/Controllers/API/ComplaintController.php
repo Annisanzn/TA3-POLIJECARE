@@ -23,7 +23,7 @@ class ComplaintController extends Controller
 
         $query = Complaint::query()
             ->with([
-                'user:id,name',
+                'user:id,name,phone',
                 'counselor:id,name',
                 'violenceCategory',
             ])
@@ -58,7 +58,11 @@ class ComplaintController extends Controller
                     'id' => $c->id,
                     'report_id' => $c->report_id,
                     'user_id' => $c->user_id,
-                    'user_name' => $c->is_anonymous ? 'Anonim' : optional($c->user)->name,
+                    'user_name' => $c->is_anonymous ? 'Anonim' : ($c->user_id ? optional($c->user)->name : $c->guest_name),
+                    'user_phone' => $c->user_id ? optional($c->user)->phone : null,
+                    'guest_name' => $c->guest_name,
+                    'guest_email' => $c->guest_email,
+                    'guest_phone' => $c->guest_phone,
                     'counselor_id' => $c->counselor_id,
                     'counselor_name' => optional($c->counselor)->name,
                     'violence_category_id' => $c->violence_category_id,
@@ -69,6 +73,12 @@ class ComplaintController extends Controller
                     'victim_type' => $c->victim_type,
                     'victim_name' => $c->victim_name,
                     'victim_relationship' => $c->victim_relationship,
+                    'is_external_victim' => $c->is_external_victim,
+                    'victim_identity_proof' => $c->victim_identity_proof,
+                    'suspect_name' => $c->suspect_name,
+                    'suspect_status' => $c->suspect_status,
+                    'suspect_affiliation' => $c->suspect_affiliation,
+                    'suspect_phone' => $c->suspect_phone,
                     'location' => $c->location,
                     'latitude' => $c->latitude,
                     'longitude' => $c->longitude,
@@ -130,7 +140,10 @@ class ComplaintController extends Controller
                 'id' => $complaint->id,
                 'report_id' => $complaint->report_id,
                 'user_id' => $complaint->user_id,
-                'user_name' => $complaint->is_anonymous ? 'Anonim' : optional($complaint->user)->name,
+                'user_name' => $complaint->is_anonymous ? 'Anonim' : ($complaint->user_id ? optional($complaint->user)->name : $complaint->guest_name),
+                'guest_name' => $complaint->guest_name,
+                'guest_email' => $complaint->guest_email,
+                'guest_phone' => $complaint->guest_phone,
                 'counselor_id' => $complaint->counselor_id,
                 'counselor_name' => optional($complaint->counselor)->name,
                 'violence_category_id' => $complaint->violence_category_id,
@@ -141,6 +154,12 @@ class ComplaintController extends Controller
                 'victim_type' => $complaint->victim_type,
                 'victim_name' => $complaint->victim_name,
                 'victim_relationship' => $complaint->victim_relationship,
+                'is_external_victim' => $complaint->is_external_victim,
+                'victim_identity_proof' => $complaint->victim_identity_proof,
+                'suspect_name' => $complaint->suspect_name,
+                'suspect_status' => $complaint->suspect_status,
+                'suspect_affiliation' => $complaint->suspect_affiliation,
+                'suspect_phone' => $complaint->suspect_phone,
                 'location' => $complaint->location,
                 'latitude' => $complaint->latitude,
                 'longitude' => $complaint->longitude,
@@ -212,14 +231,19 @@ class ComplaintController extends Controller
     {
         $validated = $request->validate([
             'counselor_id' => 'nullable|exists:users,id',
-            'counseling_schedule' => 'required|date',
+            'counseling_schedule' => 'nullable|date',
         ]);
 
-        $complaint->update([
+        $updateData = [
             'counselor_id' => $validated['counselor_id'] ?? $complaint->counselor_id,
-            'counseling_schedule' => $validated['counseling_schedule'],
             'status' => 'approved',
-        ]);
+        ];
+        // Only update schedule if provided
+        if (!empty($validated['counseling_schedule'])) {
+            $updateData['counseling_schedule'] = $validated['counseling_schedule'];
+        }
+
+        $complaint->update($updateData);
 
         return response()->json([
             'success' => true,
