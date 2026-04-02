@@ -41,6 +41,15 @@ class AuthController extends Controller
             ], 401);
         }
         
+        // Check if password hash algorithm is not Bcrypt
+        $hashInfo = password_get_info($user->password);
+        if ($hashInfo['algoName'] !== 'bcrypt') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This password does not use the Bcrypt algorithm.'
+            ], 401);
+        }
+        
         // Check password
         if (!Hash::check($credentials['password'], $user->password)) {
             return response()->json([

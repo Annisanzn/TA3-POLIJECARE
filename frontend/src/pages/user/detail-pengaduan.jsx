@@ -193,6 +193,15 @@ const DetailPengaduan = () => {
                                     </div>
                                 </div>
 
+                                {complaint.status === 'rejected' && complaint.rejection_reason && (
+                                    <div className="mx-6 md:mx-8 mb-6 p-5 bg-rose-50 border border-rose-100 rounded-2xl">
+                                        <h3 className="text-sm font-bold text-rose-800 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <FiAlertCircle className="w-4 h-4" /> Alasan Penolakan / Jadwalkan Ulang
+                                        </h3>
+                                        <p className="text-sm text-rose-900 leading-relaxed italic">"{complaint.rejection_reason}"</p>
+                                    </div>
+                                )}
+
                                 {/* 4-Step Counseling Status Tracker */}
                                 {counselingSchedule ? (
                                     <div className="mt-6 pt-6 border-t border-gray-100">

@@ -136,6 +136,15 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                         {/* Left Column - Main Details */}
                         <div className="lg:col-span-2 space-y-6">
 
+                            {complaint.status === 'rejected' && complaint.rejection_reason && (
+                                <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
+                                    <h3 className="text-sm font-bold text-rose-800 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <FiInfo className="w-4 h-4" /> Alasan Penolakan Laporan
+                                    </h3>
+                                    <p className="text-sm text-rose-900 leading-relaxed italic">"{complaint.rejection_reason}"</p>
+                                </div>
+                            )}
+
                             {/* Incident Details Card */}
                             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">

@@ -281,6 +281,11 @@ const BuatLaporan = () => {
         victim_type: 'self',
         victim_name: '',
         victim_relationship: '',
+        is_external_victim: false,
+        victim_identity_proof: null,
+        suspect_name: '',
+        suspect_status: 'Mahasiswa',
+        suspect_affiliation: '',
         counselor_id: '',
         urgency_level: 'medium',
         is_anonymous: false,
@@ -373,7 +378,15 @@ const BuatLaporan = () => {
             if (formData.victim_type === 'other') {
                 payload.append('victim_name', formData.victim_name);
                 payload.append('victim_relationship', formData.victim_relationship);
+                payload.append('is_external_victim', formData.is_external_victim ? "1" : "0");
+                if (formData.victim_identity_proof) {
+                    payload.append('victim_identity_proof', formData.victim_identity_proof);
+                }
             }
+
+            payload.append('suspect_name', formData.suspect_name);
+            payload.append('suspect_status', formData.suspect_status);
+            payload.append('suspect_affiliation', formData.suspect_affiliation);
 
             payload.append('counselor_id', formData.counselor_id);
             payload.append('urgency_level', formData.urgency_level);
@@ -773,27 +786,94 @@ const BuatLaporan = () => {
 
                             {/* Conditional Fields for "Other" Victim */}
                             {formData.victim_type === 'other' && (
-                                <div className="mt-6 p-5 bg-purple-50 rounded-xl border border-purple-100 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Korban <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="text" name="victim_name" required
-                                            value={formData.victim_name} onChange={handleInputChange}
-                                            placeholder="Masukkan nama lengkap korban"
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                        />
+                                <div className="mt-6 p-5 bg-purple-50 rounded-xl border border-purple-100 flex flex-col gap-4 animate-fadeIn">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Korban <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="text" name="victim_name" required
+                                                value={formData.victim_name} onChange={handleInputChange}
+                                                placeholder="Masukkan nama lengkap korban"
+                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">Hubungan dengan Korban <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="text" name="victim_relationship" required
+                                                value={formData.victim_relationship} onChange={handleInputChange}
+                                                placeholder="Contoh: Teman Kelas, Adik Tingkat"
+                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Hubungan dengan Korban <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="text" name="victim_relationship" required
-                                            value={formData.victim_relationship} onChange={handleInputChange}
-                                            placeholder="Contoh: Teman Kelas, Adik Tingkat"
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                        />
+                                    <div className="pt-2 border-t border-purple-100 mt-2">
+                                        <label className="flex items-center gap-3 cursor-pointer mb-4">
+                                            <input
+                                                type="checkbox" name="is_external_victim"
+                                                checked={formData.is_external_victim} onChange={handleInputChange}
+                                                className="w-5 h-5 rounded border-gray-300 text-[#8b5cf6] focus:ring-[#8b5cf6] accent-[#8b5cf6]"
+                                            />
+                                            <span className="text-sm font-semibold text-gray-800">Korban adalah Pihak Luar (Masyarakat Umum)</span>
+                                        </label>
+                                        
+                                        {formData.is_external_victim && (
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Bukti Identitas Korban <span className="text-red-500">*</span></label>
+                                                <p className="text-xs text-gray-500 mb-2">Upload scan/foto KTP korban untuk mencegah laporan palsu.</p>
+                                                <input
+                                                    type="file" required accept=".jpeg,.jpg,.png,.pdf"
+                                                    onChange={(e) => setFormData(prev => ({...prev, victim_identity_proof: e.target.files[0]}))}
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    </section>
+
+                    {/* DATA TERLAPOR (PELAKU) */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
+                                <User className="w-5 h-5 mr-2 text-rose-500" /> Data Terlapor (Pelaku)
+                            </h2>
+                            <p className="text-xs text-gray-500 mt-1">Identitas pelaku/tersangka dari Politeknik Negeri Jember</p>
+                        </div>
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Terlapor <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text" name="suspect_name" required
+                                    value={formData.suspect_name} onChange={handleInputChange}
+                                    placeholder="Nama Lengkap Terlapor"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Status Terlapor <span className="text-red-500">*</span></label>
+                                <select
+                                    name="suspect_status" required
+                                    value={formData.suspect_status} onChange={handleInputChange}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                >
+                                    <option value="Mahasiswa">Mahasiswa</option>
+                                    <option value="Dosen">Dosen</option>
+                                    <option value="Tenaga Pendidik">Tenaga Pendidik</option>
+                                    <option value="Pihak Luar">Pihak Luar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Afiliasi Terlapor <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text" name="suspect_affiliation" required
+                                    value={formData.suspect_affiliation} onChange={handleInputChange}
+                                    placeholder="Contoh: Jurusan TI / Publik"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                />
+                            </div>
                         </div>
                     </section>
 

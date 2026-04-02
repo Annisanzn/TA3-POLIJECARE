@@ -93,6 +93,10 @@ class UserComplaintController extends Controller
             'victim_type' => 'required|in:self,other',
             'victim_name' => 'required_if:victim_type,other|nullable|string|max:255',
             'victim_relationship' => 'required_if:victim_type,other|nullable|string|max:255',
+            'is_external_victim' => 'boolean',
+            'suspect_name' => 'required|string|max:255',
+            'suspect_status' => 'required|string|max:255',
+            'suspect_affiliation' => 'required|string|max:255',
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
             'counselor_id' => 'required|exists:users,id',
@@ -101,7 +105,8 @@ class UserComplaintController extends Controller
             'incident_date' => 'required|date',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240'
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
         try {
@@ -109,6 +114,11 @@ class UserComplaintController extends Controller
             if ($request->hasFile('attachment')) {
                 // Store the file in 'public/complaint_attachments' directory
                 $attachmentPath = $request->file('attachment')->store('complaint_attachments', 'public');
+            }
+
+            $identityProofPath = null;
+            if ($request->hasFile('victim_identity_proof')) {
+                $identityProofPath = $request->file('victim_identity_proof')->store('identity_proofs', 'public');
             }
 
             $complaint = Complaint::create([
@@ -120,6 +130,11 @@ class UserComplaintController extends Controller
                 'victim_type' => $validated['victim_type'],
                 'victim_name' => $validated['victim_name'] ?? null,
                 'victim_relationship' => $validated['victim_relationship'] ?? null,
+                'is_external_victim' => $request->boolean('is_external_victim', false),
+                'victim_identity_proof' => $identityProofPath,
+                'suspect_name' => $validated['suspect_name'],
+                'suspect_status' => $validated['suspect_status'],
+                'suspect_affiliation' => $validated['suspect_affiliation'],
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
                 'is_anonymous' => $request->boolean('is_anonymous', false),

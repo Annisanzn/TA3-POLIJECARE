@@ -405,9 +405,6 @@ const NewLoginPage = () => {
                   <FiAlertCircle className="h-6 w-6 text-red-600 mr-3 animate-pulse" />
                   <div>
                     <p className="text-red-700 font-medium">{loginError}</p>
-                    <p className="text-red-600 text-sm mt-1">
-                      Pesan error jelas dari sistem PolijeCare
-                    </p>
                   </div>
                 </div>
               </motion.div>

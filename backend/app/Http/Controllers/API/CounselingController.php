@@ -519,6 +519,105 @@ class CounselingController extends Controller
     }
 
     /**
+     * Submit counseling feedback
+     */
+    public function submitFeedback(Request $request, $id)
+    {
+        $user = Auth::user();
+        $schedule = CounselingSchedule::findOrFail($id);
+
+        if ($user->role !== 'konselor' || $schedule->counselor_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to submit feedback for this schedule'
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'feedback_notes' => 'required|string',
+            'feedback_attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,mp3,wav,mp4|max:20480',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed'
+            ], 422);
+        }
+
+        $attachmentPath = $schedule->feedback_attachment;
+        if ($request->hasFile('feedback_attachment')) {
+            $attachmentPath = $request->file('feedback_attachment')->store('counseling_feedbacks', 'public');
+        }
+
+        $schedule->update([
+            'status' => 'completed',
+            'feedback_notes' => $request->feedback_notes,
+            'feedback_attachment' => $attachmentPath,
+        ]);
+
+        // Sync to complaint
+        if ($schedule->complaint_id) {
+            $complaint = \App\Models\Complaint::find($schedule->complaint_id);
+            if ($complaint) {
+                $complaint->update(['status' => 'completed']);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $schedule->load(['user', 'counselor']),
+            'message' => 'Feedback submitted and schedule marked as completed'
+        ]);
+    }
+
+    /**
+     * Reassign counselor for a scheduled session
+     */
+    public function reassignCounselor(Request $request, $id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'operator') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only operators can reassign counselors'
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'counselor_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $counselor = User::find($request->counselor_id);
+        if ($counselor->role !== 'konselor') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Selected user is not a counselor'
+            ], 422);
+        }
+
+        $schedule = CounselingSchedule::findOrFail($id);
+
+        $schedule->update([
+            'counselor_id' => $request->counselor_id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $schedule->load(['user', 'counselor']),
+            'message' => 'Counselor reassigned successfully'
+        ]);
+    }
+
+    /**
      * Get schedule statistics
      */
     public function statistics()

@@ -30,9 +30,10 @@ $updatedCount = 0;
 foreach ($users as $user) {
     echo "  - {$user->name} ({$user->email}) - role: {$user->role}\n";
     
-    // Update password
-    $user->password = $hashedPassword;
-    $user->save();
+    // Update password DIRECTLY in DB to bypass Eloquent casts (avoid double-hashing)
+    Illuminate\Support\Facades\DB::table('users')
+        ->where('id', $user->id)
+        ->update(['password' => $hashedPassword]);
     
     $updatedCount++;
 }
