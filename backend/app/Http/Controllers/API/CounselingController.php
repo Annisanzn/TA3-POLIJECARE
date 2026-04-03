@@ -257,24 +257,28 @@ class CounselingController extends Controller
     {
         $user = Auth::user();
 
-        // Only users (mahasiswa) can create schedule requests
-        if ($user->role !== 'user') {
+        // Only users (mahasiswa) and counselors can create schedule requests
+        if ($user->role !== 'user' && $user->role !== 'konselor') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only students can request counseling schedules'
+                'message' => 'Unauthorized role'
             ], 403);
         }
 
         $validator = Validator::make($request->all(), [
-            'counselor_id' => 'required|exists:users,id',
+            'counselor_id' => 'nullable|exists:users,id',
             'complaint_id' => 'nullable|exists:complaints,id',
             'jenis_pengaduan' => 'nullable|string|max:255',
-            'tanggal' => 'required|date|after_or_equal:today',
+            'tanggal' => 'required|date',
             'jam_mulai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'jam_selesai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'metode' => ['required', Rule::in(['online', 'offline'])],
+            'metode' => ['nullable', Rule::in(['online', 'offline'])],
             'lokasi' => 'nullable|string|max:255',
             'meeting_link' => 'nullable|string|max:500',
+            'counselee_type' => 'nullable|string|max:255',
+            'counselee_name' => 'nullable|string|max:255',
+            'feedback_notes' => 'nullable|string',
+            'feedback_attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -285,52 +289,71 @@ class CounselingController extends Controller
             ], 422);
         }
 
-        // Normalize time to H:i format
+        // Normalize time
         $jamMulai = substr($request->jam_mulai, 0, 5);
         $jamSelesai = substr($request->jam_selesai, 0, 5);
 
-        // Validasi durasi maksimal 2 jam (120 menit)
-        $startMinutes = intval(substr($jamMulai, 0, 2)) * 60 + intval(substr($jamMulai, 3, 2));
-        $endMinutes = intval(substr($jamSelesai, 0, 2)) * 60 + intval(substr($jamSelesai, 3, 2));
-        $diffMinutes = $endMinutes - $startMinutes;
+        // Check for double booking (only for future/non-completed sessions)
+        $targetCounselorId = $request->counselor_id ?? ($user->role === 'konselor' ? $user->id : null);
+        $isQuickNote = $user->role === 'konselor' && $request->filled('feedback_notes');
+        
+        if ($targetCounselorId && !$isQuickNote) {
+            $hasConflict = CounselingSchedule::where('counselor_id', $targetCounselorId)
+                ->where('tanggal', $request->tanggal)
+                ->timeOverlap($jamMulai, $jamSelesai)
+                ->whereIn('status', ['pending', 'approved'])
+                ->exists();
 
-        if ($diffMinutes <= 0 || $diffMinutes > 120) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Durasi konseling tidak valid. Maksimal 2 jam berturutan.'
-            ], 422);
+            if ($hasConflict) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Slot waktu ini sudah dipesan. Silakan pilih jadwal lain.'
+                ], 409);
+            }
         }
 
-        // Check for double booking
-        $hasConflict = CounselingSchedule::where('counselor_id', $request->counselor_id)
-            ->where('tanggal', $request->tanggal)
-            ->timeOverlap($jamMulai, $jamSelesai)
-            ->whereIn('status', ['pending', 'approved'])
-            ->exists();
+        $data = [
+            'user_id' => $user->role === 'user' ? $user->id : null,
+            'complaint_id' => $request->complaint_id,
+            'counselor_id' => $targetCounselorId,
+            'jenis_pengaduan' => $request->jenis_pengaduan,
+            'tanggal' => $request->tanggal,
+            'jam_mulai' => $jamMulai,
+            'jam_selesai' => $jamSelesai,
+            'metode' => $request->metode ?? 'offline',
+            'lokasi' => $request->lokasi ?? 'Kantor Satgas',
+            'meeting_link' => $request->meeting_link,
+            'counselee_type' => $request->counselee_type ?? 'pelapor',
+            'counselee_name' => $request->counselee_name,
+            'feedback_notes' => $request->feedback_notes,
+            'status' => 'pending',
+            'approved_at' => null,
+        ];
 
-        if ($hasConflict) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Slot waktu ini sudah dipesan. Silakan pilih jadwal lain.'
-            ], 409);
+        // Jika konselor yang buat, langsung approve dan set selesai jika ada feedback
+        if ($user->role === 'konselor') {
+            $data['status'] = 'approved';
+            $data['approved_at'] = now();
+            
+            if ($request->filled('feedback_notes')) {
+                $data['status'] = 'completed';
+            }
         }
 
-        // Create the schedule inside try-catch to properly handle duplicate constraint
+        // Handle attachment
+        if ($request->hasFile('feedback_attachment')) {
+            try {
+                $path = $request->file('feedback_attachment')->store('counseling_feedback', 'public');
+                $data['feedback_attachment'] = $path;
+            } catch (\Exception $e) {
+                \Log::error('Feedback attachment upload failed: ' . $e->getMessage());
+            }
+        }
+
         try {
-            $schedule = CounselingSchedule::create([
-                'user_id' => $user->id,
-                'counselor_id' => $request->counselor_id,
-                'complaint_id' => $request->complaint_id,
-                'jenis_pengaduan' => $request->jenis_pengaduan,
-                'tanggal' => $request->tanggal,
-                'jam_mulai' => $jamMulai,
-                'jam_selesai' => $jamSelesai,
-                'metode' => $request->metode,
-                'lokasi' => $request->lokasi,
-                'meeting_link' => $request->meeting_link,
-                'status' => CounselingSchedule::STATUS_PENDING,
-            ]);
+            $schedule = CounselingSchedule::create($data);
 
+            // Update complaint if linked
             if ($request->complaint_id) {
                 $complaint = \App\Models\Complaint::find($request->complaint_id);
                 if ($complaint) {
@@ -339,26 +362,30 @@ class CounselingController extends Controller
                     ]);
                 }
             }
-        } catch (\Illuminate\Database\QueryException $e) {
-            $errorCode = $e->errorInfo[1] ?? null;
-            if ($errorCode == 1062) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Slot waktu ini sudah dipesan oleh Anda (atau sudah ada di jadwal). Silakan pilih slot lain.'
-                ], 409);
+
+            // Send notifications (only for new requests, not quick notes)
+            if (!$request->filled('feedback_notes')) {
+                try {
+                    $notificationService = new \App\Services\CounselingNotificationService();
+                    $notificationService->sendRequestNotification($schedule);
+                } catch (\Exception $e) {
+                    \Log::error('Notification failed: ' . $e->getMessage());
+                }
             }
-            throw $e;
+
+            return response()->json([
+                'success' => true,
+                'data' => $schedule->load(['user', 'counselor']),
+                'message' => 'Counseling schedule/note created successfully'
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Counseling creation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Send email notifications
-        $notificationService = new CounselingNotificationService();
-        $notificationService->sendRequestNotification($schedule);
-
-        return response()->json([
-            'success' => true,
-            'data' => $schedule->load(['user', 'counselor']),
-            'message' => 'Counseling schedule request created successfully'
-        ], 201);
     }
 
     /**

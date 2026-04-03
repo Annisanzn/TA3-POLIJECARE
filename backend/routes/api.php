@@ -97,9 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Pengaduan yang terkait konselor ini
         Route::get('/pengaduan', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
+        Route::get('/complaints', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
 
         // Jadwal Konseling milik konselor (counseling sessions where counselor_id = me)
         Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
+        Route::post('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'store']);
         Route::get('/jadwal/{id}', [\App\Http\Controllers\API\CounselingController::class, 'show']);
         Route::put('/jadwal/{id}/approve',  [\App\Http\Controllers\API\CounselingController::class, 'approve']);
         Route::put('/jadwal/{id}/reject',   [\App\Http\Controllers\API\CounselingController::class, 'reject']);
@@ -213,7 +215,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Counselor-specific counseling routes
-    Route::middleware(RoleMiddleware::class . ':counselor')->prefix('counseling')->group(function () {
+    Route::middleware(RoleMiddleware::class . ':konselor')->prefix('counseling')->group(function () {
         Route::put('/{id}/approve', [CounselingController::class, 'approve']);
         Route::put('/{id}/reject', [CounselingController::class, 'reject']);
     });
