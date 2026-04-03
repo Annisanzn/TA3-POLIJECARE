@@ -42,9 +42,11 @@ const ComplaintDetail = ({ isCounselor = false }) => {
 
     const [isSubmittingNote, setIsSubmittingNote] = useState(false);
     const [noteForm, setNoteForm] = useState({
+        activeSessionId: null, // If set, we are completing this session
         counselee_type: 'pelapor',
         counselee_name: '',
-        notes: '',
+        keterangan_pihak: '',
+        saran_konselor: '',
         attachment: null
     });
 
@@ -54,28 +56,39 @@ const ComplaintDetail = ({ isCounselor = false }) => {
 
     const handleNoteSubmit = async (e) => {
         e.preventDefault();
-        if (!noteForm.notes.trim()) return;
-
+        if (!noteForm.keterangan_pihak.trim()) return;
         setIsSubmittingNote(true);
+
         try {
             const formData = new FormData();
-            formData.append('complaint_id', id);
-            formData.append('counselee_type', noteForm.counselee_type);
-            formData.append('counselee_name', noteForm.counselee_name);
-            formData.append('feedback_notes', noteForm.notes);
-            formData.append('tanggal', new Date().toISOString().split('T')[0]);
-            formData.append('jam_mulai', new Date().toTimeString().slice(0, 5));
-            formData.append('jam_selesai', new Date().toTimeString().slice(0, 5));
+            formData.append('keterangan_pihak', noteForm.keterangan_pihak);
+            formData.append('saran_konselor', noteForm.saran_konselor);
             if (noteForm.attachment) {
                 formData.append('feedback_attachment', noteForm.attachment);
             }
 
-            const res = await axios.post('/konselor/jadwal', formData, {
+            let endpoint = '/konselor/jadwal';
+            if (noteForm.activeSessionId) {
+                // Completing an existing approved session
+                endpoint = `/konselor/jadwal/${noteForm.activeSessionId}/feedback`;
+            } else {
+                // Creating a new independent interaction record
+                formData.append('complaint_id', id);
+                formData.append('counselee_type', noteForm.counselee_type);
+                formData.append('counselee_name', noteForm.counselee_name);
+                formData.append('is_record_only', '1');
+                formData.append('status', 'completed');
+                formData.append('tanggal', new Date().toISOString().split('T')[0]);
+                formData.append('jam_mulai', new Date().toTimeString().slice(0, 5));
+                formData.append('jam_selesai', new Date().toTimeString().slice(0, 5));
+            }
+
+            const res = await axios.post(endpoint, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             if (res.data.success) {
-                setNoteForm({ counselee_type: 'pelapor', counselee_name: '', notes: '', attachment: null });
+                setNoteForm({ activeSessionId: null, counselee_type: 'pelapor', counselee_name: '', keterangan_pihak: '', saran_konselor: '', attachment: null });
                 fetchComplaint(); // Refresh data
             }
         } catch (err) {
@@ -305,44 +318,75 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                     {/* Counselor: Add Note Form */}
                                     {isCounselor && (
                                         <form onSubmit={handleNoteSubmit} className="mb-10 bg-indigo-50/30 border border-indigo-100 rounded-2xl p-6">
-                                            <h3 className="text-sm font-black text-indigo-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <FiPlus size={16} /> Tambah Catatan Baru
+                                            <h3 className="text-sm font-black text-indigo-900 uppercase tracking-widest mb-4 flex items-center justify-between gap-2">
+                                                <span className="flex items-center gap-2">
+                                                    {noteForm.activeSessionId ? <FiCheckCircle size={16} /> : <FiPlus size={16} />}
+                                                    {noteForm.activeSessionId ? 'Selesaikan Sesi Terjadwal' : 'Tambah Catatan Baru'}
+                                                </span>
+                                                {noteForm.activeSessionId && (
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setNoteForm({ ...noteForm, activeSessionId: null, counselee_type: 'pelapor', counselee_name: '' })}
+                                                        className="text-[10px] bg-white px-2 py-1 border border-indigo-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        BATAL SELESAIKAN
+                                                    </button>
+                                                )}
                                             </h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                 <div>
                                                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pihak Tertuju</label>
-                                                    <select
+                                                    <input
+                                                        disabled={!!noteForm.activeSessionId}
+                                                        list="counselee-types-detail"
                                                         value={noteForm.counselee_type}
                                                         onChange={(e) => setNoteForm({ ...noteForm, counselee_type: e.target.value })}
-                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
-                                                    >
-                                                        <option value="pelapor">Pelapor (Mahasiswa)</option>
-                                                        <option value="terlapor">Terlapor (Terduga)</option>
+                                                        placeholder="Cari atau ketik..."
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm disabled:opacity-50"
+                                                    />
+                                                    <datalist id="counselee-types-detail">
+                                                        <option value="pelapor">Pelapor</option>
+                                                        <option value="terlapor">Terlapor</option>
                                                         <option value="saksi">Saksi</option>
-                                                        <option value="umum">Lainnya...</option>
-                                                    </select>
+                                                        <option value="dosen">Dosen</option>
+                                                        <option value="staff">Staff / Karyawan</option>
+                                                        <option value="orang_tua">Orang Tua / Wali</option>
+                                                    </datalist>
                                                 </div>
                                                 <div>
                                                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama / Keterangan Pihak</label>
                                                     <input
                                                         type="text"
+                                                        disabled={!!noteForm.activeSessionId}
                                                         placeholder="Contoh: Nama Terlapor atau 'Saksi Kunci'"
                                                         value={noteForm.counselee_name}
                                                         onChange={(e) => setNoteForm({ ...noteForm, counselee_name: e.target.value })}
-                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm disabled:opacity-50"
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="mb-4">
-                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Hasil Pertemuan / Catatan</label>
-                                                <textarea
-                                                    required
-                                                    rows={3}
-                                                    placeholder="Tuliskan poin-poin hasil pertemuan atau perkembangan kasus..."
-                                                    value={noteForm.notes}
-                                                    onChange={(e) => setNoteForm({ ...noteForm, notes: e.target.value })}
-                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                                                />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan / Pengakuan Pihak</label>
+                                                    <textarea
+                                                        required
+                                                        rows={3}
+                                                        placeholder="Tuliskan poin-poin hasil pertemuan..."
+                                                        value={noteForm.keterangan_pihak}
+                                                        onChange={(e) => setNoteForm({ ...noteForm, keterangan_pihak: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Saran / Tindak Lanjut Konselor</label>
+                                                    <textarea
+                                                        rows={3}
+                                                        placeholder="Rencana tindak lanjut atau saran profesional..."
+                                                        value={noteForm.saran_konselor}
+                                                        onChange={(e) => setNoteForm({ ...noteForm, saran_konselor: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="flex items-center justify-between gap-4">
                                                 <div className="flex-1">
@@ -357,11 +401,11 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                 </div>
                                                 <button
                                                     type="submit"
-                                                    disabled={isSubmittingNote || !noteForm.notes.trim()}
-                                                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                                    disabled={isSubmittingNote || !noteForm.keterangan_pihak.trim()}
+                                                    className={`px-6 py-2.5 ${noteForm.activeSessionId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2`}
                                                 >
-                                                    {isSubmittingNote ? <FiLoader className="animate-spin" /> : <FiPlus />}
-                                                    Simpan Catatan
+                                                    {isSubmittingNote ? <FiLoader className="animate-spin" /> : (noteForm.activeSessionId ? <FiCheckCircle /> : <FiPlus />)}
+                                                    {noteForm.activeSessionId ? 'Selesaikan & Simpan Feedback' : 'Simpan Catatan'}
                                                 </button>
                                             </div>
                                         </form>
@@ -382,7 +426,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                     </div>
 
                                                     <div className="bg-gray-50 group-hover:bg-white group-hover:shadow-md group-hover:border-indigo-100 rounded-2xl p-5 border border-gray-100 transition-all duration-300">
-                                                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black rounded uppercase tracking-wider">
                                                                     {note.counselee_type}
@@ -390,16 +434,60 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                                 <h4 className="font-bold text-gray-900 text-sm">
                                                                     {note.counselee_name || (note.counselee_type === 'pelapor' ? 'Pelapor' : 'Pihak Terkait')}
                                                                 </h4>
+                                                                {note.status === 'approved' && (
+                                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[9px] font-black rounded uppercase tracking-wider flex items-center gap-1">
+                                                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                                                        Jadwal Aktif
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
-                                                                <FiCalendar size={10} /> {new Date(note.created_at).toLocaleDateString('id-ID')}
-                                                                <FiClock size={10} className="ml-1" /> {note.jam_mulai?.slice(0, 5)}
+                                                            <div className="flex items-center gap-4">
+                                                                {isCounselor && note.status === 'approved' && (
+                                                                    <button 
+                                                                        onClick={() => {
+                                                                            setNoteForm({
+                                                                                ...noteForm,
+                                                                                activeSessionId: note.id,
+                                                                                counselee_type: note.counselee_type,
+                                                                                counselee_name: note.counselee_name || 'Pelapor'
+                                                                            });
+                                                                            window.scrollTo({ top: 300, behavior: 'smooth' });
+                                                                        }}
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-[10px] font-black rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+                                                                    >
+                                                                        <FiCheckCircle size={12} /> SELESAIKAN SESI
+                                                                    </button>
+                                                                )}
+                                                                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                                                                    <FiCalendar size={10} /> {new Date(note.tanggal || note.created_at).toLocaleDateString('id-ID')}
+                                                                    <FiClock size={10} className="ml-1" /> {note.jam_mulai?.slice(0, 5)}
+                                                                </div>
                                                             </div>
                                                         </div>
 
-                                                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
-                                                            {note.feedback_notes}
-                                                        </p>
+                                                        {note.keterangan_pihak && (
+                                                            <div className="mb-4">
+                                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Keterangan / Pengakuan</p>
+                                                                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                                                    {note.keterangan_pihak}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {note.saran_konselor && (
+                                                            <div className="mb-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                                                                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><FiCheckCircle size={10} /> Saran / Tindak Lanjut</p>
+                                                                <p className="text-sm text-blue-900 leading-relaxed whitespace-pre-wrap italic">
+                                                                    {note.saran_konselor}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {!note.keterangan_pihak && !note.saran_konselor && note.feedback_notes && (
+                                                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
+                                                                {note.feedback_notes}
+                                                            </p>
+                                                        )}
 
                                                         {note.feedback_attachment && (
                                                             <a

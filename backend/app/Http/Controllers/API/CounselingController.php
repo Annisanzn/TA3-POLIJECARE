@@ -24,21 +24,23 @@ class CounselingController extends Controller
         // Role-based filtering
         if ($user->role === 'konselor') {
             $query->where('counselor_id', $user->id);
+            // Show ONLY Pelapor (Reporter) sessions in the schedule list
+            // Witness/Suspect meetings only appear in the Complaint Detail
+            $query->where('counselee_type', 'pelapor');
+            $query->where('is_record_only', false); 
+        } elseif ($user->role === 'operator') {
+            // Operator dashboard only shows active student schedules
+            $query->where('counselee_type', 'pelapor');
+            $query->where('is_record_only', false);
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
         }
-        // Operator can see all schedules (no filter)
 
         // Apply filters
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         } else {
-            // Default: Only show schedules that are already approved, completed, or rejected, NOT pending!
-            // Wait, if it's the dashboard we might want to see pending? 
-            // In counselor dash we DO want to see pending.
-            // The user requested: "Jika belum di Approve/Setjui, jangan di masukkan ke Jadwal Konseling, Ketika sudah di approve/setujui baru masuk ke tabel atau menu Jadwal Konseling"
-            // So if they are in "Jadwal Konseling" menu (which is the dashboard), they only want to see approved ones?
-            // "Ketika sudah di approve/setujui baru masuk ke tabel atau menu Jadwal Konseling" -> only approved!
+            // "Jika belum di Approve, jangan di masukkan ke Jadwal Konseling"
             $query->whereIn('status', ['approved', 'completed', 'rejected', 'cancelled']);
         }
 
@@ -277,7 +279,9 @@ class CounselingController extends Controller
             'meeting_link' => 'nullable|string|max:500',
             'counselee_type' => 'nullable|string|max:255',
             'counselee_name' => 'nullable|string|max:255',
-            'feedback_notes' => 'nullable|string',
+            'keterangan_pihak' => 'nullable|string',
+            'saran_konselor' => 'nullable|string',
+            'is_record_only' => 'nullable|boolean',
             'feedback_attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ]);
 
@@ -295,9 +299,9 @@ class CounselingController extends Controller
 
         // Check for double booking (only for future/non-completed sessions)
         $targetCounselorId = $request->counselor_id ?? ($user->role === 'konselor' ? $user->id : null);
-        $isQuickNote = $user->role === 'konselor' && $request->filled('feedback_notes');
+        $isRecordOnly = $request->boolean('is_record_only', false);
         
-        if ($targetCounselorId && !$isQuickNote) {
+        if ($targetCounselorId && !$isRecordOnly) {
             $hasConflict = CounselingSchedule::where('counselor_id', $targetCounselorId)
                 ->where('tanggal', $request->tanggal)
                 ->timeOverlap($jamMulai, $jamSelesai)
@@ -325,17 +329,19 @@ class CounselingController extends Controller
             'meeting_link' => $request->meeting_link,
             'counselee_type' => $request->counselee_type ?? 'pelapor',
             'counselee_name' => $request->counselee_name,
-            'feedback_notes' => $request->feedback_notes,
+            'keterangan_pihak' => $request->keterangan_pihak,
+            'saran_konselor' => $request->saran_konselor,
+            'is_record_only' => $isRecordOnly,
             'status' => 'pending',
             'approved_at' => null,
         ];
 
-        // Jika konselor yang buat, langsung approve dan set selesai jika ada feedback
+        // Jika konselor yang buat, langsung approve dan set selesai jika ini adalah record/note
         if ($user->role === 'konselor') {
             $data['status'] = 'approved';
             $data['approved_at'] = now();
             
-            if ($request->filled('feedback_notes')) {
+            if ($isRecordOnly) {
                 $data['status'] = 'completed';
             }
         }
@@ -561,7 +567,9 @@ class CounselingController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'feedback_notes' => 'required|string',
+            'keterangan_pihak' => 'required_without:feedback_notes|string',
+            'saran_konselor' => 'nullable|string',
+            'feedback_notes' => 'nullable|string', // Support legacy
             'feedback_attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf,mp3,wav,mp4|max:20480',
         ]);
 
@@ -580,7 +588,9 @@ class CounselingController extends Controller
 
         $schedule->update([
             'status' => 'completed',
-            'feedback_notes' => $request->feedback_notes,
+            'keterangan_pihak' => $request->keterangan_pihak ?? $request->feedback_notes,
+            'saran_konselor' => $request->saran_konselor,
+            'feedback_notes' => $request->feedback_notes, // Keep for legacy
             'feedback_attachment' => $attachmentPath,
         ]);
 
