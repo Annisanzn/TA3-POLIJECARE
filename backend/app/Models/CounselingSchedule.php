@@ -28,11 +28,15 @@ class CounselingSchedule extends Model
         'feedback_attachment',
         'counselee_type',
         'counselee_name',
+        'keterangan_pihak',
+        'saran_konselor',
+        'is_record_only',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'approved_at' => 'datetime',
+        'is_record_only' => 'boolean',
     ];
 
     /**

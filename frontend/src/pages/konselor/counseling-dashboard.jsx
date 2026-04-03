@@ -44,62 +44,19 @@ const CounselorCounselingDashboard = () => {
 
   // Modal state
   const [detailModal, setDetailModal] = useState({ open: false, schedule: null, loading: false });
-  const [feedbackNotes, setFeedbackNotes] = useState('');
+  const [keteranganPihak, setKeteranganPihak] = useState('');
+  const [saranKonselor, setSaranKonselor] = useState('');
   const [feedbackAttachment, setFeedbackAttachment] = useState(null);
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [stats, setStats] = useState({
     total: 0, pending: 0, approved: 0, completed: 0, cancelled: 0, today: 0, upcoming: 0,
   });
 
-  // New Session Modal State
-  const [newSessionModal, setNewSessionModal] = useState({
-    open: false,
-    complaint_id: '',
-    counselee_type: 'pelapor',
-    counselee_name: '',
-    tanggal: new Date().toISOString().split('T')[0],
-    jam_mulai: '09:00',
-    jam_selesai: '10:00',
-    metode: 'offline',
-    lokasi: 'Kantor Satgas PPKPT',
-  });
   const [myComplaints, setMyComplaints] = useState([]); // Complaints assigned to this counselor
-
-  // Handle Feedback Submission
-  const handleSubmitFeedback = async (e) => {
-    e.preventDefault();
-    if (!detailModal.schedule || !feedbackNotes.trim()) return;
-    
-    setIsSubmittingFeedback(true);
-    const formData = new FormData();
-    formData.append('feedback_notes', feedbackNotes);
-    if (feedbackAttachment) {
-      formData.append('feedback_attachment', feedbackAttachment);
-    }
-
-    try {
-      const res = await axios.post(`/konselor/jadwal/${detailModal.schedule.id}/feedback`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      if (res.data.success) {
-        setSuccess('Berhasil mengirimkan feedback dan menyelesaikan sesi!');
-        setDetailModal({ open: false, schedule: null, loading: false });
-        fetchSchedules(pagination.current_page);
-        fetchStatistics();
-      } else {
-        setError(res.data.message || 'Gagal mengirim feedback');
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Gagal mengirim feedback');
-    } finally {
-      setIsSubmittingFeedback(false);
-    }
-  };
 
   // Open detail modal with full data from API
   const openDetailModal = async (schedule) => {
-    setFeedbackNotes('');
+    setKeteranganPihak('');
+    setSaranKonselor('');
     setFeedbackAttachment(null);
     setDetailModal({ open: true, schedule, loading: true });
     try {
@@ -165,27 +122,6 @@ const CounselorCounselingDashboard = () => {
     }
   };
 
-  const handleCreateNewSession = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const payload = {
-        ...newSessionModal,
-        counselor_id: user.id, // Auto-assign to self
-      };
-      const res = await axios.post('/jadwal-konseling', payload);
-      if (res.data.success) {
-        setSuccess('Berhasil mencatat sesi pertemuan baru!');
-        setNewSessionModal(prev => ({ ...prev, open: false }));
-        fetchSchedules(pagination.current_page);
-        fetchStatistics();
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mencatat sesi baru');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Fetch schedules with filters
   const fetchSchedules = async (page = 1) => {
@@ -377,16 +313,6 @@ const CounselorCounselingDashboard = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => {
-                      fetchMyComplaints();
-                      setNewSessionModal(prev => ({ ...prev, open: true }));
-                    }}
-                    className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-md flex items-center gap-2"
-                  >
-                    <FiEdit className="w-5 h-5" />
-                    Catat Pertemuan Baru
-                  </button>
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <FiUser className="w-6 h-6 text-blue-600" />
                   </div>
@@ -900,55 +826,26 @@ const CounselorCounselingDashboard = () => {
                           </div>
                         )}
 
-                        {detailModal.schedule?.status === 'approved' && (
-                          <div className="p-6 bg-white rounded-[32px] border border-blue-200 shadow-sm mt-6">
-                            <h4 className="text-sm font-black text-blue-900 uppercase tracking-widest mb-4 flex items-center gap-2"><FiCheckCircle size={16} /> Selesaikan Sesi & Feedback</h4>
-                            <p className="text-xs text-gray-500 mb-4">Berikan catatan hasil konseling dan unggah bukti sesi (opsional) untuk menyelesaikan jadwal ini.</p>
-                            <form onSubmit={handleSubmitFeedback} className="space-y-4">
-                              <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Catatan Konseling <span className="text-red-500">*</span></label>
-                                <textarea
-                                  required rows={4}
-                                  className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm focus:border-blue-500 focus:ring-blue-500"
-                                  placeholder="Hasil analisis, saran, atau tindak lanjut..."
-                                  value={feedbackNotes} onChange={e => setFeedbackNotes(e.target.value)}
-                                ></textarea>
-                              </div>
-                              <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-2">Bukti/Dokumen Sesi (Opsional)</label>
-                                <input
-                                  type="file" accept=".jpg,.jpeg,.png,.pdf,.mp3,.mp4"
-                                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                  onChange={e => setFeedbackAttachment(e.target.files[0])}
-                                />
-                                <p className="text-xs text-gray-400 mt-1">Format: JPG, PNG, PDF, MP3, MP4. (Maks 20MB)</p>
-                              </div>
-                              <button
-                                type="submit" disabled={isSubmittingFeedback || !feedbackNotes.trim()}
-                                className="w-full py-4 mt-2 bg-blue-600 text-white rounded-[24px] text-sm font-black hover:bg-blue-700 transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                              >
-                                {isSubmittingFeedback ? <FiLoader className="animate-spin" /> : <FiCheck />}
-                                SIMPAN FEEDBACK & SELESAIKAN
-                              </button>
-                            </form>
-                          </div>
-                        )}
 
-                        {detailModal.schedule?.status === 'completed' && detailModal.schedule?.feedback_notes && (
-                          <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6">
-                            <h4 className="text-sm font-black text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Konseling (Feedback)</h4>
-                            <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                              {detailModal.schedule.feedback_notes}
-                            </div>
-                            {detailModal.schedule.feedback_attachment && (
-                              <div className="mt-4">
-                                <a
-                                  href={`http://127.0.0.1:8000/storage/${detailModal.schedule.feedback_attachment}`}
-                                  target="_blank" rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold transition-colors"
-                                >
-                                  <FiExternalLink size={14} /> Lihat/Unduh Bukti Sesi
-                                </a>
+                        {(detailModal.schedule?.status === 'completed' || detailModal.schedule?.is_record_only) && (detailModal.schedule?.keterangan_pihak || detailModal.schedule?.saran_konselor) && (
+                          <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6 space-y-6">
+                            <h4 className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2"><FiFileText size={16} /> Hasil Pertemuan</h4>
+                            
+                            {detailModal.schedule.keterangan_pihak && (
+                              <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan / Pengakuan</p>
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                                  {detailModal.schedule.keterangan_pihak}
+                                </div>
+                              </div>
+                            )}
+
+                            {detailModal.schedule.saran_konselor && (
+                              <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Saran / Tindak Lanjut</p>
+                                <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50 text-sm text-blue-900 leading-relaxed whitespace-pre-wrap italic">
+                                  {detailModal.schedule.saran_konselor}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -964,125 +861,6 @@ const CounselorCounselingDashboard = () => {
               </div>
             )}
 
-            {/* ── New Session Modal (Internal/Suspect Meeting) ─────────── */}
-            {newSessionModal.open && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-md" onClick={() => setNewSessionModal(prev => ({ ...prev, open: false }))} />
-                <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
-                  <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
-                    <div>
-                      <h3 className="text-2xl font-black text-gray-900 tracking-tight">Catat Pertemuan Baru</h3>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Catat sesi pengakuan atau interview kasus</p>
-                    </div>
-                    <button onClick={() => setNewSessionModal(prev => ({ ...prev, open: false }))}
-                      className="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-2xl text-gray-400 transition-all active:scale-95">
-                      <FiX size={24} />
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleCreateNewSession} className="p-10 overflow-y-auto space-y-6">
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Pilih Pengaduan Terkait <span className="text-red-500">*</span></label>
-                      <select
-                        required
-                        value={newSessionModal.complaint_id}
-                        onChange={e => setNewSessionModal(prev => ({ ...prev, complaint_id: e.target.value }))}
-                        className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      >
-                        <option value="">-- Pilih Laporan --</option>
-                        {myComplaints.map(c => (
-                          <option key={c.id} value={c.id}>#{c.report_id} - {c.title}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Subjek Pertemuan</label>
-                        <select
-                          value={newSessionModal.counselee_type}
-                          onChange={e => setNewSessionModal(prev => ({ ...prev, counselee_type: e.target.value }))}
-                          className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                        >
-                          <option value="pelapor">Pelapor (Mahasiswa)</option>
-                          <option value="terlapor">Terlapor (Terduga Pelaku)</option>
-                          <option value="saksi">Saksi</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Nama Subjek</label>
-                        <input
-                          type="text"
-                          placeholder="Nama lengkap..."
-                          value={newSessionModal.counselee_name}
-                          onChange={e => setNewSessionModal(prev => ({ ...prev, counselee_name: e.target.value }))}
-                          className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Tanggal</label>
-                        <input
-                          type="date" required
-                          value={newSessionModal.tanggal}
-                          onChange={e => setNewSessionModal(prev => ({ ...prev, tanggal: e.target.value }))}
-                          className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Mulai</label>
-                          <input
-                            type="time" required
-                            value={newSessionModal.jam_mulai}
-                            onChange={e => setNewSessionModal(prev => ({ ...prev, jam_mulai: e.target.value }))}
-                            className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Selesai</label>
-                          <input
-                            type="time" required
-                            value={newSessionModal.jam_selesai}
-                            onChange={e => setNewSessionModal(prev => ({ ...prev, jam_selesai: e.target.value }))}
-                            className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Lokasi / Link Meeting</label>
-                      <input
-                        type="text"
-                        value={newSessionModal.lokasi}
-                        onChange={e => setNewSessionModal(prev => ({ ...prev, lokasi: e.target.value }))}
-                        placeholder="Ruang Satgas atau Link Zoom..."
-                        className="w-full rounded-2xl border-gray-200 bg-gray-50 p-4 text-sm"
-                      />
-                    </div>
-
-                    <div className="pt-4 flex flex-col gap-3">
-                      <button
-                        type="submit" disabled={isLoading || !newSessionModal.complaint_id}
-                        className="w-full py-4 bg-indigo-600 text-white rounded-[24px] text-sm font-black hover:bg-indigo-700 transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {isLoading ? <FiLoader className="animate-spin" /> : <FiCheck />}
-                        SIMPAN PERTEMUAN
-                      </button>
-                      <button
-                        type="button" onClick={() => setNewSessionModal(prev => ({ ...prev, open: false }))}
-                        className="w-full py-4 bg-white border border-gray-200 text-gray-600 rounded-[24px] text-sm font-black hover:bg-gray-50 transition-all active:scale-95"
-                      >
-                        BATAL
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
           </div>
         </main>
       </div>

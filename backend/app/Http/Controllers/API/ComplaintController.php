@@ -186,6 +186,8 @@ class ComplaintController extends Controller
                         'jam_selesai' => $s->jam_selesai,
                         'status' => $s->status,
                         'feedback_notes' => $s->feedback_notes,
+                        'keterangan_pihak' => $s->keterangan_pihak,
+                        'saran_konselor' => $s->saran_konselor,
                         'feedback_attachment' => $s->feedback_attachment ? asset('storage/' . $s->feedback_attachment) : null,
                         'created_at' => $s->created_at->toDateTimeString(),
                     ];

@@ -19,7 +19,9 @@ class KonselorDashboardController extends Controller
         $userId = Auth::id();
 
         // ── Jadwal Konseling (counseling_schedules where counselor_id = me) ──
-        $jadwalQuery = CounselingSchedule::where('counselor_id', $userId);
+        $jadwalQuery = CounselingSchedule::where('counselor_id', $userId)
+            ->where('counselee_type', 'pelapor') // Only student schedules
+            ->where('is_record_only', false); // Hide interaction records from stats
 
         $totalJadwal    = (clone $jadwalQuery)->count();
         $pending        = (clone $jadwalQuery)->where('status', 'pending')->count();
@@ -33,7 +35,7 @@ class KonselorDashboardController extends Controller
             ->count();
 
         // ── Total mahasiswa unik yang pernah konseling dengan saya ──
-        $mahasiswaCount = (clone $jadwalQuery)->distinct('user_id')->count('user_id');
+        $mahasiswaCount = (clone $jadwalQuery)->whereNotNull('user_id')->distinct('user_id')->count('user_id');
 
         // ── Materi milik saya ──
         $materiCount = Material::where('uploaded_by', $userId)->count();
