@@ -92,6 +92,7 @@ const LaporUmum = () => {
     const [success, setSuccess] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [createdComplaintId, setCreatedComplaintId] = useState(null);
+    const [createdReportId, setCreatedReportId] = useState('');
 
     const defaultCenter = [-8.1643, 113.7169]; // Jember Default Coordinate
     const [mapPosition, setMapPosition] = useState(null);
@@ -312,6 +313,7 @@ const LaporUmum = () => {
 
             if (data?.data?.id) {
                 setCreatedComplaintId(data.data.id);
+                setCreatedReportId(data.data.report_id);
             }
 
             setSuccess(true);
@@ -331,8 +333,19 @@ const LaporUmum = () => {
                 <div className="flex-grow w-full max-w-3xl mx-auto p-4 md:p-8 text-center mt-20">
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Laporan Berhasil Terkirim!</h2>
-                    <p className="text-gray-500 mb-4">Laporan Anda telah masuk ke sistem Satgas PPKPT Politeknik Negeri Jember. Tim Satgas akan segera meninjau laporan Anda dan menghubungi Anda melalui kontak yang telah diberikan.</p>
-                    <button onClick={() => navigate('/')} className="px-6 py-2 bg-[#8b5cf6] text-white rounded-xl hover:bg-purple-700">Kembali ke Beranda</button>
+                    <p className="text-gray-500 mb-6">Laporan Anda telah masuk ke sistem Satgas PPKPT Politeknik Negeri Jember. Tim Satgas akan segera meninjau laporan Anda dan menghubungi Anda melalui kontak yang telah diberikan.</p>
+                    
+                    <div className="flex flex-col items-center gap-4">
+                        <a 
+                            href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="px-8 py-3 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center gap-2 shadow-md hover:scale-105"
+                        >
+                            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
+                            Konfirmasi via WhatsApp Satgas
+                        </a>
+                        <button onClick={() => navigate('/')} className="px-6 py-2 text-gray-500 hover:text-[#8b5cf6] font-medium transition-colors">Kembali ke Beranda</button>
+                    </div>
                 </div>
                 <Footer />
             </div>

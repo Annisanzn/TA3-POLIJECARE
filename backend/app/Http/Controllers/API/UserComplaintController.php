@@ -108,6 +108,9 @@ class UserComplaintController extends Controller
             'longitude' => 'nullable|numeric',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'guest_name' => 'nullable|string|max:255',
+            'guest_email' => 'nullable|email|max:255',
+            'guest_phone' => 'nullable|string|max:20',
         ]);
 
         try {
@@ -145,6 +148,9 @@ class UserComplaintController extends Controller
                 'longitude' => $validated['longitude'] ?? null,
                 // 'incident_date' => $validated['incident_date'], // Un-comment if column exists
                 'file_path' => $attachmentPath,
+                'guest_name' => $validated['guest_name'] ?? null,
+                'guest_email' => $validated['guest_email'] ?? null,
+                'guest_phone' => $validated['guest_phone'] ?? null,
 
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),

@@ -85,6 +85,7 @@ const ChartSection = () => {
   // Fetch category distribution data from API
   useEffect(() => {
     const fetchCategoryDistribution = async () => {
+      if (!user?.role) return;
       try {
         setLoadingCategory(true);
         // Determine API prefix based on user role

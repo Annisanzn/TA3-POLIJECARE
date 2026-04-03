@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     FiArrowLeft, FiUser, FiMapPin, FiCalendar, FiClock,
     FiAlertCircle, FiFileText, FiLink, FiCheckCircle,
-    FiInfo, FiShield, FiMonitor, FiSmartphone
+    FiInfo, FiShield, FiMonitor, FiSmartphone,
+    FiPlus, FiMessageSquare, FiUploadCloud, FiPaperclip, FiLoader
 } from 'react-icons/fi';
 import { complaintService } from '../../services/complaintService';
 import Sidebar from '../../components/layout/Sidebar';
@@ -39,9 +40,51 @@ const ComplaintDetail = ({ isCounselor = false }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+    const [noteForm, setNoteForm] = useState({
+        counselee_type: 'pelapor',
+        counselee_name: '',
+        notes: '',
+        attachment: null
+    });
+
     useEffect(() => {
         fetchComplaint();
     }, [id]);
+
+    const handleNoteSubmit = async (e) => {
+        e.preventDefault();
+        if (!noteForm.notes.trim()) return;
+
+        setIsSubmittingNote(true);
+        try {
+            const formData = new FormData();
+            formData.append('complaint_id', id);
+            formData.append('counselee_type', noteForm.counselee_type);
+            formData.append('counselee_name', noteForm.counselee_name);
+            formData.append('feedback_notes', noteForm.notes);
+            formData.append('tanggal', new Date().toISOString().split('T')[0]);
+            formData.append('jam_mulai', new Date().toTimeString().slice(0, 5));
+            formData.append('jam_selesai', new Date().toTimeString().slice(0, 5));
+            if (noteForm.attachment) {
+                formData.append('feedback_attachment', noteForm.attachment);
+            }
+
+            const res = await axios.post('/konselor/jadwal', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            if (res.data.success) {
+                setNoteForm({ counselee_type: 'pelapor', counselee_name: '', notes: '', attachment: null });
+                fetchComplaint(); // Refresh data
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Gagal menyimpan catatan');
+        } finally {
+            setIsSubmittingNote(false);
+        }
+    };
 
     const fetchComplaint = async () => {
         try {
@@ -244,6 +287,135 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                         )}
                                     </div>
 
+                                </div>
+                            </div>
+
+                            {/* Counseling Notes Section */}
+                            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <FiMessageSquare className="text-indigo-600" />
+                                        <h2 className="font-semibold text-gray-800">Catatan Perkembangan & Sesi</h2>
+                                    </div>
+                                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-lg">
+                                        {complaint.counseling_notes?.length || 0} TOTAL
+                                    </span>
+                                </div>
+                                <div className="p-6">
+                                    {/* Counselor: Add Note Form */}
+                                    {isCounselor && (
+                                        <form onSubmit={handleNoteSubmit} className="mb-10 bg-indigo-50/30 border border-indigo-100 rounded-2xl p-6">
+                                            <h3 className="text-sm font-black text-indigo-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                <FiPlus size={16} /> Tambah Catatan Baru
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pihak Tertuju</label>
+                                                    <select
+                                                        value={noteForm.counselee_type}
+                                                        onChange={(e) => setNoteForm({ ...noteForm, counselee_type: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                                                    >
+                                                        <option value="pelapor">Pelapor (Mahasiswa)</option>
+                                                        <option value="terlapor">Terlapor (Terduga)</option>
+                                                        <option value="saksi">Saksi</option>
+                                                        <option value="umum">Lainnya...</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama / Keterangan Pihak</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Contoh: Nama Terlapor atau 'Saksi Kunci'"
+                                                        value={noteForm.counselee_name}
+                                                        onChange={(e) => setNoteForm({ ...noteForm, counselee_name: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Hasil Pertemuan / Catatan</label>
+                                                <textarea
+                                                    required
+                                                    rows={3}
+                                                    placeholder="Tuliskan poin-poin hasil pertemuan atau perkembangan kasus..."
+                                                    value={noteForm.notes}
+                                                    onChange={(e) => setNoteForm({ ...noteForm, notes: e.target.value })}
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                                        <FiPaperclip className="text-gray-400" />
+                                                        <span className="text-sm text-gray-500 truncate">{noteForm.attachment?.name || 'Lampirkan Bukti (Opsional)'}</span>
+                                                        <input
+                                                            type="file" className="hidden"
+                                                            onChange={(e) => setNoteForm({ ...noteForm, attachment: e.target.files[0] })}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSubmittingNote || !noteForm.notes.trim()}
+                                                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                                >
+                                                    {isSubmittingNote ? <FiLoader className="animate-spin" /> : <FiPlus />}
+                                                    Simpan Catatan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+
+                                    {/* Timeline of Notes */}
+                                    <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                                        {!complaint.counseling_notes || complaint.counseling_notes.length === 0 ? (
+                                            <div className="pl-10 py-4 italic text-gray-400 text-sm">
+                                                Belum ada catatan perkembangan untuk laporan ini.
+                                            </div>
+                                        ) : (
+                                            complaint.counseling_notes.map((note) => (
+                                                <div key={note.id} className="relative pl-10 group">
+                                                    {/* Timeline Bullet */}
+                                                    <div className="absolute left-0 top-1.5 w-8 h-8 rounded-full bg-white border-2 border-indigo-100 flex items-center justify-center -translate-x-1 shadow-sm transition-all group-hover:border-indigo-500">
+                                                        <FiMessageSquare size={12} className="text-indigo-400 group-hover:text-indigo-600" />
+                                                    </div>
+
+                                                    <div className="bg-gray-50 group-hover:bg-white group-hover:shadow-md group-hover:border-indigo-100 rounded-2xl p-5 border border-gray-100 transition-all duration-300">
+                                                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black rounded uppercase tracking-wider">
+                                                                    {note.counselee_type}
+                                                                </span>
+                                                                <h4 className="font-bold text-gray-900 text-sm">
+                                                                    {note.counselee_name || (note.counselee_type === 'pelapor' ? 'Pelapor' : 'Pihak Terkait')}
+                                                                </h4>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                                                                <FiCalendar size={10} /> {new Date(note.created_at).toLocaleDateString('id-ID')}
+                                                                <FiClock size={10} className="ml-1" /> {note.jam_mulai?.slice(0, 5)}
+                                                            </div>
+                                                        </div>
+
+                                                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
+                                                            {note.feedback_notes}
+                                                        </p>
+
+                                                        {note.feedback_attachment && (
+                                                            <a
+                                                                href={note.feedback_attachment}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-gray-600 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                                                            >
+                                                                <FiLink size={12} /> LIHAT LAMPIRAN BUKTI
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

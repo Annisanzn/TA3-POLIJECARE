@@ -91,6 +91,7 @@ const BuatLaporan = () => {
     const [success, setSuccess] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [createdComplaintId, setCreatedComplaintId] = useState(null);
+    const [createdReportId, setCreatedReportId] = useState('');
 
     const defaultCenter = [-8.1643, 113.7169]; // Jember Default Coordinate
     const [mapPosition, setMapPosition] = useState(null);
@@ -295,7 +296,9 @@ const BuatLaporan = () => {
         chronology: '',
         location: '',
         incident_date: '',
-        attachment: null
+        attachment: null,
+        guest_phone: '',
+        guest_email: ''
     });
 
     const getAuthHeaders = () => {
@@ -400,6 +403,8 @@ const BuatLaporan = () => {
             if (formData.latitude) payload.append('latitude', formData.latitude);
             if (formData.longitude) payload.append('longitude', formData.longitude);
             if (formData.attachment) payload.append('attachment', formData.attachment);
+            if (formData.guest_phone) payload.append('guest_phone', formData.guest_phone);
+            if (formData.guest_email) payload.append('guest_email', formData.guest_email);
 
             const response = await fetch(`${API_BASE_URL}/user/reports`, {
                 method: 'POST',
@@ -420,6 +425,7 @@ const BuatLaporan = () => {
 
             if (data?.data?.id) {
                 setCreatedComplaintId(data.data.id);
+                setCreatedReportId(data.data.report_id);
             }
 
             setSuccess(true);
@@ -466,6 +472,26 @@ const BuatLaporan = () => {
                                 <h3 className="text-lg font-bold text-gray-900">Halo, terima kasih telah mengajukan laporan.</h3>
                                 <p className="text-sm text-gray-700">Langkah selanjutnya, silakan pilih jadwal temu yang sesuai dengan waktu Anda dan Konselor <strong>{pickedCounselor.name}</strong>.</p>
                                 <p className="text-sm text-[#2e1065] font-semibold">Konseling bersifat rahasia dan aman, dilakukan secara tatap muka maupun online sesuai kesepakatan.</p>
+                                
+                                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                            <Shield className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-green-800">Laporan Berhasil Diterima</p>
+                                            <p className="text-xs text-green-700">Nomor Registrasi: <strong>{createdReportId}</strong></p>
+                                        </div>
+                                    </div>
+                                    <a 
+                                        href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
+                                        target="_blank" rel="noopener noreferrer"
+                                        className="w-full md:w-auto px-5 py-2.5 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center justify-center gap-2 shadow-sm"
+                                    >
+                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
+                                        Konfirmasi via WhatsApp Satgas
+                                    </a>
+                                </div>
                             </div>
 
                             <div>
@@ -686,8 +712,19 @@ const BuatLaporan = () => {
                 <div className="w-full p-4 md:p-8 text-center mt-20">
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Jadwal Berhasil Dikonfirmasi!</h2>
-                    <p className="text-gray-500">Permintaan konseling Anda telah dikirim ke konselor terkait.</p>
-                    <p className="text-sm text-gray-400 mt-4 rounded-full bg-gray-100 px-4 py-2 inline-block">Mengalihkan ke halaman riwayat...</p>
+                    <p className="text-gray-500 mb-6">Permintaan konseling Anda telah dikirim ke konselor terkait.</p>
+                    
+                    <div className="flex flex-col items-center gap-4">
+                        <a 
+                            href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="px-8 py-3 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center gap-2 shadow-md grow-on-hover"
+                        >
+                            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
+                            Konfirmasi via WhatsApp Satgas
+                        </a>
+                        <p className="text-sm text-gray-400 mt-4 rounded-full bg-gray-100 px-4 py-2 inline-block">Mengalihkan ke halaman riwayat...</p>
+                    </div>
                 </div>
             </UserLayout>
         );
@@ -756,6 +793,29 @@ const BuatLaporan = () => {
                                 <div className="font-semibold text-gray-900">{currentUser?.semester || '-'}</div>
                             </div>
                         </div>
+
+                        {/* Additional Contact Info */}
+                        <div className="px-6 py-4 bg-purple-50/50 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp Aktif <span className="text-gray-400 font-normal">(Opsional)</span></label>
+                                <input
+                                    type="text" name="guest_phone"
+                                    value={formData.guest_phone} onChange={handleInputChange}
+                                    placeholder="Contoh: 08123456789"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                />
+                                <p className="text-[10px] text-gray-500 mt-1">Gunakan jika berbeda dengan data profil Anda.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Aktif <span className="text-gray-400 font-normal">(Opsional)</span></label>
+                                <input
+                                    type="email" name="guest_email"
+                                    value={formData.guest_email} onChange={handleInputChange}
+                                    placeholder="kamu@email.com"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                />
+                            </div>
+                        </div>
                     </section>
 
                     {/* TIPE KEJADIAN */}
@@ -810,15 +870,6 @@ const BuatLaporan = () => {
                                         </div>
                                     </div>
                                     <div className="pt-2 border-t border-purple-100 mt-2">
-                                        <label className="flex items-center gap-3 cursor-pointer mb-4">
-                                            <input
-                                                type="checkbox" name="is_external_victim"
-                                                checked={formData.is_external_victim} onChange={handleInputChange}
-                                                className="w-5 h-5 rounded border-gray-300 text-[#8b5cf6] focus:ring-[#8b5cf6] accent-[#8b5cf6]"
-                                            />
-                                            <span className="text-sm font-semibold text-gray-800">Korban adalah Pihak Luar (Masyarakat Umum)</span>
-                                        </label>
-                                        
                                         {formData.is_external_victim && (
                                             <div>
                                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Bukti Identitas Korban <span className="text-red-500">*</span></label>

@@ -105,4 +105,9 @@ class Complaint extends Model
     {
         return $this->belongsTo(ViolenceCategory::class, 'violence_category_id');
     }
+
+    public function counselingSchedules()
+    {
+        return $this->hasMany(CounselingSchedule::class, 'complaint_id');
+    }
 }

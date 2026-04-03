@@ -132,6 +132,9 @@ class ComplaintController extends Controller
             'user:id,name',
             'counselor:id,name',
             'violenceCategory',
+            'counselingSchedules' => function ($q) {
+                $q->orderBy('created_at', 'desc');
+            }
         ]);
 
         return response()->json([
@@ -173,6 +176,20 @@ class ComplaintController extends Controller
                 'file_path' => $complaint->file_path,
                 'created_at' => $complaint->created_at->toDateTimeString(),
                 'updated_at' => $complaint->updated_at->toDateTimeString(),
+                'counseling_notes' => $complaint->counselingSchedules->map(function ($s) {
+                    return [
+                        'id' => $s->id,
+                        'counselee_type' => $s->counselee_type,
+                        'counselee_name' => $s->counselee_name,
+                        'tanggal' => $s->tanggal ? $s->tanggal->toDateString() : null,
+                        'jam_mulai' => $s->jam_mulai,
+                        'jam_selesai' => $s->jam_selesai,
+                        'status' => $s->status,
+                        'feedback_notes' => $s->feedback_notes,
+                        'feedback_attachment' => $s->feedback_attachment ? asset('storage/' . $s->feedback_attachment) : null,
+                        'created_at' => $s->created_at->toDateTimeString(),
+                    ];
+                }),
             ]
         ]);
     }

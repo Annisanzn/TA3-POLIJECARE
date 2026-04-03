@@ -26,12 +26,12 @@ class CounselingSchedule extends Model
         'approved_at',
         'feedback_notes',
         'feedback_attachment',
+        'counselee_type',
+        'counselee_name',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
-        'jam_mulai' => 'datetime:H:i',
-        'jam_selesai' => 'datetime:H:i',
         'approved_at' => 'datetime',
     ];
 
