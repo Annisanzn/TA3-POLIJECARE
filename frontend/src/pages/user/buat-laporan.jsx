@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
     AlertCircle, ArrowLeft, Shield, User, FileText,
-    MapPin, Calendar, Paperclip, CheckCircle, Search
+    MapPin, Calendar, Paperclip, CheckCircle, Search, Clock, Info, Check, X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import UserLayout from '../../components/user/UserLayout';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
@@ -111,74 +112,70 @@ const BuatLaporan = () => {
     const [scheduleLocation, setScheduleLocation] = useState('Ruang Konseling Satgas PPKS Polije');
     const [scheduleLink, setScheduleLink] = useState('');
 
-    const handleScheduleSubmit = async () => {
-        if (selectedSlots.length === 0 || !createdComplaintId) return;
+    // Time & Day Helpers
+    const extractT = (v) => { 
+        const s = String(v || ''); 
+        return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); 
+    };
+
+    const formatDay = (dayStr) => {
+        const days = { 
+            'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 
+            'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' 
+        };
+        return days[dayStr.toLowerCase()] || dayStr;
+    };
+
+    const getNextDateFromDayName = (dayStr) => {
+        const map = {
+            'minggu': 0, 'sunday': 0,
+            'senin': 1, 'monday': 1,
+            'selasa': 2, 'tuesday': 2,
+            'rabu': 3, 'wednesday': 3,
+            'kamis': 4, 'thursday': 4,
+            'jumat': 5, 'friday': 5,
+            'sabtu': 6, 'saturday': 6,
+        };
+        const target = map[dayStr.toLowerCase()];
+        if (target === undefined) return new Date().toISOString().split('T')[0];
+        const today = new Date();
+        let diff = target - today.getDay();
+        if (diff <= 0) diff += 7;
+        today.setDate(today.getDate() + diff);
+        const offset = today.getTimezoneOffset();
+        const localDate = new Date(today.getTime() - (offset * 60 * 1000));
+        return localDate.toISOString().split('T')[0];
+    };
+
+    const handleScheduleSubmit = async (complaintIdOverride, reportIdOverride) => {
+        const complId = complaintIdOverride || createdComplaintId;
+        const reprId = reportIdOverride || createdReportId;
+        if (selectedSlots.length === 0 || !complId) return;
 
         setLoadingSchedules(true);
         try {
-            // Get selected slot objects in order
             const selectedScheds = selectedSlots
                 .map(slotUid => realSchedules.find(s => `${s.id}-${s.jam_mulai}` === slotUid))
                 .filter(Boolean)
                 .sort((a, b) => (a.jam_mulai > b.jam_mulai ? 1 : -1));
 
-            // Extract HH:mm from various possible time formats
-            const extractTime = (timeVal) => {
-                if (!timeVal) return '09:00';
-                const str = String(timeVal);
-                // If ISO datetime like "2026-01-01T09:00:00.000000Z"
-                if (str.includes('T')) {
-                    const timePart = str.split('T')[1];
-                    return timePart.substring(0, 5);
-                }
-                // If already "09:00:00" or "09:00"
-                return str.substring(0, 5);
-            };
-
-            // Helper to get next concrete date from day name (Indonesian + English)
-            const getNextDateFromDayName = (dayStr) => {
-                const map = {
-                    'minggu': 0, 'sunday': 0,
-                    'senin': 1, 'monday': 1,
-                    'selasa': 2, 'tuesday': 2,
-                    'rabu': 3, 'wednesday': 3,
-                    'kamis': 4, 'thursday': 4,
-                    'jumat': 5, 'friday': 5,
-                    'sabtu': 6, 'saturday': 6,
-                };
-                const target = map[dayStr.toLowerCase()];
-                if (target === undefined) return new Date().toISOString().split('T')[0];
-                const today = new Date();
-                let diff = target - today.getDay();
-                if (diff <= 0) diff += 7;
-                today.setDate(today.getDate() + diff);
-                const offset = today.getTimezoneOffset();
-                const localDate = new Date(today.getTime() - (offset * 60 * 1000));
-                return localDate.toISOString().split('T')[0];
-            };
-
-            // Merge: first slot start → last slot end
             const firstSlot = selectedScheds[0];
             const lastSlot = selectedScheds[selectedScheds.length - 1];
-
-            // Use backend-computed next_date if available, otherwise calculate
             const tanggal = firstSlot.next_date || getNextDateFromDayName(firstSlot.hari);
-
             const slotCount = selectedScheds.length;
             const durationNote = slotCount > 1 ? ` (${slotCount} slot — ${slotCount * (firstSlot.durasi_menit || 60)} menit)` : '';
 
             const payload = {
                 counselor_id: Number(formData.counselor_id),
-                complaint_id: Number(createdComplaintId),
+                complaint_id: Number(complId),
                 jenis_pengaduan: `Tindak Lanjut Laporan ${formData.title.substring(0, 50)}${durationNote}`,
                 tanggal: tanggal,
-                jam_mulai: extractTime(firstSlot.jam_mulai),
-                jam_selesai: extractTime(lastSlot.jam_selesai),
+                jam_mulai: extractT(firstSlot.jam_mulai),
+                jam_selesai: extractT(lastSlot.jam_selesai),
                 metode: scheduleMethod,
                 lokasi: scheduleMethod === 'offline' ? scheduleLocation : null,
                 meeting_link: scheduleMethod === 'online' ? scheduleLink : null,
             };
-            console.log("Schedule booking payload:", payload);
 
             const res = await fetch(`${API_BASE_URL}/user/counselings`, {
                 method: 'POST',
@@ -191,20 +188,17 @@ const BuatLaporan = () => {
 
             if (!res.ok) {
                 const errBody = await res.json().catch(() => null);
-                console.error("Schedule API error:", res.status, errBody);
-                const errMsg = errBody?.message || errBody?.errors
-                    ? `${errBody.message || ''}${errBody.errors ? ' — ' + Object.values(errBody.errors).flat().join(', ') : ''}`
-                    : `Server error ${res.status}`;
-                throw new Error(errMsg);
+                throw new Error(errBody?.message || "Gagal mengamankan jadwal.");
             }
 
             setScheduleSubmitted(true);
-            setTimeout(() => {
-                navigate('/user/histori-pengaduan');
-            }, 2000);
+            
+            // AUTO REDIRECT TO WHATSAPP
+            const waMsg = `Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${reprId || complId}*. Mohon konfirmasinya. Terima kasih.`;
+            window.open(`https://wa.me/6282126432696?text=${encodeURIComponent(waMsg)}`, '_blank');
         } catch (error) {
             console.error("Schedule error:", error);
-            toast.error(error.message || "Gagal mengamankan jadwal. Silakan coba lagi.", { position: 'top-center' });
+            toast.error(error.message || "Gagal mengamankan jadwal.");
         } finally {
             setLoadingSchedules(false);
         }
@@ -352,6 +346,28 @@ const BuatLaporan = () => {
         }));
     };
 
+    const handleCounselorSelect = async (counselorId) => {
+        setFormData(prev => ({ ...prev, counselor_id: counselorId }));
+        setSelectedSlots([]); // Reset slots when switching counselor
+        
+        setLoadingSchedules(true);
+        try {
+            const schedRes = await fetch(`${API_BASE_URL}/user/counselor-schedules?counselor_id=${counselorId}`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            const schedData = await schedRes.json();
+            if (schedRes.ok && schedData.data) {
+                setRealSchedules(schedData.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch schedules:", err);
+            toast.error("Gagal memuat jadwal konselor.");
+        } finally {
+            setLoadingSchedules(false);
+        }
+    };
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -409,7 +425,6 @@ const BuatLaporan = () => {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     Accept: 'application/json'
-                    // Don't set Content-Type for FormData, browser does it automatically with boundary.
                 },
                 body: payload,
             });
@@ -424,27 +439,14 @@ const BuatLaporan = () => {
             if (data?.data?.id) {
                 setCreatedComplaintId(data.data.id);
                 setCreatedReportId(data.data.report_id);
+                
+                // AUTOMATICALLY SUBMIT SCHEDULE
+                if (selectedSlots.length > 0) {
+                    await handleScheduleSubmit(data.data.id, data.data.report_id);
+                }
             }
 
             setSuccess(true);
-
-            // Will show the Schedule Selection Screen now!
-            // Fetch real counselor schedules
-            setLoadingSchedules(true);
-            try {
-                const schedRes = await fetch(`${API_BASE_URL}/user/counselor-schedules?counselor_id=${formData.counselor_id}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                const schedData = await schedRes.json();
-                if (schedRes.ok && schedData.data) {
-                    setRealSchedules(schedData.data);
-                }
-            } catch (err) {
-                console.error("Failed to fetch schedules:", err);
-            } finally {
-                setLoadingSchedules(false);
-            }
 
         } catch (err) {
             console.error('Submit form error:', err);
@@ -455,250 +457,24 @@ const BuatLaporan = () => {
     };
 
     if (success && !scheduleSubmitted) {
-        const pickedCounselor = counselors.find(c => c.id === formData.counselor_id) || {};
         return (
             <UserLayout user={currentUser}>
-                <div className="w-full p-4 md:p-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-                        <div className="px-8 py-6 border-b border-gray-100 bg-[#1e1b4b]">
-                            <h1 className="text-xl font-bold text-white">Pilih Jadwal Konsultasi</h1>
+                <div className="w-full h-[60vh] flex flex-col items-center justify-center p-8 text-center">
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white p-10 rounded-3xl shadow-xl border border-purple-100 flex flex-col items-center"
+                    >
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                            <CheckCircle className="w-10 h-10 text-green-600" />
                         </div>
-
-                        <div className="p-8 space-y-8">
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-bold text-gray-900">Halo, terima kasih telah mengajukan laporan.</h3>
-                                <p className="text-sm text-gray-700">Langkah selanjutnya, silakan pilih jadwal temu yang sesuai dengan waktu Anda dan Konselor <strong>{pickedCounselor.name}</strong>.</p>
-                                <p className="text-sm text-[#2e1065] font-semibold">Konseling bersifat rahasia dan aman, dilakukan secara tatap muka maupun online sesuai kesepakatan.</p>
-                                
-                                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                            <Shield className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-green-800">Laporan Berhasil Diterima</p>
-                                            <p className="text-xs text-green-700">Nomor Registrasi: <strong>{createdReportId}</strong></p>
-                                        </div>
-                                    </div>
-                                    <a 
-                                        href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
-                                        target="_blank" rel="noopener noreferrer"
-                                        className="w-full md:w-auto px-5 py-2.5 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center justify-center gap-2 shadow-sm"
-                                    >
-                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
-                                        Konfirmasi via WhatsApp Satgas
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">Profil Singkat</h2>
-                                <div className="text-sm text-gray-700 space-y-2">
-                                    <p><span className="text-gray-500 inline-block w-32">Nama:</span> {pickedCounselor.name}</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Bidang:</span> {pickedCounselor.bio || 'Konseling Umum'}</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Pengalaman:</span> 5+ tahun mendampingi mahasiswa dan tenaga pengajar</p>
-                                    <p><span className="text-gray-500 inline-block w-32">Metode Konseling:</span> Tatap muka / Online</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <h2 className="text-lg font-bold text-gray-800">Pilih Waktu Yang Tersedia</h2>
-                                    <span className="text-xs text-gray-500">{selectedSlots.length}/2 slot dipilih</span>
-                                </div>
-
-                                {/* Multi-slot tip */}
-                                <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl flex gap-2 text-sm">
-                                    <span className="text-purple-600 flex-shrink-0">💡</span>
-                                    <span className="text-purple-700">Anda dapat memilih <strong>1 atau 2 slot waktu</strong>. Pilih 2 slot berturutan jika Anda merasa 1 slot (± 60 menit) belum cukup untuk menyampaikan permasalahan Anda. Slot yang dipilih akan digabung menjadi satu sesi.</span>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {loadingSchedules ? (
-                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                            <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
-                                            Sedang memuat ketersediaan jadwal...
-                                        </div>
-                                    ) : realSchedules.length === 0 ? (
-                                        <div className="py-12 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                            <div className="text-4xl mb-2">📅</div>
-                                            Belum ada jadwal konsultasi yang tersedia untuk konselor ini.
-                                        </div>
-                                    ) : (
-                                        (() => {
-                                            // Group schedules by date
-                                            const grouped = realSchedules.reduce((acc, sch) => {
-                                                const key = sch.next_date || sch.hari;
-                                                if (!acc[key]) {
-                                                    acc[key] = {
-                                                        hari: sch.hari,
-                                                        next_date: sch.next_date,
-                                                        slots: []
-                                                    };
-                                                }
-                                                acc[key].slots.push(sch);
-                                                return acc;
-                                            }, {});
-
-                                            const extractT = (v) => { const s = String(v || ''); return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); };
-
-                                            const formatDay = (dayStr) => {
-                                                const days = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' };
-                                                return days[dayStr.toLowerCase()] || dayStr;
-                                            };
-
-                                            return Object.values(grouped).map((group, gIdx) => (
-                                                <div key={gIdx} className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden">
-                                                    {/* Group Header */}
-                                                    <div className="bg-gradient-to-r from-gray-50 to-white px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
-                                                                <Calendar className="w-5 h-5" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-gray-900 text-sm">{formatDay(group.hari)}</p>
-                                                                {group.next_date && (
-                                                                    <p className="text-xs text-purple-600 font-medium tracking-wide">
-                                                                        {new Date(group.next_date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Slots Grid */}
-                                                    <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                                        {group.slots.map(sch => {
-                                                            const slotUid = `${sch.id}-${sch.jam_mulai}`;
-                                                            const isAvailable = sch.is_active && !sch.is_booked;
-                                                            const isSelected = selectedSlots.includes(slotUid);
-                                                            const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
-
-                                                            const toggleSlot = () => {
-                                                                if (!isAvailable) return;
-                                                                if (isSelected) {
-                                                                    setSelectedSlots(prev => prev.filter(id => id !== slotUid));
-                                                                } else if (selectedSlots.length < 2) {
-                                                                    if (selectedSlots.length === 1) {
-                                                                        const firstId = selectedSlots[0];
-                                                                        const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
-                                                                        if (firstSch) {
-                                                                            const thisDate = sch.next_date || sch.hari;
-                                                                            const firstDate = firstSch.next_date || firstSch.hari;
-                                                                            if (thisDate !== firstDate) {
-                                                                                toast.error("Pilih slot kedua di hari yang sama, atau batalkan slot pertama.");
-                                                                                return;
-                                                                            }
-
-                                                                            // Periksa apakah slot berturutan
-                                                                            const firstStart = extractT(firstSch.jam_mulai);
-                                                                            const firstEnd = extractT(firstSch.jam_selesai);
-                                                                            const thisStart = extractT(sch.jam_mulai);
-                                                                            const thisEnd = extractT(sch.jam_selesai);
-
-                                                                            if (firstEnd !== thisStart && thisEnd !== firstStart) {
-                                                                                toast.error("Slot kedua harus berturutan dengan slot pertama (misal: 13:00-14:00 dan 14:00-15:00).");
-                                                                                return;
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    setSelectedSlots(prev => [...prev, slotUid]);
-                                                                }
-                                                            };
-
-                                                            return (
-                                                                <button
-                                                                    key={`${sch.id}-${group.next_date || group.hari}-${gIdx}-${sch.jam_mulai}`}
-                                                                    type="button"
-                                                                    onClick={toggleSlot}
-                                                                    disabled={isDisabled && !isSelected}
-                                                                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                                                                        ${isSelected
-                                                                            ? 'border-purple-600 bg-purple-50 shadow-md ring-2 ring-purple-100 outline-none'
-                                                                            : isAvailable
-                                                                                ? 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50 hover:-translate-y-0.5'
-                                                                                : 'border-slate-100 bg-slate-50 opacity-60'
-                                                                        }
-                                                                    `}
-                                                                >
-                                                                    {isSelected && (
-                                                                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center shadow-sm">
-                                                                            <CheckCircle className="w-3 h-3" />
-                                                                        </div>
-                                                                    )}
-                                                                    <span className={`text-sm font-bold ${isSelected ? 'text-purple-900' : isAvailable ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
-                                                                        {extractT(sch.jam_mulai)}
-                                                                    </span>
-                                                                    <span className={`text-[10px] mt-1 font-medium px-2 py-0.5 rounded-full ${isSelected ? 'bg-purple-200 text-purple-800' : isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500'}`}>
-                                                                        {isSelected ? 'Dipilih' : isAvailable ? 'Tersedia' : 'Penuh'}
-                                                                    </span>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            ));
-                                        })()
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Pilihan Metode Konseling */}
-                            <div className="mt-8">
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">Metode Konseling</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'offline' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
-                                        <div className="flex items-center">
-                                            <input type="radio" name="schedule_method" value="offline" checked={scheduleMethod === 'offline'} onChange={() => setScheduleMethod('offline')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                            <span className="ml-3 font-bold text-gray-800">Tatap Muka (Offline)</span>
-                                        </div>
-                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan langsung di lokasi yang ditentukan</p>
-                                    </label>
-
-                                    <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${scheduleMethod === 'online' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'}`}>
-                                        <div className="flex items-center">
-                                            <input type="radio" name="schedule_method" value="online" checked={scheduleMethod === 'online'} onChange={() => setScheduleMethod('online')} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                            <span className="ml-3 font-bold text-gray-800">Daring (Online)</span>
-                                        </div>
-                                        <p className="mt-2 text-sm text-gray-500 ml-8">Pertemuan virtual melalui Video Conference</p>
-                                    </label>
-                                </div>
-
-                                {scheduleMethod === 'offline' && (
-                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi Pertemuan <span className="text-red-500">*</span></label>
-                                        <input type="text" value={scheduleLocation} onChange={(e) => setScheduleLocation(e.target.value)} placeholder="Contoh: Ruang Konseling Gedung A" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" required />
-                                    </div>
-                                )}
-
-                                {scheduleMethod === 'online' && (
-                                    <div className="mt-4 p-5 bg-purple-50 border border-purple-100 rounded-xl">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Link Pertemuan (Opsional)</label>
-                                        <input type="text" value={scheduleLink} onChange={(e) => setScheduleLink(e.target.value)} placeholder="Contoh: https://meet.google.com/xxx-yyy-zzz" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]" />
-                                        <p className="text-xs text-gray-500 mt-2">Biarkan kosong jika Anda ingin menggunakan platform dari Konselor Anda.</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="pt-6 flex justify-center">
-                                <button
-                                    onClick={handleScheduleSubmit}
-                                    disabled={selectedSlots.length === 0 || loadingSchedules}
-                                    className="px-8 py-3 bg-[#1e1b4b] text-white font-medium rounded-xl hover:bg-[#2e1065] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
-                                >
-                                    {loadingSchedules ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            Memproses...
-                                        </>
-                                    ) : (
-                                        "Konfirmasi Jadwal & Kirim Permintaan Konseling"
-                                    )}
-                                </button>
-                            </div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Laporan Berhasil Dibuat</h2>
+                        <p className="text-gray-500 mb-8 max-w-sm">Mohon tunggu sebentar, kami sedang mengamankan jadwal konsultasi Anda...</p>
+                        <div className="flex items-center gap-3 text-[#8b5cf6] font-bold">
+                            <div className="w-5 h-5 border-3 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                            Sedangkan Memproses Jadwal...
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </UserLayout>
         );
@@ -707,22 +483,60 @@ const BuatLaporan = () => {
     if (scheduleSubmitted) {
         return (
             <UserLayout user={currentUser}>
-                <div className="w-full p-4 md:p-8 text-center mt-20">
-                    <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Jadwal Berhasil Dikonfirmasi!</h2>
-                    <p className="text-gray-500 mb-6">Permintaan konseling Anda telah dikirim ke konselor terkait.</p>
-                    
-                    <div className="flex flex-col items-center gap-4">
-                        <a 
-                            href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="px-8 py-3 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center gap-2 shadow-md grow-on-hover"
-                        >
-                            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
-                            Konfirmasi via WhatsApp Satgas
-                        </a>
-                        <p className="text-sm text-gray-400 mt-4 rounded-full bg-gray-100 px-4 py-2 inline-block">Mengalihkan ke halaman riwayat...</p>
-                    </div>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#1e1b4b]/40 backdrop-blur-sm">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden border border-purple-100"
+                    >
+                        {/* Decorative Header */}
+                        <div className="h-32 bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] relative flex items-center justify-center">
+                            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+                            <motion.div 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", damping: 12, delay: 0.2 }}
+                                className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center relative z-10"
+                            >
+                                <CheckCircle className="w-12 h-12 text-[#22c55e]" />
+                            </motion.div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="px-8 pt-12 pb-10 text-center">
+                            <h2 className="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">Laporan Terkirim!</h2>
+                            <p className="text-gray-500 mb-8 leading-relaxed">
+                                Laporan Anda telah berhasil kami terima dengan nomor registrasi:
+                                <span className="block mt-2 text-xl font-mono font-bold text-[#8b5cf6] bg-purple-50 py-2 px-4 rounded-xl border border-purple-100 inline-block">
+                                    {createdReportId}
+                                </span>
+                            </p>
+
+                            <div className="space-y-4">
+                                <a 
+                                    href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="w-full py-4 bg-[#25D366] text-white font-bold rounded-2xl hover:bg-[#20ba56] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-green-200 group"
+                                >
+                                    <div className="bg-white/20 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
+                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
+                                    </div>
+                                    Konfirmasi via WhatsApp
+                                </a>
+
+                                <button
+                                    onClick={() => navigate('/user/histori-pengaduan')}
+                                    className="w-full py-4 border-2 border-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                >
+                                    Lihat Riwayat Laporan
+                                </button>
+                            </div>
+
+                            <p className="mt-8 text-xs text-gray-400 font-medium italic">
+                                *Tim Satgas akan segera meninjau laporan Anda. Mohon pantau status berkala di dashboard.
+                            </p>
+                        </div>
+                    </motion.div>
                 </div>
             </UserLayout>
         );
@@ -945,39 +759,222 @@ const BuatLaporan = () => {
                             <p className="text-xs text-gray-500 mb-4">Pilih konselor yang akan menangani laporan ini</p>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Pilih Konselor yang Menangani <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+                                    <span>Pilih Konselor & Jadwal <span className="text-red-500">*</span></span>
+                                    {formData.counselor_id && (
+                                        <span className="text-xs text-[#8b5cf6] font-bold bg-purple-50 px-3 py-1 rounded-full animate-pulse">
+                                            {selectedSlots.length > 0 ? `✓ ${selectedSlots.length} Slot Terpilih` : '⚠ Pilih Slot Waktu'}
+                                        </span>
+                                    )}
+                                </label>
 
                                 {counselors.length === 0 ? (
-                                    <p className="text-xs text-red-500 mt-2">Gagal memuat data / Belum ada konselor tersedia.</p>
+                                    <div className="py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <Info className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                        <p className="text-sm text-gray-500">Belum ada konselor tersedia saat ini.</p>
+                                    </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-2">
-                                        {counselors.map((c, index) => (
-                                            <div
-                                                key={c.id}
-                                                onClick={() => setFormData(prev => ({ ...prev, counselor_id: c.id }))}
-                                                className={`cursor-pointer rounded-2xl overflow-hidden shadow-sm border transition-all duration-200 flex flex-col ${formData.counselor_id === c.id
-                                                    ? 'border-[#2e1065] ring-2 ring-[#2e1065] bg-purple-50 scale-[1.02] shadow-md'
-                                                    : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md hover:-translate-y-1'
-                                                    }`}
-                                            >
-                                                {/* Card Photo Header */}
-                                                <div className={`w-full h-40 flex justify-center items-end overflow-hidden ${index % 2 === 0 ? 'bg-gray-200' : 'bg-red-700'}`}>
-                                                    <img
-                                                        src={c.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || c.nama)}&background=random&color=fff&size=512`}
-                                                        alt="Photo Konselor"
-                                                        className="w-full h-full object-cover object-top mix-blend-multiply"
-                                                        style={{ mixBlendMode: 'normal' }}
-                                                    />
-                                                </div>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        {counselors.map((c, index) => {
+                                            const isActive = formData.counselor_id === c.id;
+                                            
+                                            return (
+                                                <motion.div
+                                                    key={c.id}
+                                                    layout
+                                                    initial={false}
+                                                    animate={{ 
+                                                        borderColor: isActive ? '#8b5cf6' : '#f3f4f6',
+                                                        backgroundColor: isActive ? '#fdfaff' : '#ffffff'
+                                                    }}
+                                                    className={`relative rounded-3xl border-2 transition-shadow overflow-hidden ${isActive ? 'shadow-lg ring-1 ring-purple-100' : 'hover:border-purple-200 hover:shadow-md cursor-pointer'}`}
+                                                    onClick={() => !isActive && handleCounselorSelect(c.id)}
+                                                >
+                                                    <div className="p-4 sm:p-5">
+                                                        <div className="flex items-start gap-4 sm:gap-6">
+                                                            {/* Profile Image */}
+                                                            <div className="relative flex-shrink-0">
+                                                                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 ${isActive ? 'border-purple-500' : 'border-gray-100 shadow-sm'}`}>
+                                                                    <img
+                                                                        src={c.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || c.nama)}&background=random&color=fff&size=200`}
+                                                                        alt={c.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                                {isActive && (
+                                                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#8b5cf6] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                                                                        <Check className="w-3 h-3" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
 
-                                                {/* Card Body (Name) */}
-                                                <div className="w-full p-4 flex flex-col items-center justify-center flex-grow bg-white border-t border-gray-100">
-                                                    <h4 className="font-bold text-gray-800 text-sm text-center line-clamp-2 leading-tight">
-                                                        {c.name || c.nama}
-                                                    </h4>
-                                                </div>
-                                            </div>
-                                        ))}
+                                                            {/* Info */}
+                                                            <div className="flex-grow">
+                                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
+                                                                    <h4 className={`text-lg font-bold leading-tight ${isActive ? 'text-purple-900' : 'text-gray-800'}`}>
+                                                                        {c.name || c.nama}
+                                                                    </h4>
+                                                                    <div className="flex gap-2">
+                                                                        {(() => {
+                                                                            if (!isActive) return (
+                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                                                    Belum Dipilih
+                                                                                </span>
+                                                                            );
+                                                                            if (loadingSchedules) return (
+                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-600 animate-pulse">
+                                                                                    Mengecek...
+                                                                                </span>
+                                                                            );
+                                                                            const hasAvailable = realSchedules.some(sch => sch.is_active && !sch.is_booked);
+                                                                            return hasAvailable ? (
+                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                                                                    Tersedia
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                                                                                    Penuh
+                                                                                </span>
+                                                                            );
+                                                                        })()}
+                                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                                            {c.bio || 'Konselor'}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                                                                    Specialist in handling student counseling and psychological support.
+                                                                </p>
+                                                                
+                                                                {!isActive && (
+                                                                    <button 
+                                                                        type="button"
+                                                                        className="text-xs font-bold text-[#8b5cf6] flex items-center gap-1 hover:underline"
+                                                                    >
+                                                                        Klik untuk pilih & lihat jadwal <Clock className="w-3 h-3" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Expanded Content: Schedules */}
+                                                        <AnimatePresence>
+                                                            {isActive && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, height: 0 }}
+                                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                                    exit={{ opacity: 0, height: 0 }}
+                                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                                    className="mt-6 pt-6 border-t border-purple-100"
+                                                                >
+                                                                    <div className="bg-white rounded-2xl p-4 border border-purple-50">
+                                                                        <div className="flex items-center justify-between mb-4">
+                                                                            <h5 className="font-bold text-gray-800 flex items-center gap-2">
+                                                                                <Calendar className="w-4 h-4 text-[#8b5cf6]" /> Slot Waktu Tersedia
+                                                                            </h5>
+                                                                            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Pilih Maksimal 2 Slot</span>
+                                                                        </div>
+
+                                                                        {loadingSchedules ? (
+                                                                            <div className="py-8 text-center">
+                                                                                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                                                                <p className="text-xs text-gray-400">Memuat jadwal...</p>
+                                                                            </div>
+                                                                        ) : realSchedules.length === 0 ? (
+                                                                            <div className="py-6 text-center text-xs text-gray-400">
+                                                                                Belum ada jadwal tersedia untuk konselor ini.
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                                                                                {(() => {
+                                                                                    const grouped = realSchedules.reduce((acc, sch) => {
+                                                                                        const key = sch.next_date || sch.hari;
+                                                                                        if (!acc[key]) acc[key] = { hari: sch.hari, next_date: sch.next_date, slots: [] };
+                                                                                        acc[key].slots.push(sch);
+                                                                                        return acc;
+                                                                                    }, {});
+
+                                                                                    return Object.values(grouped).map((group, gIdx) => (
+                                                                                        <div key={gIdx} className="space-y-2">
+                                                                                            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2">
+                                                                                                {formatDay(group.hari)}, {group.next_date ? new Date(group.next_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}
+                                                                                            </p>
+                                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                                                {group.slots.map(sch => {
+                                                                                                    const slotUid = `${sch.id}-${sch.jam_mulai}`;
+                                                                                                    const isAvailable = sch.is_active && !sch.is_booked;
+                                                                                                    const isSelected = selectedSlots.includes(slotUid);
+                                                                                                    const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
+
+                                                                                                    const toggleSlot = (e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        if (!isAvailable) return;
+                                                                                                        if (isSelected) {
+                                                                                                            setSelectedSlots(prev => prev.filter(id => id !== slotUid));
+                                                                                                        } else if (selectedSlots.length < 2) {
+                                                                                                            if (selectedSlots.length === 1) {
+                                                                                                                const firstId = selectedSlots[0];
+                                                                                                                const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
+                                                                                                                if (firstSch) {
+                                                                                                                    const thisDate = sch.next_date || sch.hari;
+                                                                                                                    const firstDate = firstSch.next_date || firstSch.hari;
+                                                                                                                    if (thisDate !== firstDate) {
+                                                                                                                        toast.error("Pilih slot di hari yang sama.");
+                                                                                                                        return;
+                                                                                                                    }
+                                                                                                                    const fE = extractT(firstSch.jam_selesai);
+                                                                                                                    const tS = extractT(sch.jam_mulai);
+                                                                                                                    const tE = extractT(sch.jam_selesai);
+                                                                                                                    const fS = extractT(firstSch.jam_mulai);
+                                                                                                                    if (fE !== tS && tE !== fS) {
+                                                                                                                        toast.error("Slot harus berurutan.");
+                                                                                                                        return;
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                            setSelectedSlots(prev => [...prev, slotUid]);
+                                                                                                        }
+                                                                                                    };
+
+                                                                                                    return (
+                                                                                                        <button
+                                                                                                            key={slotUid}
+                                                                                                            type="button"
+                                                                                                            onClick={toggleSlot}
+                                                                                                            disabled={isDisabled && !isSelected}
+                                                                                                            className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all text-center
+                                                                                                                ${isSelected 
+                                                                                                                    ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-sm ring-1 ring-purple-100' 
+                                                                                                                    : isAvailable 
+                                                                                                                        ? 'border-gray-100 bg-white hover:border-purple-200 text-gray-700' 
+                                                                                                                        : 'border-red-50 bg-red-50/30 text-red-300 cursor-not-allowed opacity-50'
+                                                                                                                }`}
+                                                                                                        >
+                                                                                                            <span className="text-xs font-bold leading-none mb-1">
+                                                                                                                {extractT(sch.jam_mulai)}
+                                                                                                            </span>
+                                                                                                            <span className={`text-[8px] font-bold uppercase tracking-tighter ${isSelected ? 'text-purple-600' : isAvailable ? 'text-green-500' : 'text-red-400'}`}>
+                                                                                                                {isSelected ? 'Terpilih' : isAvailable ? 'Tersedia' : 'Penuh'}
+                                                                                                            </span>
+                                                                                                        </button>
+                                                                                                    );
+                                                                                                })}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ));
+                                                                                })()}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -1194,10 +1191,15 @@ const BuatLaporan = () => {
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || !mapPosition}
+                            disabled={loading || !mapPosition || selectedSlots.length === 0}
                             className="px-8 py-3 bg-[#8b5cf6] text-white font-medium rounded-xl hover:bg-[#7c4ee6] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center"
                         >
-                            {loading ? 'Menyimpan...' : 'Kirim Laporan Pengaduan'}
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Memproses Laporan & Jadwal...
+                                </span>
+                            ) : 'Kirim Laporan & Booking Jadwal'}
                         </button>
                     </div>
 
