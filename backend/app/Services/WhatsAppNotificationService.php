@@ -59,9 +59,7 @@ class WhatsAppNotificationService
             return false;
         }
 
-        $pelapor = $complaint->is_anonymous
-            ? 'Anonim'
-            : optional($complaint->user)->name ?? 'Mahasiswa';
+        $pelapor = optional($complaint->user)->name ?? $complaint->guest_name ?? 'Mahasiswa/Umum';
 
         $kategori = optional($complaint->violenceCategory)->name ?? '-';
 

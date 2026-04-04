@@ -14,16 +14,19 @@ import axios from '../../api/axios';
 // WhatsApp clickable link component
 const WaLink = ({ phone, label }) => {
     if (!phone) return <span className="text-gray-400 italic text-sm">-</span>;
-    const cleaned = phone.replace(/[^0-9]/g, '');
+    // Format: remove non-digits, and if starts with 0 replace with 62
+    let cleaned = phone.replace(/[^0-9]/g, '');
+    if (cleaned.startsWith('0')) {
+        cleaned = '62' + cleaned.substring(1);
+    }
     const waUrl = `https://wa.me/${cleaned}`;
     return (
         <a
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-1 px-3 py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#128C7E] rounded-xl font-semibold text-sm transition-colors"
+            className="inline-flex items-center gap-2 mt-1 px-3 py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#128C7E] rounded-xl font-semibold text-sm transition-all active:scale-95"
         >
-            {/* WhatsApp SVG icon */}
             <svg viewBox="0 0 32 32" className="w-4 h-4 shrink-0 fill-[#25D366]" xmlns="http://www.w3.org/2000/svg">
                 <path d="M16 2C8.268 2 2 8.268 2 16c0 2.52.693 4.881 1.9 6.912L2 30l7.302-1.876A13.934 13.934 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.5a11.43 11.43 0 0 1-5.824-1.594l-.417-.248-4.337 1.114 1.138-4.228-.272-.435A11.453 11.453 0 0 1 4.5 16C4.5 9.649 9.649 4.5 16 4.5S27.5 9.649 27.5 16 22.351 27.5 16 27.5zm6.29-8.474c-.344-.172-2.034-1.003-2.349-1.118-.315-.115-.545-.172-.774.172-.23.344-.888 1.118-1.09 1.347-.2.229-.4.258-.745.086-.344-.172-1.452-.535-2.767-1.707-1.022-.913-1.712-2.04-1.913-2.384-.2-.344-.021-.53.15-.701.155-.154.344-.4.516-.6.172-.2.229-.344.344-.573.115-.23.057-.43-.029-.602-.086-.172-.774-1.866-1.06-2.556-.279-.671-.563-.58-.774-.59l-.66-.012c-.23 0-.602.086-.917.43s-1.204 1.176-1.204 2.87 1.233 3.33 1.405 3.56c.172.23 2.428 3.71 5.882 5.205.823.355 1.465.567 1.966.725.826.263 1.578.226 2.172.137.663-.099 2.034-.831 2.32-1.634.287-.803.287-1.491.2-1.634-.086-.143-.315-.229-.66-.4z"/>
             </svg>
@@ -522,11 +525,26 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                         <p className="text-xs text-gray-500 mb-1">Nama Pelapor</p>
                                         <p className="font-medium text-gray-900 border-b border-dashed border-gray-200 pb-2">
                                             {complaint.user_name}
-                                            {complaint.is_anonymous && <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full inline-block">Mode Anonim</span>}
                                         </p>
-                                        {!complaint.is_anonymous && complaint.user_id && complaint.user_phone && (
-                                            <div className="mt-2">
-                                                <WaLink phone={complaint.user_phone} label={`WA: ${complaint.user_phone}`} />
+                                        {(complaint.user_phone || complaint.user_email) && (
+                                            <div className="mt-3 space-y-2 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                                <p className="text-[10px] font-black text-indigo-700 uppercase tracking-widest mb-1">Kontak Pelapor</p>
+                                                {complaint.user_phone && (
+                                                    <WaLink phone={complaint.user_phone} label={`WA/Telp: ${complaint.user_phone}`} />
+                                                )}
+                                                {complaint.user_email && (
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <FiLink size={14} className="text-indigo-400" />
+                                                        <a 
+                                                            href={`mailto:${complaint.user_email}`} 
+                                                            className="hover:text-indigo-600 hover:underline transition-colors"
+                                                            // Standard link is best for mailto:, but the error implies weird interaction context
+                                                            // We keep it simple and direct.
+                                                        >
+                                                            {complaint.user_email}
+                                                        </a>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -551,15 +569,6 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                 </p>
                                             </div>
                                         </>
-                                    )}
-                                    {!complaint.user_id && (
-                                        <div className="bg-green-50 p-3 rounded-xl border border-green-200 mt-2 space-y-2">
-                                            <p className="text-xs font-semibold text-green-800">Kontak Tamu / Eksternal</p>
-                                            <WaLink phone={complaint.guest_phone} label={`WA: ${complaint.guest_phone}`} />
-                                            {complaint.guest_email && (
-                                                <p className="text-sm text-gray-600">Email: <a href={`mailto:${complaint.guest_email}`} className="text-indigo-600 hover:underline">{complaint.guest_email}</a></p>
-                                            )}
-                                        </div>
                                     )}
                                 </div>
                             </div>

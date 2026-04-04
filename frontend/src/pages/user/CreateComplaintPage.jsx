@@ -20,7 +20,6 @@ const CreateComplaintPage = () => {
         title: '',
         violence_category_id: '',
         urgency_level: 'rendah',
-        is_anonymous: false,
         victim_type: 'diri_sendiri',
         victim_name: '',
         victim_relationship: '',
@@ -206,19 +205,6 @@ const CreateComplaintPage = () => {
                                 </select>
                             </div>
 
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label className={styles.checkboxContainer}>
-                                    <input
-                                        type="checkbox" name="is_anonymous"
-                                        className={styles.checkboxInput}
-                                        checked={formData.is_anonymous} onChange={handleInputChange}
-                                    />
-                                    <div className={styles.checkboxContent}>
-                                        <span className={styles.checkboxTitle}>Laporkan sebagai Anonim</span>
-                                        <span className={styles.checkboxDesc}>Identitas Anda akan disembunyikan dari pelapor luar dan dashboard umum.</span>
-                                    </div>
-                                </label>
-                            </div>
                         </div>
                     </section>
 

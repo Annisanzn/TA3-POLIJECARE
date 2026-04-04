@@ -76,7 +76,7 @@ class KonselorDashboardController extends Controller
                     'id'                  => $c->id,
                     'report_id'           => $c->report_id,
                     'user_id'             => $c->user_id,
-                    'user_name'           => $c->is_anonymous ? 'Anonim' : ($c->user?->name ?? $c->guest_name ?? 'Pelapor'),
+                    'user_name'           => $c->user?->name ?? $c->guest_name ?? 'Pelapor',
                     'user_phone'          => $c->user?->phone,
                     'guest_name'          => $c->guest_name,
                     'guest_phone'         => $c->guest_phone,

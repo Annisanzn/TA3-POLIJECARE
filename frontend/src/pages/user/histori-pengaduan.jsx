@@ -206,17 +206,12 @@ const HistoriPengaduan = () => {
                                         >
                                             {/* Card Body */}
                                             <div className="p-7 flex-1">
-                                                {/* Header: Ref ID + anonim flag */}
+                                                {/* Header: Ref ID */}
                                                 <div className="flex items-start justify-between mb-5">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-mono text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-xl tracking-wide">
                                                             {item.report_reference || `#${item.id}`}
                                                         </span>
-                                                        {item.is_anonymous && (
-                                                            <span title="Dilaporkan Anonim" className="w-7 h-7 bg-gray-100 rounded-xl flex items-center justify-center">
-                                                                <FiLock size={12} className="text-gray-400" />
-                                                            </span>
-                                                        )}
                                                     </div>
                                                     {/* Urgency badge */}
                                                     <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-widest ${urgencyCfg.cls}`}>

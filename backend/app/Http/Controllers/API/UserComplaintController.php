@@ -70,10 +70,6 @@ class UserComplaintController extends Controller
             ], 403);
         }
 
-        // Optional policy: mask IP addressing if it was marked as anonymous when returning back to user
-        if ($complaint->is_anonymous) {
-            $complaint->ip_address = null;
-        }
 
         return response()->json([
             'success' => true,
@@ -101,7 +97,6 @@ class UserComplaintController extends Controller
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
             'counselor_id' => 'required|exists:users,id',
-            'is_anonymous' => 'boolean',
             'location' => 'required|string|max:255',
             'incident_date' => 'required|date',
             'latitude' => 'nullable|numeric',
@@ -142,7 +137,6 @@ class UserComplaintController extends Controller
                 'suspect_phone' => $validated['suspect_phone'] ?? null,
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
-                'is_anonymous' => $request->boolean('is_anonymous', false),
                 'location' => $validated['location'],
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
