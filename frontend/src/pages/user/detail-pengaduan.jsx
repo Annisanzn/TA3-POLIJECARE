@@ -149,11 +149,6 @@ const DetailPengaduan = () => {
                             </Link>
 
                             <div className="flex items-center gap-3">
-                                {complaint.is_anonymous && (
-                                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-xs font-medium rounded-lg shadow-sm">
-                                        <FiLock className="w-3.5 h-3.5" /> Dilaporkan Anonim
-                                    </span>
-                                )}
                                 {getUrgencyBadge(complaint.urgency_level)}
                             </div>
                         </div>
@@ -381,7 +376,7 @@ const DetailPengaduan = () => {
                                             <div className="pt-2 border-t border-gray-50">
                                                 <span className="block text-gray-400 mb-0.5">IP Address Perekam</span>
                                                 <span className="font-mono bg-gray-100 px-1 py-0.5 rounded text-gray-500">
-                                                    {complaint.is_anonymous ? 'Dilindungi (Anonim)' : (complaint.ip_address || 'Tidak Tersedia')}
+                                                    {complaint.ip_address || 'Tidak Tersedia'}
                                                 </span>
                                             </div>
                                         </div>

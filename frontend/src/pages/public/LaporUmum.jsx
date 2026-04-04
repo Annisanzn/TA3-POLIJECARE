@@ -183,7 +183,6 @@ const LaporUmum = () => {
         suspect_phone: '',
         counselor_id: '', // Empty
         urgency_level: 'medium',
-        is_anonymous: false,
         title: '',
         violence_category_id: '',
         chronology: '',
@@ -287,7 +286,6 @@ const LaporUmum = () => {
 
             payload.append('counselor_id', formData.counselor_id);
             payload.append('urgency_level', formData.urgency_level);
-            payload.append('is_anonymous', formData.is_anonymous ? 1 : 0);
             payload.append('description', formData.chronology); // API requirement backward-compatibility
             payload.append('chronology', formData.chronology);
             payload.append('location', formData.location);
@@ -404,7 +402,7 @@ const LaporUmum = () => {
                                 <input
                                     type="text" name="guest_name" required
                                     value={formData.guest_name} onChange={handleInputChange}
-                                    placeholder="Masukkan nama Anda (atau anonim)"
+                                    placeholder="Masukkan nama Anda"
                                     className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
                                 />
                             </div>
@@ -631,22 +629,6 @@ const LaporUmum = () => {
                                     </div>
                                 </div>
 
-                                <div className="pt-2">
-                                    <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer">
-                                        <input
-                                            type="checkbox" name="is_anonymous"
-                                            checked={formData.is_anonymous} onChange={handleInputChange}
-                                            className="w-5 h-5 rounded border-gray-300 text-[#8b5cf6] focus:ring-[#8b5cf6] accent-[#8b5cf6]"
-                                        />
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                                                <Shield className="w-4 h-4 text-gray-500" />
-                                                Saya ingin melapor secara anonim
-                                            </span>
-                                            <span className="text-xs text-gray-500">Identitas saya akan dirahasiakan</span>
-                                        </div>
-                                    </label>
-                                </div>
                             </div>
                         </section>
                     </div>

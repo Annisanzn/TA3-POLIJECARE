@@ -58,8 +58,8 @@ class ComplaintController extends Controller
                     'id' => $c->id,
                     'report_id' => $c->report_id,
                     'user_id' => $c->user_id,
-                    'user_name' => $c->is_anonymous ? 'Anonim' : ($c->user_id ? optional($c->user)->name : $c->guest_name),
-                    'user_phone' => $c->user_id ? optional($c->user)->phone : null,
+                    'user_name' => $c->user_id ? optional($c->user)->name : $c->guest_name,
+                    'user_phone' => $c->user_id ? optional($c->user)->phone : $c->guest_phone,
                     'guest_name' => $c->guest_name,
                     'guest_email' => $c->guest_email,
                     'guest_phone' => $c->guest_phone,
@@ -129,7 +129,7 @@ class ComplaintController extends Controller
         }
 
         $complaint->load([
-            'user:id,name',
+            'user:id,name,email,phone',
             'counselor:id,name',
             'violenceCategory',
             'counselingSchedules' => function ($q) {
@@ -143,7 +143,9 @@ class ComplaintController extends Controller
                 'id' => $complaint->id,
                 'report_id' => $complaint->report_id,
                 'user_id' => $complaint->user_id,
-                'user_name' => $complaint->is_anonymous ? 'Anonim' : ($complaint->user_id ? optional($complaint->user)->name : $complaint->guest_name),
+                'user_name' => $complaint->user_id ? optional($complaint->user)->name : $complaint->guest_name,
+                'user_email' => $complaint->guest_email ?: ($complaint->user_id ? optional($complaint->user)->email : null),
+                'user_phone' => $complaint->guest_phone ?: ($complaint->user_id ? optional($complaint->user)->phone : null),
                 'guest_name' => $complaint->guest_name,
                 'guest_email' => $complaint->guest_email,
                 'guest_phone' => $complaint->guest_phone,

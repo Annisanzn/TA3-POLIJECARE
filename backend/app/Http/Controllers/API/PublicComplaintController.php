@@ -65,7 +65,6 @@ class PublicComplaintController extends Controller
                 'suspect_phone' => $validated['suspect_phone'] ?? null,
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
-                'is_anonymous' => false, // Guest reports inherently anonymized relative to system, but they provide a name to Satgas
                 'location' => $validated['location'],
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
