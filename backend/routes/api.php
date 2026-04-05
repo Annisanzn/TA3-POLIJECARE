@@ -39,6 +39,7 @@ Route::get('/articles', function () {
     }
 });
 Route::get('/articles/{slug}', [ArticleController::class, 'show']);
+Route::get('/materials', [MaterialController::class, 'index']);
 
 // Contact
 Route::get('/contact', [ContactController::class, 'index']);

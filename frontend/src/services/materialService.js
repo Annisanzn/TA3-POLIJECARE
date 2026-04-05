@@ -7,6 +7,12 @@ const materialService = {
     return response.data;
   },
 
+  // Get public materials (on landing page)
+  async getPublicMaterials(params = {}) {
+    const response = await axios.get('/materials', { params });
+    return response.data;
+  },
+
   // Upload material (file or link)
   async createMaterial(formData) {
     const response = await axios.post('/operator/materials', formData, {
