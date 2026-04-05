@@ -4,6 +4,7 @@ import Hero from '../components/Hero';
 import About from '../components/About';
 import Services from '../components/Services';
 import Articles from '../components/Articles';
+import Materials from '../components/Materials';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import LoginModal from '../components/LoginModal';
@@ -32,6 +33,7 @@ const LandingPage = () => {
       <About />
       <Services />
       <Articles />
+      <Materials />
       <Contact />
       <Footer />
     </div>

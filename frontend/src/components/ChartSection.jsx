@@ -132,13 +132,13 @@ const ChartSection = () => {
     { month: 'Juni', laki: 50, perempuan: 50, total: 100 },
   ];
 
-  // Data untuk sebaran kekerasan seksual per gedung
-  const buildingData = [
-    { name: 'Gedung A (Rektorat)', value: 12, color: '#EF4444', percentage: '24%' },
-    { name: 'Gedung B (Fakultas)', value: 18, color: '#F59E0B', percentage: '36%' },
-    { name: 'Gedung C (Lab. Komputer)', value: 8, color: '#10B981', percentage: '16%' },
-    { name: 'Gedung D (Perpustakaan)', value: 7, color: '#3B82F6', percentage: '14%' },
-    { name: 'Gedung E (Student Center)', value: 5, color: '#8B5CF6', percentage: '10%' },
+  // Data untuk sebaran kekerasan seksual per jurusan
+  const departmentData = [
+    { name: 'Teknologi Informasi', value: 18, color: '#F59E0B', percentage: '36%' },
+    { name: 'Kesehatan', value: 12, color: '#EF4444', percentage: '24%' },
+    { name: 'Manajemen Agribisnis', value: 8, color: '#10B981', percentage: '16%' },
+    { name: 'Teknik', value: 7, color: '#3B82F6', percentage: '14%' },
+    { name: 'Produksi Pertanian', value: 5, color: '#8B5CF6', percentage: '10%' },
   ];
 
   return (
@@ -363,8 +363,8 @@ const ChartSection = () => {
               <FiBarChart2 className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">Sebaran Kekerasan Seksual per Gedung</h3>
-              <p className="text-sm text-gray-500">Jurusan Teknologi Informasi - Ranking 2024</p>
+              <h3 className="font-bold text-gray-900">Sebaran Kekerasan Seksual per Jurusan</h3>
+              <p className="text-sm text-gray-500">Data Seluruh Jurusan - Ranking 2024</p>
             </div>
           </div>
           <div className="text-sm font-medium text-gray-900 bg-red-50 px-3 py-1 rounded-full">
@@ -376,8 +376,8 @@ const ChartSection = () => {
         <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-600">Gedung dengan kasus tertinggi</div>
-              <div className="text-xl font-bold text-gray-900">Gedung B (Fakultas)</div>
+              <div className="text-sm text-gray-600">Jurusan dengan kasus tertinggi</div>
+              <div className="text-xl font-bold text-gray-900">Jurusan Teknologi Informasi</div>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-red-600">36%</div>
@@ -388,7 +388,7 @@ const ChartSection = () => {
 
         {/* Horizontal Bar Chart Sorted Descending */}
         <div className="space-y-4">
-          {buildingData
+          {departmentData
             .sort((a, b) => b.value - a.value) // Sort by value descending
             .map((item, index) => {
               const percentage = (item.value / 50) * 100;
@@ -468,8 +468,8 @@ const ChartSection = () => {
 
         <div className="mt-6 pt-6 border-t border-gray-100">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="text-sm text-gray-500">
-              <span className="font-medium">Insight:</span> 60% kasus terjadi di Gedung A & B
+          <div className="text-sm text-gray-500">
+              <span className="font-medium">Insight:</span> 60% kasus melibatkan Jurusan TI & Kesehatan
             </div>
             <button
               onClick={() => setShowMapModal(true)}
@@ -536,7 +536,7 @@ const ChartSection = () => {
 
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-                    <p className="font-bold text-sm mb-1">Gedung B (Fakultas)</p>
+                    <p className="font-bold text-sm mb-1">Jurusan Teknologi Informasi</p>
                     <p className="text-gray-300">18 Kasus tercatat</p>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                   </div>
@@ -548,7 +548,7 @@ const ChartSection = () => {
 
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-                    <p className="font-bold text-sm mb-1">Gedung A (Rektorat)</p>
+                    <p className="font-bold text-sm mb-1">Jurusan Kesehatan</p>
                     <p className="text-gray-300">12 Kasus tercatat</p>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                   </div>

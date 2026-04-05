@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Info, FileText, BookOpen, Phone } from 'lucide-react';
+import { Home, Info, FileText, BookOpen, Phone, Library } from 'lucide-react';
 import { ExpandableTabs } from "@/components/ui/expandable-tabs";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,7 @@ const Navbar = () => {
     { name: 'Tentang Kami', href: '#about' },
     { name: 'Cara Melapor', href: '#services' },
     { name: 'Artikel', href: '#articles' },
+    { name: 'Materi', href: '#materials' },
     { name: 'Kontak', href: '#contact' }
   ];
 
@@ -31,6 +32,7 @@ const Navbar = () => {
     { title: "Tentang Kami", icon: Info },
     { title: "Cara Melapor", icon: FileText },
     { title: "Artikel", icon: BookOpen },
+    { title: "Materi", icon: Library },
     { title: "Kontak", icon: Phone },
   ];
 
