@@ -37,7 +37,13 @@ class ComplaintController extends Controller
                 });
             })
             ->when($status && $status !== 'all', function ($q) use ($status) {
-                $q->where('status', $status);
+                // Support comma-separated multiple statuses (e.g. 'pending,approved')
+                $statuses = array_map('trim', explode(',', $status));
+                if (count($statuses) > 1) {
+                    $q->whereIn('status', $statuses);
+                } else {
+                    $q->where('status', $statuses[0]);
+                }
             })
             ->when($urgency && $urgency !== 'all', function ($q) use ($urgency) {
                 $q->where('urgency_level', $urgency);
@@ -221,8 +227,84 @@ class ComplaintController extends Controller
                 'approved' => $approved,
                 'completed' => $completed,
                 'rejected' => $rejected,
+                'archived' => $completed + $rejected,
             ],
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->query('type', 'all'); // all, daily, monthly, yearly
+        $date = $request->query('date', now()->toDateString());
+
+        $query = Complaint::with(['user', 'counselor', 'violenceCategory']);
+
+        if ($type === 'daily') {
+            $query->whereDate('created_at', $date);
+        } elseif ($type === 'monthly') {
+            $month = date('m', strtotime($date));
+            $year = date('Y', strtotime($date));
+            $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
+        } elseif ($type === 'yearly') {
+            $year = date('Y', strtotime($date));
+            $query->whereYear('created_at', $year);
+        }
+
+        $complaints = $query->orderBy('created_at', 'desc')->get();
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=laporan-pengaduan-" . now()->format('Ymd_His') . ".csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() use($complaints) {
+            $file = fopen('php://output', 'w');
+            // Adding UTF-8 BOM for Excel compatibility
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            fputcsv($file, [
+                'ID Laporan', 
+                'Tanggal Lapor', 
+                'Kategori Kekerasan', 
+                'Tingkat Urgensi', 
+                'Status', 
+                'Nama Korban/Pelapor',
+                'Tipe Korban',
+                'Hubungan Korban',
+                'Lokasi', 
+                'Judul Aduan', 
+                'Deskripsi', 
+                'Konselor Penanggung Jawab', 
+                'Jadwal Konseling',
+                'Alasan Penolakan'
+            ]);
+
+            foreach ($complaints as $c) {
+                fputcsv($file, [
+                    $c->report_id,
+                    $c->created_at->format('d/m/Y H:i'),
+                    optional($c->violenceCategory)->name ?? optional($c->violenceCategory)->kategori,
+                    $c->urgency_level,
+                    strtoupper($c->status),
+                    $c->user_id ? optional($c->user)->name : $c->guest_name,
+                    $c->victim_type,
+                    $c->victim_relationship,
+                    $c->location,
+                    $c->title,
+                    $c->description,
+                    optional($c->counselor)->name,
+                    $c->counseling_schedule ? $c->counseling_schedule->format('d/m/Y H:i') : '-',
+                    $c->rejection_reason ?? '-'
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function updateStatus(Request $request, Complaint $complaint)
@@ -239,7 +321,10 @@ class ComplaintController extends Controller
 
         // Sync status to associated counseling schedules
         \App\Models\CounselingSchedule::where('complaint_id', $complaint->id)
-            ->update(['status' => $validated['status']]);
+            ->update([
+                'status' => $validated['status'],
+                'approved_at' => ($validated['status'] === 'approved') ? now() : null
+            ]);
 
         return response()->json([
             'success' => true,
@@ -266,9 +351,17 @@ class ComplaintController extends Controller
 
         $complaint->update($updateData);
 
+        // Sync status & counselor to associated counseling schedules
+        \App\Models\CounselingSchedule::where('complaint_id', $complaint->id)
+            ->update([
+                'status' => 'approved',
+                'counselor_id' => $updateData['counselor_id'] ?? $complaint->counselor_id,
+                'approved_at' => now()
+            ]);
+
         return response()->json([
             'success' => true,
-            'message' => 'Schedule updated successfully',
+            'message' => 'Schedule and status updated successfully',
             'data' => $complaint,
         ]);
     }

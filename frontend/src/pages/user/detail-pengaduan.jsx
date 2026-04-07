@@ -54,10 +54,10 @@ const DetailPengaduan = () => {
 
     // 4-Step counseling schedule status tracker
     const COUNSELING_STEPS = [
-        { key: 'pending', label: 'Menunggu\nPersetujuan', color: 'bg-red-500', ring: 'ring-red-300', text: 'text-red-600' },
-        { key: 'approved', label: 'Disetujui', color: 'bg-green-500', ring: 'ring-green-300', text: 'text-green-600' },
-        { key: 'reschedule', label: 'Jadwalkan\nUlang', color: 'bg-yellow-400', ring: 'ring-yellow-300', text: 'text-yellow-600' },
-        { key: 'completed', label: 'Selesai', color: 'bg-blue-500', ring: 'ring-blue-300', text: 'text-blue-600' },
+        { key: 'pending', label: 'Peninjauan\nLaporan', color: 'bg-amber-500', ring: 'ring-amber-300', text: 'text-amber-600' },
+        { key: 'approved', label: 'Sedang\nDitangani', color: 'bg-blue-500', ring: 'ring-blue-300', text: 'text-blue-600' },
+        { key: 'reschedule', label: 'Jadwalkan\nUlang', color: 'bg-rose-400', ring: 'ring-rose-300', text: 'text-rose-600' },
+        { key: 'completed', label: 'Laporan\nSelesai', color: 'bg-emerald-500', ring: 'ring-emerald-300', text: 'text-emerald-600' },
     ];
 
     const getCounselingStepIndex = (status) => {
@@ -73,10 +73,10 @@ const DetailPengaduan = () => {
 
     const getComplaintStatusInfo = (status) => {
         switch (status) {
-            case 'pending': return { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' };
-            case 'approved': return { label: 'Diproses / Disetujui', color: 'bg-blue-100 text-blue-800' };
-            case 'completed': return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
-            case 'rejected': return { label: 'Ditolak', color: 'bg-red-100 text-red-800' };
+            case 'pending': return { label: 'Sedang Ditinjau', color: 'bg-amber-100 text-amber-800' };
+            case 'approved': return { label: 'Sedang Ditangani', color: 'bg-blue-100 text-blue-800' };
+            case 'completed': return { label: 'Selesai', color: 'bg-emerald-100 text-emerald-800' };
+            case 'rejected': return { label: 'Jadwalkan Ulang', color: 'bg-rose-100 text-rose-800' };
             default: return { label: '-', color: 'bg-gray-100 text-gray-800' };
         }
     };

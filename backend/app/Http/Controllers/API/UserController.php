@@ -183,6 +183,34 @@ class UserController extends Controller
     }
 
     /**
+     * Get statistics for the authenticated user's profile.
+     */
+    public function profileStats(Request $request)
+    {
+        $user = $request->user();
+        $stats = [
+            'total_contribution' => 0,
+            'label' => 'Kontribusi',
+        ];
+
+        if ($user->role === 'user') {
+            $stats['total_contribution'] = \App\Models\Complaint::where('user_id', $user->id)->count();
+            $stats['label'] = 'Laporan Dibuat';
+        } elseif ($user->role === 'konselor') {
+            $stats['total_contribution'] = \App\Models\CounselingSchedule::where('counselor_id', $user->id)->count();
+            $stats['label'] = 'Sesi Ditangani';
+        } elseif (in_array($user->role, ['operator', 'admin'])) {
+            $stats['total_contribution'] = \App\Models\Complaint::count();
+            $stats['label'] = 'Total Kasus Sistem';
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats
+        ]);
+    }
+
+    /**
      * Get display name for role.
      */
     private function getRoleDisplayName($role)

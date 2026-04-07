@@ -11,6 +11,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import counselingService from '../../services/counselingService';
 import axios from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
+import dayjs from 'dayjs';
 
 /* ── Toast Component ───────────────────────────────────────────────────────── */
 const Toast = ({ toast, onClose }) => {
@@ -55,6 +56,7 @@ const CounselingManagementPage = () => {
   const [pagination, setPagination] = useState({
     current_page: 1, last_page: 1, per_page: 10, total: 0
   });
+  const [activeTab, setActiveTab] = useState('new'); // 'new', 'ongoing', 'archive'
 
   // Modal states
   const [detailModal, setDetailModal] = useState({ open: false, schedule: null, loading: false });
@@ -65,7 +67,7 @@ const CounselingManagementPage = () => {
   useEffect(() => {
     fetchSchedules();
     fetchCounselors();
-  }, []);
+  }, [activeTab]);
 
   const fetchCounselors = async () => {
     try {
@@ -79,15 +81,43 @@ const CounselingManagementPage = () => {
   const fetchSchedules = async (page = 1) => {
     setIsLoading(true);
     try {
+      const today = dayjs().format('YYYY-MM-DD');
+      const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
+      
       const params = {
         page,
         search: searchQuery,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
         metode: methodFilter !== 'all' ? methodFilter : undefined,
         counselor_id: counselorFilter !== 'all' ? counselorFilter : undefined,
-        date_from: dateFrom || undefined,
-        date_to: dateTo || undefined
       };
+
+      // Date-aware Tab Filtering
+      if (activeTab === 'new') {
+        params.status = 'pending';
+        params.date_from = today; // Only show future pending
+      } else if (activeTab === 'today') {
+        params.status = 'approved';
+        params.date_from = today;
+        params.date_to = today;
+      } else if (activeTab === 'upcoming') {
+        params.status = 'approved';
+        params.date_from = tomorrow;
+      } else if (activeTab === 'archive') {
+        // Status finished OR date is past
+        params.status = statusFilter !== 'all' ? statusFilter : 'completed,rejected,cancelled';
+        if (statusFilter === 'all') {
+          // If all, we might want to include past approved/pending too
+          // But our API currently filters strictly by status. 
+          // We rely on the 'date_to' to show past records.
+          params.date_to = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+        }
+      }
+
+      // Override with manual filters if active
+      if (dateFrom) params.date_from = dateFrom;
+      if (dateTo) params.date_to = dateTo;
+      if (statusFilter !== 'all') params.status = statusFilter;
+
       const response = await counselingService.getSchedules(params);
       if (response.success) {
         setSchedules(response.data.data || []);
@@ -95,15 +125,17 @@ const CounselingManagementPage = () => {
           current_page: page, last_page: 1, per_page: 10,
           total: response.data.data?.length || 0
         });
-        setStats(response.data.stats || {
-          total: response.data.data?.length || 0,
-          pending: 0, approved: 0, rejected: 0, completed: 0, cancelled: 0
-        });
+        
+        // Use the precise stats from backend
+        if (response.data.stats) {
+          setStats(response.data.stats);
+        }
       } else {
         showToast(response.message || 'Gagal memuat data jadwal', 'error');
         setSchedules([]);
       }
     } catch (err) {
+      console.error('Fetch error:', err);
       showToast('Terjadi kesalahan saat memuat data jadwal', 'error');
       setSchedules([]);
     } finally {
@@ -239,26 +271,28 @@ const CounselingManagementPage = () => {
   };
   const formatTime = (timeString) => timeString?.substring(0, 5) ?? '-';
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-amber-100 text-amber-700 border border-amber-200';
-      case 'approved': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-      case 'rejected': return 'bg-rose-100 text-rose-700 border border-rose-200';
-      case 'completed': return 'bg-sky-100 text-sky-700 border border-sky-200';
-      case 'cancelled': return 'bg-slate-100 text-slate-700 border border-slate-200';
-      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
-    }
-  };
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'pending': return 'Menunggu';
+      case 'pending': return 'Tinjauan Baru';
       case 'approved': return 'Disetujui';
-      case 'rejected': return 'Ditolak';
       case 'completed': return 'Selesai';
-      case 'cancelled': return 'Dibatalkan';
+      case 'rejected': return 'Dibatalkan';
+      case 'cancelled': return 'Batal';
       default: return status;
     }
   };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'pending': return 'bg-amber-100 text-amber-700 border border-amber-200';
+      case 'approved': return 'bg-blue-100 text-blue-700 border border-blue-200';
+      case 'completed': return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+      case 'rejected': return 'bg-rose-100 text-rose-700 border border-rose-200';
+      case 'cancelled': return 'bg-gray-100 text-gray-700 border border-gray-200';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
   const getUrgencyBadge = (urgency) => {
     switch (urgency) {
       case 'Tinggi': return 'bg-red-50 text-red-700 border-red-200';
@@ -299,47 +333,16 @@ const CounselingManagementPage = () => {
         </header>
 
         <main className="flex-1 p-6 lg:p-10">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {[
-              { label: 'Total Konseling', value: stats.total, icon: <FiBarChart2 className="w-6 h-6 text-blue-600" />, iconBg: 'bg-blue-100', sub: 'Semua waktu' },
-              { label: 'Hari Ini', value: stats.today || 0, icon: <FiCalendar className="w-6 h-6 text-indigo-600" />, iconBg: 'bg-indigo-100', sub: 'Sesi hari ini' },
-              { label: 'Akan Datang', value: stats.upcoming || 0, icon: <FiClock className="w-6 h-6 text-green-600" />, iconBg: 'bg-green-100', sub: 'Sesi mendatang' },
-              { label: 'Menunggu', value: stats.pending, icon: <FiUsers className="w-6 h-6 text-yellow-600" />, iconBg: 'bg-yellow-100', sub: 'Menunggu persetujuan' },
-            ].map((s, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">{s.label}</p>
-                    <p className="text-3xl font-bold text-gray-900">{s.value}</p>
-                  </div>
-                  <div className={`w-12 h-12 ${s.iconBg} rounded-full flex items-center justify-center`}>{s.icon}</div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-sm text-gray-600">{s.sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: 'Disetujui', value: stats.approved, icon: <FiCheckCircle className="w-5 h-5 text-green-600" />, iconBg: 'bg-green-100', color: 'text-green-600' },
-              { label: 'Selesai', value: stats.completed, icon: <FiCheck className="w-5 h-5 text-blue-600" />, iconBg: 'bg-blue-100', color: 'text-blue-600' },
-              { label: 'Ditolak', value: stats.rejected || 0, icon: <FiXCircle className="w-5 h-5 text-red-600" />, iconBg: 'bg-red-100', color: 'text-red-600' },
-              { label: 'Dibatalkan', value: stats.cancelled, icon: <FiX className="w-5 h-5 text-gray-600" />, iconBg: 'bg-gray-100', color: 'text-gray-600' },
-            ].map((s, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-4 border border-gray-100/50 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 ${s.iconBg} rounded-full flex items-center justify-center`}>{s.icon}</div>
-                  <div>
-                    <p className="text-sm text-gray-500">{s.label}</p>
-                    <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Stats Summary - Mini & Compact */}
+          <div className="flex flex-wrap items-center gap-4 mb-8">
+            <div className="bg-blue-600 px-5 py-2.5 rounded-2xl shadow-lg shadow-blue-200 flex items-center gap-3">
+              <FiBarChart2 className="text-white/80" size={16} />
+              <span className="text-sm font-bold text-white">Total: {stats.total}</span>
+            </div>
+            <div className="bg-white border border-gray-100 px-5 py-2.5 rounded-2xl shadow-sm flex items-center gap-3">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Status Sistem: Aktif</span>
+            </div>
           </div>
 
           {/* Filters */}
@@ -399,6 +402,46 @@ const CounselingManagementPage = () => {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-2 mb-8 bg-gray-100/50 p-1.5 rounded-[24px] w-full border border-gray-200/50 overflow-x-auto lg:overflow-x-visible no-scrollbar">
+            <button
+              onClick={() => { setActiveTab('new'); setStatusFilter('all'); }}
+              className={`flex-1 min-w-[140px] px-6 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'new' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Pendaftaran Baru
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'new' ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.pending || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => { setActiveTab('today'); setStatusFilter('all'); }}
+              className={`flex-1 min-w-[140px] px-6 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'today' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Hari Ini
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'today' ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.today || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => { setActiveTab('upcoming'); setStatusFilter('all'); }}
+              className={`flex-1 min-w-[140px] px-6 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'upcoming' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Mendatang
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'upcoming' ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.upcoming || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => { setActiveTab('archive'); setStatusFilter('all'); }}
+              className={`flex-1 min-w-[140px] px-6 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'archive' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Riwayat & Arsip
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'archive' ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.archived || 0}
+              </span>
+            </button>
           </div>
 
           {/* Schedule Cards */}

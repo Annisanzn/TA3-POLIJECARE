@@ -13,9 +13,9 @@ import dayjs from 'dayjs';
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 const getStatusConfig = (status) => {
     switch (status) {
-        case 'pending': return { label: 'Menunggu', cls: 'bg-amber-50 text-amber-700', dot: 'bg-amber-400' };
-        case 'approved': return { label: 'Diproses', cls: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' };
-        case 'completed': return { label: 'Selesai', cls: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' };
+        case 'pending': return { label: 'Sedang Ditinjau', cls: 'bg-amber-50 text-amber-700', dot: 'bg-amber-400' };
+        case 'approved': return { label: 'Sedang Ditangani', cls: 'bg-blue-50 text-blue-700', dot: 'bg-blue-500' };
+        case 'completed': return { label: 'Laporan Selesai', cls: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' };
         case 'rejected': return { label: 'Jadwalkan Ulang', cls: 'bg-rose-50 text-rose-700', dot: 'bg-rose-500' };
         default: return { label: status || '-', cls: 'bg-gray-50 text-gray-600', dot: 'bg-gray-400' };
     }
@@ -131,9 +131,9 @@ const HistoriPengaduan = () => {
                     {/* ── Stat Cards ──────────────────────────────────────────────── */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <StatCard label="Total Laporan" value={total} icon={FiFileText} color="bg-violet-600" sub="semua laporan Anda" />
-                        <StatCard label="Menunggu" value={pending} icon={FiClock} color="bg-amber-500" sub="menunggu tindakan" />
-                        <StatCard label="Diproses" value={approved} icon={FiShield} color="bg-blue-600" sub="sedang ditangani" />
-                        <StatCard label="Selesai" value={completed} icon={FiCheckCircle} color="bg-emerald-600" sub="konseling selesai" />
+                        <StatCard label="Peninjauan" value={pending} icon={FiClock} color="bg-amber-500" sub="laporan sedang ditinjau" />
+                        <StatCard label="Ditangani" value={approved} icon={FiShield} color="bg-blue-600" sub="laporan sedang ditangani" />
+                        <StatCard label="Selesai" value={completed} icon={FiCheckCircle} color="bg-emerald-600" sub="kasus selesai" />
                     </div>
 
                     {/* ── Filter Bar ──────────────────────────────────────────────── */}
@@ -156,8 +156,8 @@ const HistoriPengaduan = () => {
                                     onChange={(e) => handleStatusChange(e.target.value)}
                                 >
                                     <option value="">Semua Status</option>
-                                    <option value="pending">Menunggu</option>
-                                    <option value="approved">Diproses</option>
+                                    <option value="pending">Sedang Ditinjau</option>
+                                    <option value="approved">Sedang Ditangani</option>
                                     <option value="completed">Selesai</option>
                                     <option value="rejected">Jadwalkan Ulang</option>
                                 </select>

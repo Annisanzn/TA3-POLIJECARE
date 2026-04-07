@@ -18,19 +18,18 @@ const OPERATOR_MENU = [
   {
     category: 'MANAJEMEN',
     items: [
+      { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/operator/case-management' },
       { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
-      { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '/operator/complaints-management' },
+      { name: 'Manajemen Jadwal Konselor', icon: <FiClock />, path: '/operator/counselor-schedule-management' },
       { name: 'Manajemen Materi', icon: <FiBook />, path: '/operator/materials-management' },
       { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
-      { name: 'Jadwal Konseling', icon: <FiCalendar />, path: '/operator/counseling-management' },
-      { name: 'Manajemen Jadwal Konselor', icon: <FiClock />, path: '/operator/counselor-schedule-management' },
       { name: 'Manajemen Artikel', icon: <FiBell />, path: '/operator/article-management' },
     ],
   },
   {
     category: 'PENGATURAN',
     items: [
-      { name: 'Profil Operator', icon: <FiUser />, path: '#' },
+      { name: 'Profil Operator', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];
@@ -54,7 +53,7 @@ const KONSELOR_MENU = [
   {
     category: 'AKUN',
     items: [
-      { name: 'Profil Saya', icon: <FiUser />, path: '#' },
+      { name: 'Profil Saya', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];
@@ -76,7 +75,7 @@ const USER_MENU = [
   {
     category: 'AKUN',
     items: [
-      { name: 'Profil Saya', icon: <FiUser />, path: '#' },
+      { name: 'Profil Saya', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];

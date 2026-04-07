@@ -16,7 +16,8 @@ import {
   FiUser,
   FiRefreshCw,
   FiCheck,
-  FiX
+  FiX,
+  FiDownload
 } from 'react-icons/fi';
 import { complaintService } from '../../services/complaintService';
 import { useNavigate } from 'react-router-dom';
@@ -51,6 +52,7 @@ const ComplaintsManagementPage = () => {
   const [urgencyFilter, setUrgencyFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [activeTab, setActiveTab] = useState('new'); // 'new', 'ongoing', 'archive'
 
   const [perPage] = useState(10);
 
@@ -106,7 +108,11 @@ const ComplaintsManagementPage = () => {
           page,
           per_page: perPage,
           search: searchQuery,
-          status: statusFilter !== 'all' ? statusFilter : undefined,
+          status: activeTab === 'new' 
+            ? 'pending'
+            : activeTab === 'ongoing'
+              ? 'approved'
+              : 'completed,rejected',
           urgency: urgencyFilter !== 'all' ? urgencyFilter : undefined,
           date_from: dateFrom || undefined,
           date_to: dateTo || undefined,
@@ -137,7 +143,7 @@ const ComplaintsManagementPage = () => {
 
   useEffect(() => {
     fetchData(1);
-  }, []);
+  }, [activeTab]);
 
   const handleFilterChange = () => {
     fetchData(1);
@@ -216,6 +222,29 @@ const ComplaintsManagementPage = () => {
       setIsSubmitting(false);
     }
   };
+  
+  const handleExport = async (period) => {
+    try {
+      setIsLoading(true);
+      const res = await axios.get(`/operator/complaints/export?type=${period}`, {
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `laporan-pengaduan-${period}-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      showToast('Laporan berhasil diekspor!');
+    } catch (error) {
+      showToast('Gagal mengekspor laporan.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
@@ -244,71 +273,35 @@ const ComplaintsManagementPage = () => {
               >
                 Reset
               </button>
+              
+              {activeTab === 'archive' && (
+                <div className="relative group/export">
+                  <button
+                    className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-200"
+                  >
+                    <FiDownload size={16} /> Ekspor Laporan
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover/export:opacity-100 group-hover/export:visible transition-all z-[60] overflow-hidden">
+                    <button onClick={() => handleExport('daily')} className="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium border-b border-gray-50">Hari Ini</button>
+                    <button onClick={() => handleExport('monthly')} className="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium border-b border-gray-50">Bulan Ini</button>
+                    <button onClick={() => handleExport('yearly')} className="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">Tahun Ini</button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
         <main className="flex-1 p-6 lg:p-10">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Total Laporan</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.total || 0}</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <FiFileText className="w-6 h-6 text-purple-600" />
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-sm text-gray-600">Keseluruhan laporan</p>
-              </div>
+          {/* Stats Summary - Compact & Modern */}
+          <div className="flex flex-wrap items-center gap-4 mb-8">
+            <div className="bg-purple-600 px-5 py-2.5 rounded-2xl shadow-lg shadow-purple-200 flex items-center gap-3">
+              <FiFileText className="text-white/80" size={16} />
+              <span className="text-sm font-bold text-white">Total Laporan: {stats.total || 0}</span>
             </div>
-
-            <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Menunggu</p>
-                  <p className="text-3xl font-bold text-yellow-600">{stats.pending || 0}</p>
-                </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <FiAlertCircle className="w-6 h-6 text-yellow-600" />
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-sm text-gray-600">Perlu tindak lanjut</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Diproses</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.approved || 0}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <FiEdit className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-sm text-gray-600">Sedang ditindaklanjuti</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6 border border-gray-100/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Selesai</p>
-                  <p className="text-3xl font-bold text-emerald-600">{stats.completed || 0}</p>
-                </div>
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <FiCheckCircle className="w-6 h-6 text-emerald-600" />
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-sm text-gray-600">Penanganan tuntas</p>
-              </div>
+            <div className="bg-white border border-gray-100 px-5 py-2.5 rounded-2xl shadow-sm flex items-center gap-3">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Pusat Bantuan Satgas - Aktif</span>
             </div>
           </div>
 
@@ -387,6 +380,37 @@ const ComplaintsManagementPage = () => {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-2 mb-8 bg-gray-100/50 p-1.5 rounded-[24px] w-full border border-gray-200/50">
+            <button
+              onClick={() => { setActiveTab('new'); setStatusFilter('all'); }}
+              className={`flex-1 px-8 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'new' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Laporan Baru
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'new' ? 'bg-purple-100 text-purple-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.pending || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => { setActiveTab('ongoing'); setStatusFilter('all'); }}
+              className={`flex-1 px-8 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'ongoing' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Sedang Ditangani
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'ongoing' ? 'bg-purple-100 text-purple-600' : 'bg-gray-200 text-gray-500'}`}>
+                {stats.approved || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => { setActiveTab('archive'); setStatusFilter('all'); }}
+              className={`flex-1 px-8 py-3 rounded-[20px] text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'archive' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Arsip & Ekspor
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeTab === 'archive' ? 'bg-purple-100 text-purple-600' : 'bg-gray-200 text-gray-500'}`}>
+                {(stats.completed || 0) + (stats.rejected || 0)}
+              </span>
+            </button>
           </div>
 
           {/* Main Content Grid */}

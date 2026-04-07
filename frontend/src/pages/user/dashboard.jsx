@@ -106,13 +106,13 @@ const UserDashboard = () => {
                   onClick={() => navigate('/user/histori-pengaduan')}
                 />
                 <StatCard
-                  label="Diproses" value={loading ? '-' : stats.processing}
-                  icon={FiShield} color="bg-blue-600" sub="sedang ditangani"
+                  label="Dalam Peninjauan" value={loading ? '-' : stats.processing}
+                  icon={FiShield} color="bg-blue-600" sub="laporan sedang ditinjau"
                   onClick={() => navigate('/user/histori-pengaduan?status=approved')}
                 />
                 <StatCard
-                  label="Selesai" value={loading ? '-' : stats.completed}
-                  icon={FiCheckCircle} color="bg-emerald-600" sub="konseling selesai"
+                  label="Laporan Selesai" value={loading ? '-' : stats.completed}
+                  icon={FiCheckCircle} color="bg-emerald-600" sub="penanganan tuntas"
                   onClick={() => navigate('/user/histori-pengaduan?status=completed')}
                 />
               </div>
@@ -186,9 +186,9 @@ const UserDashboard = () => {
                               item.status === 'rejected' ? 'bg-rose-100 text-rose-700' :
                                 'bg-amber-100 text-amber-700'
                             }`}>
-                            {item.status === 'completed' ? 'SELESAI' :
-                              item.status === 'approved' ? 'DIPROSES' :
-                                item.status === 'rejected' ? 'DITOLAK' : 'MENUNGGU'}
+                            {item.status === 'completed' ? 'LAPORAN SELESAI' :
+                              item.status === 'approved' ? 'SEDANG DITANGANI' :
+                                item.status === 'rejected' ? 'JADWAL ULANG' : 'SEDANG DITINJAU'}
                           </span>
                         </div>
                       ))}

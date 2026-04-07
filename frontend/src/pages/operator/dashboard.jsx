@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import SummaryCard from '../../components/SummaryCard';
@@ -10,6 +11,7 @@ import { FiRefreshCw } from 'react-icons/fi';
 import DashboardNotification from '../../components/DashboardNotification';
 
 const OperatorDashboard = () => {
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({
     summary: { new: 0, approved: 0, completed: 0, total: 0 },
@@ -95,7 +97,10 @@ const OperatorDashboard = () => {
                     Pantau aktivitas sistem dan kelola laporan dengan efisien.
                   </p>
                   <div className="flex items-center space-x-4">
-                    <button className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors">
+                    <button 
+                      onClick={() => navigate('/operator/complaints-management')}
+                      className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors"
+                    >
                       Tinjau Laporan Baru
                     </button>
                   </div>

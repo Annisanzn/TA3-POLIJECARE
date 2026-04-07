@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user-new', [NewLoginController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/profile/stats', [UserController::class, 'profileStats']);
     
     // User routes
     Route::middleware(RoleMiddleware::class . ':user')->prefix('user')->group(function () {
@@ -148,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/complaints', [ComplaintController::class, 'index']);
         Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']);
         Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+        Route::get('/complaints/export', [ComplaintController::class, 'export']);
         Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 
