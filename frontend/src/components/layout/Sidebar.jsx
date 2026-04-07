@@ -44,8 +44,7 @@ const KONSELOR_MENU = [
   {
     category: 'MANAJEMEN',
     items: [
-      { name: 'Manajemen Pengaduan', icon: <FiFileText />, path: '/konselor/pengaduan' },
-      { name: 'Jadwal Konseling', icon: <FiClock />, path: '/konselor/counseling-dashboard' },
+      { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/konselor/case-management' },
       { name: 'Manajemen Jadwal Konselor', icon: <FiCalendar />, path: '/konselor/jadwal' },
       { name: 'Manajemen Materi', icon: <FiBook />, path: '/konselor/materi' },
     ],

@@ -39,6 +39,7 @@ import KonselorPengaduan from './pages/konselor/pengaduan';
 import KonselorComplaintDetail from './pages/konselor/complaint-detail';
 import KonselorMateri from './pages/konselor/materi';
 import Profile from './pages/shared/Profile';
+import CounselorCaseManagement from './pages/konselor/case-management';
 
 function App() {
   return (
@@ -129,12 +130,20 @@ function App() {
               }
             />
 
-            {/* Konselor: Materi */}
             <Route
               path="/konselor/materi"
               element={
                 <NewProtectedRoute requiredRole="konselor">
                   <KonselorMateri />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/konselor/case-management"
+              element={
+                <NewProtectedRoute requiredRole="konselor">
+                  <CounselorCaseManagement />
                 </NewProtectedRoute>
               }
             />

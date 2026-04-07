@@ -314,6 +314,13 @@ class ComplaintController extends Controller
             'rejection_reason' => 'nullable|string',
         ]);
 
+        if ($request->user()->role === 'konselor' && $complaint->counselor_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda hanya dapat memperbarui status laporan yang ditugaskan kepada Anda.'
+            ], 403);
+        }
+
         $complaint->update([
             'status' => $validated['status'],
             'rejection_reason' => $validated['rejection_reason'] ?? $complaint->rejection_reason,
@@ -339,6 +346,13 @@ class ComplaintController extends Controller
             'counselor_id' => 'nullable|exists:users,id',
             'counseling_schedule' => 'nullable|date',
         ]);
+
+        if ($request->user()->role === 'konselor' && $complaint->counselor_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda hanya dapat mengatur jadwal laporan yang ditugaskan kepada Anda.'
+            ], 403);
+        }
 
         $updateData = [
             'counselor_id' => $validated['counselor_id'] ?? $complaint->counselor_id,
