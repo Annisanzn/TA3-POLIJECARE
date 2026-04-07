@@ -29,7 +29,7 @@ const OPERATOR_MENU = [
   {
     category: 'PENGATURAN',
     items: [
-      { name: 'Profil Operator', icon: <FiUser />, path: '#' },
+      { name: 'Profil Operator', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];
@@ -53,7 +53,7 @@ const KONSELOR_MENU = [
   {
     category: 'AKUN',
     items: [
-      { name: 'Profil Saya', icon: <FiUser />, path: '#' },
+      { name: 'Profil Saya', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];
@@ -75,7 +75,7 @@ const USER_MENU = [
   {
     category: 'AKUN',
     items: [
-      { name: 'Profil Saya', icon: <FiUser />, path: '#' },
+      { name: 'Profil Saya', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];

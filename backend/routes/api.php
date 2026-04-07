@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user-new', [NewLoginController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/profile/stats', [UserController::class, 'profileStats']);
     
     // User routes
     Route::middleware(RoleMiddleware::class . ':user')->prefix('user')->group(function () {

@@ -38,6 +38,7 @@ import KonselorJadwal from './pages/konselor/jadwal-konseling';
 import KonselorPengaduan from './pages/konselor/pengaduan';
 import KonselorComplaintDetail from './pages/konselor/complaint-detail';
 import KonselorMateri from './pages/konselor/materi';
+import Profile from './pages/shared/Profile';
 
 function App() {
   return (
@@ -319,6 +320,15 @@ function App() {
                 </ProtectedRoute>
               }
             /> */}
+
+            <Route
+              path="/profile"
+              element={
+                <NewProtectedRoute>
+                  <Profile />
+                </NewProtectedRoute>
+              }
+            />
 
             {/* Redirect */}
             <Route path="/redirect" element={<RedirectDashboard />} />
