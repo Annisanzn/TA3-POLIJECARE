@@ -662,10 +662,10 @@ class CounselingController extends Controller
     public function reassignCounselor(Request $request, $id)
     {
         $user = Auth::user();
-        if ($user->role !== 'operator') {
+        if ($user->role !== 'operator' && $user->role !== 'konselor') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only operators can reassign counselors'
+                'message' => 'Only operators and counselors can reassign counselors'
             ], 403);
         }
 

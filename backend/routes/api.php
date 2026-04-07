@@ -98,8 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
 
         // Pengaduan yang terkait konselor ini
-        Route::get('/pengaduan', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
-        Route::get('/complaints', [\App\Http\Controllers\API\KonselorDashboardController::class, 'pengaduan']);
+        Route::get('/pengaduan', [\App\Http\Controllers\API\ComplaintController::class, 'index']);
+        Route::get('/complaints', [\App\Http\Controllers\API\ComplaintController::class, 'index']);
 
         // Jadwal Konseling milik konselor (counseling sessions where counselor_id = me)
         Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
@@ -118,6 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Complaint update (status & jadwal) untuk konselor yang menangani pengaduan tersebut
         Route::get('/complaints/{complaint}',            [ComplaintController::class, 'show']);
+        Route::get('/complaints-stats',                  [ComplaintController::class, 'stats']);
         Route::patch('/complaints/{complaint}/status',   [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 
