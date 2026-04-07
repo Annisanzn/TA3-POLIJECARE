@@ -19,7 +19,7 @@ class CounselingController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = CounselingSchedule::with(['user', 'counselor', 'complaint']);
+        $query = CounselingSchedule::with(['user', 'counselor', 'complaint.counselor']);
 
         // Role-based filtering
         if ($user->role === 'konselor') {
@@ -38,7 +38,12 @@ class CounselingController extends Controller
 
         // Apply filters
         if ($request->has('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
+            $statuses = array_map('trim', explode(',', $request->status));
+            if (count($statuses) > 1) {
+                $query->whereIn('status', $statuses);
+            } else {
+                $query->where('status', $statuses[0]);
+            }
         } else {
             // "Jika belum di Approve, jangan di masukkan ke Jadwal Konseling"
             $query->whereIn('status', ['approved', 'completed', 'rejected', 'cancelled']);
@@ -78,6 +83,48 @@ class CounselingController extends Controller
         // Pagination
         $perPage = $request->get('per_page', 10);
         $schedules = $query->paginate($perPage);
+
+        // Flatten the collection and ensure name consistency
+        $schedules->setCollection(
+            $schedules->getCollection()->map(function ($s) {
+                // Determine the actual reporter/user name and phone
+                // 1. From the schedule's user relation
+                // 2. From the linked complaint's user relation
+                // 3. From the linked complaint's guest data
+                $userName = optional($s->user)->name 
+                            ?? optional($s->complaint->user)->name 
+                            ?? optional($s->complaint)->guest_name 
+                            ?? 'Pelapor';
+                            
+                $userPhone = optional($s->user)->phone 
+                             ?? optional($s->complaint->user)->phone 
+                             ?? optional($s->complaint)->guest_phone;
+                
+                return [
+                    'id' => $s->id,
+                    'complaint_id' => $s->complaint_id,
+                    'user_id' => $s->user_id,
+                    'user_name' => $userName,
+                    'user_phone' => $userPhone,
+                    'counselor_id' => $s->counselor_id,
+                    'counselor_name' => optional($s->counselor)->name ?? optional($s->complaint->counselor)->name ?? 'Belum diplot',
+                    'tanggal' => $s->tanggal,
+                    'jam_mulai' => $s->jam_mulai,
+                    'jam_selesai' => $s->jam_selesai,
+                    'tempat' => $s->tempat,
+                    'status' => $s->status,
+                    'keterangan' => $s->keterangan,
+                    // Complaint fields needed for the card UI
+                    'title' => optional($s->complaint)->title,
+                    'description' => optional($s->complaint)->description,
+                    'report_id' => optional($s->complaint)->report_id,
+                    'urgency_level' => optional($s->complaint)->urgency_level,
+                    'is_anonymous' => optional($s->complaint)->is_anonymous,
+                    // Keep the nested object for compatibility
+                    'complaint' => $s->complaint
+                ];
+            })
+        );
 
         return response()->json([
             'success' => true,
@@ -669,12 +716,20 @@ class CounselingController extends Controller
             $query->where('user_id', $user->id);
         }
 
+        $today = now()->toDateString();
         $stats = [
             'total' => $query->count(),
-            'pending' => $query->clone()->where('status', 'pending')->count(),
-            'approved' => $query->clone()->where('status', 'approved')->count(),
-            'rejected' => $query->clone()->where('status', 'rejected')->count(),
-            'completed' => $query->clone()->where('status', 'completed')->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'approved' => (clone $query)->where('status', 'approved')->count(),
+            'rejected' => (clone $query)->where('status', 'rejected')->count(),
+            'completed' => (clone $query)->where('status', 'completed')->count(),
+            'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
+            'today' => (clone $query)->where('status', 'approved')->whereDate('tanggal', $today)->count(),
+            'upcoming' => (clone $query)->where('status', 'approved')->whereDate('tanggal', '>', $today)->count(),
+            'archived' => (clone $query)->where(function($q) use ($today) {
+                $q->whereIn('status', ['completed', 'rejected', 'cancelled'])
+                  ->orWhereDate('tanggal', '<', $today);
+            })->count(),
         ];
 
         return response()->json([

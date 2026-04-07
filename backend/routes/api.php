@@ -148,6 +148,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/complaints', [ComplaintController::class, 'index']);
         Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']);
         Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+        Route::get('/complaints/export', [ComplaintController::class, 'export']);
         Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 

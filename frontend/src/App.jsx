@@ -15,6 +15,7 @@ import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
 import UserManagementPage from './pages/operator/user-management';
 import ComplaintsManagementPage from './pages/operator/complaints-management';
+import CaseManagementPage from './pages/operator/case-management';
 import OperatorComplaintDetail from './pages/operator/complaint-detail';
 import MaterialsManagement from './pages/operator/materials-management';
 import HistoriPengaduan from './pages/user/histori-pengaduan';
@@ -157,10 +158,19 @@ function App() {
             />
 
             <Route
+              path="/operator/case-management"
+              element={
+                <NewProtectedRoute requiredRole="operator">
+                  <CaseManagementPage />
+                </NewProtectedRoute>
+              }
+            />
+
+            <Route
               path="/operator/complaints-management"
               element={
                 <NewProtectedRoute requiredRole="operator">
-                  <ComplaintsManagementPage />
+                  <CaseManagementPage />
                 </NewProtectedRoute>
               }
             />
@@ -201,12 +211,12 @@ function App() {
               }
             />
 
-            {/* Counseling Management for Operator */}
+            {/* Counseling Management for Operator - Redirected to Unified Case Management */}
             <Route
               path="/operator/counseling-management"
               element={
                 <NewProtectedRoute requiredRole="operator">
-                  <CounselingManagementPage />
+                  <CaseManagementPage />
                 </NewProtectedRoute>
               }
             />
