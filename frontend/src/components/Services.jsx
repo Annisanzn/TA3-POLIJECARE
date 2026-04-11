@@ -27,7 +27,7 @@ const Services = () => {
       features: ['Respons 24/7', 'Konsultasi Privat', 'Pendampingan Awal'],
       buttonText: 'Chat WhatsApp Sekarang',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      buttonLink: 'https://wa.me/6281234567890',
+      buttonLink: `https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKS Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`,
       gradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
       iconColor: 'text-green-600 dark:text-green-400',
       spotlightColor: 'rgba(34, 197, 94, 0.2)' // Green glow for WhatsApp
@@ -105,7 +105,7 @@ const Services = () => {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">
-            Cara <span className="text-[#191970] dark:text-blue-400">Melapor</span>
+            Cara <span className="text-[#191970] dark:text-indigo-400">Melapor</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Kami menyediakan ruang aman bagi Anda untuk bersuara. Pilih metode yang paling nyaman, kami siap mendampingi setiap langkahnya.
@@ -249,10 +249,10 @@ const Services = () => {
                     transition={{ delay: index * 0.2 + 0.3 }}
                   >
                     <div className="relative z-10 flex flex-col items-center text-center">
-                      <div className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 flex items-center justify-center mb-4 text-[#191970] dark:text-blue-500 shadow-md group-hover/step:scale-110 group-hover/step:border-[#191970] dark:group-hover/step:border-blue-500 transition-all duration-300 relative bg-opacity-80 backdrop-blur-md">
+                      <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 flex items-center justify-center mb-4 text-[#191970] dark:text-indigo-400 shadow-md group-hover/step:scale-110 group-hover/step:border-[#191970] dark:group-hover/step:border-indigo-500 transition-all duration-300 relative bg-opacity-80 backdrop-blur-md">
                         {step.icon}
                       </div>
-                      <span className="text-xs font-bold font-mono text-[#191970] dark:text-blue-400 mb-2 opacity-80">{step.step}</span>
+                      <span className="text-xs font-bold font-mono text-[#191970] dark:text-indigo-400 mb-2 opacity-80">{step.step}</span>
                       <h4 className="font-bold text-gray-900 dark:text-white text-base mb-2">{step.title}</h4>
                       <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">{step.desc}</p>
                     </div>
@@ -266,13 +266,15 @@ const Services = () => {
 
         {/* Emergency Banner */}
         <motion.div
-          className="mt-12 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6"
+          className="mt-12 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative"
           variants={fadeIn}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
+          {/* Subtle background glow */}
+          <div className="absolute -top-12 -left-12 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
               <Phone className="w-6 h-6" />
@@ -284,7 +286,7 @@ const Services = () => {
           </div>
           <FlowButton
             text="Hubungi Sekarang"
-            href="https://wa.me/6281234567890"
+            href={`https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKS Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`}
             target="_blank"
             colorStr="#dc2626"
             hoverColorStr="#dc2626"

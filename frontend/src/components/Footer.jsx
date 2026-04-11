@@ -27,14 +27,14 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: <Instagram className="w-5 h-5" />, href: 'https://instagram.com/satgasppkpt_polije', label: 'Instagram' },
+    { icon: <Instagram className="w-5 h-5" />, href: 'https://instagram.com/ppkptpolije', label: 'Instagram' },
     { icon: <Twitter className="w-5 h-5" />, href: '#', label: 'Twitter' },
     { icon: <Facebook className="w-5 h-5" />, href: '#', label: 'Facebook' },
     { icon: <Linkedin className="w-5 h-5" />, href: '#', label: 'LinkedIn' },
   ];
 
   return (
-    <footer className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-t border-gray-200/50 dark:border-white/5 pt-20 pb-10 relative overflow-hidden">
+    <footer className="bg-white dark:bg-slate-950 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 pt-20 pb-10 relative overflow-hidden transition-colors duration-300">
       {/* Background Gradients */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-70"></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent opacity-70"></div>
@@ -52,10 +52,10 @@ const Footer = () => {
               <img
                 src="/logo_polijecare.png"
                 alt="PolijeCare Logo"
-                className="w-14 h-14 object-contain filter drop-shadow-sm"
+                className="w-14 h-14 object-contain filter drop-shadow-sm dark:brightness-0 dark:invert transition-all duration-300"
               />
               <div className="space-y-0.5">
-                <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <h3 className="text-2xl font-bold tracking-tight text-black dark:text-white">
                   PolijeCare
                 </h3>
                 <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary">
@@ -64,7 +64,7 @@ const Footer = () => {
               </div>
             </motion.div>
 
-            <p className="text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm text-sm">
+            <p className="text-gray-800 dark:text-gray-300 leading-relaxed max-w-sm text-sm">
               Mewujudkan lingkungan kampus yang aman, inklusif, dan bebas kekerasan seksual. Kami hadir untuk melayani, melindungi, dan mendampingi sivitas akademika Polije.
             </p>
 
@@ -90,7 +90,7 @@ const Footer = () => {
           <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {Object.entries(footerLinks).map(([title, links], columnIndex) => (
               <div key={title} className="space-y-6">
-                <h4 className="font-semibold text-gray-900 dark:text-white text-sm uppercase tracking-wider">{title}</h4>
+                <h4 className="font-bold text-black dark:text-white text-sm uppercase tracking-wider">{title}</h4>
                 <ul className="space-y-3">
                   {links.map((link, index) => (
                     <motion.li
@@ -102,7 +102,7 @@ const Footer = () => {
                     >
                       <a
                         href={link.href}
-                        className="text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors inline-flex items-center group"
+                        className="text-sm text-gray-700 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors inline-flex items-center group font-medium"
                       >
                         <span className="relative overflow-hidden">
                           {link.name}
@@ -118,7 +118,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-200/50 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-500 dark:text-gray-500">
+        <div className="pt-8 border-t border-gray-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-black dark:text-gray-400 font-medium">
           <p>© {currentYear} PolijeCare. All rights reserved.</p>
           <div className="flex gap-8">
             <div className="flex items-center gap-2">
@@ -127,7 +127,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-3 h-3" />
-              <span>satgasppkpt@polije.ac.id</span>
+              <span>satgas.ppks@polije.ac.id</span>
             </div>
           </div>
         </div>
