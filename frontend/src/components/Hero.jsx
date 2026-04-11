@@ -130,14 +130,14 @@ const Hero = ({ heroData }) => {
                   className="rounded-full bg-red-600 hover:bg-red-700 border-0"
                   gradientLight={{ from: "from-red-600", via: "via-red-600", to: "to-red-600" }}
                   gradientDark={{ from: "from-red-600", via: "via-red-600", to: "to-red-600" }}
-                  onClick={() => window.open('https://wa.me/6281234567890', '_blank')}
+                  onClick={() => window.open(`https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKPT Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`, '_blank')}
                 />
               </motion.div>
             </motion.div>
 
             {/* Announcement Banner */}
             <motion.div
-              className="mt-6 p-6 bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100 rounded-3xl shadow-sm relative overflow-hidden"
+              className="mt-6 p-6 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-slate-900 dark:to-indigo-950/30 border border-blue-100 dark:border-indigo-500/20 rounded-3xl shadow-sm relative overflow-hidden transition-colors duration-300"
               variants={fadeIn}
               initial="hidden"
               animate="visible"
@@ -146,14 +146,14 @@ const Hero = ({ heroData }) => {
               <div className="absolute -top-4 -right-4 p-4 opacity-5">
                 <Icon icon="solar:info-circle-bold-duotone" className="w-40 h-40 text-blue-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                 <Icon icon="solar:info-circle-bold-duotone" className="text-blue-600 w-6 h-6" />
                 Informasi Pelaporan
               </h3>
-              <p className="text-sm text-gray-700 leading-relaxed max-w-lg mb-6">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-w-lg mb-6">
                 Bagi <strong>Sivitas Akademika Polije</strong> silahkan login terlebih dahulu. Namun, jika Anda berasal dari <strong>Masyarakat Umum / Kampus Lain</strong>, Anda dapat membuat laporan langsung tanpa login.
               </p>
-              
+
               <div className="flex flex-wrap gap-4 relative z-10">
                 <button
                   onClick={() => navigate('/login-new')}

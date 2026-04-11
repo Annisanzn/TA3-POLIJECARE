@@ -168,7 +168,7 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 bg-white/50 backdrop-blur-md border-b border-white/20 shadow-sm will-change-transform"
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 dark:bg-slate-950/90 backdrop-blur-md border-b border-white/20 dark:border-slate-800 shadow-sm will-change-transform"
           >
             <div className="w-full px-8 lg:px-12">
               <div className="flex items-center justify-between h-20">
@@ -177,12 +177,12 @@ const Navbar = () => {
                   <img
                     src="/logo_polije.png"
                     alt="Logo Polije"
-                    className="h-12 w-auto object-contain"
+                    className="h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all duration-300"
                   />
                   <img
                     src="/logo_polijecare.png"
                     alt="Polijecare Logo"
-                    className="h-12 w-auto object-contain"
+                    className="h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all duration-300"
                   />
                 </Link>
 
@@ -196,8 +196,8 @@ const Navbar = () => {
                         handleNavClick(link.href);
                       }}
                       className={`px-5 py-2.5 text-base font-medium rounded-full transition-all duration-200 ${activeLink === link.href
-                        ? 'bg-[#191970] text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]'
-                        : 'text-gray-600 hover:text-[#191970] hover:bg-gray-100'
+                        ? 'bg-[#191970] dark:bg-indigo-600 text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-[#191970] dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-slate-800/50'
                         }`}
                     >
                       {link.name}

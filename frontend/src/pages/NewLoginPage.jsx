@@ -270,7 +270,7 @@ const NewLoginPage = () => {
               PolijeCare Login
             </h1>
             <p className="text-gray-600 mb-3">
-              Masuk ke sistem PolijeCare untuk akses layanan kesehatan
+              Masuk ke sistem PolijeCare untuk akses layanan pengaduan dan konseling
             </p>
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2 rounded-full border border-green-100">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

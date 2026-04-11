@@ -139,7 +139,7 @@ const Gallery4 = ({
                         alt={item.title}
                         className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
                       <div
-                        className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] mix-blend-multiply" />
+                        className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] dark:bg-gradient-to-t dark:from-slate-950 dark:via-slate-900/40 dark:to-transparent mix-blend-multiply dark:mix-blend-normal" />
                       <div
                         className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
                         <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">

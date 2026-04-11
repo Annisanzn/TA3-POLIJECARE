@@ -13,10 +13,10 @@ const Contact = () => {
     // Temporary disable API calls to prevent 404 errors
     const mockContactInfo = {
       address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',
-      phone: '+62 331-123456',
-      email: 'satgasppkpt@polije.ac.id',
-      instagram: '@satgasppkpt_polije',
-      whatsapp: '+6281234567890',
+      phone: '0821-2643-2696',
+      email: 'satgas.ppks@polije.ac.id',
+      instagram: '@ppkptpolije',
+      whatsapp: '+62 821-2643-2696',
       facebook: 'SatgasPPKPTPolije',
       twitter: '@SatgasPPKPTPolije'
     };
@@ -27,10 +27,10 @@ const Contact = () => {
 
   const defaultContact = {
     address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',
-    phone: '+62 331-123456',
-    email: 'satgasppkpt@polije.ac.id',
-    instagram: '@satgasppkpt_polije',
-    whatsapp: '+62 812-3456-7890'
+    phone: '0821-2643-2696',
+    email: 'satgas.ppks@polije.ac.id',
+    instagram: '@ppkptpolije',
+    whatsapp: '+62 821-2643-2696'
   };
 
   const contact = contactInfo || defaultContact;
@@ -115,11 +115,11 @@ const Contact = () => {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bantuan Darurat 24/7</h3>
                     <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-                      Jika Anda dalam situasi darurat atau bahaya, segera hubungi tim Satgas PPKS melalui saluran khusus ini.
+                      Jika Anda dalam situasi darurat atau bahaya, segera hubungi tim Satgas PPKPT melalui saluran khusus ini.
                     </p>
                     <FlowButton
                       text="Hubungi Darurat Sekarang"
-                      href={`https://wa.me/${contact.whatsapp?.replace(/[^0-9]/g, '')}`}
+                      href={`https://wa.me/${contact.whatsapp?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Satgas PPKPT Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`}
                       target="_blank"
                       colorStr="#ef4444"
                       hoverColorStr="#dc2626"

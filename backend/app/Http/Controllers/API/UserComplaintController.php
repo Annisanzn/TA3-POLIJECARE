@@ -14,8 +14,8 @@ class UserComplaintController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 10);
-        $search  = $request->query('search', '');
-        $status  = $request->query('status', '');
+        $search = $request->query('search', '');
+        $status = $request->query('status', '');
 
         $query = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
             ->where('user_id', auth()->id());
@@ -24,7 +24,7 @@ class UserComplaintController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('report_id', 'like', "%{$search}%");
+                    ->orWhere('report_id', 'like', "%{$search}%");
             });
         }
 
@@ -40,9 +40,9 @@ class UserComplaintController extends Controller
             'data' => $complaints->items(),
             'meta' => [
                 'current_page' => $complaints->currentPage(),
-                'last_page'    => $complaints->lastPage(),
-                'per_page'     => $complaints->perPage(),
-                'total'        => $complaints->total(),
+                'last_page' => $complaints->lastPage(),
+                'per_page' => $complaints->perPage(),
+                'total' => $complaints->total(),
             ]
         ]);
     }
@@ -54,7 +54,7 @@ class UserComplaintController extends Controller
     {
         $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
             ->find($id);
-            
+
         if (!$complaint) {
             return response()->json([
                 'success' => false,
@@ -154,7 +154,7 @@ class UserComplaintController extends Controller
             // Load relations for WhatsApp notification
             $complaint->load(['user', 'violenceCategory']);
 
-            // Send WhatsApp notification to Satgas PPKS (non-blocking)
+            // Send WhatsApp notification to Satgas PPKPT (non-blocking)
             try {
                 \App\Services\WhatsAppNotificationService::notifyNewComplaint($complaint);
             } catch (\Exception $e) {

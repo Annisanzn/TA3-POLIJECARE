@@ -229,7 +229,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   <img 
                     src="/logo_polijecare.png" 
                     alt="Polijecare Logo" 
-                    className="w-10 h-10 object-contain"
+                    className="w-10 h-10 object-contain brightness-0 invert"
                   />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
