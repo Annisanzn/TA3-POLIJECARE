@@ -52,19 +52,19 @@ const Footer = () => {
               <img
                 src="/logo_polijecare.png"
                 alt="PolijeCare Logo"
-                className="w-14 h-14 object-contain filter drop-shadow-sm dark:brightness-0 dark:invert transition-all duration-300"
+                className="w-14 h-14 object-contain filter drop-shadow-sm transition-all duration-300 dark:bg-white/90 dark:p-1 dark:rounded-xl"
               />
               <div className="space-y-0.5">
-                <h3 className="text-2xl font-bold tracking-tight text-black dark:text-white">
+                <h3 className="text-2xl font-bold tracking-tight text-black dark:!text-white">
                   PolijeCare
                 </h3>
-                <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary">
+                <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary dark:!text-white">
                   Satgas PPKS Polije
                 </p>
               </div>
             </motion.div>
 
-            <p className="text-gray-800 dark:text-gray-300 leading-relaxed max-w-sm text-sm">
+            <p className="text-gray-800 dark:!text-white leading-relaxed max-w-sm text-sm">
               Mewujudkan lingkungan kampus yang aman, inklusif, dan bebas kekerasan seksual. Kami hadir untuk melayani, melindungi, dan mendampingi sivitas akademika Polije.
             </p>
 
@@ -90,7 +90,7 @@ const Footer = () => {
           <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {Object.entries(footerLinks).map(([title, links], columnIndex) => (
               <div key={title} className="space-y-6">
-                <h4 className="font-bold text-black dark:text-white text-sm uppercase tracking-wider">{title}</h4>
+                <h4 className="font-bold text-black dark:!text-white text-sm uppercase tracking-wider">{title}</h4>
                 <ul className="space-y-3">
                   {links.map((link, index) => (
                     <motion.li
@@ -102,7 +102,7 @@ const Footer = () => {
                     >
                       <a
                         href={link.href}
-                        className="text-sm text-gray-700 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors inline-flex items-center group font-medium"
+                        className="text-sm text-gray-700 dark:!text-white hover:text-black transition-colors inline-flex items-center group font-medium"
                       >
                         <span className="relative overflow-hidden">
                           {link.name}
@@ -118,7 +118,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-black dark:text-gray-400 font-medium">
+        <div className="pt-8 border-t border-gray-200 dark:!border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-black dark:!text-white font-medium">
           <p>© {currentYear} PolijeCare. All rights reserved.</p>
           <div className="flex gap-8">
             <div className="flex items-center gap-2">

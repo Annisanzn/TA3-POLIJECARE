@@ -116,7 +116,7 @@ export default function AboutSection() {
                                 customVariants={revealVariants}
                                 className="md:w-8 md:h-8 sm:w-6 w-5 sm:h-6 h-5 border border-indigo-200 bg-indigo-50 rounded-lg flex items-center justify-center"
                             >
-                                <Heart className="w-4 h-4 text-[#191970]" />
+                                <Heart className="w-4 h-4 text-[#191970] dark:!text-indigo-300" />
                             </TimelineContent>
                             <TimelineContent
                                 as="div"
@@ -125,7 +125,7 @@ export default function AboutSection() {
                                 customVariants={revealVariants}
                                 className="md:w-8 md:h-8 sm:w-6 w-5 sm:h-6 h-5 border border-indigo-200 bg-indigo-50 rounded-lg flex items-center justify-center"
                             >
-                                <Lock className="w-4 h-4 text-[#191970]" />
+                                <Lock className="w-4 h-4 text-[#191970] dark:!text-indigo-300" />
                             </TimelineContent>
                             <TimelineContent
                                 as="div"
@@ -134,7 +134,7 @@ export default function AboutSection() {
                                 customVariants={revealVariants}
                                 className="md:w-8 md:h-8 sm:w-6 w-5 sm:h-6 h-5 border border-indigo-200 bg-indigo-50 rounded-lg flex items-center justify-center"
                             >
-                                <Scale className="w-4 h-4 text-[#191970]" />
+                                <Scale className="w-4 h-4 text-[#191970] dark:!text-indigo-300" />
                             </TimelineContent>
                         </div>
                     </div>
@@ -230,9 +230,9 @@ export default function AboutSection() {
                             className="flex items-center gap-2 sm:text-base text-xs"
                         >
                             <span className="text-[#191970] dark:text-indigo-400 font-bold">24/7</span>
-                            <span className="text-gray-600">layanan aktif</span>
+                            <span className="text-gray-600 dark:!text-gray-300">layanan aktif</span>
                         </TimelineContent>
-                        <span className="text-gray-300">|</span>
+                        <span className="text-gray-300 dark:text-gray-600">|</span>
                         <TimelineContent
                             as="div"
                             animationNum={7}
@@ -240,10 +240,10 @@ export default function AboutSection() {
                             customVariants={revealVariants}
                             className="flex items-center gap-2 sm:text-base text-xs"
                         >
-                            <span className="text-[#191970] font-bold">Gratis</span>
-                            <span className="text-gray-600">tanpa biaya</span>
+                            <span className="text-[#191970] dark:text-indigo-400 font-bold">Gratis</span>
+                            <span className="text-gray-600 dark:!text-gray-300">tanpa biaya</span>
                         </TimelineContent>
-                        <span className="text-gray-300">|</span>
+                        <span className="text-gray-300 dark:text-gray-600">|</span>
                         <TimelineContent
                             as="div"
                             animationNum={8}
@@ -251,8 +251,8 @@ export default function AboutSection() {
                             customVariants={revealVariants}
                             className="flex items-center gap-2 sm:text-base text-xs"
                         >
-                            <span className="text-[#191970] font-bold">Cepat</span>
-                            <span className="text-gray-600">respon tanggap</span>
+                            <span className="text-[#191970] dark:text-indigo-400 font-bold">Cepat</span>
+                            <span className="text-gray-600 dark:!text-gray-300">respon tanggap</span>
                         </TimelineContent>
                     </div>
                 </div>
@@ -260,7 +260,7 @@ export default function AboutSection() {
                 {/* Main Content */}
                 <div className="grid md:grid-cols-3 gap-8">
                     <div className="md:col-span-2">
-                        <h2 className="sm:text-4xl md:text-5xl text-2xl !leading-[110%] font-semibold text-gray-900 mb-8">
+                        <h2 className="sm:text-4xl md:text-5xl text-2xl !leading-[110%] font-semibold text-gray-900 dark:!text-white mb-8">
                             <VerticalCutReveal
                                 splitBy="words"
                                 staggerDuration={0.1}
@@ -282,7 +282,7 @@ export default function AboutSection() {
                             animationNum={9}
                             timelineRef={heroRef}
                             customVariants={revealVariants}
-                            className="grid md:grid-cols-2 gap-8 text-gray-600"
+                            className="grid md:grid-cols-2 gap-8 text-gray-600 dark:!text-gray-300"
                         >
                             <TimelineContent
                                 as="div"
@@ -331,7 +331,7 @@ export default function AboutSection() {
                                 animationNum={13}
                                 timelineRef={heroRef}
                                 customVariants={revealVariants}
-                                className="text-gray-600 text-sm mb-8"
+                                className="text-gray-600 dark:!text-gray-300 text-sm mb-8"
                             >
                                 Politeknik Negeri Jember
                             </TimelineContent>
@@ -343,7 +343,7 @@ export default function AboutSection() {
                                 customVariants={revealVariants}
                                 className="mb-6"
                             >
-                                <p className="text-gray-900 font-medium mb-4">
+                                <p className="text-gray-900 dark:!text-white font-medium mb-4">
                                     Siap untuk melaporkan atau butuh bantuan? Kami siap mendengarkan Anda.
                                 </p>
                             </TimelineContent>

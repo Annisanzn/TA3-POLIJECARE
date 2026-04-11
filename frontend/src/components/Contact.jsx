@@ -146,8 +146,8 @@ const Contact = () => {
                       <div className={`w-12 h-12 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center mb-4 ${method.color} group-hover:scale-110 transition-transform duration-300`}>
                         {method.icon}
                       </div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{method.label}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 break-all">{method.value}</p>
+                      <h4 className="font-semibold text-gray-900 dark:!text-white mb-1">{method.label}</h4>
+                      <p className="text-sm text-gray-500 dark:!text-white break-all">{method.value}</p>
                     </a>
                   </SpotlightCard>
                 ))}

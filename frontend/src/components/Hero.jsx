@@ -9,8 +9,7 @@ const Hero = ({ heroData }) => {
   const navigate = useNavigate();
   const defaultHero = {
     title: 'Aman Bicara, Aman Melapor',
-    subtitle: 'Satgas PPKPT Politeknik Negeri Jember',
-    description: 'Kami siap mendengar dan membantu Anda dengan profesionalisme dan kerahasiaan terjamin.'
+    subtitle: 'Satgas PPKPT Politeknik Negeri Jember'
   };
 
   const hero = heroData || defaultHero;
@@ -77,7 +76,7 @@ const Hero = ({ heroData }) => {
               </motion.h1>
 
               <motion.h2
-                className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[#191970] dark:text-blue-300"
+                className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[#191970] dark:!text-white"
                 variants={slideUp}
                 initial="hidden"
                 animate="visible"
@@ -150,7 +149,7 @@ const Hero = ({ heroData }) => {
                 <Icon icon="solar:info-circle-bold-duotone" className="text-blue-600 w-6 h-6" />
                 Informasi Pelaporan
               </h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-w-lg mb-6">
+              <p className="text-sm text-gray-700 dark:!text-gray-900 leading-relaxed max-w-lg mb-6">
                 Bagi <strong>Sivitas Akademika Polije</strong> silahkan login terlebih dahulu. Namun, jika Anda berasal dari <strong>Masyarakat Umum / Kampus Lain</strong>, Anda dapat membuat laporan langsung tanpa login.
               </p>
 
@@ -164,7 +163,7 @@ const Hero = ({ heroData }) => {
                 </button>
                 <button
                   onClick={() => navigate('/lapor-umum')}
-                  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold bg-white dark:!bg-white/10 text-blue-700 dark:!text-white border border-blue-200 dark:!border-white/20 hover:bg-blue-50 dark:hover:!bg-white/20 hover:border-blue-300 transition-all shadow-sm"
                 >
                   <Icon icon="solar:document-add-bold-duotone" className="w-5 h-5" />
                   Lapor Tanpa Login (Umum)
