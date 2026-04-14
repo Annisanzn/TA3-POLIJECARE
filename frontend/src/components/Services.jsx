@@ -42,7 +42,7 @@ const Services = () => {
       buttonColor: 'bg-[#191970] hover:bg-blue-900',
       buttonLink: '/login-new?from=form-laporan',
       gradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
-      iconColor: 'text-[#191970] dark:text-blue-400',
+      iconColor: 'text-[#191970] dark:text-white',
       spotlightColor: 'rgba(139, 92, 246, 0.2)' // Purple glow for Form
     }
   ];
@@ -104,8 +104,8 @@ const Services = () => {
 
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">
-            Cara <span className="text-[#191970] dark:text-indigo-400">Melapor</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:!text-white mb-6 tracking-tight">
+            Cara <span className="text-primary">Melapor</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Kami menyediakan ruang aman bagi Anda untuk bersuara. Pilih metode yang paling nyaman, kami siap mendampingi setiap langkahnya.
@@ -249,7 +249,7 @@ const Services = () => {
                     transition={{ delay: index * 0.2 + 0.3 }}
                   >
                     <div className="relative z-10 flex flex-col items-center text-center">
-                      <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 flex items-center justify-center mb-4 text-[#191970] dark:text-indigo-400 shadow-md group-hover/step:scale-110 group-hover/step:border-[#191970] dark:group-hover/step:border-indigo-500 transition-all duration-300 relative bg-opacity-80 backdrop-blur-md">
+                      <div className="w-14 h-14 rounded-full bg-white dark:!bg-slate-800 border-2 border-gray-100 dark:!border-slate-700 flex items-center justify-center mb-4 text-[#191970] dark:!text-white shadow-md group-hover/step:scale-110 group-hover/step:border-[#191970] dark:group-hover/step:!border-indigo-500 transition-all duration-300 relative bg-opacity-80 backdrop-blur-md">
                         {step.icon}
                       </div>
                       <span className="text-xs font-bold font-mono text-[#191970] dark:text-indigo-400 mb-2 opacity-80">{step.step}</span>
@@ -280,8 +280,8 @@ const Services = () => {
               <Phone className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 dark:text-white">Butuh Bantuan Darurat?</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Jangan ragu untuk menghubungi kami jika situasi mendesak.</p>
+              <h4 className="font-bold text-gray-900 dark:!text-red-400">Butuh Bantuan Darurat?</h4>
+              <p className="text-sm text-gray-600 dark:!text-red-400">Jangan ragu untuk menghubungi kami jika situasi mendesak.</p>
             </div>
           </div>
           <FlowButton

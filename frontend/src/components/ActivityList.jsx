@@ -1,61 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiClock, FiUser, FiFileText, FiChevronRight } from 'react-icons/fi';
+import { complaintService } from '../services/complaintService';
 
 const ActivityList = () => {
-  const activities = [
-    {
-      id: 'LP-2024-0012',
-      title: 'Laporan Perundungan di Asrama Putra',
-      reporter: 'Ahmad Fauzi',
-      date: '18 Feb 2024 • 14:30',
-      status: 'Baru',
-      statusColor: 'bg-orange-100 text-orange-600',
-    },
-    {
-      id: 'LP-2024-0011',
-      title: 'Kekerasan Verbal di Kelas Teknik',
-      reporter: 'Siti Rahma',
-      date: '17 Feb 2024 • 10:15',
-      status: 'Diproses',
-      statusColor: 'bg-purple-100 text-purple-600',
-    },
-    {
-      id: 'LP-2024-0010',
-      title: 'Penganiayaan Fisik di Lapangan',
-      reporter: 'Budi Santoso',
-      date: '16 Feb 2024 • 16:45',
-      status: 'Selesai',
-      statusColor: 'bg-green-100 text-green-600',
-    },
-    {
-      id: 'LP-2024-0009',
-      title: 'Bullying Online via Media Sosial',
-      reporter: 'Dewi Anggraini',
-      date: '15 Feb 2024 • 09:20',
-      status: 'Diproses',
-      statusColor: 'bg-purple-100 text-purple-600',
-    },
-    {
-      id: 'LP-2024-0008',
-      title: 'Pelecehan Non-Fisik di Perpustakaan',
-      reporter: 'Rizki Pratama',
-      date: '14 Feb 2024 • 13:10',
-      status: 'Baru',
-      statusColor: 'bg-orange-100 text-orange-600',
-    },
-  ];
+  const [activities, setActivities] = useState([]);
+  const [totalActive, setTotalActive] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setIsLoading(true);
+      try {
+        const response = await complaintService.getComplaints({ page: 1, per_page: 5, status: 'pending,approved' });
+        if (response.data && response.data.data) {
+          setActivities(response.data.data);
+          setTotalActive(response.data.total || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+  const navigate = useNavigate();
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending': return 'Baru';
+      case 'approved': return 'Diproses';
+      case 'completed': return 'Selesai';
+      case 'rejected': return 'Ditolak';
+      default: return 'Baru';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return 'bg-orange-100 text-orange-600';
+      case 'approved': return 'bg-purple-100 text-purple-600';
+      case 'completed': return 'bg-green-100 text-green-600';
+      case 'rejected': return 'bg-red-100 text-red-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Baru':
-        return <div className="w-2 h-2 bg-orange-500 rounded-full"></div>;
-      case 'Diproses':
-        return <div className="w-2 h-2 bg-purple-500 rounded-full"></div>;
-      case 'Selesai':
-        return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
+      case 'pending':
+        return <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>;
+      case 'approved':
+        return <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>;
+      case 'completed':
+        return <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>;
+      case 'rejected':
+        return <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>;
       default:
-        return <div className="w-2 h-2 bg-gray-500 rounded-full"></div>;
+        return <div className="w-2 h-2 bg-gray-500 rounded-full mt-2 flex-shrink-0"></div>;
     }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(',', ' •');
   };
 
   return (
@@ -71,7 +87,10 @@ const ActivityList = () => {
               <p className="text-sm text-gray-500">5 laporan terbaru yang perlu perhatian</p>
             </div>
           </div>
-          <button className="text-purple-600 hover:text-purple-700 font-medium flex items-center space-x-2">
+          <button 
+            onClick={() => navigate('/operator/complaints-management')}
+            className="text-[#6666DE] hover:text-[#5555CC] font-medium flex items-center space-x-2 transition-colors"
+          >
             <span>Lihat Semua</span>
             <FiChevronRight />
           </button>
@@ -79,60 +98,59 @@ const ActivityList = () => {
       </div>
 
       <div className="divide-y divide-gray-100">
-        {activities.map((activity, index) => (
-          <div
-            key={index}
-            className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-start space-x-3">
-                  {getStatusIcon(activity.status)}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">{activity.title}</h4>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                      <div className="flex items-center space-x-2">
-                        <FiFileText className="w-4 h-4" />
-                        <span>ID: {activity.id}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FiUser className="w-4 h-4" />
-                        <span>{activity.reporter}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FiClock className="w-4 h-4" />
-                        <span>{activity.date}</span>
+        {isLoading ? (
+          <div className="p-6 text-center text-gray-500">Memuat aktivitas...</div>
+        ) : activities.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">Tidak ada aktivitas terbaru</div>
+        ) : (
+          activities.map((activity) => (
+            <div
+              key={activity.id}
+              onClick={() => navigate(`/operator/complaint-detail/${activity.id}`)}
+              className="p-6 hover:bg-gray-50 transition-colors cursor-pointer group"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-start space-x-3">
+                    {getStatusIcon(activity.status)}
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">{activity.title}</h4>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center space-x-2">
+                          <FiFileText className="w-4 h-4 flex-shrink-0" />
+                          <span>ID: {activity.report_id}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FiUser className="w-4 h-4 flex-shrink-0" />
+                          <span>{activity.user_name || 'Anonim'}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FiClock className="w-4 h-4 flex-shrink-0" />
+                          <span>{formatDate(activity.created_at)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-4">
-                <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${activity.statusColor}`}>
-                  {activity.status}
-                </span>
-                <button className="text-gray-400 hover:text-gray-600">
-                  <FiChevronRight />
-                </button>
+                <div className="flex items-center space-x-4">
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(activity.status)}`}>
+                    {getStatusLabel(activity.status)}
+                  </span>
+                  <button className="text-gray-400 hover:text-gray-600 transition-colors group-hover:text-[#6666DE]">
+                    <FiChevronRight />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Total laporan aktif:</span> 12 laporan membutuhkan tindakan
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-              Filter Laporan
-            </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors">
-              Tindakan Cepat
-            </button>
+            <span className="font-medium">Total laporan aktif:</span> {totalActive} laporan membutuhkan tindakan
           </div>
         </div>
       </div>

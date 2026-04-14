@@ -173,16 +173,16 @@ const Navbar = () => {
             <div className="w-full px-8 lg:px-12">
               <div className="flex items-center justify-between h-20">
                 {/* Logo Section - Left */}
-                <Link to="/" className="flex items-center space-x-2 cursor-default">
+                <Link to="/" className="flex items-center space-x-2 cursor-default dark:bg-white/90 dark:px-3 dark:py-1.5 dark:rounded-2xl transition-all">
                   <img
                     src="/logo_polije.png"
                     alt="Logo Polije"
-                    className="h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all duration-300"
+                    className="h-12 w-auto object-contain transition-all duration-300"
                   />
                   <img
                     src="/logo_polijecare.png"
                     alt="Polijecare Logo"
-                    className="h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all duration-300"
+                    className="h-12 w-auto object-contain transition-all duration-300"
                   />
                 </Link>
 

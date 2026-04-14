@@ -87,36 +87,32 @@ const OperatorDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-x-auto">
           {/* Welcome Banner */}
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-[#E6E6FA] to-[#D6D6EA] rounded-2xl p-8 text-gray-800">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-2xl font-bold mb-2">Selamat Datang, Operator!</h1>
-                  <p className="opacity-90 mb-4">
-                    Anda memiliki <span className="font-bold">{stats.summary.new} laporan baru</span> yang membutuhkan perhatian segera.
-                    Pantau aktivitas sistem dan kelola laporan dengan efisien.
-                  </p>
-                  <div className="flex items-center space-x-4">
-                    <button 
-                      onClick={() => navigate('/operator/complaints-management')}
-                      className="bg-white text-[#6666DE] hover:bg-gray-100 px-5 py-2.5 rounded-xl font-medium transition-colors"
-                    >
-                      Tinjau Laporan Baru
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DashboardNotification role="operator" />
-                  <button
-                    onClick={fetchDashboardData}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white rounded-xl text-sm font-medium transition-colors"
-                  >
-                    <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
-                    Refresh
-                  </button>
-                </div>
+          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900">Selamat Datang, Operator!</h1>
+              <p className="text-gray-600 max-w-2xl">
+                Anda memiliki <span className="font-bold text-gray-900">{stats.summary.new} laporan baru</span> yang membutuhkan perhatian segera.
+                Pantau aktivitas sistem dan kelola laporan dengan efisien.
+              </p>
+              <div className="flex items-center space-x-4 mt-6">
+                <button 
+                  onClick={() => navigate('/operator/complaints-management')}
+                  className="bg-[#6666DE] text-white hover:bg-[#5555CC] shadow-md px-6 py-2.5 rounded-xl font-medium transition-colors"
+                >
+                  Tinjau Laporan Baru
+                </button>
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <DashboardNotification role="operator" />
+              <button
+                onClick={fetchDashboardData}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors"
+              >
+                <FiRefreshCw className={isLoading ? 'animate-spin text-gray-400' : 'text-gray-600'} />
+                Refresh
+              </button>
             </div>
           </div>
 
