@@ -90,8 +90,8 @@ const UserDashboard = () => {
             {/* Welcome Banner */}
             <motion.div variants={itemVariant} className="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[32px] p-8 sm:p-10 text-white shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-              <h1 className="text-3xl font-bold mb-3">Halo, {user?.name || 'Mahasiswa'}! 👋</h1>
-              <p className="opacity-90 max-w-2xl text-base sm:text-lg leading-relaxed font-medium">
+              <h1 className="text-3xl font-bold mb-3 text-white">Halo, {user?.name || 'Mahasiswa'}! 👋</h1>
+              <p className="opacity-90 max-w-2xl text-base sm:text-lg leading-relaxed font-medium text-white">
                 Ruang aman Anda untuk menyampaikan laporan dan mendapatkan dukungan penuh dari Satgas PPKS Polije. Kami siap mendengar dan membantu Anda.
               </p>
             </motion.div>
