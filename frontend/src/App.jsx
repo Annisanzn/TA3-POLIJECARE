@@ -30,6 +30,7 @@ import CounselorCounselingDashboard from './pages/konselor/counseling-dashboard'
 import MyScheduleManagementPage from './pages/konselor/my-schedule-management';
 import ArticleManagementPage from './pages/operator/article-management';
 import NewLoginPage from './pages/NewLoginPage';
+import GoogleCallback from './pages/GoogleCallback';
 import NewRedirectDashboard from './components/NewRedirectDashboard';
 import NewUserDashboard from './pages/NewUserDashboard';
 import NewProtectedRoute from './components/NewProtectedRoute';
@@ -61,6 +62,7 @@ function App() {
 
             {/* New Login System Routes */}
             <Route path="/login-new" element={<NewLoginPage />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
             <Route path="/redirect-new" element={<NewRedirectDashboard />} />
 
             {/* New Protected Dashboard Routes */}

@@ -15,6 +15,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NewLoginController;
 use App\Http\Controllers\API\AdminArticleController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\GoogleAuthController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -53,6 +54,8 @@ Route::get('/counseling-test', [CounselingController::class, 'index']);
 // Auth routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-new', [NewLoginController::class, 'login']);
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
 // Public routes
 Route::post('/public-complaints', [\App\Http\Controllers\API\PublicComplaintController::class, 'store']);
