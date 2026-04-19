@@ -235,10 +235,29 @@
   background: var(--color-primary-dark);
 }
 
-/* Remove all green colors globally */
-[class*="green"] {
-  background-color: transparent !important;
-  color: inherit !important;
-  border-color: transparent !important;
-  background-image: none !important;
+/* ── Page Transition Smoothing ───────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
+
+/* Smooth main content entry for dashboard pages */
+main {
+  animation: fadeSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sidebar should never animate during page transitions */
+.sidebar-persistent {
+  animation: none !important;
+}
+
