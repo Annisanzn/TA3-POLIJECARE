@@ -1,105 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
-import { useAuth } from '../../hooks/useAuth';
-import api from '../../api/axios';
+import Topbar from '../../components/layout/Topbar';
+import SummaryCard from '../../components/SummaryCard';
 import ChartSection from '../../components/ChartSection';
 import CounselingCalendar from '../../components/CounselingCalendar';
+import ActivityList from '../../components/ActivityList';
+import api from '../../api/axios';
+import { FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
 import DashboardNotification from '../../components/DashboardNotification';
-import {
-  FiCalendar, FiClock, FiCheckCircle, FiXCircle,
-  FiUsers, FiBook, FiAlertCircle, FiRefreshCw,
-} from 'react-icons/fi';
 
-/* ── Stat Card ─────────────────────────────────────────────────────────────── */
-const StatCard = ({ title, value, sub, icon, color, loading }) => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-gray-500 text-sm">{title}</p>
-        <p className="text-3xl font-bold text-gray-900 mt-1">
-          {loading ? <span className="animate-pulse">—</span> : value}
-        </p>
-        {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
-      </div>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-        {icon}
-      </div>
-    </div>
-  </div>
-);
-
-/* ── Quick Link Card ───────────────────────────────────────────────────────── */
-const QuickLink = ({ to, title, desc, icon, accent }) => (
-  <Link
-    to={to}
-    className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all group"
-  >
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${accent}`}>
-      <span className="text-white text-xl">{icon}</span>
-    </div>
-    <div>
-      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{title}</p>
-      <p className="text-sm text-gray-500">{desc}</p>
-    </div>
-  </Link>
-);
-
-/* ── Main Component ─────────────────────────────────────────────────────────── */
 const KonselorDashboard = () => {
-  const { user } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchStats = async () => {
-    setLoading(true);
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
     setError('');
     try {
       const res = await api.get('/konselor/dashboard');
-      if (res.data.success) setStats(res.data.data);
-      else setError(res.data.message || 'Gagal memuat statistik');
+      if (res.data.success) {
+        setStats(res.data.data);
+      } else {
+        setError(res.data.message || 'Gagal memuat statistik');
+      }
     } catch (e) {
       setError(e.response?.data?.message || 'Gagal terhubung ke server');
+      console.error('Failed to fetch dashboard stats', e);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   const j = stats?.jadwal || {};
 
+  const summaryData = [
+    {
+      title: 'Jadwal Menunggu',
+      value: isLoading ? '...' : (j.pending ?? 0),
+      icon: 'new',
+      badge: '',
+      trend: '',
+      description: `${j.pending ?? 0} perlu konfirmasi`
+    },
+    {
+      title: 'Jadwal Disetujui',
+      value: isLoading ? '...' : (j.approved ?? 0),
+      icon: 'approved',
+      badge: '',
+      trend: '',
+      description: `${j.approved ?? 0} jadwal aktif`
+    },
+    {
+      title: 'Sesi Selesai',
+      value: isLoading ? '...' : (j.completed ?? 0),
+      icon: 'completed',
+      badge: '',
+      trend: '',
+      description: `${j.completed ?? 0} telah diselesaikan`
+    },
+    {
+      title: 'Total Jadwal',
+      value: isLoading ? '...' : (j.total ?? 0),
+      icon: 'total',
+      badge: '',
+      trend: '',
+      description: `${j.total ?? 0} total jadwal`
+    }
+  ];
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar collapsed={collapsed} toggleCollapse={() => setCollapsed(v => !v)} />
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard Konselor</h1>
-              <p className="text-gray-500 text-sm mt-0.5">
-                Selamat datang, <span className="font-medium text-green-700">{user?.name || 'Konselor'}</span>!
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <DashboardNotification role="konselor" />
-              <button
-                onClick={fetchStats}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </header>
+        {/* Topbar — same as operator */}
+        <Topbar />
 
-        <main className="flex-1 p-6">
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-x-auto">
           {/* Error */}
           {error && (
             <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
@@ -108,47 +98,55 @@ const KonselorDashboard = () => {
             </div>
           )}
 
-          {/* Breadcrumb */}
-          <p className="text-sm text-gray-400 mb-6">
-            Dashboard / Konselor / <span className="text-gray-700 font-medium">Overview</span>
-          </p>
-
           {/* Welcome Banner */}
-          <div className="rounded-2xl p-6 mb-8 text-gray-800" style={{ backgroundColor: '#E6E6FA' }}>
-            <h2 className="text-2xl font-bold mb-1 text-gray-900">Selamat Datang, {user?.name || 'Konselor'}! 👋</h2>
-            <p className="opacity-80 text-sm text-gray-700">
-              {j.pending > 0
-                ? `Anda memiliki ${j.pending} jadwal menunggu konfirmasi.`
-                : 'Semua jadwal sudah dikonfirmasi. Tetap semangat!'}
-            </p>
-            <div className="flex gap-3 mt-4">
-              <Link
-                to="/konselor/jadwal"
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900">Selamat Datang, Konselor!</h1>
+              <p className="text-gray-600 max-w-2xl">
+                Anda memiliki <span className="font-bold text-gray-900">{j.pending ?? 0} jadwal menunggu konfirmasi</span> yang membutuhkan perhatian segera.
+                Pantau aktivitas konseling dan kelola jadwal dengan efisien.
+              </p>
+              <div className="flex items-center space-x-4 mt-6">
+                <button
+                  onClick={() => navigate('/konselor/jadwal')}
+                  className="bg-[#6666DE] text-white hover:bg-[#5555CC] shadow-md px-6 py-2.5 rounded-xl font-medium transition-colors"
+                >
+                  Lihat Jadwal
+                </button>
+                <button
+                  onClick={() => navigate('/konselor/pengaduan')}
+                  className="bg-white text-[#6666DE] border border-gray-200 hover:bg-gray-50 shadow-sm px-6 py-2.5 rounded-xl font-medium transition-colors"
+                >
+                  Lihat Pengaduan
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <DashboardNotification role="konselor" />
+              <button
+                onClick={fetchDashboardData}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors"
               >
-                Lihat Jadwal
-              </Link>
-              <Link
-                to="/konselor/pengaduan"
-                className="px-4 py-2 bg-white text-indigo-700 border border-indigo-200 text-sm font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-sm"
-              >
-                Lihat Pengaduan
-              </Link>
+                <FiRefreshCw className={isLoading ? 'animate-spin text-gray-400' : 'text-gray-600'} />
+                Refresh
+              </button>
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard loading={loading} title="Total Jadwal" value={j.total} sub="Semua waktu" icon={<FiCalendar size={22} className="text-blue-600" />} color="bg-blue-50" />
-            <StatCard loading={loading} title="Menunggu" value={j.pending} sub="Perlu konfirmasi" icon={<FiClock size={22} className="text-yellow-600" />} color="bg-yellow-50" />
-            <StatCard loading={loading} title="Disetujui" value={j.approved} sub="Jadwal aktif" icon={<FiCheckCircle size={22} className="text-green-600" />} color="bg-green-50" />
-            <StatCard loading={loading} title="Selesai" value={j.completed} sub="Session completed" icon={<FiCheckCircle size={22} className="text-indigo-600" />} color="bg-indigo-50" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <StatCard loading={loading} title="Hari Ini" value={j.today} sub="Session hari ini" icon={<FiCalendar size={22} className="text-purple-600" />} color="bg-purple-50" />
-            <StatCard loading={loading} title="Akan Datang" value={j.upcoming} sub="Jadwal mendatang" icon={<FiClock size={22} className="text-orange-600" />} color="bg-orange-50" />
-            <StatCard loading={loading} title="Total Materi" value={stats?.materi ?? '—'} sub="Materi milik saya" icon={<FiBook size={22} className="text-teal-600" />} color="bg-teal-50" />
+          {/* Summary Cards Grid — 4 cards like operator */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {summaryData.map((item, index) => (
+              <SummaryCard
+                key={index}
+                title={item.title}
+                value={item.value}
+                icon={item.icon}
+                badge={item.badge}
+                trend={item.trend}
+                description={item.description}
+              />
+            ))}
           </div>
 
           {/* Charts Section */}
@@ -156,20 +154,43 @@ const KonselorDashboard = () => {
             <ChartSection />
           </div>
 
-          {/* Calendar Section */}
+          {/* Counseling Calendar */}
           <div className="mb-8">
             <CounselingCalendar role="konselor" />
           </div>
 
-          {/* Quick Links */}
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Akses Cepat</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <QuickLink to="/konselor/jadwal" title="Jadwal Konseling" desc="Kelola sesi konseling mahasiswa" icon={<FiCalendar />} accent="bg-blue-500" />
-            <QuickLink to="/konselor/pengaduan" title="Pengaduan" desc="Pengaduan yang ditangani Anda" icon={<FiUsers />} accent="bg-orange-500" />
-            <QuickLink to="/konselor/materi" title="Materi" desc="Upload dan kelola materi" icon={<FiBook />} accent="bg-teal-500" />
+          {/* Activity List */}
+          <div className="mb-8">
+            <ActivityList />
+          </div>
+
+          {/* Quick Stats Footer */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4">
+                <div className="text-2xl font-bold text-[#E6E6FA] mb-2">{j.today ?? 0}</div>
+                <div className="text-sm text-gray-600">Sesi Hari Ini</div>
+              </div>
+              <div className="text-center p-4 border-l border-r border-gray-100">
+                <div className="text-2xl font-bold text-green-600 mb-2">{j.upcoming ?? 0}</div>
+                <div className="text-sm text-gray-600">Jadwal Mendatang</div>
+              </div>
+              <div className="text-center p-4">
+                <div className="text-2xl font-bold text-blue-600 mb-2">{stats?.materi ?? 0}</div>
+                <div className="text-sm text-gray-600">Total Materi Saya</div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={toggleSidebar}
+        ></div>
+      )}
     </div>
   );
 };

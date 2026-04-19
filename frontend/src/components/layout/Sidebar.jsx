@@ -157,9 +157,9 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
                 <li key={i}>
                   <Link
                     to={item.path}
-                    className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-200 ${isActive(item.path)
-                      ? 'bg-white/60 text-gray-900 shadow-sm border-l-4'
-                      : 'text-gray-700 hover:bg-white/40'
+                    className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300 ease-out ${isActive(item.path)
+                      ? 'bg-white/60 text-gray-900 shadow-sm border-l-4 scale-[1.02]'
+                      : 'text-gray-700 hover:bg-white/40 hover:scale-[1.01] active:scale-[0.98]'
                       }`}
                     style={
                       isActive(item.path)
@@ -168,7 +168,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
                     }
                   >
                     <span
-                      className={`text-lg ${collapsed ? 'mx-auto' : 'mr-3'}`}
+                      className={`text-lg transition-all duration-300 ${collapsed ? 'mx-auto' : 'mr-3'}`}
                       style={{ color: isActive(item.path) ? meta.color : undefined }}
                     >
                       {item.icon}
