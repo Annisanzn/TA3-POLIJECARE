@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/axios';
 import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import TimePicker24h from './ui/TimePicker24h';
 
 const MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 const DAY_NAMES_ID = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
@@ -152,7 +153,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
             map[d].push({
                 id: `s-${s.id}`,
                 title: s.jenis_pengaduan || 'Sesi Konseling',
-                time: s.jam_mulai ? String(s.jam_mulai).substring(0, 5) : '',
+                time: s.jam_mulai ? String(s.jam_mulai).substring(0, 5) + ' WIB' : '',
                 status: s.status || 'pending',
                 nama: s.user?.name || '',
             });
@@ -467,8 +468,10 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Jam</label>
-                                        <input type="time" value={addForm.time} onChange={e => setAddForm(p => ({ ...p, time: e.target.value }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all" />
+                                        <TimePicker24h 
+                                            value={addForm.time} 
+                                            onChange={val => setAddForm(p => ({ ...p, time: val }))} 
+                                        />
                                     </div>
                                 </div>
                                 <div>

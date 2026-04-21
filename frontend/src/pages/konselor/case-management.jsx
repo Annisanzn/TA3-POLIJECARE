@@ -6,7 +6,8 @@ import {
   FiCheckCircle, FiXCircle, FiEye, FiEdit,
   FiChevronLeft, FiChevronRight, FiUsers, FiMapPin, FiDownload,
   FiAlertCircle, FiX, FiCheck, FiMoreVertical, FiTrendingUp,
-  FiRefreshCw, FiUser, FiMessageSquare
+  FiRefreshCw, FiUser, FiMessageSquare,
+  FiPlus, FiSave, FiLoader, FiVideo
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import axios from '../../api/axios';
@@ -66,6 +67,7 @@ const CounselorCaseManagement = () => {
   const [scheduleModal, setScheduleModal] = useState({ open: false, complaint: null, counselor_id: '', counseling_schedule: '' });
   const [exportModal, setExportModal] = useState({ open: false, date_from: '', date_to: '', status: 'all' });
   const [counselors, setCounselors] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const showToast = (message, type = 'success') => setToast({ message, type });
 
@@ -151,8 +153,10 @@ const CounselorCaseManagement = () => {
   useEffect(() => {
     fetchData();
     setSearchParams({ tab: activeTab });
-    // Use the global counselor list endpoint
-    axios.get('/counselors').then(res => setCounselors(res.data.data || []));
+    // Use the authenticated counselor list endpoint
+    axios.get('/counseling/counselors').then(res => setCounselors(res.data.data || [])).catch(() => {});
+    // Fetch violence categories for manual counseling form
+    axios.get('/public-categories').then(res => setCategories(res.data.data || [])).catch(() => {});
   }, [activeTab, searchQuery, urgencyFilter]);
 
   const handleFilterChange = (e) => {
@@ -305,6 +309,14 @@ const CounselorCaseManagement = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <button 
+                id="btn-tambah-konseling-manual"
+                onClick={() => navigate('/konselor/manual-counseling')}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:from-teal-600 hover:to-emerald-700 transition-all text-sm font-bold active:scale-95"
+              >
+                <FiPlus size={18} />
+                KONSELING MANUAL
+              </button>
               <button 
                 onClick={() => setExportModal({ ...exportModal, open: true })}
                 className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all text-sm font-bold"
@@ -461,8 +473,8 @@ const CounselorCaseManagement = () => {
                 return (
                   <div key={item.id} className="group relative bg-white rounded-[40px] p-8 border border-gray-100 hover:border-purple-100 hover:shadow-2xl hover:shadow-purple-500/5 transition-all duration-300 overflow-hidden text-left">
                     {/* Urgency Ribbon */}
-                    <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-[20px] text-[10px] font-bold tracking-widest uppercase border-l border-b ${getUrgencyBadge(report?.urgency_level)}`}>
-                       {report?.urgency_level}
+                    <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-[20px] text-[10px] font-bold tracking-widest uppercase border-l border-b ${getUrgencyBadge(report?.urgency_level || 'low')}`}>
+                       {report?.urgency_level || 'MANUAL'}
                     </div>
 
                     <div className="flex flex-col h-full">
@@ -473,17 +485,17 @@ const CounselorCaseManagement = () => {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">ID KASUS SAYA</p>
-                          <p className="text-sm font-bold text-gray-900 tracking-tight">{report?.report_id}</p>
+                          <p className="text-sm font-bold text-gray-900 tracking-tight">{report?.report_id || 'JADWAL-MANUAL'}</p>
                         </div>
                       </div>
 
                       {/* Content */}
                       <div className="mb-8">
                          <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight line-clamp-1 group-hover:text-purple-600 transition-colors">
-                            {report?.title}
+                            {report?.title || `Sesi Konseling Langsung: ${item?.jenis_pengaduan || 'Umum'}`}
                          </h3>
                          <p className="text-gray-500 text-sm font-medium line-clamp-2 leading-relaxed italic">
-                            "{report?.description}"
+                            "{report?.description || item?.keterangan_pihak || 'Data sesi konseling ditambahkan secara manual (Walk-in / Tatap Muka)'}"
                          </p>
                       </div>
 
@@ -510,10 +522,10 @@ const CounselorCaseManagement = () => {
                            <div className="min-w-0 text-left">
                              <div className="flex items-center gap-2">
                                <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Pelapor</p>
-                               {(report?.user_phone || report?.guest_phone) && (
+                               {(report?.user_phone || report?.guest_phone || item?.user_phone) && (
                                  <a 
-                                   href={`https://wa.me/${(report?.user_phone || report?.guest_phone || '').replace(/^0/, '62')}?text=${encodeURIComponent(
-                                     `Halo ${report?.user_name || 'Pelapor'}, saya adalah konselor Anda dari Satgas PPKS Polije. Terkait laporan ${report?.report_id}, ada yang bisa saya bantu atau ingin dijadwalkan sesi konsultasi?`
+                                   href={`https://wa.me/${(report?.user_phone || report?.guest_phone || item?.user_phone || '').replace(/^0/, '62')}?text=${encodeURIComponent(
+                                     `Halo ${report?.user_name || item?.user_name || 'Pelapor'}, saya adalah konselor Anda dari Satgas PPKS Polije. Ada yang bisa saya bantu terkait jadwal kita?`
                                    )}`}
                                    target="_blank"
                                    rel="noopener noreferrer"
@@ -525,7 +537,7 @@ const CounselorCaseManagement = () => {
                                )}
                              </div>
                              <p className="text-xs font-bold text-gray-900 truncate">
-                               {report?.user_name || report?.guest_name || report?.user?.name || 'Anonim'}
+                               {report?.user_name || report?.guest_name || report?.user?.name || item?.user_name || 'Anonim'}
                              </p>
                            </div>
                         </div>
@@ -535,7 +547,7 @@ const CounselorCaseManagement = () => {
                            <div className="min-w-0 text-left">
                              <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Konselor Penanggung Jawab</p>
                              <p className="text-xs font-bold text-gray-900 truncate">
-                               {report?.counselor_name || report?.counselor?.name || 'Belum diplot'}
+                               {report?.counselor_name || report?.counselor?.name || item?.counselor_name || 'Belum diplot'}
                              </p>
                            </div>
                         </div>
@@ -544,10 +556,17 @@ const CounselorCaseManagement = () => {
                       {/* Action Bar */}
                       <div className="mt-8 flex gap-3">
                         <button 
-                           onClick={() => navigate(`/konselor/complaint-detail/${report?.id || item?.complaint_id}`)}
+                           onClick={() => {
+                             const targetId = report?.id || item?.complaint_id;
+                             if (targetId) {
+                               navigate(`/konselor/complaint-detail/${targetId}`);
+                             } else {
+                               showToast('Ini adalah sesi manual / walk-in. Silakan kelola lewat menu Jadwal Konseling.', 'info');
+                             }
+                           }}
                            className="flex-1 py-4 bg-gray-900 text-white rounded-[24px] text-[10px] font-bold tracking-[0.1em] uppercase hover:bg-purple-600 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-2"
                         >
-                           <FiEye /> DETAIL LENGKAP
+                           <FiEye /> {report?.id || item?.complaint_id ? 'DETAIL LENGKAP' : 'SESI MANUAL'}
                         </button>
                         
                         {activeTab === 'new' ? (
@@ -775,6 +794,7 @@ const CounselorCaseManagement = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

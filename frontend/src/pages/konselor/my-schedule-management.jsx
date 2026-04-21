@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
 import { toast } from 'react-hot-toast';
+import TimePicker24h from '../../components/ui/TimePicker24h';
 
 const MyScheduleManagementPage = () => {
   const { user } = useAuth();
@@ -419,24 +420,16 @@ const MyScheduleManagementPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Jam Mulai</label>
-                      <input
-                        type="time"
-                        name="jam_mulai"
+                      <TimePicker24h
                         value={formData.jam_mulai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        onChange={val => handleInputChange({ target: { name: 'jam_mulai', value: val } })}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Jam Selesai</label>
-                      <input
-                        type="time"
-                        name="jam_selesai"
+                      <TimePicker24h
                         value={formData.jam_selesai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        onChange={val => handleInputChange({ target: { name: 'jam_selesai', value: val } })}
                       />
                     </div>
                   </div>
@@ -509,24 +502,16 @@ const MyScheduleManagementPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Jam Mulai</label>
-                      <input
-                        type="time"
-                        name="jam_mulai"
+                      <TimePicker24h
                         value={formData.jam_mulai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        onChange={val => handleInputChange({ target: { name: 'jam_mulai', value: val } })}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Jam Selesai</label>
-                      <input
-                        type="time"
-                        name="jam_selesai"
+                      <TimePicker24h
                         value={formData.jam_selesai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        onChange={val => handleInputChange({ target: { name: 'jam_selesai', value: val } })}
                       />
                     </div>
                   </div>

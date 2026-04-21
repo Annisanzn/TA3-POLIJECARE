@@ -43,6 +43,7 @@ import KonselorComplaintDetail from './pages/konselor/complaint-detail';
 import KonselorMateri from './pages/konselor/materi';
 import Profile from './pages/shared/Profile';
 import CounselorCaseManagement from './pages/konselor/case-management';
+import ManualCounseling from './pages/konselor/manual-counseling';
 
 /* ── Animated Routes (useLocation must be inside Router) ── */
 const AnimatedRoutes = () => {
@@ -148,6 +149,15 @@ const AnimatedRoutes = () => {
           element={
             <NewProtectedRoute requiredRole="konselor">
               <PageTransition><CounselorCaseManagement /></PageTransition>
+            </NewProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/konselor/manual-counseling"
+          element={
+            <NewProtectedRoute requiredRole="konselor">
+              <PageTransition><ManualCounseling /></PageTransition>
             </NewProtectedRoute>
           }
         />

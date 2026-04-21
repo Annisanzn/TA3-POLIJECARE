@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
 import Sidebar from '../../components/layout/Sidebar';
+import TimePicker24h from '../../components/ui/TimePicker24h';
 
 /* ── Toast ─────────────────────────────────────────────────────────────────── */
 const Toast = ({ toast, onClose }) => {
@@ -52,11 +53,17 @@ const ScheduleForm = ({ data, onChange }) => (
         <div className="grid grid-cols-2 gap-4">
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
-                <input type="time" name="jam_mulai" value={data.jam_mulai} onChange={onChange} required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
+                <TimePicker24h 
+                    value={data.jam_mulai} 
+                    onChange={val => onChange({ target: { name: 'jam_mulai', value: val } })} 
+                />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jam Selesai</label>
-                <input type="time" name="jam_selesai" value={data.jam_selesai} onChange={onChange} required className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" />
+                <TimePicker24h 
+                    value={data.jam_selesai} 
+                    onChange={val => onChange({ target: { name: 'jam_selesai', value: val } })} 
+                />
             </div>
         </div>
         <div>

@@ -26,6 +26,8 @@ class Complaint extends Model
         'guest_name',
         'guest_email',
         'guest_phone',
+        'guest_nim',
+        'guest_wa',
         'suspect_name',
         'suspect_status',
         'suspect_affiliation',

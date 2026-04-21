@@ -47,7 +47,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
         });
         if (todaySessions.length > 0) {
             todaySessions.forEach(s => {
-                const time = s.jam_mulai ? String(s.jam_mulai).substring(0, 5) : '';
+                const time = s.jam_mulai ? String(s.jam_mulai).substring(0, 5) + ' WIB' : '';
                 const id = `today-${s.id}`;
                 result.push({
                     id,
@@ -55,7 +55,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                     icon: <FiClock className="text-green-600" size={16} />,
                     color: 'border-green-200 bg-green-50',
                     badgeColor: 'bg-green-500',
-                    title: `Sesi konseling hari ini pukul ${time} WIB`,
+                    title: `Sesi konseling hari ini pukul ${time}`,
                     body: s.jenis_pengaduan || 'Sesi Konseling',
                     sub: s.user?.name ? `dengan ${s.user.name}` : '',
                     link: role === 'konselor' ? '/konselor/jadwal' : '/operator/counseling-management',
