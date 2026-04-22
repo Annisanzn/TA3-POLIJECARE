@@ -53,7 +53,7 @@ class UserDashboardController extends Controller
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
-                'cover_image' => $article->image,
+                'cover_image' => $article->image ? asset('storage/' . $article->image) : null,
                 'published_at' => $article->published_at,
             ];
         });

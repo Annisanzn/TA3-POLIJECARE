@@ -41,8 +41,16 @@ class MaterialController extends Controller
         $perPage = $request->get('per_page', 10);
         $materials = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
+        $materialsData = collect($materials->items())->map(function ($material) {
+            $data = $material->toArray();
+            if ($material->tipe === 'file' && $material->file_path) {
+                $data['file_path'] = asset('storage/' . $material->file_path);
+            }
+            return $data;
+        });
+
         return response()->json([
-            'materials' => $materials->items(),
+            'materials' => $materialsData,
             'pagination' => [
                 'total' => $materials->total(),
                 'per_page' => $materials->perPage(),
@@ -139,10 +147,15 @@ class MaterialController extends Controller
             $material = Material::create($data);
             $material->load('uploader:id,name,role');
 
+            $materialData = $material->toArray();
+            if ($material->tipe === 'file' && $material->file_path) {
+                $materialData['file_path'] = asset('storage/' . $material->file_path);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Material berhasil ditambahkan',
-                'data' => $material,
+                'data' => $materialData,
             ], 201);
             
         } catch (\Exception $e) {
