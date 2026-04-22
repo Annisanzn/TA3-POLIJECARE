@@ -6,7 +6,8 @@ import {
   FiCheck, FiX, FiLoader, FiAlertCircle, FiSearch,
   FiFilter, FiChevronLeft, FiChevronRight, FiEdit,
   FiEye, FiMail, FiCheckCircle, FiXCircle, FiRefreshCw,
-  FiBarChart2, FiUsers, FiFileText, FiExternalLink
+  FiBarChart2, FiUsers, FiFileText, FiExternalLink,
+  FiPlus, FiSave
 } from 'react-icons/fi';
 import counselingService from '../../services/counselingService';
 import { useAuth } from '../../hooks/useAuth';
@@ -52,8 +53,7 @@ const CounselorCounselingDashboard = () => {
   });
 
   const [myComplaints, setMyComplaints] = useState([]); // Complaints assigned to this counselor
-
-  // Open detail modal with full data from API
+  // ── Original State & Helpers ───────────────────────────────────────────────  // Open detail modal with full data from API
   const openDetailModal = async (schedule) => {
     setKeteranganPihak('');
     setSaranKonselor('');
@@ -93,6 +93,8 @@ const CounselorCounselingDashboard = () => {
   useEffect(() => {
     fetchSchedules();
     fetchStatistics();
+    // Fetch violence categories for manual counseling form
+    axios.get('/public-categories').then(res => setCategories(res.data.data || [])).catch(() => {});
   }, []);
 
   // Fetch statistics
@@ -313,6 +315,14 @@ const CounselorCounselingDashboard = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                  <button
+                    id="btn-tambah-konseling-manual"
+                    onClick={() => navigate('/konselor/manual-counseling')}
+                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-sm font-bold hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                  >
+                    <FiPlus size={18} />
+                    Tambah Konseling Manual
+                  </button>
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <FiUser className="w-6 h-6 text-blue-600" />
                   </div>
@@ -860,6 +870,7 @@ const CounselorCounselingDashboard = () => {
                 </div>
               </div>
             )}
+
 
           </div>
         </main>

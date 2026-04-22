@@ -91,14 +91,19 @@ class CounselingController extends Controller
                 // 1. From the schedule's user relation
                 // 2. From the linked complaint's user relation
                 // 3. From the linked complaint's guest data
-                $userName = optional($s->user)->name 
-                            ?? optional($s->complaint->user)->name 
+                $userName = $s->counselee_name
+                            ?? optional($s->user)->name 
+                            ?? ($s->complaint ? optional($s->complaint->user)->name : null)
                             ?? optional($s->complaint)->guest_name 
                             ?? 'Pelapor';
                             
                 $userPhone = optional($s->user)->phone 
-                             ?? optional($s->complaint->user)->phone 
+                             ?? ($s->complaint ? optional($s->complaint->user)->phone : null) 
                              ?? optional($s->complaint)->guest_phone;
+
+                $counselorName = optional($s->counselor)->name 
+                                 ?? ($s->complaint ? optional($s->complaint->counselor)->name : null) 
+                                 ?? 'Belum diplot';
                 
                 return [
                     'id' => $s->id,
@@ -107,7 +112,7 @@ class CounselingController extends Controller
                     'user_name' => $userName,
                     'user_phone' => $userPhone,
                     'counselor_id' => $s->counselor_id,
-                    'counselor_name' => optional($s->counselor)->name ?? optional($s->complaint->counselor)->name ?? 'Belum diplot',
+                    'counselor_name' => $counselorName,
                     'tanggal' => $s->tanggal,
                     'jam_mulai' => $s->jam_mulai,
                     'jam_selesai' => $s->jam_selesai,
@@ -326,6 +331,14 @@ class CounselingController extends Controller
             'meeting_link' => 'nullable|string|max:500',
             'counselee_type' => 'nullable|string|max:255',
             'counselee_name' => 'nullable|string|max:255',
+            'guest_nim' => 'nullable|string|max:50',
+            'guest_email' => 'nullable|email|max:255',
+            'guest_phone' => 'nullable|string|max:20',
+            'guest_wa' => 'nullable|string|max:20',
+            'suspect_name' => 'nullable|string|max:255',
+            'suspect_status' => 'nullable|string|max:100',
+            'suspect_affiliation' => 'nullable|string|max:255',
+            'suspect_phone' => 'nullable|string|max:20',
             'keterangan_pihak' => 'nullable|string',
             'saran_konselor' => 'nullable|string',
             'is_record_only' => 'nullable|boolean',
@@ -343,10 +356,39 @@ class CounselingController extends Controller
         // Normalize time
         $jamMulai = substr($request->jam_mulai, 0, 5);
         $jamSelesai = substr($request->jam_selesai, 0, 5);
+        $isRecordOnly = $request->boolean('is_record_only', false);
+        $now = now();
+        $selectedStart = \Carbon\Carbon::parse($request->tanggal . ' ' . $jamMulai);
+
+        // Time order validation
+        if ($jamSelesai <= $jamMulai) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jam selesai harus lebih besar dari jam mulai.'
+            ], 422);
+        }
+
+        // Mode specific validation
+        if (!$isRecordOnly) {
+            // Future mode: must be in the future
+            if ($selectedStart->lt($now)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Untuk penjadwalan masa depan, silakan pilih tanggal dan jam yang belum terlewati.'
+                ], 422);
+            }
+        } else {
+            // Archive mode: must be today or past
+            if (\Carbon\Carbon::parse($request->tanggal)->startOfDay()->gt($now->startOfDay())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mode arsip hanya digunakan untuk mencatat sesi yang sudah terjadi (hari ini atau lampau).'
+                ], 422);
+            }
+        }
 
         // Check for double booking (only for future/non-completed sessions)
         $targetCounselorId = $request->counselor_id ?? ($user->role === 'konselor' ? $user->id : null);
-        $isRecordOnly = $request->boolean('is_record_only', false);
         
         if ($targetCounselorId && !$isRecordOnly) {
             $hasConflict = CounselingSchedule::where('counselor_id', $targetCounselorId)
@@ -363,9 +405,42 @@ class CounselingController extends Controller
             }
         }
 
+        $complaintId = $request->complaint_id;
+
+        // Jika tidak ada complaint_id (konseling manual murni), kita buatkan "Complaint" (Pengaduan) baru di background
+        if (!$complaintId && ($user->role === 'konselor' || $user->role === 'operator')) {
+            $violenceCat = \App\Models\ViolenceCategory::where('name', $request->jenis_pengaduan)->first();
+            $catId = $violenceCat ? $violenceCat->unique_id : 'CAT-'.date('Y');
+
+            $newComplaint = \App\Models\Complaint::create([
+                'user_id' => $user->role === 'user' ? $user->id : null,
+                'guest_name' => $request->counselee_name,
+                'guest_nim' => $request->guest_nim,
+                'guest_email' => $request->guest_email,
+                'guest_phone' => $request->guest_phone,
+                'guest_wa' => $request->guest_wa,
+                'suspect_name' => $request->suspect_name,
+                'suspect_status' => $request->suspect_status,
+                'suspect_affiliation' => $request->suspect_affiliation,
+                'suspect_phone' => $request->suspect_phone,
+                'title' => 'Sesi Konseling Manual: ' . ($request->jenis_pengaduan ?? 'Umum'),
+                'description' => 'Sesi konseling dijadwalkan secara manual (Walk-in / Tatap Muka). Keterangan tambahan: ' . ($request->keterangan_pihak ?? '-'),
+                'violence_category_id' => $catId,
+                'victim_type' => 'self',
+                'victim_name' => $request->counselee_name,
+                'location' => $request->lokasi ?? 'Kantor Satgas',
+                'status' => $isRecordOnly ? 'completed' : 'approved',
+                'counseling_schedule' => $request->tanggal . ' ' . $jamMulai . ':00',
+                'counselor_id' => $targetCounselorId,
+                'urgency_level' => 'low',
+                'is_anonymous' => false,
+            ]);
+            $complaintId = $newComplaint->id;
+        }
+
         $data = [
             'user_id' => $user->role === 'user' ? $user->id : null,
-            'complaint_id' => $request->complaint_id,
+            'complaint_id' => $complaintId,
             'counselor_id' => $targetCounselorId,
             'jenis_pengaduan' => $request->jenis_pengaduan,
             'tanggal' => $request->tanggal,

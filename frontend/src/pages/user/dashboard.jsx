@@ -304,7 +304,7 @@ const UserDashboard = () => {
                         <Link to={`/articles/${article.slug}`} key={article.id} className="flex gap-4 group">
                           {article.cover_image ? (
                             <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gray-100">
-                              <img src={`http://127.0.0.1:8000/storage/${article.cover_image}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              <img src={article.cover_image} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             </div>
                           ) : (
                             <div className="w-20 h-20 rounded-2xl bg-sky-50 text-sky-300 flex items-center justify-center shrink-0">

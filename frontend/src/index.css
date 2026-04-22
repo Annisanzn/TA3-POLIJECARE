@@ -103,7 +103,7 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     font-weight: 400;
     font-synthesis: none;
@@ -120,7 +120,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     color: var(--color-gray-900); /* Uses the flipped gray palette */
     margin-bottom: 1rem;

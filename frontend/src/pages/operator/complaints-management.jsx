@@ -503,7 +503,7 @@ const ComplaintsManagementPage = () => {
                           {c.status}
                         </span>
                         <span className="text-[10px] font-bold text-gray-400">
-                          {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                          {c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':') + ' WIB' : '-'}
                         </span>
                       </div>
                     </div>

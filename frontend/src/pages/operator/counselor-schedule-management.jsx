@@ -9,6 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
 import Sidebar from '../../components/layout/Sidebar';
 import { useNavigate } from 'react-router-dom';
+import TimePicker24h from '../../components/ui/TimePicker24h';
 
 /* ── Toast Component ───────────────────────────────────────────────────────── */
 const Toast = ({ toast, onClose }) => {
@@ -464,24 +465,16 @@ const CounselorScheduleManagementPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Jam Buka</label>
-                      <input
-                        type="time"
-                        name="jam_mulai"
+                      <TimePicker24h
                         value={formData.jam_mulai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
+                        onChange={val => handleInputChange({ target: { name: 'jam_mulai', value: val } })}
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Jam Tutup</label>
-                      <input
-                        type="time"
-                        name="jam_selesai"
+                      <TimePicker24h
                         value={formData.jam_selesai}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
+                        onChange={val => handleInputChange({ target: { name: 'jam_selesai', value: val } })}
                       />
                     </div>
                   </div>

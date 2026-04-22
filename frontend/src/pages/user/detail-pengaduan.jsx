@@ -317,7 +317,7 @@ const DetailPengaduan = () => {
                                             </h3>
                                             <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                                                 <a
-                                                    href={`http://127.0.0.1:8000/storage/${complaint.file_path}`}
+                                                    href={complaint.file_path}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 font-medium text-sm"

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiClock, FiUser, FiFileText, FiChevronRight } from 'react-icons/fi';
-import { complaintService } from '../services/complaintService';
+import { useAuth } from '../hooks/useAuth';
+import axios from '../api/axios';
 
 const ActivityList = () => {
+  const { user } = useAuth();
   const [activities, setActivities] = useState([]);
   const [totalActive, setTotalActive] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,7 +14,11 @@ const ActivityList = () => {
     const fetchActivities = async () => {
       setIsLoading(true);
       try {
-        const response = await complaintService.getComplaints({ page: 1, per_page: 5, status: 'pending,approved' });
+        const endpoint = user?.role === 'konselor' ? '/konselor/complaints' : '/operator/complaints';
+        const response = await axios.get(endpoint, {
+          params: { page: 1, per_page: 5, status: 'pending,approved' }
+        });
+        
         if (response.data && response.data.data) {
           setActivities(response.data.data);
           setTotalActive(response.data.total || 0);
@@ -70,8 +76,9 @@ const ActivityList = () => {
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    }).replace(',', ' •');
+      minute: '2-digit',
+      hour12: false
+    }).replace(',', ' •').replace(/\./g, ':') + ' WIB';
   };
 
   return (
@@ -88,7 +95,7 @@ const ActivityList = () => {
             </div>
           </div>
           <button 
-            onClick={() => navigate('/operator/complaints-management')}
+            onClick={() => navigate(user?.role === 'konselor' ? '/konselor/case-management' : '/operator/complaints-management')}
             className="text-[#6666DE] hover:text-[#5555CC] font-medium flex items-center space-x-2 transition-colors"
           >
             <span>Lihat Semua</span>
@@ -106,7 +113,7 @@ const ActivityList = () => {
           activities.map((activity) => (
             <div
               key={activity.id}
-              onClick={() => navigate(`/operator/complaint-detail/${activity.id}`)}
+              onClick={() => navigate(user?.role === 'konselor' ? `/konselor/complaint-detail/${activity.id}` : `/operator/complaint-detail/${activity.id}`)}
               className="p-6 hover:bg-gray-50 transition-colors cursor-pointer group"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

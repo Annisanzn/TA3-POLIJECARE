@@ -95,7 +95,7 @@ class ComplaintController extends Controller
                     'is_anonymous' => $c->is_anonymous,
                     'ip_address' => $c->ip_address,
                     'user_agent' => $c->user_agent,
-                    'file_path' => $c->file_path,
+                    'file_path' => $c->file_path ? asset('storage/' . $c->file_path) : null,
                     'created_at' => $c->created_at->toDateTimeString(),
                     'updated_at' => $c->updated_at->toDateTimeString(),
                 ];
@@ -166,7 +166,7 @@ class ComplaintController extends Controller
                 'victim_name' => $complaint->victim_name,
                 'victim_relationship' => $complaint->victim_relationship,
                 'is_external_victim' => $complaint->is_external_victim,
-                'victim_identity_proof' => $complaint->victim_identity_proof,
+                'victim_identity_proof' => $complaint->victim_identity_proof ? asset('storage/' . $complaint->victim_identity_proof) : null,
                 'suspect_name' => $complaint->suspect_name,
                 'suspect_status' => $complaint->suspect_status,
                 'suspect_affiliation' => $complaint->suspect_affiliation,
@@ -181,7 +181,7 @@ class ComplaintController extends Controller
                 'is_anonymous' => $complaint->is_anonymous,
                 'ip_address' => $complaint->ip_address,
                 'user_agent' => $complaint->user_agent,
-                'file_path' => $complaint->file_path,
+                'file_path' => $complaint->file_path ? asset('storage/' . $complaint->file_path) : null,
                 'created_at' => $complaint->created_at->toDateTimeString(),
                 'updated_at' => $complaint->updated_at->toDateTimeString(),
                 'counseling_notes' => $complaint->counselingSchedules->map(function ($s) {
