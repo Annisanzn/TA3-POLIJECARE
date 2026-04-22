@@ -32,11 +32,11 @@ Route::get('/articles', function () {
         $articles = \App\Models\Article::published()->latest()->limit(6)->get();
         return response()->json([
             'success' => true,
-            'data'    => \App\Http\Resources\ArticleResource::collection($articles),
-            'meta'    => ['total' => $articles->count()],
+            'data' => \App\Http\Resources\ArticleResource::collection($articles),
+            'meta' => ['total' => $articles->count()],
         ]);
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Gagal mengambil artikel'], 500);
+        return response()->json(['success' => false, 'message' => 'Gagal mengambil artikel', 'err' => $e->getMessage()], 500);
     }
 });
 Route::get('/articles/{slug}', [ArticleController::class, 'show']);
@@ -72,7 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/profile/stats', [UserController::class, 'profileStats']);
-    
+
     // User routes
     Route::middleware(RoleMiddleware::class . ':user')->prefix('user')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\API\UserDashboardController::class, 'index']);
@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/complaints', [\App\Http\Controllers\API\UserComplaintController::class, 'store']);
         Route::post('/reports', [\App\Http\Controllers\API\UserComplaintController::class, 'store']); // Alias for new architecture
         Route::get('/complaints/{id}', [\App\Http\Controllers\API\UserComplaintController::class, 'show']);
-        
+
         // Data Reference Form
         Route::get('/categories', function () {
             $categories = \App\Models\ViolenceCategory::orderBy('name')->get(['unique_id', 'name']);
@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/counselings', [\App\Http\Controllers\API\CounselingController::class, 'store']);
         Route::get('/counseling-schedule', [\App\Http\Controllers\API\CounselingController::class, 'userSchedules']);
     });
-    
+
     // Konselor routes
     Route::middleware(RoleMiddleware::class . ':konselor')->prefix('konselor')->group(function () {
         // Dashboard stats
@@ -108,30 +108,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
         Route::post('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'store']);
         Route::get('/jadwal/{id}', [\App\Http\Controllers\API\CounselingController::class, 'show']);
-        Route::put('/jadwal/{id}/approve',  [\App\Http\Controllers\API\CounselingController::class, 'approve']);
-        Route::put('/jadwal/{id}/reject',   [\App\Http\Controllers\API\CounselingController::class, 'reject']);
+        Route::put('/jadwal/{id}/approve', [\App\Http\Controllers\API\CounselingController::class, 'approve']);
+        Route::put('/jadwal/{id}/reject', [\App\Http\Controllers\API\CounselingController::class, 'reject']);
         Route::put('/jadwal/{id}/complete', [\App\Http\Controllers\API\CounselingController::class, 'updateStatus']);
         Route::post('/jadwal/{id}/feedback', [\App\Http\Controllers\API\CounselingController::class, 'submitFeedback']);
 
         // Materi milik konselor (filter by uploaded_by handled in MaterialController)
-        Route::get('/materials',                [MaterialController::class, 'index']);
-        Route::post('/materials',               [MaterialController::class, 'store']);
-        Route::put('/materials/{material}',     [MaterialController::class, 'update']);
-        Route::delete('/materials/{material}',  [MaterialController::class, 'destroy']);
+        Route::get('/materials', [MaterialController::class, 'index']);
+        Route::post('/materials', [MaterialController::class, 'store']);
+        Route::put('/materials/{material}', [MaterialController::class, 'update']);
+        Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
 
         // Complaint update (status & jadwal) untuk konselor yang menangani pengaduan tersebut
-        Route::get('/complaints/{complaint}',            [ComplaintController::class, 'show']);
-        Route::get('/complaints-stats',                  [ComplaintController::class, 'stats']);
-        Route::patch('/complaints/{complaint}/status',   [ComplaintController::class, 'updateStatus']);
+        Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']);
+        Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
+        Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 
         // Slot jadwal ketersediaan konselor (konselor kelola jadwal sendiri)
-        Route::get('/counselor-schedules',        [CounselorScheduleController::class, 'index']);
-        Route::post('/counselor-schedules',       [CounselorScheduleController::class, 'store']);
-        Route::put('/counselor-schedules/{id}',   [CounselorScheduleController::class, 'update']);
-        Route::delete('/counselor-schedules/{id}',[CounselorScheduleController::class, 'destroy']);
+        Route::get('/counselor-schedules', [CounselorScheduleController::class, 'index']);
+        Route::post('/counselor-schedules', [CounselorScheduleController::class, 'store']);
+        Route::put('/counselor-schedules/{id}', [CounselorScheduleController::class, 'update']);
+        Route::delete('/counselor-schedules/{id}', [CounselorScheduleController::class, 'destroy']);
     });
-    
+
     // Operator routes
     Route::middleware(RoleMiddleware::class . ':operator')->prefix('operator')->group(function () {
         Route::get('/dashboard', function () {

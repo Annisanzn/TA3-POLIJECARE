@@ -15,11 +15,11 @@ const Articles = () => {
         if (res.success) {
           setArticles(res.data || []);
         } else {
-          setError('Gagal memuat artikel');
+          setError('Gagal memuat artikel--');
         }
       } catch (err) {
         console.error('Articles fetch error:', err);
-        setError('Gagal memuat artikel');
+        setError('Gagal memuat artikel---');
       } finally {
         setLoading(false);
       }
