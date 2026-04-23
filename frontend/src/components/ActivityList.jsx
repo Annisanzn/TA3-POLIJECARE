@@ -12,9 +12,10 @@ const ActivityList = () => {
 
   useEffect(() => {
     const fetchActivities = async () => {
+      if (!user) return; // Wait for user to be loaded
       setIsLoading(true);
       try {
-        const endpoint = user?.role === 'konselor' ? '/konselor/complaints' : '/operator/complaints';
+        const endpoint = user.role === 'konselor' ? '/konselor/complaints' : '/operator/complaints';
         const response = await axios.get(endpoint, {
           params: { page: 1, per_page: 5, status: 'pending,approved' }
         });
@@ -30,8 +31,10 @@ const ActivityList = () => {
       }
     };
 
-    fetchActivities();
-  }, []);
+    if (user) {
+      fetchActivities();
+    }
+  }, [user]);
   const navigate = useNavigate();
   const getStatusLabel = (status) => {
     switch (status) {

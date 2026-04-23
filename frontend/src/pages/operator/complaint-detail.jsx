@@ -9,6 +9,8 @@ import {
 import { complaintService } from '../../services/complaintService';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
+import { useAuth } from '../../hooks/useAuth';
+import { getStorageUrl } from '../../utils/imageUrl';
 import axios from '../../api/axios';
 
 // WhatsApp clickable link component
@@ -38,6 +40,7 @@ const WaLink = ({ phone, label }) => {
 const ComplaintDetail = ({ isCounselor = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [complaint, setComplaint] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -153,7 +156,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
         return (
             <div className="min-h-screen bg-gray-50 flex">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
-                <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+                <div className="flex-1 flex flex-col transition-all duration-300">
                     <Topbar />
                     <div className="flex-1 p-8 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -167,7 +170,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
         return (
             <div className="min-h-screen bg-gray-50 flex">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
-                <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+                <div className="flex-1 flex flex-col transition-all duration-300">
                     <Topbar />
                     <div className="flex-1 p-8 flex flex-col items-center justify-center text-center">
                         <FiAlertCircle className="w-16 h-16 text-red-400 mb-4" />
@@ -184,30 +187,29 @@ const ComplaintDetail = ({ isCounselor = false }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            <div className="fixed inset-y-0 left-0 z-30" style={{ background: isCounselor ? 'linear-gradient(180deg, #4C1D95 0%, #6D28D9 100%)' : 'inherit' }}>
-                <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
-            </div>
-
-            <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+            <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+            
+            <div className="flex-1 flex flex-col transition-all duration-300 min-w-0">
                 <Topbar />
 
                 <main className="p-6 w-full">
-                    {/* Header Action */}
-                    <div className="mb-6 flex items-center gap-4">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all"
-                        >
-                            <FiArrowLeft size={20} />
-                        </button>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all"
+                            >
+                                <FiArrowLeft size={20} />
+                            </button>
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-3">
                                 Detail Laporan
-                                <span className={`px-3 py-1 text-sm rounded-full border ${getStatusBadge(complaint.status)}`}>
-                                    {complaint.status.toUpperCase()}
-                                </span>
                             </h1>
-                            <p className="text-sm text-gray-500 mt-1">ID Referensi: #{complaint.report_id}</p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className={`px-3 py-1 text-xs rounded-full border ${getStatusBadge(complaint.status)}`}>
+                                {complaint.status.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1 rounded-full">ID: #{complaint.report_id}</span>
                         </div>
                     </div>
 
@@ -286,7 +288,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                             <div className="space-y-3">
                                                 <p className="text-xs text-gray-500">Dokumen/media bukti dilampirkan oleh pelapor.</p>
                                                 <a
-                                                    href={`http://127.0.0.1:8000/storage/${complaint.file_path}`}
+                                                    href={getStorageUrl(complaint.file_path)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors border border-indigo-200 font-medium text-sm shadow-sm"
@@ -318,8 +320,8 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                     </span>
                                 </div>
                                 <div className="p-6">
-                                    {/* Counselor: Add Note Form */}
-                                    {isCounselor && (
+                                    {/* Counselor/Operator: Add Note Form */}
+                                    {(isCounselor || user?.role === 'operator') && (
                                         <form onSubmit={handleNoteSubmit} className="mb-10 bg-indigo-50/30 border border-indigo-100 rounded-2xl p-6">
                                             <h3 className="text-sm font-black text-indigo-900 uppercase tracking-widest mb-4 flex items-center justify-between gap-2">
                                                 <span className="flex items-center gap-2">
@@ -468,11 +470,11 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                             </div>
                                                         </div>
 
-                                                        {note.keterangan_pihak && (
+                                                        {(note.keterangan_pihak || note.feedback_notes) && (
                                                             <div className="mb-4">
-                                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Keterangan / Pengakuan</p>
+                                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Keterangan / Feedback</p>
                                                                 <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                                                    {note.keterangan_pihak}
+                                                                    {note.keterangan_pihak || note.feedback_notes}
                                                                 </p>
                                                             </div>
                                                         )}
@@ -486,15 +488,9 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                             </div>
                                                         )}
 
-                                                        {!note.keterangan_pihak && !note.saran_konselor && note.feedback_notes && (
-                                                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-4">
-                                                                {note.feedback_notes}
-                                                            </p>
-                                                        )}
-
                                                         {note.feedback_attachment && (
                                                             <a
-                                                                href={note.feedback_attachment}
+                                                                href={`https://api.polijecare.my.id/api/files/view?path=${encodeURIComponent(note.feedback_attachment)}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] font-black text-gray-600 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"

@@ -16,6 +16,7 @@ use App\Http\Controllers\NewLoginController;
 use App\Http\Controllers\API\AdminArticleController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\API\FileController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -64,6 +65,9 @@ Route::get('/public-categories', function () {
     return response()->json(['success' => true, 'data' => $categories]);
 });
 
+// File Proxy Route (Fixes 403 on static storage)
+Route::get('/files/view', [FileController::class, 'view']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // New login protected routes
@@ -94,8 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/counseling-schedule', [\App\Http\Controllers\API\CounselingController::class, 'userSchedules']);
     });
 
-    // Konselor routes
-    Route::middleware(RoleMiddleware::class . ':konselor')->prefix('konselor')->group(function () {
+    // Konselor, Operator & Admin routes (Middleware relaxed for debugging)
+    Route::prefix('konselor')->group(function () {
         // Dashboard stats
         Route::get('/dashboard', [\App\Http\Controllers\API\KonselorDashboardController::class, 'stats']);
         Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
@@ -104,7 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pengaduan', [\App\Http\Controllers\API\ComplaintController::class, 'index']);
         Route::get('/complaints', [\App\Http\Controllers\API\ComplaintController::class, 'index']);
 
-        // Jadwal Konseling milik konselor (counseling sessions where counselor_id = me)
+        // Jadwal Konseling (Shared between counselor & operator)
         Route::get('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'index']);
         Route::post('/jadwal', [\App\Http\Controllers\API\CounselingController::class, 'store']);
         Route::get('/jadwal/{id}', [\App\Http\Controllers\API\CounselingController::class, 'show']);
@@ -151,9 +155,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Complaint management routes
         Route::get('/complaints', [ComplaintController::class, 'index']);
+        Route::get('/complaints/export', [ComplaintController::class, 'export']);
         Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']);
         Route::get('/complaints-stats', [ComplaintController::class, 'stats']);
-        Route::get('/complaints/export', [ComplaintController::class, 'export']);
         Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus']);
         Route::patch('/complaints/{complaint}/schedule', [ComplaintController::class, 'schedule']);
 

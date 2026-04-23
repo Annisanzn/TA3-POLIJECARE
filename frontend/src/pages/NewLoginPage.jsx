@@ -86,7 +86,8 @@ const NewLoginPage = () => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     // Redirect to backend auth route which will redirect to Google Identity Services
-    window.location.href = 'http://localhost:8000/api/auth/google';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.polijecare.my.id/api';
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   // Handle form submission

@@ -13,7 +13,7 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!auth()->check()) {
             return response()->json([
@@ -23,9 +23,17 @@ class RoleMiddleware
         }
         
         $user = auth()->user();
+        $userRole = strtolower($user->role ?? '');
+        $allowedRoles = array_map(fn($r) => strtolower(trim($r)), $roles);
         
-        // Check if user has the required role
-        if ($user->role !== $role) {
+        // Check if user has one of the required roles
+        if (!in_array($userRole, $allowedRoles)) {
+            \Illuminate\Support\Facades\Log::warning('RoleMiddleware Access Denied', [
+                'user_id' => $user->id,
+                'user_role' => $user->role,
+                'allowed_roles' => $roles,
+                'path' => $request->path()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden - Insufficient permissions'

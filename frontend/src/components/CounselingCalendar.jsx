@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import TimePicker24h from './ui/TimePicker24h';
@@ -100,6 +101,7 @@ const saveExternalAgendas = (agendas) => {
 };
 
 const CounselingCalendar = ({ role = 'konselor' }) => {
+    const navigate = useNavigate();
     const today = new Date();
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -120,9 +122,10 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                 : ['/operator/counseling?per_page=100&sort_by=tanggal&sort_order=asc'];
 
             for (const ep of endpoints) {
+                console.log(`[Calendar] Fetching from: ${ep}`);
                 const res = await api.get(ep);
-                // Handle both paginated {data:{data:[...]}} and plain {data:[...]} responses
                 const raw = res.data;
+                console.log(`[Calendar] Response from ${ep}:`, raw);
                 let items = [];
                 if (Array.isArray(raw?.data?.data)) {
                     items = raw.data.data;
@@ -133,6 +136,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                 }
                 allSessions = [...allSessions, ...items];
             }
+            console.log(`[Calendar] Total sessions found: ${allSessions.length}`);
             setSessions(allSessions);
         } catch (err) {
             console.error('Gagal mengambil jadwal konseling:', err);
@@ -201,10 +205,11 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
     };
 
     const handleAddAgenda = () => {
-        const prefillDate = selectedDay?.dateStr
-            || `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        setAddForm({ date: prefillDate, time: '09:00', title: '', description: '' });
-        setShowAddModal(true);
+        if (role === 'konselor') {
+            navigate('/konselor/manual-counseling');
+        } else {
+            navigate('/operator/case-management?tab=new');
+        }
     };
 
     const handleSaveAgenda = () => {
@@ -378,7 +383,13 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: i * 0.1 }}
                                                 key={ev.id}
-                                                className={`p-3.5 rounded-2xl border shadow-sm transition-all hover:shadow-md ${ev.isExternal ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-white' : 'border-gray-100 bg-white'}`}
+                                                onClick={() => {
+                                                    if (!ev.isExternal && !ev.id.startsWith('holiday')) {
+                                                        const id = ev.id.replace('s-', '');
+                                                        navigate(`/${role}/complaint-detail/${id}`);
+                                                    }
+                                                }}
+                                                className={`p-3.5 rounded-2xl border shadow-sm transition-all hover:shadow-md ${ev.isExternal ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-white' : 'border-gray-100 bg-white cursor-pointer hover:border-indigo-200'}`}
                                             >
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1 min-w-0">

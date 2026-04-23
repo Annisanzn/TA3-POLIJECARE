@@ -63,7 +63,7 @@ class UserComplaintController extends Controller
         }
 
         // Authorization format: Return 403 if it doesn't belong to the logged-in user
-        if ($complaint->user_id !== auth()->id()) {
+        if ((int) $complaint->user_id !== (int) auth()->id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses ke laporan ini.'

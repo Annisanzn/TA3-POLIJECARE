@@ -6,7 +6,7 @@ import {
   FiCheckCircle, FiXCircle, FiEye, FiEdit, FiBarChart2,
   FiChevronLeft, FiChevronRight, FiUsers, FiMapPin, FiDownload,
   FiAlertCircle, FiX, FiCheck, FiMoreVertical, FiTrendingUp,
-  FiRefreshCw, FiUser, FiMessageSquare
+  FiRefreshCw, FiUser, FiMessageSquare, FiMenu
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import axios from '../../api/axios';
@@ -61,6 +61,9 @@ const CaseManagementPage = () => {
   const [urgencyFilter, setUrgencyFilter] = useState('all');
 
   // State: Modals
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
+  
   const [statusModal, setStatusModal] = useState({ 
     open: false, complaint: null, status: 'pending', rejection_reason: '', isRejectOnly: false 
   });
@@ -312,28 +315,34 @@ const CaseManagementPage = () => {
 
   return (
     <div className="flex min-h-screen bg-[#FDFDFF]">
-      <Sidebar collapsed={false} />
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
       
       <div className="flex-1 flex flex-col min-w-0">
         <Toast toast={toast} onClose={() => setToast(null)} />
 
         <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                <button 
+                  onClick={toggleSidebar}
+                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
+                >
+                  <FiMenu size={20} />
+                </button>
                 <FiFileText className="text-blue-600" /> Manajemen Kasus
               </h1>
-              <p className="text-gray-500 text-sm mt-1 font-medium italic">
+              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
                 Pusat Kendali Pengaduan & Jadwal Konseling PolijeCare
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-end">
               <button 
                 onClick={() => setExportModal({ ...exportModal, open: true })}
-                className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all text-sm font-bold"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all text-xs sm:text-sm font-bold"
               >
                 <FiDownload size={18} />
-                EKSPOR EXCEL
+                EKSPOR
               </button>
               <button 
                 onClick={handleReset}
@@ -374,7 +383,7 @@ const CaseManagementPage = () => {
           </div>
 
           {/* 2. Unified Filter Section */}
-          <div className="bg-white rounded-[40px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100 mb-8">
+          <div className="bg-white rounded-[30px] sm:rounded-[40px] p-6 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100 mb-8">
              <div className="flex items-center gap-3 mb-8">
                 <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
                 <h2 className="text-lg font-bold text-gray-900 tracking-tight">PARAMETER FILTRASI</h2>
@@ -412,11 +421,11 @@ const CaseManagementPage = () => {
 
                 <div className="lg:col-span-2 space-y-3">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Opsi Tambahan</label>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <select 
                       value={statusFilter}
                       onChange={e => setStatusFilter(e.target.value)}
-                      className="flex-1 px-6 py-4 bg-gray-50/50 border-2 border-transparent hover:border-gray-100 focus:bg-white focus:border-blue-500 rounded-[28px] text-sm font-medium outline-none transition-all"
+                      className="w-full sm:flex-1 px-6 py-4 bg-gray-50/50 border-2 border-transparent hover:border-gray-100 focus:bg-white focus:border-blue-500 rounded-[28px] text-sm font-medium outline-none transition-all"
                     >
                       <option value="all">SEMUA STATUS</option>
                       <option value="pending">PENDING</option>
@@ -425,7 +434,7 @@ const CaseManagementPage = () => {
                     </select>
                     <button 
                       onClick={handleFilterChange}
-                      className="px-10 py-4 bg-blue-600 text-white rounded-[28px] text-xs font-bold tracking-widest hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 transition-all shadow-lg"
+                      className="w-full sm:px-10 py-4 bg-blue-600 text-white rounded-[28px] text-xs font-bold tracking-widest hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 transition-all shadow-lg"
                     >
                       FILTER
                     </button>
@@ -482,7 +491,7 @@ const CaseManagementPage = () => {
                 const schedule = isReport ? null : item;
 
                 return (
-                  <div key={item.id} className="group relative bg-white rounded-[40px] p-8 border border-gray-100 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-300 overflow-hidden">
+                  <div key={item.id} className="group relative bg-white rounded-[30px] sm:rounded-[40px] p-6 sm:p-8 border border-gray-100 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-300 overflow-hidden">
                     {/* Urgency Ribbon */}
                     <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-[20px] text-[10px] font-bold tracking-widest uppercase border-l border-b ${getUrgencyBadge(report?.urgency_level)}`}>
                        {report?.urgency_level}

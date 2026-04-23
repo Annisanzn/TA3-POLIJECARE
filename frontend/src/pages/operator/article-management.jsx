@@ -6,6 +6,7 @@ import {
     FiToggleLeft, FiToggleRight, FiImage, FiX,
 } from 'react-icons/fi';
 import { articleService } from '../../services/articleService';
+import { normalizeImageUrl } from '../../utils/imageUrl';
 
 // ─── Toast Notification ──────────────────────────────────────────────────────
 const Toast = ({ toast, onClose }) => {
@@ -71,7 +72,7 @@ const ArticleModal = ({ mode, article, onClose, onSaved }) => {
         is_active: article?.is_active ?? true,
     });
     const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(article?.image || null);
+    const [imagePreview, setImagePreview] = useState(normalizeImageUrl(article?.image) || null);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const fileRef = useRef();
@@ -498,7 +499,7 @@ const ArticleManagementPage = () => {
                                             <td className="py-4 px-6">
                                                 <div className="relative w-16 h-12 rounded-xl overflow-hidden shadow-sm group-hover:shadow border border-gray-200 transition-all shrink-0">
                                                     {article.image ? (
-                                                        <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                        <img src={normalizeImageUrl(article.image)} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                                                             <FiImage size={18} className="text-gray-400" />

@@ -11,6 +11,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 import userComplaintService from '../../services/userComplaintService';
 import api from '../../api/axios';
+import { getStorageUrl } from '../../utils/imageUrl';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 
@@ -317,7 +318,7 @@ const DetailPengaduan = () => {
                                             </h3>
                                             <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
                                                 <a
-                                                    href={complaint.file_path}
+                                                    href={getStorageUrl(complaint.file_path)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100 font-medium text-sm"
