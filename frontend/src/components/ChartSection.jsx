@@ -53,14 +53,14 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
       </svg>
 
       {/* Legend */}
-      <div className="absolute -right-40 top-0 space-y-2">
+      <div className="mt-4 sm:mt-0 sm:absolute sm:-right-40 sm:top-0 space-y-2">
         {data.map((item, index) => (
           <div key={index} className="flex items-center space-x-2">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-3 h-3 rounded-full shrink-0"
               style={{ backgroundColor: item.color.replace('bg-', '') }}
             ></div>
-            <span className="text-sm text-gray-700">{item.name}</span>
+            <span className="text-sm text-gray-700 truncate">{item.name}</span>
             <span className="text-sm font-medium text-gray-900">{item.percentage}</span>
           </div>
         ))}
@@ -249,9 +249,6 @@ const ChartSection = () => {
         <div className="mt-6 pt-6 border-t border-gray-100">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total laporan: {totalReports} kasus</span>
-            <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
-              Lihat detail →
-            </button>
           </div>
         </div>
       </div>
@@ -320,13 +317,13 @@ const ChartSection = () => {
               </div>
 
               {/* Comparison */}
-              <div className="flex justify-between text-xs text-gray-500 pt-2">
+              <div className="flex flex-col sm:flex-row justify-between text-[10px] sm:text-xs text-gray-500 pt-2 gap-2">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-[#3B82F6]"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#3B82F6] shrink-0"></div>
                   <span>Laki-laki: {item.laki}%</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#8B5CF6] shrink-0"></div>
                   <span>Perempuan: {item.perempuan}%</span>
                 </div>
                 <div className={`font-medium ${item.laki > item.perempuan ? 'text-blue-600' :
@@ -345,12 +342,6 @@ const ChartSection = () => {
               Rata-rata: <span className="font-medium text-blue-600">62% Laki-laki</span>,
               <span className="font-medium text-purple-600 ml-2">38% Perempuan</span>
             </div>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1">
-              <span>Lihat detail</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
@@ -471,16 +462,6 @@ const ChartSection = () => {
           <div className="text-sm text-gray-500">
               <span className="font-medium">Insight:</span> 60% kasus melibatkan Jurusan TI & Kesehatan
             </div>
-            <button
-              onClick={() => setShowMapModal(true)}
-              className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1 group px-4 py-2 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
-            >
-              <FiMap className="w-4 h-4 mr-1" />
-              <span>Lihat Detail Peta Wilayah Kampus</span>
-              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>

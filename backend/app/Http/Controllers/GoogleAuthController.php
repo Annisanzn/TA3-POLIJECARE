@@ -29,7 +29,7 @@ class GoogleAuthController extends Controller
             $email = $googleUser->getEmail();
             if (!str_ends_with($email, '@polije.ac.id') && !str_ends_with($email, '@student.polije.ac.id')) {
                 // Return generic redirect with error so frontend can catch it
-                return redirect(config('app.frontend_url', 'http://localhost:5173') . '/login-new?error=domain_not_allowed');
+                return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/login-new?error=domain_not_allowed');
             }
 
             // Determine role

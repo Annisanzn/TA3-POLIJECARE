@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gallery4 } from './gallery4';
 import { articleService } from '../services/articleService';
+import { normalizeImageUrl } from '../utils/imageUrl';
 
 const Articles = () => {
   const [articles, setArticles] = useState([]);
@@ -33,7 +34,7 @@ const Articles = () => {
     title: article.title,
     description: article.excerpt || '',
     href: `/artikel/${article.slug}`,
-    image: article.image || `https://picsum.photos/seed/${article.slug}/800/400.jpg`,
+    image: normalizeImageUrl(article.image) || `https://picsum.photos/seed/${article.slug}/800/400.jpg`,
   }));
 
   const SectionTitle = (

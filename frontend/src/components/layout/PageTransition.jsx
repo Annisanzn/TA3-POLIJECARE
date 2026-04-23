@@ -13,25 +13,18 @@ import { motion } from 'framer-motion';
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 18,
-    filter: 'blur(4px)',
   },
   animate: {
     opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
     transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1], // easeOutQuint – buttery smooth deceleration
+      duration: 0.3,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
   exit: {
     opacity: 0,
-    y: -10,
-    filter: 'blur(2px)',
     transition: {
-      duration: 0.25,
-      ease: [0.55, 0, 1, 0.45], // easeInQuint
+      duration: 0.2,
     },
   },
 };

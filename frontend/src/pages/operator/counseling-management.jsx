@@ -304,7 +304,8 @@ const CounselingManagementPage = () => {
 
   const getFileUrl = (filePath) => {
     if (!filePath) return '#';
-    return `http://127.0.0.1:8000/storage/${filePath}`;
+    // Backend now returns absolute URL via asset() helper
+    return filePath;
   };
 
   return (
@@ -673,7 +674,7 @@ const CounselingManagementPage = () => {
                       {detailModal.schedule.feedback_attachment && (
                         <div className="mt-4">
                           <a
-                            href={`http://127.0.0.1:8000/storage/${detailModal.schedule.feedback_attachment}`}
+                            href={detailModal.schedule.feedback_attachment}
                             target="_blank" rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold transition-colors"
                           >

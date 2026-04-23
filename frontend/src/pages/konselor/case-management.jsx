@@ -7,7 +7,7 @@ import {
   FiChevronLeft, FiChevronRight, FiUsers, FiMapPin, FiDownload,
   FiAlertCircle, FiX, FiCheck, FiMoreVertical, FiTrendingUp,
   FiRefreshCw, FiUser, FiMessageSquare,
-  FiPlus, FiSave, FiLoader, FiVideo
+  FiPlus, FiSave, FiLoader, FiVideo, FiMenu
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import axios from '../../api/axios';
@@ -61,6 +61,9 @@ const CounselorCaseManagement = () => {
   const [urgencyFilter, setUrgencyFilter] = useState('all');
 
   // State: Modals
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
+  
   const [statusModal, setStatusModal] = useState({ 
     open: false, complaint: null, status: 'pending', rejection_reason: '', isRejectOnly: false 
   });
@@ -293,7 +296,7 @@ const CounselorCaseManagement = () => {
 
   return (
     <div className="flex min-h-screen bg-[#FDFDFF]">
-      <Sidebar collapsed={false} />
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
       
       <div className="flex-1 flex flex-col min-w-0">
         <Toast toast={toast} onClose={() => setToast(null)} />
@@ -302,6 +305,12 @@ const CounselorCaseManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                <button 
+                  onClick={toggleSidebar}
+                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
+                >
+                  <FiMenu size={20} />
+                </button>
                 <FiFileText className="text-purple-600" /> Manajemen Kasus
               </h1>
               <p className="text-gray-500 text-sm mt-1 font-medium italic">

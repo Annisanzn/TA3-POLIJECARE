@@ -12,7 +12,7 @@ import DashboardNotification from '../../components/DashboardNotification';
 
 const KonselorDashboard = () => {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -86,7 +86,7 @@ const KonselorDashboard = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar — same as operator */}
-        <Topbar />
+        <Topbar onMenuClick={toggleSidebar} title="Ringkasan Statistik" />
 
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-x-auto">
@@ -184,13 +184,6 @@ const KonselorDashboard = () => {
         </main>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
-      {sidebarCollapsed && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
-          onClick={toggleSidebar}
-        ></div>
-      )}
     </div>
   );
 };

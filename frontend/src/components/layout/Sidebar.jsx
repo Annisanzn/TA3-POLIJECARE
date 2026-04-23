@@ -104,9 +104,19 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
   };
 
   return (
-    <div
-      className={`h-screen flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'
-        } shrink-0 sticky top-0 z-40`}
+    <>
+      {/* Mobile Sidebar Overlay */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          onClick={toggleCollapse}
+        ></div>
+      )}
+      <div
+      className={`h-screen flex flex-col transition-all duration-300 fixed z-50 inset-y-0 left-0 w-64
+        ${collapsed ? '-translate-x-full' : 'translate-x-0'}
+        lg:sticky lg:translate-x-0 ${collapsed ? 'lg:w-20' : 'lg:w-64'}
+        overflow-hidden`}
       style={{ background: 'linear-gradient(180deg, #E6E6FA 0%, #D6D6EA 100%)' }}
     >
       {/* ── Header ── */}
@@ -225,6 +235,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

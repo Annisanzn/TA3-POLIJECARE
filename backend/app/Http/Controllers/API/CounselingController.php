@@ -27,11 +27,9 @@ class CounselingController extends Controller
             // Show ONLY Pelapor (Reporter) sessions in the schedule list
             // Witness/Suspect meetings only appear in the Complaint Detail
             $query->where('counselee_type', 'pelapor');
-            $query->where('is_record_only', false); 
         } elseif ($user->role === 'operator') {
             // Operator dashboard only shows active student schedules
             $query->where('counselee_type', 'pelapor');
-            $query->where('is_record_only', false);
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
         }
@@ -125,6 +123,9 @@ class CounselingController extends Controller
                     'report_id' => optional($s->complaint)->report_id,
                     'urgency_level' => optional($s->complaint)->urgency_level,
                     'is_anonymous' => optional($s->complaint)->is_anonymous,
+                    // Added feedback fields with absolute URLs
+                    'feedback_notes' => $s->feedback_notes,
+                    'feedback_attachment' => $s->feedback_attachment ? asset('storage/' . $s->feedback_attachment) : null,
                     // Keep the nested object for compatibility
                     'complaint' => $s->complaint
                 ];
@@ -196,11 +197,15 @@ class CounselingController extends Controller
                     'urgency_level' => $complaint->urgency_level,
                     'location'      => $complaint->location,
                     'status'        => $complaint->status,
-                    'file_path'     => $complaint->file_path,
+                    'file_path'     => $complaint->file_path ? asset('storage/' . $complaint->file_path) : null,
                     'is_anonymous'  => $complaint->is_anonymous,
                     'victim_type'   => $complaint->victim_type,
                     'victim_name'   => $complaint->victim_name,
                 ] : null,
+                'feedback_notes' => $schedule->feedback_notes,
+                'feedback_attachment' => $schedule->feedback_attachment ? asset('storage/' . $schedule->feedback_attachment) : null,
+                'keterangan_pihak' => $schedule->keterangan_pihak,
+                'saran_konselor' => $schedule->saran_konselor,
             ],
             'message' => 'Counseling schedule retrieved successfully'
         ]);
@@ -211,7 +216,13 @@ class CounselingController extends Controller
     {
         $counselors = User::where('role', 'konselor')
             ->select('id', 'name', 'email', 'nim', 'profile_photo', 'bio')
-            ->get();
+            ->get()
+            ->map(function ($counselor) {
+                if ($counselor->profile_photo) {
+                    $counselor->profile_photo = asset('storage/' . $counselor->profile_photo);
+                }
+                return $counselor;
+            });
 
         return response()->json([
             'success' => true,
@@ -310,9 +321,16 @@ class CounselingController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        \Log::info('Counseling store attempt', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'request_data' => $request->all()
+        ]);
 
-        // Only users (mahasiswa) and counselors can create schedule requests
-        if ($user->role !== 'user' && $user->role !== 'konselor') {
+        $userRole = strtolower($user->role ?? '');
+
+        // Only users (mahasiswa), counselors, operators, and admins can create schedule requests/notes
+        if (!in_array($userRole, ['user', 'konselor', 'operator', 'admin'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized role'
@@ -324,8 +342,8 @@ class CounselingController extends Controller
             'complaint_id' => 'nullable|exists:complaints,id',
             'jenis_pengaduan' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
-            'jam_mulai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'jam_selesai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jam_mulai' => [$request->boolean('is_record_only') ? 'nullable' : 'required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jam_selesai' => [$request->boolean('is_record_only') ? 'nullable' : 'required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'metode' => ['nullable', Rule::in(['online', 'offline'])],
             'lokasi' => 'nullable|string|max:255',
             'meeting_link' => 'nullable|string|max:500',
@@ -346,6 +364,10 @@ class CounselingController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Log::warning('Counseling store validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
@@ -354,14 +376,14 @@ class CounselingController extends Controller
         }
 
         // Normalize time
-        $jamMulai = substr($request->jam_mulai, 0, 5);
-        $jamSelesai = substr($request->jam_selesai, 0, 5);
+        $jamMulai = $request->filled('jam_mulai') ? substr($request->jam_mulai, 0, 5) : now()->format('H:i');
+        $jamSelesai = $request->filled('jam_selesai') ? substr($request->jam_selesai, 0, 5) : now()->addHour()->format('H:i');
         $isRecordOnly = $request->boolean('is_record_only', false);
         $now = now();
         $selectedStart = \Carbon\Carbon::parse($request->tanggal . ' ' . $jamMulai);
 
-        // Time order validation
-        if ($jamSelesai <= $jamMulai) {
+        // Time order validation (only for future schedules, skip for notes)
+        if (!$isRecordOnly && $jamSelesai <= $jamMulai) {
             return response()->json([
                 'success' => false,
                 'message' => 'Jam selesai harus lebih besar dari jam mulai.'
@@ -681,7 +703,13 @@ class CounselingController extends Controller
         $user = Auth::user();
         $schedule = CounselingSchedule::findOrFail($id);
 
-        if ($user->role !== 'konselor' || $schedule->counselor_id !== $user->id) {
+        $userRole = strtolower($user->role ?? '');
+
+        // Allow if user is an operator/admin, OR if user is the assigned counselor
+        $isOperator = in_array($userRole, ['operator', 'admin']);
+        $isAssignedCounselor = $userRole === 'konselor' && (int)$schedule->counselor_id === (int)$user->id;
+
+        if (!$isOperator && !$isAssignedCounselor) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to submit feedback for this schedule'
@@ -727,7 +755,8 @@ class CounselingController extends Controller
         return response()->json([
             'success' => true,
             'data' => $schedule->load(['user', 'counselor']),
-            'message' => 'Feedback submitted and schedule marked as completed'
+            'message' => 'Feedback submitted and schedule marked as completed',
+            'attachment_url' => $schedule->feedback_attachment ? asset('storage/' . $schedule->feedback_attachment) : null
         ]);
     }
 

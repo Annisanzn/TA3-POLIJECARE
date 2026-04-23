@@ -20,7 +20,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileStats = async () => {
       try {
-        const response = await axios.get('/api/profile/stats');
+        const response = await axios.get('/profile/stats');
         if (response.data.success) {
           setStats(response.data.data);
         }

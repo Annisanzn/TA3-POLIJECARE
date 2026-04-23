@@ -111,7 +111,7 @@ class ComplaintController extends Controller
 
         // If counselor, ensure they're authorized to see this complaint
         if ($authUser && $authUser->role === 'konselor') {
-            $isAssignedDirectly = $complaint->counselor_id === $authUser->id;
+            $isAssignedDirectly = (int) $complaint->counselor_id === (int) $authUser->id;
             
             // Check if there's a counseling schedule linking this counselor to the complaint
             $hasSchedule = \App\Models\CounselingSchedule::where('complaint_id', $complaint->id)
@@ -314,7 +314,7 @@ class ComplaintController extends Controller
             'rejection_reason' => 'nullable|string',
         ]);
 
-        if ($request->user()->role === 'konselor' && $complaint->counselor_id !== $request->user()->id) {
+        if ($request->user()->role === 'konselor' && (int) $complaint->counselor_id !== (int) $request->user()->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda hanya dapat memperbarui status laporan yang ditugaskan kepada Anda.'
@@ -347,7 +347,7 @@ class ComplaintController extends Controller
             'counseling_schedule' => 'nullable|date',
         ]);
 
-        if ($request->user()->role === 'konselor' && $complaint->counselor_id !== $request->user()->id) {
+        if ($request->user()->role === 'konselor' && (int) $complaint->counselor_id !== (int) $request->user()->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda hanya dapat mengatur jadwal laporan yang ditugaskan kepada Anda.'

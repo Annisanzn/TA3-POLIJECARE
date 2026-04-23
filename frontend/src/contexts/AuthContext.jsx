@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: AUTH_ACTIONS.LOAD_USER_START });
 
         try {
-          const response = await axios.get('/api/user');
+          const response = await axios.get('/user');
           if (response.data.success) {
             dispatch({
               type: AUTH_ACTIONS.LOAD_USER_SUCCESS,
@@ -157,10 +157,10 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
 
-      console.log('🔍 Attempting login to:', '/api/login');
+      console.log('🔍 Attempting login to:', '/login');
       console.log('🔍 Credentials:', { email: credentials.email, password: '***' });
 
-      const response = await axios.post('/api/login', credentials);
+      const response = await axios.post('/login', credentials);
 
       console.log('🔍 Auth response:', response.data);
       console.log('🔍 Response status:', response.status);
@@ -216,7 +216,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (state.token) {
-        await axios.post('/api/logout');
+        await axios.post('/logout');
       }
     } catch (error) {
       console.error('Logout error:', error);

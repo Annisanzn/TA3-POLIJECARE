@@ -58,7 +58,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                     title: `Sesi konseling hari ini pukul ${time}`,
                     body: s.jenis_pengaduan || 'Sesi Konseling',
                     sub: s.user?.name ? `dengan ${s.user.name}` : '',
-                    link: role === 'konselor' ? '/konselor/jadwal' : '/operator/counseling-management',
+                    link: role === 'konselor' ? '/konselor/jadwal' : '/operator/case-management',
                 });
             });
         }
@@ -116,7 +116,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                 title: `${pendingSessions.length} permintaan sesi menunggu konfirmasi`,
                 body: 'Segera tinjau dan setujui permintaan konseling',
                 sub: '',
-                link: role === 'konselor' ? '/konselor/pengaduan' : '/operator/complaints-management',
+                link: role === 'konselor' ? '/konselor/case-management' : '/operator/case-management',
             });
         }
 
@@ -131,7 +131,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                 title: `${pendingComplaints} pengaduan menunggu penanganan`,
                 body: 'Tinjau dan proses laporan pengaduan baru',
                 sub: '',
-                link: '/operator/complaints-management',
+                link: '/operator/case-management',
             });
         }
 

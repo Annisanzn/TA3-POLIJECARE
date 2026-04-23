@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { articleService } from '../services/articleService';
+import { normalizeImageUrl } from '../utils/imageUrl';
 
 /* ─── Reading Progress Bar ─────────────────────────────────────────────────── */
 const ReadingProgress = () => {
@@ -169,7 +170,7 @@ const ArticleDetail = () => {
         <div className="relative w-full h-72 sm:h-96 lg:h-[28rem] overflow-hidden bg-gray-900">
           {article.image ? (
             <img
-              src={article.image}
+              src={normalizeImageUrl(article.image)}
               alt={article.title}
               className="w-full h-full object-cover opacity-80"
               onError={e => { e.target.style.display = 'none'; }}
