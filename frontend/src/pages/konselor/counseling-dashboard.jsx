@@ -21,7 +21,7 @@ const CounselorCounselingDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -300,7 +300,7 @@ const CounselorCounselingDashboard = () => {
           }`}
       >
         {/* Topbar */}
-        <Topbar />
+        <Topbar onMenuClick={toggleSidebar} />
 
         {/* Page Content */}
         <main className="p-6">

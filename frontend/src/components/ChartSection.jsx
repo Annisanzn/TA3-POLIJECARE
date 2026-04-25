@@ -265,14 +265,14 @@ const ChartSection = () => {
               <p className="text-sm text-gray-500">Perbandingan perempuan vs laki-laki per bulan</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 sm:mt-0">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 rounded-full bg-[#3B82F6]"></div>
-              <span className="text-sm text-gray-600">Laki-laki</span>
+              <span className="text-xs sm:text-sm text-gray-600">Laki-laki</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 rounded-full bg-[#8B5CF6]"></div>
-              <span className="text-sm text-gray-600">Perempuan</span>
+              <span className="text-xs sm:text-sm text-gray-600">Perempuan</span>
             </div>
           </div>
         </div>
@@ -280,57 +280,61 @@ const ChartSection = () => {
         {/* Grouped Bar Chart */}
         <div className="space-y-6">
           {genderData.map((item, index) => (
-            <div key={index} className="space-y-3">
+            <div key={index} className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-900">{item.month}</span>
-                <span className="text-sm text-gray-500">Total: {item.laki + item.perempuan}%</span>
+                <span className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                  <span className="hidden sm:inline">{item.month}</span>
+                  <span className="sm:hidden">{item.month.slice(0, 3)}</span>
+                </span>
+                <span className="text-xs sm:text-sm text-gray-500 ml-2 shrink-0">Total: {item.laki + item.perempuan}%</span>
               </div>
 
-              <div className="flex items-end space-x-4 h-40">
+              {/* Horizontal stacked bars for better mobile support */}
+              <div className="space-y-2">
                 {/* Laki-laki Bar */}
-                <div className="flex-1">
-                  <div className="text-center mb-2 flex flex-col items-center">
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-500">Laki-laki</span>
-                    <span className="text-sm font-bold text-[#3B82F6]">{item.laki}%</span>
-                  </div>
-                  <div className="relative w-full flex justify-center">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 w-16 sm:w-20 shrink-0">Laki-laki</span>
+                  <div className="flex-1 h-6 sm:h-7 bg-gray-100 rounded-lg overflow-hidden">
                     <div
-                      className="w-full bg-[#3B82F6] rounded-t-lg transition-all duration-500 ease-out"
-                      style={{ height: `${item.laki * 2}px` }}
-                    ></div>
+                      className="h-full bg-[#3B82F6] rounded-lg transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                      style={{ width: `${item.laki}%` }}
+                    >
+                      {item.laki > 15 && (
+                        <span className="text-[10px] sm:text-xs font-bold text-white">{item.laki}%</span>
+                      )}
+                    </div>
                   </div>
+                  {item.laki <= 15 && (
+                    <span className="text-[10px] sm:text-xs font-bold text-[#3B82F6] shrink-0">{item.laki}%</span>
+                  )}
                 </div>
 
                 {/* Perempuan Bar */}
-                <div className="flex-1">
-                  <div className="text-center mb-2 flex flex-col items-center">
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-500">Perempuan</span>
-                    <span className="text-sm font-bold text-[#8B5CF6]">{item.perempuan}%</span>
-                  </div>
-                  <div className="relative w-full flex justify-center">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 w-16 sm:w-20 shrink-0">Perempuan</span>
+                  <div className="flex-1 h-6 sm:h-7 bg-gray-100 rounded-lg overflow-hidden">
                     <div
-                      className="w-full bg-[#8B5CF6] rounded-t-lg transition-all duration-500 ease-out"
-                      style={{ height: `${item.perempuan * 2}px` }}
-                    ></div>
+                      className="h-full bg-[#8B5CF6] rounded-lg transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                      style={{ width: `${item.perempuan}%` }}
+                    >
+                      {item.perempuan > 15 && (
+                        <span className="text-[10px] sm:text-xs font-bold text-white">{item.perempuan}%</span>
+                      )}
+                    </div>
                   </div>
+                  {item.perempuan <= 15 && (
+                    <span className="text-[10px] sm:text-xs font-bold text-[#8B5CF6] shrink-0">{item.perempuan}%</span>
+                  )}
                 </div>
               </div>
 
               {/* Comparison */}
-              <div className="flex flex-col sm:flex-row justify-between text-[10px] sm:text-xs text-gray-500 pt-2 gap-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-[#3B82F6] shrink-0"></div>
-                  <span>Laki-laki: {item.laki}%</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-[#8B5CF6] shrink-0"></div>
-                  <span>Perempuan: {item.perempuan}%</span>
-                </div>
-                <div className={`font-medium ${item.laki > item.perempuan ? 'text-blue-600' :
+              <div className="flex justify-end">
+                <span className={`text-[10px] sm:text-xs font-medium ${item.laki > item.perempuan ? 'text-blue-600' :
                   item.laki < item.perempuan ? 'text-purple-600' : 'text-gray-600'
                   }`}>
                   Selisih: {Math.abs(item.laki - item.perempuan)}%
-                </div>
+                </span>
               </div>
             </div>
           ))}

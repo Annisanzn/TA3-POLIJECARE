@@ -8,7 +8,7 @@ import violenceCategoryService from '../../services/violenceCategoryService';
 const MaterialsManagement = () => {
   console.log('🚀 MaterialsManagement component rendering...');
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [materials, setMaterials] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -390,11 +390,11 @@ const MaterialsManagement = () => {
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                 <select
                   value={kategoriFilter}
                   onChange={(e) => setKategoriFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="all">Semua Kategori</option>
                   {kategoriOptions.map((kat) => (
@@ -404,7 +404,7 @@ const MaterialsManagement = () => {
                 <select
                   value={tipeFilter}
                   onChange={(e) => setTipeFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="all">Semua Tipe</option>
                   <option value="file">File</option>
@@ -412,7 +412,7 @@ const MaterialsManagement = () => {
                 </select>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center gap-2"
+                  className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <FiPlus className="w-4 h-4" />
                   Tambah Materi

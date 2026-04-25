@@ -7,6 +7,7 @@ import {
     FiChevronLeft, FiChevronRight, FiFileText
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
 
 const KATEGORI_OPTIONS = [
     'Modul Pelatihan', 'Panduan Konseling', 'Artikel',
@@ -38,7 +39,7 @@ const konselorMaterialService = {
 };
 
 const KonselorMateri = () => {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [materials, setMaterials] = useState([]);
     const [pagination, setPagination] = useState({ total: 0, per_page: 10, current_page: 1, total_pages: 0 });
     const [isLoading, setIsLoading] = useState(false);
@@ -176,19 +177,18 @@ const KonselorMateri = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-white border-b border-gray-200 px-6 py-4">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Manajemen Materi" />
+
+                <main className="flex-1 p-6 overflow-x-auto">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Materi</h1>
+                            <h2 className="text-2xl font-bold text-gray-900">Manajemen Materi</h2>
                             <p className="text-gray-600 mt-1">Kelola materi pelatihan dan panduan konseling milik Anda</p>
                         </div>
-                        <button onClick={fetchMaterials} disabled={isLoading} className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 self-start lg:self-auto">
+                        <button onClick={fetchMaterials} disabled={isLoading} className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 self-start lg:self-auto shadow-sm">
                             <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                         </button>
                     </div>
-                </header>
-
-                <main className="flex-1 p-6 overflow-x-auto">
                     <AnimatePresence>
                         {errorMessage && (
                             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -238,12 +238,12 @@ const KonselorMateri = () => {
                                 <input type="text" placeholder="Cari judul atau kategori..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                             </div>
-                            <div className="flex gap-2 flex-wrap">
-                                <select value={kategoriFilter} onChange={e => setKategoriFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                                <select value={kategoriFilter} onChange={e => setKategoriFilter(e.target.value)} className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                                     <option value="all">Semua Kategori</option>
                                     {kategoriOptions.map(k => <option key={k} value={k}>{k}</option>)}
                                 </select>
-                                <select value={tipeFilter} onChange={e => setTipeFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <select value={tipeFilter} onChange={e => setTipeFilter(e.target.value)} className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                                     <option value="all">Semua Tipe</option>
                                     <option value="file">File</option>
                                     <option value="link">Link</option>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser, FiRefreshCw } from 'react-icons/fi';
 import TimePicker24h from './ui/TimePicker24h';
 
 const MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -255,35 +255,45 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                         <p className="text-xs text-gray-500">Sesi dari sistem + agenda eksternal</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={goToPrevMonth} className="p-2 hover:bg-white rounded-lg transition-colors text-gray-600"><FiChevronLeft size={18} /></button>
-                    <div className="flex items-center gap-1 mx-2">
-                        <select
-                            className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none text-right hover:bg-gray-50 rounded px-1"
-                            value={currentMonth}
-                            onChange={(e) => setCurrentMonth(Number(e.target.value))}
-                            title="Pilih Bulan"
-                        >
-                            {MONTH_NAMES_ID.map((m, i) => (
-                                <option key={i} value={i}>{m}</option>
-                            ))}
-                        </select>
-                        <select
-                            className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none hover:bg-gray-50 rounded px-1"
-                            value={currentYear}
-                            onChange={(e) => setCurrentYear(Number(e.target.value))}
-                            title="Pilih Tahun"
-                        >
-                            {Array.from({ length: 10 }, (_, i) => today.getFullYear() - 2 + i).map(y => (
-                                <option key={y} value={y}>{y}</option>
-                            ))}
-                        </select>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 sm:mt-0 w-full sm:w-auto">
+                    <div className="flex items-center bg-gray-100/50 p-1 rounded-xl">
+                        <button onClick={goToPrevMonth} className="p-2.5 hover:bg-white rounded-lg transition-all text-gray-600 shadow-sm sm:shadow-none"><FiChevronLeft size={20} /></button>
+                        <div className="flex items-center gap-1 px-3">
+                            <select
+                                className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none text-right hover:text-indigo-600 rounded"
+                                value={currentMonth}
+                                onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                                title="Pilih Bulan"
+                            >
+                                {MONTH_NAMES_ID.map((m, i) => (
+                                    <option key={i} value={i}>{m}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none hover:text-indigo-600 rounded"
+                                value={currentYear}
+                                onChange={(e) => setCurrentYear(Number(e.target.value))}
+                                title="Pilih Tahun"
+                            >
+                                {Array.from({ length: 10 }, (_, i) => today.getFullYear() - 2 + i).map(y => (
+                                    <option key={y} value={y}>{y}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button onClick={goToNextMonth} className="p-2.5 hover:bg-white rounded-lg transition-all text-gray-600 shadow-sm sm:shadow-none"><FiChevronRight size={20} /></button>
                     </div>
-                    <button onClick={goToNextMonth} className="p-2 hover:bg-white rounded-lg transition-colors text-gray-600"><FiChevronRight size={18} /></button>
-                    <button onClick={() => { fetchSessions(); }} className="ml-1 p-2 hover:bg-white rounded-lg transition-colors text-gray-500 text-xs font-medium">↻ Refresh</button>
-                    <button onClick={handleAddAgenda} className="ml-2 flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors">
-                        <FiPlus size={14} /> Tambah Agenda
-                    </button>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <button 
+                            onClick={() => { fetchSessions(); }} 
+                            className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                            title="Refresh Data"
+                        >
+                            <FiRefreshCw size={18} className="text-gray-500" />
+                        </button>
+                        <button onClick={handleAddAgenda} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 active:scale-95">
+                            <FiPlus size={18} /> Tambah Agenda
+                        </button>
+                    </div>
                 </div>
             </div>
 

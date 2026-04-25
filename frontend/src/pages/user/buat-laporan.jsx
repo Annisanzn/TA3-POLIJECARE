@@ -12,7 +12,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.polijecare.my.id/api';
+import { API_BASE_URL } from '../../config';
 
 const CAMPUS_LOCATIONS = [
     // POLIJE LOCATIONS

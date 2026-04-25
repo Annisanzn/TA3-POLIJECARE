@@ -10,108 +10,123 @@ class ComplaintController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = (int) $request->query('per_page', 10);
-        $perPage = max(1, min($perPage, 100));
+        try {
+            $perPage = (int) $request->query('per_page', 10);
+            $perPage = max(1, min($perPage, 100));
 
-        $search = $request->query('search');
-        $status = $request->query('status');
-        $urgency = $request->query('urgency');
-        $dateFrom = $request->query('date_from');
-        $dateTo = $request->query('date_to');
+            $search = $request->query('search');
+            $status = $request->query('status');
+            $urgency = $request->query('urgency');
+            $dateFrom = $request->query('date_from');
+            $dateTo = $request->query('date_to');
 
-        $authUser = $request->user();
+            $authUser = $request->user();
 
-        $query = Complaint::query()
-            ->with([
-                'user:id,name,phone',
-                'counselor:id,name',
-                'violenceCategory',
-            ])
-            ->when($authUser && $authUser->role === 'konselor', function ($q) use ($authUser) {
-                $q->where('counselor_id', $authUser->id);
-            })
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($qq) use ($search) {
-                    $qq->where('report_id', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
-                });
-            })
-            ->when($status && $status !== 'all', function ($q) use ($status) {
-                // Support comma-separated multiple statuses (e.g. 'pending,approved')
-                $statuses = array_map('trim', explode(',', $status));
-                if (count($statuses) > 1) {
-                    $q->whereIn('status', $statuses);
-                } else {
-                    $q->where('status', $statuses[0]);
-                }
-            })
-            ->when($urgency && $urgency !== 'all', function ($q) use ($urgency) {
-                $q->where('urgency_level', $urgency);
-            })
-            ->when($dateFrom, function ($q) use ($dateFrom) {
-                $q->whereDate('created_at', '>=', $dateFrom);
-            })
-            ->when($dateTo, function ($q) use ($dateTo) {
-                $q->whereDate('created_at', '<=', $dateTo);
-            })
-            ->orderBy('created_at', 'desc');
+            $query = Complaint::query()
+                ->with([
+                    'user:id,name,phone',
+                    'counselor:id,name',
+                    'violenceCategory',
+                    'attachments'
+                ])
+                ->when($authUser && $authUser->role === 'konselor', function ($q) use ($authUser) {
+                    $q->where('counselor_id', $authUser->id);
+                })
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($qq) use ($search) {
+                        $qq->where('report_id', 'like', "%{$search}%")
+                            ->orWhere('location', 'like', "%{$search}%");
+                    });
+                })
+                ->when($status && $status !== 'all', function ($q) use ($status) {
+                    // Support comma-separated multiple statuses (e.g. 'pending,approved')
+                    $statuses = array_map('trim', explode(',', $status));
+                    if (count($statuses) > 1) {
+                        $q->whereIn('status', $statuses);
+                    } else {
+                        $q->where('status', $statuses[0]);
+                    }
+                })
+                ->when($urgency && $urgency !== 'all', function ($q) use ($urgency) {
+                    $q->where('urgency_level', $urgency);
+                })
+                ->when($dateFrom, function ($q) use ($dateFrom) {
+                    $q->whereDate('created_at', '>=', $dateFrom);
+                })
+                ->when($dateTo, function ($q) use ($dateTo) {
+                    $q->whereDate('created_at', '<=', $dateTo);
+                })
+                ->orderBy('created_at', 'desc');
 
-        $paginator = $query->paginate($perPage);
+            $paginator = $query->paginate($perPage);
 
-        $paginator->setCollection(
-            $paginator->getCollection()->map(function ($c) {
-                return [
-                    'id' => $c->id,
-                    'report_id' => $c->report_id,
-                    'user_id' => $c->user_id,
-                    'user_name' => $c->user_id ? optional($c->user)->name : $c->guest_name,
-                    'user_phone' => $c->user_id ? optional($c->user)->phone : $c->guest_phone,
-                    'guest_name' => $c->guest_name,
-                    'guest_email' => $c->guest_email,
-                    'guest_phone' => $c->guest_phone,
-                    'counselor_id' => $c->counselor_id,
-                    'counselor_name' => optional($c->counselor)->name,
-                    'violence_category_id' => $c->violence_category_id,
-                    'violence_category_name' => optional($c->violenceCategory)->name ?? optional($c->violenceCategory)->kategori,
-                    'title' => $c->title,
-                    'description' => $c->description,
-                    'chronology' => $c->chronology,
-                    'victim_type' => $c->victim_type,
-                    'victim_name' => $c->victim_name,
-                    'victim_relationship' => $c->victim_relationship,
-                    'is_external_victim' => $c->is_external_victim,
-                    'victim_identity_proof' => $c->victim_identity_proof,
-                    'suspect_name' => $c->suspect_name,
-                    'suspect_status' => $c->suspect_status,
-                    'suspect_affiliation' => $c->suspect_affiliation,
-                    'suspect_phone' => $c->suspect_phone,
-                    'location' => $c->location,
-                    'latitude' => $c->latitude,
-                    'longitude' => $c->longitude,
-                    'status' => $c->status,
-                    'rejection_reason' => $c->rejection_reason,
-                    'counseling_schedule' => optional($c->counseling_schedule)->toDateTimeString(),
-                    'urgency_level' => $c->urgency_level,
-                    'is_anonymous' => $c->is_anonymous,
-                    'ip_address' => $c->ip_address,
-                    'user_agent' => $c->user_agent,
-                    'file_path' => $c->file_path ? asset('storage/' . $c->file_path) : null,
-                    'attachments' => $c->attachments->map(function($a) {
-                        return [
-                            'id' => $a->id,
-                            'file_path' => asset('storage/' . $a->file_path),
-                            'file_name' => $a->file_name,
-                            'file_type' => $a->file_type,
-                            'file_size' => $a->file_size
-                        ];
-                    }),
-                    'created_at' => $c->created_at->toDateTimeString(),
-                    'updated_at' => $c->updated_at->toDateTimeString(),
-                ];
-            })
-        );
+            $paginator->setCollection(
+                $paginator->getCollection()->map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'report_id' => $c->report_id,
+                        'user_id' => $c->user_id,
+                        'user_name' => $c->user_id ? optional($c->user)->name : $c->guest_name,
+                        'user_phone' => $c->user_id ? optional($c->user)->phone : $c->guest_phone,
+                        'guest_name' => $c->guest_name,
+                        'guest_email' => $c->guest_email,
+                        'guest_phone' => $c->guest_phone,
+                        'counselor_id' => $c->counselor_id,
+                        'counselor_name' => optional($c->counselor)->name,
+                        'violence_category_id' => $c->violence_category_id,
+                        'violence_category_name' => optional($c->violenceCategory)->name ?? optional($c->violenceCategory)->kategori,
+                        'title' => $c->title,
+                        'description' => $c->description,
+                        'chronology' => $c->chronology,
+                        'victim_type' => $c->victim_type,
+                        'victim_name' => $c->victim_name,
+                        'victim_relationship' => $c->victim_relationship,
+                        'is_external_victim' => $c->is_external_victim,
+                        'victim_identity_proof' => $c->victim_identity_proof,
+                        'suspect_name' => $c->suspect_name,
+                        'suspect_status' => $c->suspect_status,
+                        'suspect_affiliation' => $c->suspect_affiliation,
+                        'suspect_phone' => $c->suspect_phone,
+                        'location' => $c->location,
+                        'incident_date' => $this->safeGetIncidentDate($c),
+                        'latitude' => $c->latitude,
+                        'longitude' => $c->longitude,
+                        'status' => $c->status,
+                        'rejection_reason' => $c->rejection_reason,
+                        'counseling_schedule' => optional($c->counseling_schedule)->toDateTimeString(),
+                        'urgency_level' => $c->urgency_level,
+                        'is_anonymous' => $c->is_anonymous,
+                        'ip_address' => $c->ip_address,
+                        'user_agent' => $c->user_agent,
+                        'file_path' => $c->file_path ? url('/api/files/view?path=' . $c->file_path) : null,
+                        'attachments' => $c->attachments->map(function($a) {
+                            return [
+                                'id' => $a->id,
+                                'file_path' => url('/api/files/view?path=' . $a->file_path),
+                                'file_name' => $a->file_name,
+                                'file_type' => $a->file_type,
+                                'file_size' => $a->file_size
+                            ];
+                        }),
+                        'created_at' => $c->created_at->toDateTimeString(),
+                        'updated_at' => $c->updated_at->toDateTimeString(),
+                    ];
+                })
+            );
 
-        return response()->json($paginator);
+            return response()->json($paginator);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('ComplaintController@index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memuat data laporan.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error',
+                'data' => [],
+                'total' => 0,
+            ], 500);
+        }
     }
 
     public function show(Request $request, Complaint $complaint)
@@ -388,5 +403,22 @@ class ComplaintController extends Controller
             'message' => 'Schedule and status updated successfully',
             'data' => $complaint,
         ]);
+    }
+
+    /**
+     * Ambil incident_date secara aman.
+     * Jika kolom belum ada di database (migration belum dijalankan),
+     * return null tanpa crash.
+     */
+    private function safeGetIncidentDate($complaint)
+    {
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('complaints', 'incident_date')) {
+                return null;
+            }
+            return $complaint->incident_date ? $complaint->incident_date->toDateString() : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

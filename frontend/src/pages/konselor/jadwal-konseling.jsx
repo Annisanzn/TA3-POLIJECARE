@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
 import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
 import TimePicker24h from '../../components/ui/TimePicker24h';
 
 /* ── Toast ─────────────────────────────────────────────────────────────────── */
@@ -105,9 +106,8 @@ const KonselorJadwalKonselor = () => {
             // Route ada di konselor group: /api/konselor/counselor-schedules
             const res = await axios.get('/konselor/counselor-schedules');
             if (res.data.success) {
-                // Filter hanya jadwal milik konselor yang sedang login
-                const mine = (res.data.data || []).filter(s => s.counselor_id === user?.id);
-                setSchedules(mine);
+                // Backend already filters by counselor_id for konselor role
+                setSchedules(res.data.data || []);
             }
         } catch (e) {
             showToast('Gagal memuat jadwal', 'error');
@@ -202,11 +202,13 @@ const KonselorJadwalKonselor = () => {
             <Sidebar collapsed={collapsed} toggleCollapse={() => setCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                {/* Header */}
-                <header className="bg-white border-b border-gray-200 px-6 py-4">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <Topbar onMenuClick={() => setCollapsed(v => !v)} title="Jadwal Konselor" />
+
+                <main className="flex-1 p-6">
+                    {/* Page Title & Actions */}
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Jadwal Konselor</h1>
+                            <h2 className="text-2xl font-bold text-gray-900">Jadwal Konselor</h2>
                             <p className="text-gray-600 mt-1">Kelola jadwal ketersediaan Anda untuk sesi konseling</p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -221,9 +223,6 @@ const KonselorJadwalKonselor = () => {
                             </button>
                         </div>
                     </div>
-                </header>
-
-                <main className="flex-1 p-6">
                     {/* Stats */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {[

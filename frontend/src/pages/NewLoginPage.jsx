@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { API_BASE_URL } from '../config';
+import { toast } from 'react-hot-toast';
 import { FiMail, FiLock, FiAlertCircle, FiEye, FiEyeOff, FiLogIn } from 'react-icons/fi';
 import api from '../api/axios';
 
@@ -86,7 +88,7 @@ const NewLoginPage = () => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     // Redirect to backend auth route which will redirect to Google Identity Services
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.polijecare.my.id/api';
+    const apiUrl = API_BASE_URL;
     window.location.href = `${apiUrl}/auth/google`;
   };
 

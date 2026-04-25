@@ -9,28 +9,31 @@ const ActivityList = () => {
   const [activities, setActivities] = useState([]);
   const [totalActive, setTotalActive] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchActivities = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const endpoint = user.role === 'konselor' ? '/konselor/complaints' : '/operator/complaints';
+      const response = await axios.get(endpoint, {
+        params: { page: 1, per_page: 5, status: 'pending,approved' }
+      });
+      
+      if (response.data && response.data.data) {
+        setActivities(response.data.data);
+        setTotalActive(response.data.total || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setError('Gagal memuat aktivitas. Silakan coba lagi.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchActivities = async () => {
-      if (!user) return; // Wait for user to be loaded
-      setIsLoading(true);
-      try {
-        const endpoint = user.role === 'konselor' ? '/konselor/complaints' : '/operator/complaints';
-        const response = await axios.get(endpoint, {
-          params: { page: 1, per_page: 5, status: 'pending,approved' }
-        });
-        
-        if (response.data && response.data.data) {
-          setActivities(response.data.data);
-          setTotalActive(response.data.total || 0);
-        }
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (user) {
       fetchActivities();
     }
@@ -110,6 +113,16 @@ const ActivityList = () => {
       <div className="divide-y divide-gray-100">
         {isLoading ? (
           <div className="p-6 text-center text-gray-500">Memuat aktivitas...</div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <p className="text-red-500 text-sm mb-2">{error}</p>
+            <button 
+              onClick={fetchActivities}
+              className="text-sm text-[#6666DE] hover:text-[#5555CC] font-medium transition-colors"
+            >
+              Coba Lagi
+            </button>
+          </div>
         ) : activities.length === 0 ? (
           <div className="p-6 text-center text-gray-500">Tidak ada aktivitas terbaru</div>
         ) : (

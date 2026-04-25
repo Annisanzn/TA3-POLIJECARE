@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class PublicComplaintController extends Controller
 {
@@ -28,7 +29,7 @@ class PublicComplaintController extends Controller
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
             'location' => 'required|string|max:255',
-            'incident_date' => 'required|date|before_or_equal:today',
+            'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? 'required|date|before_or_equal:today' : 'nullable',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
@@ -67,7 +68,7 @@ class PublicComplaintController extends Controller
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
                 'location' => $validated['location'],
-                'incident_date' => $validated['incident_date'] ?? null,
+                'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? ($validated['incident_date'] ?? null) : null,
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
                 'file_path' => $attachmentPath,

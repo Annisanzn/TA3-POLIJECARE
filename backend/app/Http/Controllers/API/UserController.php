@@ -166,10 +166,30 @@ class UserController extends Controller
      */
     public function stats()
     {
+        $now = now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+
+        // Current totals
         $totalUsers = User::count();
         $konselorCount = User::where('role', 'konselor')->count();
         $operatorCount = User::whereIn('role', ['operator', 'admin'])->count();
         $penggunaCount = User::where('role', 'user')->count();
+
+        // Users added THIS month
+        $newThisMonth = User::where('created_at', '>=', $startOfMonth)->count();
+        $newKonselorThisMonth = User::where('role', 'konselor')->where('created_at', '>=', $startOfMonth)->count();
+        $newOperatorThisMonth = User::whereIn('role', ['operator', 'admin'])->where('created_at', '>=', $startOfMonth)->count();
+        $newPenggunaThisMonth = User::where('role', 'user')->where('created_at', '>=', $startOfMonth)->count();
+
+        // Users added LAST month (for comparison)
+        $newLastMonth = User::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
+
+        // Calculate percentage growth
+        $growthPercent = $newLastMonth > 0
+            ? round((($newThisMonth - $newLastMonth) / $newLastMonth) * 100)
+            : ($newThisMonth > 0 ? 100 : 0);
 
         return response()->json([
             'success' => true,
@@ -178,6 +198,13 @@ class UserController extends Controller
                 'konselor' => $konselorCount,
                 'operator' => $operatorCount,
                 'pengguna' => $penggunaCount,
+                'growth' => [
+                    'total_change' => $newThisMonth,
+                    'total_percent' => $growthPercent,
+                    'konselor_change' => $newKonselorThisMonth,
+                    'operator_change' => $newOperatorThisMonth,
+                    'pengguna_change' => $newPenggunaThisMonth,
+                ],
             ]
         ]);
     }

@@ -40,7 +40,7 @@ const Toast = ({ toast, onClose }) => {
 };
 
 const ComplaintsManagementPage = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);

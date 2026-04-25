@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+import { API_BASE_URL } from '../config';
+
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.polijecare.my.id/api',
+  baseURL: API_BASE_URL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',

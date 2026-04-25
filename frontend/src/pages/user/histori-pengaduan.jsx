@@ -47,7 +47,7 @@ const StatCard = ({ label, value, icon: Icon, color, sub }) => (
 
 /* ── Main Component ──────────────────────────────────────────────────────── */
 const HistoriPengaduan = () => {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');

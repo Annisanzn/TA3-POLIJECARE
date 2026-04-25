@@ -278,7 +278,7 @@ const ArticleModal = ({ mode, article, onClose, onSaved }) => {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const ArticleManagementPage = () => {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [articles, setArticles] = useState([]);
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, per_page: 10, total: 0 });
     const [currentPage, setCurrentPage] = useState(1);

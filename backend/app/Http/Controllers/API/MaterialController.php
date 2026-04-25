@@ -44,7 +44,7 @@ class MaterialController extends Controller
         $materialsData = collect($materials->items())->map(function ($material) {
             $data = $material->toArray();
             if ($material->tipe === 'file' && $material->file_path) {
-                $data['file_path'] = asset('storage/' . $material->file_path);
+                $data['file_path'] = url('/api/files/view?path=' . $material->file_path);
             }
             return $data;
         });
@@ -149,7 +149,7 @@ class MaterialController extends Controller
 
             $materialData = $material->toArray();
             if ($material->tipe === 'file' && $material->file_path) {
-                $materialData['file_path'] = asset('storage/' . $material->file_path);
+                $materialData['file_path'] = url('/api/files/view?path=' . $material->file_path);
             }
 
             return response()->json([

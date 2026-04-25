@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
 import {
     FiFileText, FiSearch, FiFilter,
     FiChevronLeft, FiChevronRight,
@@ -10,7 +11,7 @@ import { konselorComplaintService } from '../../services/konselorComplaintServic
 import { useNavigate } from 'react-router-dom';
 
 const KonselorPengaduan = () => {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const navigate = useNavigate();
 
     const navigateToDetail = (id) => {
@@ -128,10 +129,12 @@ const KonselorPengaduan = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="bg-white border-b border-gray-200 px-6 py-5 sticky top-0 z-30">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Manajemen Pengaduan" />
+
+                <main className="flex-1 p-6 lg:p-10">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Pengaduan</h1>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Pengaduan</h2>
                             <p className="text-gray-600">Kelola laporan pengaduan mahasiswa yang ditangani Anda</p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -151,9 +154,6 @@ const KonselorPengaduan = () => {
                             </button>
                         </div>
                     </div>
-                </header>
-
-                <main className="flex-1 p-6 lg:p-10">
                     {errorMessage && !isLoading && (
                         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
                             <div className="flex items-center gap-3 text-red-700">

@@ -32,7 +32,7 @@ const Toast = ({ toast, onClose }) => {
 const CounselingManagementPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState(null);
 

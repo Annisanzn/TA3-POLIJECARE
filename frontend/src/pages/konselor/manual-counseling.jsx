@@ -12,7 +12,7 @@ import TimePicker24h from '../../components/ui/TimePicker24h';
 
 const ManualCounseling = () => {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
   const [categories, setCategories] = useState([]);
@@ -137,7 +137,7 @@ const ManualCounseling = () => {
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'} flex flex-col h-screen overflow-hidden`}>
         <div className="flex-none">
-          <Topbar title="Konseling Manual" subtitle="Pencatatan sesi tatap muka & pelaporan langsung" />
+          <Topbar onMenuClick={toggleSidebar} title="Konseling Manual" subtitle="Pencatatan sesi tatap muka & pelaporan langsung" />
         </div>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">

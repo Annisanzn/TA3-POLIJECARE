@@ -26,7 +26,7 @@ class ArticleResource extends JsonResource
             'id'           => $this->id,
             'title'        => $this->title,
             'slug'         => $this->slug,
-            'image'        => $this->image ? asset('storage/' . $this->image) : null,
+            'image'        => $this->image ? url('/api/files/view?path=' . $this->image) : null,
             'excerpt'      => Str::limit(strip_tags($this->content), 150),
             'content'      => $this->content,
             'is_published' => $this->is_published,

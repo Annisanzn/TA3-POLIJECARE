@@ -43,6 +43,7 @@ class Complaint extends Model
         'urgency_level',
         'is_anonymous',
         'file_path',
+        'incident_date',
     ];
 
     protected $appends = ['report_reference'];
@@ -58,6 +59,23 @@ class Complaint extends Model
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
     ];
+
+    /**
+     * Boot: tambahkan cast incident_date hanya jika kolom sudah ada di database.
+     * Ini mencegah crash di production yang belum jalankan migration.
+     */
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('complaints', 'incident_date')) {
+                $this->casts['incident_date'] = 'date';
+            }
+        } catch (\Exception $e) {
+            // Abaikan error saat boot (misal koneksi DB belum siap)
+        }
+    }
 
     protected static function booted()
     {
