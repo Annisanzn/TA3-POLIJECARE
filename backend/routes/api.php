@@ -98,8 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/counseling-schedule', [\App\Http\Controllers\API\CounselingController::class, 'userSchedules']);
     });
 
-    // Konselor, Operator & Admin routes (Middleware relaxed for debugging)
-    Route::prefix('konselor')->group(function () {
+    // Konselor, Operator & Admin routes
+    Route::middleware(RoleMiddleware::class . ':konselor,operator,admin')->prefix('konselor')->group(function () {
         // Dashboard stats
         Route::get('/dashboard', [\App\Http\Controllers\API\KonselorDashboardController::class, 'stats']);
         Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);

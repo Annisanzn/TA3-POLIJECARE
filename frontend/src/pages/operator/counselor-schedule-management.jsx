@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiCalendar, FiClock, FiUser, FiCheck, FiX,
   FiEdit, FiTrash2, FiPlus, FiFilter, FiSearch,
-  FiEye, FiRefreshCw, FiInfo
+  FiEye, FiRefreshCw, FiInfo, FiMenu
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
@@ -198,12 +198,21 @@ const CounselorScheduleManagementPage = () => {
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
-        {/* Header matching Counselor Schedule Page */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Jam Kerja Konselor</h1>
-              <p className="text-gray-600 mt-1">Kelola ketersediaan hari dan jam operasional seluruh konselor</p>
+        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                <button 
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
+                >
+                  <FiMenu size={20} />
+                </button>
+                <FiCalendar className="text-blue-600" /> Manajemen Jam Kerja Konselor
+              </h1>
+              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
+                Kelola ketersediaan hari dan jam operasional seluruh konselor PolijeCare
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button

@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import { Link, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
 import userComplaintService from '../../services/userComplaintService';
 import dayjs from 'dayjs';
 
@@ -32,14 +33,14 @@ const getUrgencyConfig = (urgency) => {
 
 /* ── Stat Card ───────────────────────────────────────────────────────────── */
 const StatCard = ({ label, value, icon: Icon, color, sub }) => (
-    <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm flex items-center gap-5">
-        <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 ${color}`}>
-            <Icon size={22} className="text-white" />
+    <div className="bg-white rounded-[24px] md:rounded-[28px] border border-gray-100 p-4 md:p-6 shadow-sm flex items-center gap-4 md:gap-5">
+        <div className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl md:rounded-[18px] flex items-center justify-center shrink-0 ${color}`}>
+            <Icon size={18} className="md:w-[22px] text-white" />
         </div>
         <div>
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
-            <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
-            {sub && <p className="text-xs text-gray-400 mt-1 font-medium">{sub}</p>}
+            <p className="text-[9px] md:text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
+            <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none">{value}</p>
+            {sub && <p className="text-[10px] md:text-xs text-gray-400 mt-1 font-medium italic">{sub}</p>}
         </div>
     </div>
 );
@@ -108,13 +109,14 @@ const HistoriPengaduan = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-8">
+                <Topbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} title="Histori Pengaduan" />
+                <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">
 
                     {/* ── Page Header ─────────────────────────────────────────────── */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                         <div>
                             <p className="text-[11px] font-bold text-violet-500 uppercase tracking-[0.2em] mb-2">Riwayat Saya</p>
-                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Histori Pengaduan</h1>
+                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Histori Pengaduan</h1>
                             <p className="text-gray-500 text-sm mt-1 font-medium">
                                 Daftar laporan tindak kekerasan yang pernah Anda ajukan
                             </p>
@@ -137,25 +139,25 @@ const HistoriPengaduan = () => {
                     </div>
 
                     {/* ── Filter Bar ──────────────────────────────────────────────── */}
-                    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm px-8 py-5 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                        <div className="flex items-center gap-3 flex-wrap">
+                    <div className="bg-white rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm px-4 md:px-8 py-5 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
                             <div className="relative">
                                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                                 <input
                                     type="text"
-                                    placeholder="Cari referensi atau judul..."
-                                    className="pl-11 pr-4 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl text-sm transition-all w-64 font-medium"
+                                    placeholder="Cari..."
+                                    className="pl-11 pr-4 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl text-sm transition-all w-full sm:w-64 font-medium"
                                     value={search}
                                     onChange={(e) => handleSearchChange(e.target.value)}
                                 />
                             </div>
-                            <div className="relative">
+                            <div className="relative w-full sm:w-auto">
                                 <select
-                                    className="pl-4 pr-10 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-violet-400 rounded-2xl text-sm text-gray-700 appearance-none font-medium transition-all"
+                                    className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-violet-400 rounded-2xl text-sm text-gray-700 appearance-none font-medium transition-all"
                                     value={statusFilter}
                                     onChange={(e) => handleStatusChange(e.target.value)}
                                 >
-                                    <option value="">Semua Status</option>
+                                    <option value="">Status</option>
                                     <option value="pending">Sedang Ditinjau</option>
                                     <option value="approved">Sedang Ditangani</option>
                                     <option value="completed">Selesai</option>

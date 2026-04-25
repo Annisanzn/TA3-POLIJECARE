@@ -52,7 +52,7 @@ class UserComplaintController extends Controller
      */
     public function show($id)
     {
-        $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name'])
+        $complaint = Complaint::with(['counselor:id,name', 'violenceCategory:unique_id,name', 'attachments'])
             ->find($id);
 
         if (!$complaint) {
@@ -98,23 +98,17 @@ class UserComplaintController extends Controller
             'urgency_level' => 'required|in:low,medium,high,critical',
             'counselor_id' => 'required|exists:users,id',
             'location' => 'required|string|max:255',
-            'incident_date' => 'required|date',
+            'incident_date' => 'required|date|before_or_equal:today',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'guest_name' => 'nullable|string|max:255',
-            'guest_email' => 'nullable|email|max:255',
-            'guest_phone' => 'nullable|string|max:20',
+            'guest_email' => 'required|email|max:255',
+            'guest_phone' => 'required|string|max:20',
         ]);
 
         try {
-            $attachmentPath = null;
-            if ($request->hasFile('attachment')) {
-                // Store the file in 'public/complaint_attachments' directory
-                $attachmentPath = $request->file('attachment')->store('complaint_attachments', 'public');
-            }
-
             $identityProofPath = null;
             if ($request->hasFile('victim_identity_proof')) {
                 $identityProofPath = $request->file('victim_identity_proof')->store('identity_proofs', 'public');
@@ -141,7 +135,7 @@ class UserComplaintController extends Controller
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
                 // 'incident_date' => $validated['incident_date'], // Un-comment if column exists
-                'file_path' => $attachmentPath,
+                'file_path' => null, // Will be set to the first attachment if any
                 'guest_name' => $validated['guest_name'] ?? null,
                 'guest_email' => $validated['guest_email'] ?? null,
                 'guest_phone' => $validated['guest_phone'] ?? null,
@@ -151,10 +145,46 @@ class UserComplaintController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Load relations for WhatsApp notification
-            $complaint->load(['user', 'violenceCategory']);
+            // Handle multiple attachments
+            if ($request->hasFile('attachments')) {
+                $files = $request->file('attachments');
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
 
-            // Send WhatsApp notification to Satgas PPKPT (non-blocking)
+                foreach ($files as $index => $file) {
+                    $path = $file->store('complaint_attachments', 'public');
+                    
+                    $complaint->attachments()->create([
+                        'file_path' => $path,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+
+                    // Set the first attachment as the main file_path for backward compatibility
+                    if ($index === 0) {
+                        $complaint->update(['file_path' => $path]);
+                    }
+                }
+            }
+            // Backward compatibility for single 'attachment' field
+            elseif ($request->hasFile('attachment')) {
+                $file = $request->file('attachment');
+                $path = $file->store('complaint_attachments', 'public');
+                $complaint->update(['file_path' => $path]);
+                $complaint->attachments()->create([
+                    'file_path' => $path,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
+
+            // Load relations for response and WhatsApp
+            $complaint->load(['user', 'violenceCategory', 'attachments']);
+
+            // Send WhatsApp notification
             try {
                 \App\Services\WhatsAppNotificationService::notifyNewComplaint($complaint);
             } catch (\Exception $e) {

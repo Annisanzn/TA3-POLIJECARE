@@ -14,14 +14,14 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/id';
 
 const StatCard = ({ label, value, icon: Icon, color, sub, onClick }) => (
-  <div onClick={onClick} className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-md hover:border-violet-200 transition-all group">
-    <div className={`w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0 ${color} group-hover:scale-105 transition-transform`}>
-      <Icon size={22} className="text-white" />
+  <div onClick={onClick} className="bg-white rounded-[24px] md:rounded-[28px] p-4 md:p-6 shadow-sm border border-gray-100 flex items-center gap-4 md:gap-5 cursor-pointer hover:shadow-md hover:border-violet-200 transition-all group">
+    <div className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl md:rounded-[18px] flex items-center justify-center shrink-0 ${color} group-hover:scale-105 transition-transform`}>
+      <Icon size={18} className="md:w-[22px] text-white" />
     </div>
     <div>
-      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
-      <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1 font-medium">{sub}</p>}
+      <p className="text-[9px] md:text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
+      <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none">{value}</p>
+      {sub && <p className="text-[10px] md:text-xs text-gray-400 mt-1 font-medium">{sub}</p>}
     </div>
   </div>
 );
@@ -82,9 +82,9 @@ const UserDashboard = () => {
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={toggleSidebar} title="Mahasiswa PolijeCare" />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-8">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">
           <motion.div variants={staggerContainer} initial="hidden" animate="show" className="max-w-[1500px] w-full mx-auto space-y-8">
 
             {/* Welcome Banner */}

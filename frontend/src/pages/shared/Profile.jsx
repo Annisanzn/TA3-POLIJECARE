@@ -82,19 +82,19 @@ const Profile = () => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <Topbar />
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
+        <Topbar onMenuClick={toggleSidebar} title="Profil Saya" />
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 overflow-y-auto">
           {/* ── Header / Banner ── */}
-          <div className={`h-64 bg-gradient-to-r ${theme.primary} relative overflow-hidden`}>
+          <div className={`h-auto min-h-[300px] md:h-64 bg-gradient-to-r ${theme.primary} relative overflow-hidden pb-12 md:pb-0`}>
             <div className="absolute inset-0 opacity-20">
               <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" />
               <div className="absolute top-1/2 -right-24 w-64 h-64 bg-indigo-200 rounded-full blur-3xl" />
             </div>
             
-            <div className="max-w-6xl mx-auto px-8 h-full flex flex-col justify-center relative z-10 pt-8">
-              <div className="flex flex-col md:flex-row md:items-end gap-8">
+            <div className="max-w-6xl mx-auto px-6 md:px-8 h-full flex flex-col justify-center relative z-10 pt-10 md:pt-8">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 text-center md:text-left">
                 {/* Avatar */}
                 <div className="relative group">
                   <div className="w-28 h-28 md:w-36 md:h-36 rounded-[32px] bg-white p-1.5 shadow-2xl relative z-10 rotate-2 group-hover:rotate-0 transition-transform duration-500 overflow-hidden">
@@ -107,14 +107,14 @@ const Profile = () => {
 
                 <div className="flex-1 space-y-2 mb-2">
                   <div className="flex items-center gap-3">
-                    <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                    <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
                       {user?.name || 'Loading...'}
                     </h1>
                     <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white text-[9px] font-black uppercase tracking-[0.2em]">
                       {theme.roleLabel}
                     </div>
                   </div>
-                  <p className="text-white/80 text-sm font-medium flex items-center gap-2">
+                  <p className="text-white/80 text-sm font-medium flex items-center justify-center md:justify-start gap-2">
                     <FiMail className="opacity-60" /> {user?.email}
                   </p>
                 </div>
@@ -122,12 +122,12 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="max-w-6xl mx-auto px-8 -mt-10 relative z-20 pb-20">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 -mt-8 md:-mt-10 relative z-20 pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
               
               {/* ── Left Column: Identity Info ── */}
-              <div className="lg:col-span-2 space-y-8">
-                <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100">
+              <div className="lg:col-span-2 space-y-6 md:space-y-8">
+                <div className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-sm border border-gray-100">
                    <div className="flex items-center justify-between mb-10">
                       <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-2xl ${theme.iconBg} ${theme.text}`}>
