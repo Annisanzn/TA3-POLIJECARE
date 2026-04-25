@@ -13,7 +13,7 @@ class PublicComplaintController extends Controller
     {
         $validated = $request->validate([
             'guest_name' => 'required|string|max:255',
-            'guest_email' => 'nullable|email|max:255',
+            'guest_email' => 'required|email|max:255',
             'guest_phone' => 'required|string|max:20',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -28,9 +28,10 @@ class PublicComplaintController extends Controller
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
             'location' => 'required|string|max:255',
+            'incident_date' => 'required|date|before_or_equal:today',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
@@ -66,6 +67,7 @@ class PublicComplaintController extends Controller
                 'chronology' => $validated['chronology'],
                 'urgency_level' => $validated['urgency_level'],
                 'location' => $validated['location'],
+                'incident_date' => $validated['incident_date'] ?? null,
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
                 'file_path' => $attachmentPath,
@@ -73,6 +75,29 @@ class PublicComplaintController extends Controller
                 'user_agent' => $request->userAgent(),
                 'status' => 'pending',
             ]);
+
+            // Handle multiple attachments if present
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('complaint_attachments', 'public');
+                    \App\Models\ComplaintAttachment::create([
+                        'complaint_id' => $complaint->id,
+                        'file_path' => $path,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                }
+            } elseif ($attachmentPath) {
+                // If only legacy single file is present, also add to attachments table for consistency
+                \App\Models\ComplaintAttachment::create([
+                    'complaint_id' => $complaint->id,
+                    'file_path' => $attachmentPath,
+                    'file_name' => $request->file('attachment')->getClientOriginalName(),
+                    'file_type' => $request->file('attachment')->getClientMimeType(),
+                    'file_size' => $request->file('attachment')->getSize(),
+                ]);
+            }
 
             // Notify via WA (optional)
             try {

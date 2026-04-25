@@ -301,50 +301,57 @@ const CounselorCaseManagement = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Toast toast={toast} onClose={() => setToast(null)} />
 
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                <button 
-                  onClick={toggleSidebar}
-                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
-                >
-                  <FiMenu size={20} />
-                </button>
-                <FiFileText className="text-purple-600" /> Manajemen Kasus
-              </h1>
-              <p className="text-gray-500 text-sm mt-1 font-medium italic">
-                Pusat Kendali Laporan & Sesi Konseling Konselor PolijeCare
-              </p>
+        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-4 sm:px-8 py-4 sm:py-6 h-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={toggleSidebar}
+                className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors shrink-0"
+              >
+                <FiMenu size={20} />
+              </button>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2 sm:gap-3">
+                  <FiFileText className="text-purple-600 shrink-0" /> <span className="truncate">Manajemen Kasus</span>
+                </h1>
+                <p className="text-gray-500 text-[10px] sm:text-sm mt-0.5 font-medium italic hidden xs:block">
+                  Pusat Kendali Laporan & Sesi Konseling
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
+            
+            <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto sm:overflow-visible no-scrollbar pb-1 sm:pb-0">
               <button 
                 id="btn-tambah-konseling-manual"
                 onClick={() => navigate('/konselor/manual-counseling')}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:from-teal-600 hover:to-emerald-700 transition-all text-sm font-bold active:scale-95"
+                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 hover:from-teal-600 hover:to-emerald-700 transition-all text-[11px] sm:text-sm font-bold active:scale-95 whitespace-nowrap"
               >
-                <FiPlus size={18} />
-                KONSELING MANUAL
+                <FiPlus size={16} />
+                <span className="hidden sm:inline">KONSELING MANUAL</span>
+                <span className="sm:hidden">MANUAL</span>
               </button>
               <button 
                 onClick={() => setExportModal({ ...exportModal, open: true })}
-                className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all text-sm font-bold"
+                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all text-[11px] sm:text-sm font-bold whitespace-nowrap"
               >
-                <FiDownload size={18} />
-                EKSPOR
+                <FiDownload size={16} />
+                <span className="hidden sm:inline">EKSPOR</span>
+                <span className="sm:hidden">EKSPOR</span>
               </button>
-              <button 
-                onClick={handleReset}
-                className="p-3 bg-gray-50 text-gray-400 rounded-2xl hover:bg-white hover:text-purple-600 border border-transparent hover:border-gray-200 transition-all shadow-sm"
-              >
-                <FiX size={20} />
-              </button>
-              <button 
-                onClick={() => fetchData(1)}
-                className="p-3 bg-purple-600 text-white rounded-2xl shadow-xl shadow-purple-500/20 hover:bg-purple-700 hover:scale-110 active:scale-95 transition-all"
-              >
-                <FiRefreshCw className={`${isLoading ? 'animate-spin' : ''}`} size={20} />
-              </button>
+              <div className="flex items-center gap-1.5 sm:gap-3 border-l border-gray-100 pl-2 sm:pl-4">
+                <button 
+                  onClick={handleReset}
+                  className="p-2 sm:p-3 bg-gray-50 text-gray-400 rounded-xl sm:rounded-2xl hover:bg-white hover:text-purple-600 border border-transparent hover:border-gray-200 transition-all shadow-sm"
+                >
+                  <FiX size={18} />
+                </button>
+                <button 
+                  onClick={() => fetchData(1)}
+                  className="p-2 sm:p-3 bg-purple-600 text-white rounded-xl sm:rounded-2xl shadow-xl shadow-purple-500/20 hover:bg-purple-700 hover:scale-110 active:scale-95 transition-all"
+                >
+                  <FiRefreshCw className={`${isLoading ? 'animate-spin' : ''}`} size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -410,7 +417,7 @@ const CounselorCaseManagement = () => {
 
                 <div className="lg:col-span-2 space-y-3">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Filter Lanjutan</label>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <select 
                       value={statusFilter}
                       onChange={e => setStatusFilter(e.target.value)}
@@ -423,7 +430,7 @@ const CounselorCaseManagement = () => {
                     </select>
                     <button 
                       onClick={handleFilterChange}
-                      className="px-10 py-4 bg-purple-600 text-white rounded-[28px] text-xs font-bold tracking-widest hover:bg-purple-700 hover:shadow-xl hover:shadow-purple-500/20 active:scale-95 transition-all shadow-lg"
+                      className="w-full sm:w-auto px-10 py-4 bg-purple-600 text-white rounded-[28px] text-xs font-bold tracking-widest hover:bg-purple-700 hover:shadow-xl hover:shadow-purple-500/20 active:scale-95 transition-all shadow-lg"
                     >
                       TERAPKAN
                     </button>

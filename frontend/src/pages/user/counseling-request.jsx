@@ -1,4 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import UserLayout from '../../components/user/UserLayout';
 import {
   FiCalendar, FiClock, FiUser, FiVideo, FiMapPin,
   FiCheck, FiX, FiLoader, FiAlertCircle, FiChevronRight,
@@ -162,10 +164,11 @@ const CounselingRequestPage = () => {
   };
 
   return (
-    <motion.div
-      {...pageTransition}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6 lg:p-8"
-    >
+    <UserLayout user={user}>
+      <motion.div
+        {...pageTransition}
+        className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6 lg:p-8"
+      >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -585,7 +588,8 @@ const CounselingRequestPage = () => {
           </form>
         </motion.div>
       </div>
-    </motion.div>
+      </motion.div>
+    </UserLayout>
   );
 };
 

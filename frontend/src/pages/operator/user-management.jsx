@@ -3,7 +3,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import {
   FiUsers, FiUserPlus, FiSearch, FiFilter, FiEdit, FiTrash2,
   FiCheckCircle, FiAlertCircle, FiDownload, FiPrinter,
-  FiUser, FiMessageSquare, FiChevronLeft, FiChevronRight, FiEye, FiEyeOff
+  FiUser, FiMessageSquare, FiChevronLeft, FiChevronRight, FiEye, FiEyeOff, FiMenu
 } from 'react-icons/fi';
 import { userService } from '../../services/userService';
 
@@ -342,13 +342,22 @@ const UserManagementPage = () => {
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Pengguna</h1>
-              <p className="text-gray-600 mt-1">Kelola data pengguna sistem pelaporan</p>
+        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                <button 
+                  onClick={toggleSidebar}
+                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
+                >
+                  <FiMenu size={20} />
+                </button>
+                <FiUsers className="text-blue-600" /> Manajemen Pengguna
+              </h1>
+              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
+                Kelola data pengguna sistem pelaporan PolijeCare
+              </p>
             </div>
-
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="relative w-full sm:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

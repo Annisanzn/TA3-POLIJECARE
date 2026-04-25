@@ -238,9 +238,9 @@ const Navbar = () => {
                 <div className="md:hidden">
                   <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="text-gray-600 hover:text-primary p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-[#191970] dark:text-indigo-400 hover:bg-gray-100 transition-all shadow-sm"
                   >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <AnimatePresence mode="wait">
                         {isMobileMenuOpen ? (
                           <motion.path

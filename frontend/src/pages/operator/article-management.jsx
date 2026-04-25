@@ -3,7 +3,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import {
     FiFileText, FiPlus, FiSearch, FiEdit, FiTrash2,
     FiAlertCircle, FiCheckCircle, FiChevronLeft, FiChevronRight,
-    FiToggleLeft, FiToggleRight, FiImage, FiX,
+    FiToggleLeft, FiToggleRight, FiImage, FiX, FiMenu
 } from 'react-icons/fi';
 import { articleService } from '../../services/articleService';
 import { normalizeImageUrl } from '../../utils/imageUrl';
@@ -374,11 +374,21 @@ const ArticleManagementPage = () => {
 
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <header className="bg-white border-b border-gray-200 px-6 py-4">
+                <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manajemen Artikel</h1>
-                            <p className="text-gray-600 mt-1">Kelola artikel & pengumuman landing page</p>
+                        <div className="w-full sm:w-auto">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                                <button 
+                                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                                    className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
+                                >
+                                    <FiMenu size={20} />
+                                </button>
+                                <FiFileText className="text-blue-600" /> Manajemen Artikel
+                            </h1>
+                            <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
+                                Kelola artikel & pengumuman landing page PolijeCare
+                            </p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <div className="relative w-full sm:w-72">

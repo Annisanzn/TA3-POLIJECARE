@@ -112,4 +112,9 @@ class Complaint extends Model
     {
         return $this->hasMany(CounselingSchedule::class, 'complaint_id');
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(ComplaintAttachment::class, 'complaint_id');
+    }
 }

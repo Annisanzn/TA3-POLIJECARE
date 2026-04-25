@@ -321,11 +321,6 @@ class CounselingController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        \Log::info('Counseling store attempt', [
-            'user_id' => $user->id,
-            'user_role' => $user->role,
-            'request_data' => $request->all()
-        ]);
 
         $userRole = strtolower($user->role ?? '');
 

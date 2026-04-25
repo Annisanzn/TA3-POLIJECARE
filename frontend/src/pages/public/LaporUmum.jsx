@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
     AlertCircle, ArrowLeft, Shield, User, FileText,
-    MapPin, Calendar, Paperclip, CheckCircle, Search
+    MapPin, Calendar, Paperclip, CheckCircle, Search, X
 } from 'lucide-react';
 
 import Navbar from '../../components/Navbar';
@@ -188,7 +188,7 @@ const LaporUmum = () => {
         chronology: '',
         location: '',
         incident_date: '',
-        attachment: null
+        attachments: []
     });
 
     const getAuthHeaders = () => {
@@ -235,6 +235,20 @@ const LaporUmum = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        
+        if (name === 'guest_phone') {
+            // Only allow digits
+            const digits = value.replace(/\D/g, '');
+            // If it starts with 0, remove it
+            const cleanDigits = digits.startsWith('0') ? digits.substring(1) : digits;
+            
+            setFormData(prev => ({
+                ...prev,
+                [name]: cleanDigits
+            }));
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
@@ -242,15 +256,28 @@ const LaporUmum = () => {
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Basic validate
-            if (file.size > 10 * 1024 * 1024) {
-                toast.error("Ukuran file maksimal 10MB", { position: 'top-center' });
-                return;
-            }
-            setFormData(prev => ({ ...prev, attachment: file }));
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            const validFiles = files.filter(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    toast.error(`File ${file.name} melebihi 10MB`, { position: 'top-center' });
+                    return false;
+                }
+                return true;
+            });
+
+            setFormData(prev => ({
+                ...prev,
+                attachments: [...prev.attachments, ...validFiles]
+            }));
         }
+    };
+
+    const removeAttachment = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            attachments: prev.attachments.filter((_, i) => i !== index)
+        }));
     };
 
     const handleSubmit = async (e) => {
@@ -292,7 +319,13 @@ const LaporUmum = () => {
             if (formData.incident_date) payload.append('incident_date', formData.incident_date);
             if (formData.latitude) payload.append('latitude', formData.latitude);
             if (formData.longitude) payload.append('longitude', formData.longitude);
-            if (formData.attachment) payload.append('attachment', formData.attachment);
+            
+            // Handle multiple attachments
+            if (formData.attachments && formData.attachments.length > 0) {
+                formData.attachments.forEach((file) => {
+                    payload.append('attachments[]', file);
+                });
+            }
 
             const response = await fetch(`${API_BASE_URL}/public-complaints`, {
                 method: 'POST',
@@ -408,21 +441,28 @@ const LaporUmum = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon/WhatsApp <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" name="guest_phone" required
-                                    value={formData.guest_phone} onChange={handleInputChange}
-                                    placeholder="Contoh: 08123456789"
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                />
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span className="text-gray-500 text-sm font-medium">+62</span>
+                                    </div>
+                                    <input
+                                        type="text" name="guest_phone" required
+                                        value={formData.guest_phone} onChange={handleInputChange}
+                                        placeholder="8123456789"
+                                        className={`w-full bg-white border ${!formData.guest_phone ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-1">Hanya angka yang diperbolehkan.</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Email <span className="text-gray-400 font-normal">(Opsional)</span></label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Email <span className="text-red-500">*</span></label>
                                 <input
-                                    type="email" name="guest_email"
+                                    type="email" name="guest_email" required
                                     value={formData.guest_email} onChange={handleInputChange}
                                     placeholder="kamu@email.com"
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                    className={`w-full bg-white border ${!formData.guest_email ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
                                 />
+                                <p className="text-[10px] text-gray-500 mt-1">Kami akan mengirimkan notifikasi ke email ini.</p>
                             </div>
                         </div>
                     </section>
@@ -655,7 +695,7 @@ const LaporUmum = () => {
                                 <select
                                     name="violence_category_id" required
                                     value={formData.violence_category_id} onChange={handleInputChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                    className={`w-full bg-gray-50 border ${!formData.violence_category_id ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
                                 >
                                     <option value="">-- Pilih Kategori --</option>
                                     {categories.map(c => (
@@ -684,7 +724,7 @@ const LaporUmum = () => {
                                     name="chronology" required minLength="50" rows="6"
                                     value={formData.chronology} onChange={handleInputChange}
                                     placeholder="Jelaskan kejadian secara detail, mulai dari awal hingga akhir..."
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] resize-y"
+                                    className={`w-full bg-gray-50 border ${!formData.chronology || formData.chronology.length < 50 ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] resize-y transition-colors`}
                                 ></textarea>
                                 <p className="text-xs text-gray-400 mt-1 text-right">Minimal 50 karakter.</p>
                             </div>
@@ -700,7 +740,7 @@ const LaporUmum = () => {
                                             type="text" name="location" required
                                             value={formData.location} onChange={handleInputChange}
                                             placeholder="Contoh: Gedung A Lantai 3"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                            className={`w-full bg-gray-50 border ${!formData.location ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
                                         />
                                     </div>
                                 </div>
@@ -712,8 +752,9 @@ const LaporUmum = () => {
                                         <Calendar className="w-4 h-4 absolute left-4 top-3.5 text-gray-400" />
                                         <input
                                             type="date" name="incident_date" required
+                                            max={new Date().toISOString().split("T")[0]}
                                             value={formData.incident_date} onChange={handleInputChange}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                            className={`w-full bg-gray-50 border ${!formData.incident_date || new Date(formData.incident_date) > new Date() ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
                                         />
                                     </div>
                                 </div>
@@ -783,25 +824,51 @@ const LaporUmum = () => {
                                 <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer group">
                                     <input
                                         type="file"
+                                        multiple
                                         accept=".jpg,.jpeg,.png,.pdf"
                                         onChange={handleFileChange}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     />
                                     <Paperclip className="w-8 h-8 text-gray-400 mx-auto mb-2 group-hover:text-[#8b5cf6] transition-colors" />
-                                    {formData.attachment ? (
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-800">{formData.attachment.name}</p>
-                                            <p className="text-xs text-gray-500">{(formData.attachment.size / 1024 / 1024).toFixed(2)} MB</p>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700">Klik untuk upload file bukti</p>
-                                            <p className="text-xs text-gray-400 mt-1">Belum ada file terpilih</p>
-                                        </div>
-                                    )}
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-700">Klik untuk upload satu atau lebih file bukti</p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {formData.attachments.length > 0 ? `${formData.attachments.length} file dipilih` : 'Belum ada file terpilih'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* File Preview List */}
+                                {formData.attachments.length > 0 && (
+                                    <div className="mt-4 space-y-2">
+                                        {formData.attachments.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 group">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#8b5cf6] shadow-sm border border-gray-100">
+                                                        <FileText size={20} />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-800 truncate max-w-[200px] md:max-w-md">
+                                                            {file.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttachment(index)}
+                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <X size={18} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 </div>
                             </div>
-                        </div>
                     </section>
 
                     {/* SUBMIT BUTTON */}

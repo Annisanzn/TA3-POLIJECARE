@@ -96,6 +96,15 @@ class ComplaintController extends Controller
                     'ip_address' => $c->ip_address,
                     'user_agent' => $c->user_agent,
                     'file_path' => $c->file_path ? asset('storage/' . $c->file_path) : null,
+                    'attachments' => $c->attachments->map(function($a) {
+                        return [
+                            'id' => $a->id,
+                            'file_path' => asset('storage/' . $a->file_path),
+                            'file_name' => $a->file_name,
+                            'file_type' => $a->file_type,
+                            'file_size' => $a->file_size
+                        ];
+                    }),
                     'created_at' => $c->created_at->toDateTimeString(),
                     'updated_at' => $c->updated_at->toDateTimeString(),
                 ];
@@ -138,6 +147,7 @@ class ComplaintController extends Controller
             'user:id,name,email,phone',
             'counselor:id,name',
             'violenceCategory',
+            'attachments',
             'counselingSchedules' => function ($q) {
                 $q->orderBy('created_at', 'desc');
             }

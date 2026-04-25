@@ -96,7 +96,7 @@ const DetailPengaduan = () => {
             <div className="flex min-h-screen bg-gray-50">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
                 <div className="flex-1 flex flex-col min-w-0">
-                    <Topbar />
+                    <Topbar onMenuClick={toggleSidebar} title="Memuat Detail..." />
                     <div className="flex-1 flex justify-center items-center">
                         <FiActivity className="animate-spin w-8 h-8 text-[#8B5CF6]" />
                         <span className="ml-3 text-gray-600 font-medium">Memuat data laporan...</span>
@@ -111,7 +111,7 @@ const DetailPengaduan = () => {
             <div className="flex min-h-screen bg-gray-50">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
                 <div className="flex-1 flex flex-col min-w-0">
-                    <Topbar />
+                    <Topbar onMenuClick={toggleSidebar} title="Laporan Tidak Ditemukan" />
                     <div className="flex-1 p-6 flex flex-col items-center justify-center">
                         <FiAlertCircle className="w-16 h-16 text-red-400 mb-4" />
                         <h2 className="text-xl font-bold text-gray-800 mb-2">Akses Ditolak / Tidak Ditemukan</h2>
@@ -133,7 +133,7 @@ const DetailPengaduan = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <Topbar />
+                <Topbar onMenuClick={toggleSidebar} title={`Laporan #${complaint?.report_reference || id}`} />
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 md:p-8">
                     <div className="w-full">
@@ -311,7 +311,40 @@ const DetailPengaduan = () => {
                                         </div>
                                     </section>
 
-                                    {complaint.file_path && (
+                                    {(complaint.attachments && complaint.attachments.length > 0) ? (
+                                        <section className="text-gray-800">
+                                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                                                <FiLink className="text-[#8B5CF6]" /> Lampiran Bukti ({complaint.attachments.length})
+                                            </h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {complaint.attachments.map((file, idx) => (
+                                                    <div key={file.id || idx} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                                                <FiLink size={20} />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs font-bold text-gray-900 truncate" title={file.file_name || 'Lampiran Bukti'}>
+                                                                    {file.file_name || `Lampiran ${idx + 1}`}
+                                                                </p>
+                                                                <p className="text-[10px] text-gray-500 uppercase tracking-tighter mt-0.5">
+                                                                    {file.file_type?.split('/')[1] || 'FILE'} • {file.file_size ? (file.file_size / 1024 / 1024).toFixed(2) + ' MB' : 'Lihat Detail'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <a
+                                                            href={file.file_path ? getStorageUrl(file.file_path) : (file.path ? getStorageUrl(file.path) : '#')}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors border border-gray-100 font-bold text-[10px] uppercase tracking-wider"
+                                                        >
+                                                            BUKA DOKUMEN
+                                                        </a>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    ) : (complaint.file_path && (
                                         <section className="text-gray-800">
                                             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
                                                 <FiLink className="text-[#8B5CF6]" /> Lampiran Bukti
@@ -328,7 +361,7 @@ const DetailPengaduan = () => {
                                                 </a>
                                             </div>
                                         </section>
-                                    )}
+                                    ))}
                                 </div>
 
                                 {/* Right Column: Metadata Korban & Teknis */}

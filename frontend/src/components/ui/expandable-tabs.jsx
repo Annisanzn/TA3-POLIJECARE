@@ -60,7 +60,7 @@ export function ExpandableTabs({
     <div
       ref={outsideClickRef}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-full border border-white/20 bg-white/80 backdrop-blur-md p-1 shadow-lg",
+        "flex items-center gap-1 sm:gap-2 rounded-full border border-white/20 bg-white/80 backdrop-blur-md p-1 shadow-lg max-w-[95vw] sm:max-w-none overflow-x-auto no-scrollbar",
         className
       )}>
       {tabs.map((tab, index) => {
@@ -83,14 +83,14 @@ export function ExpandableTabs({
             onMouseLeave={() => setHovered(null)}
             transition={transition}
             className={cn(
-              "relative flex items-center rounded-full py-3 text-base font-medium transition-colors duration-300",
+              "relative flex items-center rounded-full py-2.5 sm:py-3 text-sm sm:text-base font-medium transition-colors duration-300 shrink-0",
               selected === index
                 ? "bg-[#191970] text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]"
                 : hovered === index
                   ? "bg-gray-200 text-foreground"
                   : "text-muted-foreground hover:text-foreground"
             )}>
-            <Icon size={24} />
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
             <AnimatePresence initial={false}>
               {isExpanded && (
                 <motion.span
@@ -110,7 +110,7 @@ export function ExpandableTabs({
       {trailingElement && (
         <>
           <Separator />
-          <div className="pl-1">
+          <div className="pl-0.5 sm:pl-1">
             {trailingElement}
           </div>
         </>

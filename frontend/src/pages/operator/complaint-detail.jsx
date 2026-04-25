@@ -157,7 +157,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             <div className="min-h-screen bg-gray-50 flex">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
                 <div className="flex-1 flex flex-col transition-all duration-300">
-                    <Topbar />
+                    <Topbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} title="Memuat Laporan..." />
                     <div className="flex-1 p-8 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                     </div>
@@ -171,7 +171,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             <div className="min-h-screen bg-gray-50 flex">
                 <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
                 <div className="flex-1 flex flex-col transition-all duration-300">
-                    <Topbar />
+                    <Topbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} title="Laporan Tidak Ditemukan" />
                     <div className="flex-1 p-8 flex flex-col items-center justify-center text-center">
                         <FiAlertCircle className="w-16 h-16 text-red-400 mb-4" />
                         <h2 className="text-xl font-bold text-gray-900 mb-2">Pencarian Gagal</h2>
@@ -190,7 +190,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
             
             <div className="flex-1 flex flex-col transition-all duration-300 min-w-0">
-                <Topbar />
+                <Topbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} title={`Detail Laporan #${complaint?.report_id}`} />
 
                 <main className="p-6 w-full">
                     <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -283,8 +283,37 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                     </div>
 
                                     <div>
-                                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lampiran Bukti</h3>
-                                        {complaint.file_path ? (
+                                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lampiran Bukti Pendukung</h3>
+                                        {(complaint.attachments && complaint.attachments.length > 0) ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                                {complaint.attachments.map((file, idx) => (
+                                                    <div key={file.id || idx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                                                <FiLink size={16} />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs font-bold text-gray-900 truncate" title={file.file_name || 'Lampiran Bukti'}>
+                                                                    {file.file_name || `Lampiran ${idx + 1}`}
+                                                                </p>
+                                                                <p className="text-[10px] text-gray-400">
+                                                                    {file.file_size ? (file.file_size / 1024 / 1024).toFixed(2) + ' MB' : 'Lihat File'}
+                                                                </p>
+                                                            </div>
+                                                            <a
+                                                                href={file.file_path ? getStorageUrl(file.file_path) : (file.path ? getStorageUrl(file.path) : '#')}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="p-2 bg-gray-50 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-lg transition-colors border border-gray-100"
+                                                                title="Buka Dokumen"
+                                                            >
+                                                                <FiExternalLink size={14} />
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (complaint.file_path ? (
                                             <div className="space-y-3">
                                                 <p className="text-xs text-gray-500">Dokumen/media bukti dilampirkan oleh pelapor.</p>
                                                 <a
@@ -302,7 +331,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                 <FiFileText size={16} className="text-gray-400 shrink-0" />
                                                 Tidak ada lampiran bukti dari pelapor
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
 
                                 </div>
