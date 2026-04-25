@@ -261,7 +261,7 @@ class AdminArticleController extends Controller
             'id'           => $article->id,
             'title'        => $article->title,
             'slug'         => $article->slug,
-            'image'        => $article->image ? asset('storage/' . $article->image) : null,
+            'image'        => $article->image ? url('/api/files/view?path=' . $article->image) : null,
             'image_path'   => $article->image,
             'excerpt'      => Str::limit(strip_tags($article->content), 150),
             'content'      => $article->content,

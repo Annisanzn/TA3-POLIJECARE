@@ -32,7 +32,7 @@ const CounselorScheduleManagementPage = () => {
   const [schedules, setSchedules] = useState([]);
   const [counselors, setCounselors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [toast, setToast] = useState(null);
 
   const showToast = (msg, type = 'success') => setToast({ msg, type });

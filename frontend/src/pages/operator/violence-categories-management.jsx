@@ -5,7 +5,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import violenceCategoryService from '../../services/violenceCategoryService';
 
 const ViolenceCategoriesManagement = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [categories, setCategories] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,

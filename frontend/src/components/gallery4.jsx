@@ -1,7 +1,7 @@
 "use client";;
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -80,6 +80,8 @@ const Gallery4 = ({
     };
   }, [carouselApi]);
 
+  if (!items || items.length === 0) return null;
+
   return (
     <section className="py-32">
       <div className="container mx-auto">
@@ -117,7 +119,7 @@ const Gallery4 = ({
       <div className="w-full">
         <Carousel
           setApi={setCarouselApi}
-          opts={{
+          opts={useMemo(() => ({
             align: "start",
             loop: true,
             breakpoints: {
@@ -125,7 +127,7 @@ const Gallery4 = ({
                 dragFree: true,
               },
             },
-          }}>
+          }), [])}>
           <CarouselContent
             className="ml-0 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
             {items.map((item) => (

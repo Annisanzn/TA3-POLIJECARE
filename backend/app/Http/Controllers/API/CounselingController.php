@@ -405,7 +405,17 @@ class CounselingController extends Controller
         }
 
         // Check for double booking (only for future/non-completed sessions)
+        $complaintId = $request->complaint_id;
+        
         $targetCounselorId = $request->counselor_id ?? ($user->role === 'konselor' ? $user->id : null);
+        
+        // Inherit counselor from complaint if not explicitly provided
+        if (!$targetCounselorId && $complaintId) {
+            $existingComplaint = \App\Models\Complaint::find($complaintId);
+            if ($existingComplaint) {
+                $targetCounselorId = $existingComplaint->counselor_id;
+            }
+        }
         
         if ($targetCounselorId && !$isRecordOnly) {
             $hasConflict = CounselingSchedule::where('counselor_id', $targetCounselorId)
@@ -422,7 +432,6 @@ class CounselingController extends Controller
             }
         }
 
-        $complaintId = $request->complaint_id;
 
         // Jika tidak ada complaint_id (konseling manual murni), kita buatkan "Complaint" (Pengaduan) baru di background
         if (!$complaintId && ($user->role === 'konselor' || $user->role === 'operator')) {
@@ -475,8 +484,8 @@ class CounselingController extends Controller
             'approved_at' => null,
         ];
 
-        // Jika konselor yang buat, langsung approve dan set selesai jika ini adalah record/note
-        if ($user->role === 'konselor') {
+        // Jika konselor/operator yang buat, langsung approve dan set selesai jika ini adalah record/note
+        if (in_array($user->role, ['konselor', 'operator', 'admin'])) {
             $data['status'] = 'approved';
             $data['approved_at'] = now();
             

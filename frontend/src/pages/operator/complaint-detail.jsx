@@ -41,7 +41,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [complaint, setComplaint] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -422,10 +422,10 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between gap-4">
-                                                <div className="flex-1">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div className="flex-1 w-full">
                                                     <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                                                        <FiPaperclip className="text-gray-400" />
+                                                        <FiPaperclip className="text-gray-400 shrink-0" />
                                                         <span className="text-sm text-gray-500 truncate">{noteForm.attachment?.name || 'Lampirkan Bukti (Opsional)'}</span>
                                                         <input
                                                             type="file" className="hidden"
@@ -436,7 +436,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                 <button
                                                     type="submit"
                                                     disabled={isSubmittingNote || !noteForm.keterangan_pihak.trim()}
-                                                    className={`px-6 py-2.5 ${noteForm.activeSessionId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2`}
+                                                    className={`w-full sm:w-auto px-6 py-2.5 ${noteForm.activeSessionId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center sm:justify-start gap-2`}
                                                 >
                                                     {isSubmittingNote ? <FiLoader className="animate-spin" /> : (noteForm.activeSessionId ? <FiCheckCircle /> : <FiPlus />)}
                                                     {noteForm.activeSessionId ? 'Selesaikan & Simpan Feedback' : 'Simpan Catatan'}

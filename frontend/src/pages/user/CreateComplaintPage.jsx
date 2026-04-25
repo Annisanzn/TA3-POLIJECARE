@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import UserLayout from '../../components/user/UserLayout';
 import styles from './CreateComplaintPage.module.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.polijecare.my.id/api';
+import { API_BASE_URL } from '../../config';
 
 const CreateComplaintPage = () => {
     const navigate = useNavigate();

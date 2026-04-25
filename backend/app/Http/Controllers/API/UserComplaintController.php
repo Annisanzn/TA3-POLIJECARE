@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class UserComplaintController extends Controller
 {
@@ -98,7 +99,7 @@ class UserComplaintController extends Controller
             'urgency_level' => 'required|in:low,medium,high,critical',
             'counselor_id' => 'required|exists:users,id',
             'location' => 'required|string|max:255',
-            'incident_date' => 'required|date|before_or_equal:today',
+            'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? 'required|date|before_or_equal:today' : 'nullable',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
@@ -134,7 +135,7 @@ class UserComplaintController extends Controller
                 'location' => $validated['location'],
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
-                // 'incident_date' => $validated['incident_date'], // Un-comment if column exists
+                'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? ($validated['incident_date'] ?? null) : null,
                 'file_path' => null, // Will be set to the first attachment if any
                 'guest_name' => $validated['guest_name'] ?? null,
                 'guest_email' => $validated['guest_email'] ?? null,

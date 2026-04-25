@@ -1,3 +1,4 @@
+import { STORAGE_BASE_URL as PRODUCTION_STORAGE_BASE } from "../config";
 /**
  * Normalizes image URLs from backend responses.
  * 
@@ -6,7 +7,7 @@
  * localhost URLs to the correct production storage URL.
  */
 
-const PRODUCTION_STORAGE_BASE = 'https://api.polijecare.my.id';
+
 
 /**
  * Fix image URL from backend — replaces localhost references with production URL.

@@ -8,7 +8,7 @@ import {
 import { userService } from '../../services/userService';
 
 const UserManagementPage = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,12 +48,49 @@ const UserManagementPage = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  // Stats data untuk cards
+  // Stats data untuk cards — dinamis dari API
+  const growth = stats.growth || {};
   const statsData = [
-    { title: 'Total User', value: stats.total_users?.toString() || '0', icon: <FiUsers size={20} />, color: 'from-purple-500 to-purple-600', change: '+12%' },
-    { title: 'Operator', value: stats.operator?.toString() || '0', icon: <FiUser size={20} />, color: 'from-green-500 to-green-600', change: '+1' },
-    { title: 'Konselor', value: stats.konselor?.toString() || '0', icon: <FiMessageSquare size={20} />, color: 'from-blue-500 to-blue-600', change: '+3' },
-    { title: 'Pengguna', value: stats.pengguna?.toString() || '0', icon: <FiUser size={20} />, color: 'from-gray-500 to-gray-600', change: '+24' },
+    {
+      title: 'Total User',
+      value: stats.total_users?.toString() || '0',
+      icon: <FiUsers size={20} />,
+      color: 'from-purple-500 to-purple-600',
+      change: growth.total_percent !== undefined
+        ? `${growth.total_percent >= 0 ? '+' : ''}${growth.total_percent}%`
+        : null,
+      changeCount: growth.total_change,
+    },
+    {
+      title: 'Operator',
+      value: stats.operator?.toString() || '0',
+      icon: <FiUser size={20} />,
+      color: 'from-green-500 to-green-600',
+      change: growth.operator_change !== undefined
+        ? `+${growth.operator_change}`
+        : null,
+      changeCount: growth.operator_change,
+    },
+    {
+      title: 'Konselor',
+      value: stats.konselor?.toString() || '0',
+      icon: <FiMessageSquare size={20} />,
+      color: 'from-blue-500 to-blue-600',
+      change: growth.konselor_change !== undefined
+        ? `+${growth.konselor_change}`
+        : null,
+      changeCount: growth.konselor_change,
+    },
+    {
+      title: 'Pengguna',
+      value: stats.pengguna?.toString() || '0',
+      icon: <FiUser size={20} />,
+      color: 'from-gray-500 to-gray-600',
+      change: growth.pengguna_change !== undefined
+        ? `+${growth.pengguna_change}`
+        : null,
+      changeCount: growth.pengguna_change,
+    },
   ];
 
   const itemsPerPage = pagination.per_page;
@@ -419,7 +456,15 @@ const UserManagementPage = () => {
                   </div>
                 </div>
                 <div className="mt-3 sm:mt-4">
-                  <span className="text-green-600 text-xs sm:text-sm font-medium">{stat.change} dari bulan lalu</span>
+                  {stat.change !== null ? (
+                    <span className={`text-xs sm:text-sm font-medium ${
+                      stat.changeCount > 0 ? 'text-green-600' : 'text-gray-400'
+                    }`}>
+                      {stat.changeCount > 0 ? stat.change : '0'} baru bulan ini
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 text-xs sm:text-sm font-medium">—</span>
+                  )}
                 </div>
               </div>
             ))}

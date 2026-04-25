@@ -216,7 +216,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                     {/* Backdrop */}
                     <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
 
-                    <div className="absolute right-0 top-12 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+                    <div className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-12 z-50 w-auto sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600">
                             <div className="flex items-center gap-2">

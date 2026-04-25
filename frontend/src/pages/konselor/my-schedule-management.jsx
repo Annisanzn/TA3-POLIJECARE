@@ -10,14 +10,20 @@ import axios from '../../api/axios';
 import { toast } from 'react-hot-toast';
 import TimePicker24h from '../../components/ui/TimePicker24h';
 
+import Sidebar from '../../components/layout/Sidebar';
+import Topbar from '../../components/layout/Topbar';
+
 const MyScheduleManagementPage = () => {
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
   const [filteredSchedules, setFilteredSchedules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [dayFilter, setDayFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
   const [addModal, setAddModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, schedule: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, schedule: null });
@@ -193,8 +199,14 @@ const MyScheduleManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
+      
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar onMenuClick={toggleSidebar} title={user?.role === 'operator' ? 'Jadwal Konselor' : 'Jadwal Saya'} />
+        
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -394,7 +406,9 @@ const MyScheduleManagementPage = () => {
               </button>
             </div>
           )}
+          </div>
         </div>
+        </main>
       </div>
 
       {/* Add Modal */}

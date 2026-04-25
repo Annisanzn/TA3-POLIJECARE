@@ -22,7 +22,7 @@ const DetailPengaduan = () => {
     const [complaint, setComplaint] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [counselingSchedule, setCounselingSchedule] = useState(null);
 
     useEffect(() => {

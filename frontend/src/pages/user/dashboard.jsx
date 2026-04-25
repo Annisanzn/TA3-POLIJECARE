@@ -27,7 +27,7 @@ const StatCard = ({ label, value, icon: Icon, color, sub, onClick }) => (
 );
 
 const UserDashboard = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const { user } = useAuth();
   const navigate = useNavigate();
 

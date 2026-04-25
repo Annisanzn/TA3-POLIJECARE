@@ -15,7 +15,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ total_contribution: 0, label: 'Kontribusi' });
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
     const fetchProfileStats = async () => {
