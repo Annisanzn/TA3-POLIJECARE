@@ -21,7 +21,7 @@ const OPERATOR_MENU = [
       { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/operator/case-management' },
       { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
       { name: 'Manajemen Jadwal Konselor', icon: <FiClock />, path: '/operator/counselor-schedule-management' },
-      { name: 'Manajemen Materi', icon: <FiBook />, path: '/operator/materials-management' },
+      { name: 'Pusat Edukasi', icon: <FiBook />, path: '/operator/materials-management' },
       { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
       { name: 'Manajemen Artikel', icon: <FiBell />, path: '/operator/article-management' },
     ],
@@ -46,7 +46,7 @@ const KONSELOR_MENU = [
     items: [
       { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/konselor/case-management' },
       { name: 'Manajemen Jadwal Konselor', icon: <FiCalendar />, path: '/konselor/jadwal' },
-      { name: 'Manajemen Materi', icon: <FiBook />, path: '/konselor/materi' },
+      { name: 'Pusat Edukasi', icon: <FiBook />, path: '/konselor/materi' },
     ],
   },
   {

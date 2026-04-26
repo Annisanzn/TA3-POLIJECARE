@@ -1,7 +1,7 @@
-"use client";;
+"use client";
+import React, { useEffect, useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -117,86 +117,133 @@ const Gallery4 = ({
         </div>
       </div>
       <div className="w-full">
-        <Carousel
-          setApi={setCarouselApi}
-          opts={useMemo(() => ({
-            align: "start",
-            loop: true,
-            breakpoints: {
-              "(max-width: 768px)": {
-                dragFree: true,
-              },
-            },
-          }), [])}>
-          <CarouselContent
-            className="ml-0 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
+        {items.length <= 1 ? (
+          <div className="container mx-auto flex justify-center">
             {items.map((item) => (
-              <CarouselItem key={item.id} className="max-w-[320px] pl-[20px] lg:max-w-[360px]">
+              <div key={item.id} className="w-full max-w-[400px]">
                 {item.href.startsWith('/') ? (
-                  <Link to={item.href} className="group rounded-xl">
-                    <div
-                      className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
+                  <Link to={item.href} className="group rounded-xl block">
+                    <div className="group relative h-full min-h-[27rem] overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
                       <img
                         src={item.image}
                         alt={item.title}
                         className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-                      <div
-                        className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] dark:bg-gradient-to-t dark:from-slate-950 dark:via-slate-900/40 dark:to-transparent mix-blend-multiply dark:mix-blend-normal" />
-                      <div
-                        className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
-                        <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">
-                          {item.title}
-                        </div>
-                        <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">
-                          {item.description}
-                        </div>
+                      <div className="absolute inset-0 h-full bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent mix-blend-normal" />
+                      <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
+                        <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">{item.title}</div>
+                        <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">{item.description}</div>
                         <div className="flex items-center text-sm">
-                          Read more{" "}
-                          <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
+                          Baca selengkapnya <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>
                     </div>
                   </Link>
                 ) : (
-                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="group rounded-xl">
-                    <div
-                      className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
+                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="group rounded-xl block">
+                    <div className="group relative h-full min-h-[27rem] overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
                       <img
                         src={item.image}
                         alt={item.title}
                         className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
-                      <div
-                        className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] mix-blend-multiply" />
-                      <div
-                        className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
-                        <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">
-                          {item.title}
-                        </div>
-                        <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">
-                          {item.description}
-                        </div>
+                      <div className="absolute inset-0 h-full bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent mix-blend-normal" />
+                      <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
+                        <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">{item.title}</div>
+                        <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">{item.description}</div>
                         <div className="flex items-center text-sm">
-                          Read more{" "}
-                          <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
+                          Baca selengkapnya <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>
                     </div>
                   </a>
                 )}
-              </CarouselItem>
+              </div>
             ))}
-          </CarouselContent>
-        </Carousel>
-        <div className="mt-8 flex justify-center gap-2">
-          {items.map((_, index) => (
-            <button
-              key={index}
-              className={`h-2 w-2 rounded-full transition-colors ${currentSlide === index ? "bg-primary" : "bg-primary/20"
-                }`}
-              onClick={() => carouselApi?.scrollTo(index)}
-              aria-label={`Go to slide ${index + 1}`} />
-          ))}
-        </div>
+          </div>
+        ) : (
+          <>
+            <Carousel
+              key={items.length}
+              setApi={setCarouselApi}
+              opts={{
+                align: "start",
+                loop: items.length > 1,
+                breakpoints: {
+                  "(max-width: 768px)": {
+                    dragFree: true,
+                  },
+                },
+              }}>
+              <CarouselContent
+                className="ml-0 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
+                {items.map((item) => (
+                  <CarouselItem key={item.id} className="max-w-[320px] pl-[20px] lg:max-w-[360px]">
+                    {item.href.startsWith('/') ? (
+                      <Link to={item.href} className="group rounded-xl">
+                        <div
+                          className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
+                          <div
+                            className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] dark:bg-gradient-to-t dark:from-slate-950 dark:via-slate-900/40 dark:to-transparent mix-blend-multiply dark:mix-blend-normal" />
+                          <div
+                            className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
+                            <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">
+                              {item.title}
+                            </div>
+                            <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">
+                              {item.description}
+                            </div>
+                            <div className="flex items-center text-sm">
+                              Read more{" "}
+                              <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ) : (
+                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="group rounded-xl">
+                        <div
+                          className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105" />
+                          <div
+                            className="absolute inset-0 h-full bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] mix-blend-multiply" />
+                          <div
+                            className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 text-primary-foreground md:p-8">
+                            <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4">
+                              {item.title}
+                            </div>
+                            <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">
+                              {item.description}
+                            </div>
+                            <div className="flex items-center text-sm">
+                              Read more{" "}
+                              <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    )}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+            <div className="mt-8 flex justify-center gap-2">
+              {items.map((_, index) => (
+                <button
+                  key={index}
+                  className={`h-2 w-2 rounded-full transition-colors ${currentSlide === index ? "bg-primary" : "bg-primary/20"
+                    }`}
+                  onClick={() => carouselApi?.scrollTo(index)}
+                  aria-label={`Go to slide ${index + 1}`} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

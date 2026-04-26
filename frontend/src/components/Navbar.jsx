@@ -23,7 +23,7 @@ const Navbar = () => {
     { name: 'Tentang Kami', href: '#about' },
     { name: 'Cara Melapor', href: '#services' },
     { name: 'Artikel', href: '#articles' },
-    { name: 'Materi', href: '#materials' },
+    { name: 'Edukasi', href: '#materials' },
     { name: 'Kontak', href: '#contact' }
   ];
 
@@ -32,7 +32,7 @@ const Navbar = () => {
     { title: "Tentang Kami", icon: Info },
     { title: "Cara Melapor", icon: FileText },
     { title: "Artikel", icon: BookOpen },
-    { title: "Materi", icon: Library },
+    { title: "Edukasi", icon: Library },
     { title: "Kontak", icon: Phone },
   ];
 
@@ -173,16 +173,17 @@ const Navbar = () => {
             <div className="w-full px-8 lg:px-12">
               <div className="flex items-center justify-between h-20">
                 {/* Logo Section - Left */}
-                <Link to="/" className="flex items-center space-x-2 cursor-default dark:bg-white/90 dark:px-3 dark:py-1.5 dark:rounded-2xl transition-all">
+                <Link to="/" className="flex items-center space-x-2 cursor-default transition-all group">
                   <img
                     src="/logo_polije.png"
                     alt="Logo Polije"
-                    className="h-12 w-auto object-contain transition-all duration-300"
+                    className="h-10 w-auto object-contain transition-all duration-300 dark:invert dark:hue-rotate-180 opacity-95 group-hover:opacity-100"
                   />
-                  <img
-                    src="/logo_polijecare.png"
-                    alt="Polijecare Logo"
-                    className="h-12 w-auto object-contain transition-all duration-300"
+                  <div className="h-8 w-[1px] bg-gray-200 dark:bg-slate-700 hidden sm:block mx-2"></div>
+                  <img 
+                    src="/logo_polijecare_new.png" 
+                    alt="Polijecare Logo" 
+                    className="h-11 w-auto object-contain transition-all duration-300 dark:invert dark:hue-rotate-180 group-hover:scale-105"
                   />
                 </Link>
 
@@ -313,6 +314,11 @@ const Navbar = () => {
                     ))}
 
                     <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">Tema Gelap</span>
+                        <Switch />
+                      </div>
+                      
                       {isAuthenticated ? (
                         <>
                           <button

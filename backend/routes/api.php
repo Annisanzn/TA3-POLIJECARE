@@ -65,6 +65,9 @@ Route::get('/public-categories', function () {
     return response()->json(['success' => true, 'data' => $categories]);
 });
 
+// Public Materials Route
+Route::get('/public-materials', [\App\Http\Controllers\API\MaterialController::class, 'index']);
+
 // File Proxy Route (Fixes 403 on static storage)
 Route::get('/files/view', [FileController::class, 'view']);
 

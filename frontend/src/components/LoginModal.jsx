@@ -227,9 +227,9 @@ const LoginModal = ({ isOpen, onClose }) => {
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <img 
-                    src="/logo_polijecare.png" 
+                    src="/logo_polijecare_new.png" 
                     alt="Polijecare Logo" 
-                    className="w-10 h-10 object-contain brightness-0 invert"
+                    className="w-10 h-10 object-contain transition-all duration-300 dark:invert dark:hue-rotate-180"
                   />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">

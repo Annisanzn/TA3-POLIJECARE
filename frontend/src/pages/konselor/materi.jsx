@@ -32,6 +32,7 @@ const konselorMaterialService = {
     },
     getFileUrl(filePath) {
         if (!filePath) return '#';
+        if (filePath.startsWith('http')) return filePath;
         const encodedPath = encodeURIComponent(filePath);
         const baseUrl = axios.defaults.baseURL.replace(/\/api$/, '');
         return `${baseUrl}/storage/${encodedPath}`;
@@ -177,13 +178,13 @@ const KonselorMateri = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Manajemen Materi" />
+                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Pusat Edukasi" />
 
                 <main className="flex-1 p-6 overflow-x-auto">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Manajemen Materi</h2>
-                            <p className="text-gray-600 mt-1">Kelola materi pelatihan dan panduan konseling milik Anda</p>
+                            <h2 className="text-2xl font-bold text-gray-900">Pusat Edukasi</h2>
+                            <p className="text-gray-600 mt-1">Akses buku saku, SOP, dan materi edukasi PolijeCare</p>
                         </div>
                         <button onClick={fetchMaterials} disabled={isLoading} className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 self-start lg:self-auto shadow-sm">
                             <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
@@ -212,7 +213,7 @@ const KonselorMateri = () => {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {[
-                            { label: 'Total Materi', value: pagination.total, icon: <FiFile className="w-6 h-6 text-purple-600" />, bg: 'bg-purple-100' },
+                            { label: 'Total Edukasi', value: pagination.total, icon: <FiFile className="w-6 h-6 text-purple-600" />, bg: 'bg-purple-100' },
                             { label: 'File Upload', value: materials.filter(m => m.tipe === 'file').length, icon: <FiUpload className="w-6 h-6 text-blue-600" />, bg: 'bg-blue-100' },
                             { label: 'Link', value: materials.filter(m => m.tipe === 'link').length, icon: <FiLink className="w-6 h-6 text-green-600" />, bg: 'bg-green-100' },
                             { label: 'Kategori', value: [...new Set(materials.map(m => m.kategori))].length, icon: <FiFilter className="w-6 h-6 text-orange-600" />, bg: 'bg-orange-100' },
@@ -279,7 +280,7 @@ const KonselorMateri = () => {
                                 <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
                                     <FiFile className="w-10 h-10 text-gray-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada materi</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada materi edukasi</h3>
                                 <p className="text-gray-500 mb-6 max-w-sm mx-auto">Mulai dengan menambahkan materi pertama untuk bahan edukasi atau panduan.</p>
                                 <button
                                     onClick={() => setShowAddModal(true)}
@@ -443,7 +444,7 @@ const KonselorMateri = () => {
                             </div>
                             <form onSubmit={handleAddMaterial} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Judul Materi</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Judul Edukasi</label>
                                     <input type="text" required value={formData.judul} onChange={e => setFormData({ ...formData, judul: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                                 </div>

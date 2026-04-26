@@ -50,9 +50,9 @@ const Footer = () => {
               className="flex items-center gap-4"
             >
               <img
-                src="/logo_polijecare.png"
+                src="/logo_polijecare_new.png"
                 alt="PolijeCare Logo"
-                className="w-14 h-14 object-contain filter drop-shadow-sm transition-all duration-300 dark:bg-white/90 dark:p-1 dark:rounded-xl"
+                className="w-14 h-14 object-contain filter drop-shadow-sm transition-all duration-300 dark:invert dark:hue-rotate-180"
               />
               <div className="space-y-0.5">
                 <h3 className="text-2xl font-bold tracking-tight text-black dark:!text-white">

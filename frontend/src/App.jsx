@@ -12,6 +12,7 @@ import PageTransition from './components/layout/PageTransition';
 // Pages
 import LandingPage from './pages/LandingPage';
 import LaporUmum from './pages/public/LaporUmum';
+import PusatEdukasi from './pages/public/PusatEdukasi';
 import UserDashboard from './pages/user/dashboard';
 import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
@@ -59,6 +60,7 @@ const AnimatedRoutes = () => {
         <Route path="/articles" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/contact" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/lapor-umum" element={<PageTransition><LaporUmum /></PageTransition>} />
+        <Route path="/edukasi" element={<PageTransition><PusatEdukasi /></PageTransition>} />
 
         {/* Article Detail - public reading page */}
         <Route path="/artikel/:slug" element={<PageTransition><ArticleDetail /></PageTransition>} />
