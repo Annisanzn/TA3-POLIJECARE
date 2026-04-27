@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiCalendar, FiClock, FiUser, FiCheck, FiX,
   FiEdit, FiTrash2, FiPlus, FiFilter, FiSearch,
-  FiEye, FiRefreshCw, FiInfo, FiMenu
+  FiEye, FiRefreshCw, FiInfo, FiMenu, FiAlertCircle, FiArrowRight, FiSave, FiCheckCircle
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
@@ -20,10 +20,11 @@ const Toast = ({ toast, onClose }) => {
   }, [toast]);
   if (!toast) return null;
   return (
-    <div className={`fixed top-5 right-5 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium animate-in fade-in slide-in-from-top-4 duration-300 ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
-      {toast.type === 'success' ? <FiCheck size={18} /> : <FiX size={18} />}
-      {toast.msg}
-    </div>
+    <motion.div initial={{ opacity: 0, y: -20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+      className={`fixed top-8 right-8 z-[150] flex items-center gap-4 px-8 py-5 rounded-[2rem] shadow-2xl text-white text-[11px] font-bold uppercase tracking-widest border backdrop-blur-xl ${toast.type === 'success' ? 'bg-emerald-600/90 border-emerald-400 shadow-emerald-500/20' : 'bg-rose-600/90 border-rose-400 shadow-rose-500/20'}`}>
+      {toast.type === 'success' ? <FiCheckCircle size={22} /> : <FiAlertCircle size={22} />}
+      <span>{toast.msg}</span>
+    </motion.div>
   );
 };
 
@@ -39,17 +40,15 @@ const CounselorScheduleManagementPage = () => {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [dayFilter, setDayFilter] = useState('all');
   const [counselorFilter, setCounselorFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
 
   // Modals
   const BLANK_FORM = {
     counselor_id: '',
     hari: 'Senin',
-    jam_mulai: '',
-    jam_selesai: '',
-    slot_duration: 45,
+    jam_mulai: '08:00',
+    jam_selesai: '16:00',
+    slot_duration: 60,
     is_active: true
   };
   const [formData, setFormData] = useState(BLANK_FORM);
@@ -58,7 +57,7 @@ const CounselorScheduleManagementPage = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, schedule: null });
   const [submitting, setSubmitting] = useState(false);
 
-  const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+  const DAYS_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
   useEffect(() => {
     fetchSchedules();
@@ -74,7 +73,6 @@ const CounselorScheduleManagementPage = () => {
       }
     } catch (err) {
       showToast('Gagal memuat daftar jadwal', 'error');
-      console.error('Error fetching schedules:', err);
     } finally {
       setIsLoading(false);
     }
@@ -83,32 +81,13 @@ const CounselorScheduleManagementPage = () => {
   const fetchCounselors = async () => {
     try {
       const response = await axios.get('/operator/counseling/counselors');
-      if (response.data.success) {
-        setCounselors(response.data.data);
-      }
-    } catch (err) {
-      console.error('Error fetching counselors:', err);
-    }
+      if (response.data.success) setCounselors(response.data.data);
+    } catch (err) {}
   };
-
-  const filteredSchedules = schedules.filter(schedule => {
-    const matchesSearch = schedule.counselor?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      schedule.hari.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDay = dayFilter === 'all' || schedule.hari === dayFilter;
-    const matchesCounselor = counselorFilter === 'all' || schedule.counselor_id.toString() === counselorFilter;
-    const matchesStatus = statusFilter === 'all' ||
-      (statusFilter === 'active' && schedule.is_active) ||
-      (statusFilter === 'inactive' && !schedule.is_active);
-
-    return matchesSearch && matchesDay && matchesCounselor && matchesStatus;
-  });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleAddSchedule = async (e) => {
@@ -121,12 +100,9 @@ const CounselorScheduleManagementPage = () => {
         setAddModal(false);
         setFormData(BLANK_FORM);
         fetchSchedules();
-      } else {
-        showToast(response.data.message || 'Gagal menambahkan jadwal', 'error');
       }
     } catch (err) {
       showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
-      console.error('Error adding schedule:', err);
     } finally {
       setSubmitting(false);
     }
@@ -141,12 +117,9 @@ const CounselorScheduleManagementPage = () => {
         showToast('Jadwal berhasil diperbarui');
         setEditModal({ open: false, schedule: null });
         fetchSchedules();
-      } else {
-        showToast(response.data.message || 'Gagal memperbarui jadwal', 'error');
       }
     } catch (err) {
       showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
-      console.error('Error updating schedule:', err);
     } finally {
       setSubmitting(false);
     }
@@ -160,12 +133,9 @@ const CounselorScheduleManagementPage = () => {
         showToast('Jadwal berhasil dihapus');
         setDeleteModal({ open: false, schedule: null });
         fetchSchedules();
-      } else {
-        showToast(response.data.message || 'Gagal menghapus jadwal', 'error');
       }
     } catch (err) {
       showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
-      console.error('Error deleting schedule:', err);
     } finally {
       setSubmitting(false);
     }
@@ -176,369 +146,228 @@ const CounselorScheduleManagementPage = () => {
     setFormData({
       counselor_id: schedule.counselor_id,
       hari: schedule.hari,
-      jam_mulai: schedule.jam_mulai,
-      jam_selesai: schedule.jam_selesai,
+      jam_mulai: schedule.jam_mulai.substring(0, 5),
+      jam_selesai: schedule.jam_selesai.substring(0, 5),
       slot_duration: schedule.slot_duration,
       is_active: schedule.is_active
     });
   };
 
-  // Helper variables to match jadwal-konseling.jsx aesthetic
-  const getStatusColor = (isActive) => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  const getGroupedSchedules = () => {
+    let filtered = schedules.filter(s => {
+      const matchesCounselor = counselorFilter === 'all' || s.counselor_id.toString() === counselorFilter;
+      const matchesSearch = s.counselor?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCounselor && matchesSearch;
+    });
+
+    const groups = {};
+    filtered.forEach(s => {
+      const key = `${s.counselor_id}-${s.hari}`;
+      if (!groups[key]) {
+        groups[key] = { counselor: s.counselor, hari: s.hari, slots: [] };
+      }
+      groups[key].slots.push(s);
+    });
+
+    return Object.values(groups).map(group => {
+      group.slots.sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
+      group.slots = group.slots.map((slot, idx) => {
+        let isOverlapping = false;
+        if (idx > 0) {
+          const prevSlot = group.slots[idx - 1];
+          if (slot.jam_mulai < prevSlot.jam_selesai) isOverlapping = true;
+        }
+        return { ...slot, isOverlapping };
+      });
+      return group;
+    }).sort((a, b) => {
+      if (a.counselor?.name !== b.counselor?.name) {
+        return a.counselor?.name?.localeCompare(b.counselor?.name);
+      }
+      return DAYS_ORDER.indexOf(a.hari) - DAYS_ORDER.indexOf(b.hari);
+    });
   };
 
-  const getStatusText = (isActive) => {
-    return isActive ? 'Aktif' : 'Non-Aktif';
-  };
+  const groupedData = getGroupedSchedules();
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-['Poppins'] overflow-hidden transition-colors duration-500">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+      `}</style>
       <Toast toast={toast} onClose={() => setToast(null)} />
-      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      
+      <div className="flex-none h-full overflow-y-auto no-scrollbar border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
+        <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      </div>
 
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                <button 
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
-                >
-                  <FiMenu size={20} />
-                </button>
-                <FiCalendar className="text-blue-600" /> Manajemen Jam Kerja Konselor
-              </h1>
-              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
-                Kelola ketersediaan hari dan jam operasional seluruh konselor PolijeCare
-              </p>
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-slate-800 px-4 md:px-8 py-4 md:py-8 shrink-0 z-30 transition-all">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+               <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl lg:hidden text-slate-600 dark:text-white transition-all"><FiMenu size={20} /></button>
+                <div>
+                   <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
+                     <FiCalendar className="text-indigo-600 dark:text-indigo-400" /> Jadwal Kerja Konselor
+                   </h1>
+                   <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium tracking-wide mt-1.5">Manajemen Ketersediaan Layanan PolijeCare</p>
+                </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={fetchSchedules}
-                disabled={isLoading}
-                className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
-                title="Refresh Data"
-              >
-                <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <button onClick={fetchSchedules} className="p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-400 hover:text-indigo-600 rounded-2xl transition-all shadow-sm">
+                <FiRefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
               </button>
-              <button
+               <button
                 onClick={() => { setAddModal(true); setFormData(BLANK_FORM); }}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors shadow-sm"
+                className="flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all active:scale-95 w-full md:w-auto"
               >
-                <FiPlus size={16} /> Tambah Jadwal
+                <FiPlus size={20} /> Tambah Jadwal
               </button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-6">
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[
-              { label: 'Total Jadwal Sistem', value: schedules.length, color: 'bg-blue-100', icon: <FiCalendar className="text-blue-600" size={22} /> },
-              { label: 'Jadwal Aktif', value: schedules.filter(s => s.is_active).length, color: 'bg-green-100', icon: <FiCheck className="text-green-600" size={22} /> },
-              { label: 'Konselor Terdaftar', value: counselors.length, color: 'bg-purple-100', icon: <FiUser className="text-purple-600" size={22} /> },
-              { label: 'Jadwal Nonaktif', value: schedules.filter(s => !s.is_active).length, color: 'bg-red-100', icon: <FiInfo className="text-red-600" size={22} /> },
-            ].map((stat, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{isLoading ? '—' : stat.value}</p>
-                </div>
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${stat.color}`}>{stat.icon}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Premium Filter Container */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari konselor atau hari..."
-                  className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                />
-              </div>
-
-              <div className="w-full md:w-48">
-                <select
-                  value={counselorFilter}
-                  onChange={(e) => setCounselorFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                >
-                  <option value="all">Semua Konselor</option>
-                  {counselors.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="w-full md:w-40">
-                <select
-                  value={dayFilter}
-                  onChange={(e) => setDayFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                >
-                  <option value="all">Semua Hari</option>
-                  {DAYS.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="w-full md:w-40">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="active">Aktif</option>
-                  <option value="inactive">Nonaktif</option>
-                </select>
-              </div>
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 bg-slate-50/50 dark:bg-slate-950/50 custom-scrollbar transition-all">
+          
+          <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row gap-6 shadow-sm transition-all">
+            <div className="flex-1 relative group">
+              <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-all" size={20} />
+              <input type="text" placeholder="Cari Nama Konselor..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-16 pr-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-sm font-medium text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
+            </div>
+             <div className="w-full md:w-80">
+              <select value={counselorFilter} onChange={(e) => setCounselorFilter(e.target.value)}
+                className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-xs font-bold text-slate-600 dark:text-slate-400 outline-none appearance-none cursor-pointer shadow-inner">
+                <option value="all">Semua Konselor</option>
+                {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
           </div>
 
-          {/* Schedule Cards Grid - Replaces previous Table */}
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <FiRefreshCw className="w-10 h-10 text-green-500 animate-spin mb-4" />
-              <p className="text-gray-500 font-medium">Memuat data jadwal operasional...</p>
-            </div>
-          ) : filteredSchedules.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 border border-gray-100">
-                <FiCalendar className="w-8 h-8 text-gray-300" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Tidak ada jadwal ditemukan</h3>
-              <p className="text-gray-500">Coba ubah filter pencarian Anda</p>
-            </div>
+             <div className="flex flex-col items-center justify-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div className="w-20 h-20 border-[6px] border-slate-100 dark:border-slate-800 border-t-indigo-600 rounded-full animate-spin mb-8" />
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-widest">Sinkronisasi Jadwal...</p>
+             </div>
+          ) : groupedData.length === 0 ? (
+             <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border border-gray-100 dark:border-slate-800 shadow-sm transition-all">
+                <div className="w-24 h-24 bg-slate-50 dark:bg-slate-950 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-gray-100 dark:border-slate-800">
+                  <FiCalendar className="text-slate-200 dark:text-slate-700" size={50} />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Belum Ada Jadwal</h3>
+                <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-2">Gunakan tombol 'Tambah Jadwal' untuk memulai</p>
+             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <AnimatePresence>
-                {filteredSchedules.map((schedule) => (
-                  <motion.div
-                    key={schedule.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex flex-col overflow-hidden group"
-                  >
-                    <div className="p-5 flex-1 relative">
-                      {/* Operational Status indicator line */}
-                      <div className={`absolute top-0 left-0 right-0 h-1 ${schedule.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
-
-                      <div className="flex justify-between items-start mb-5 mt-1">
-                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest ${getStatusColor(schedule.is_active)}`}>
-                          {getStatusText(schedule.is_active)}
-                        </span>
-
-                        <div className="flex opacity-50 group-hover:opacity-100 transition-opacity bg-gray-50 rounded-lg p-1 border border-gray-100">
-                          <button
-                            onClick={() => openEdit(schedule)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
-                            title="Edit Jadwal"
-                          >
-                            <FiEdit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteModal({ open: true, schedule })}
-                            className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
-                            title="Hapus Jadwal"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Counselor Info */}
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-center justify-center shadow-inner">
-                          <FiUser className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-bold text-gray-900 truncate" title={schedule.counselor?.name}>
-                            {schedule.counselor?.name || 'Konselor'}
-                          </h3>
-                          <p className="text-[11px] text-gray-500 truncate">{schedule.counselor?.email || 'N/A'}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
-                            <FiCalendar className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider leading-none mb-1">Hari Kerja</p>
-                            <p className="text-sm font-bold text-gray-900">{schedule.hari}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 flex-shrink-0">
-                            <FiClock className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider leading-none mb-1">Jam Tayang</p>
-                            <p className="text-sm font-bold text-gray-900">
-                              {schedule.jam_mulai?.substring(0, 5)} - {schedule.jam_selesai?.substring(0, 5)} WIB
-                            </p>
-                          </div>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pb-10">
+              {groupedData.map((group, gIdx) => (
+                <div key={gIdx} className="bg-white dark:bg-slate-900 rounded-[3rem] border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500">
+                  <div className="p-8 bg-slate-50/50 dark:bg-slate-950/30 border-b border-gray-100 dark:border-slate-800/50 flex items-center gap-5 transition-all">
+                    <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-xl border border-gray-100 dark:border-slate-700 shrink-0 group-hover:scale-110 transition-all">
+                      <FiUser size={28} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight leading-none mb-2">{group.counselor?.name}</h3>
+                      <div className="flex items-center gap-2">
+                         <span className="px-4 py-1.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full text-[10px] font-bold">{group.hari}</span>
                       </div>
                     </div>
-
-                    <div className="bg-gray-50/80 px-5 py-3 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Durasi Per Sesi</span>
-                      <span className="px-2.5 py-1 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-700 shadow-sm">
-                        {schedule.slot_duration} Menit
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  </div>
+                  <div className="p-8 space-y-4 flex-1">
+                    {group.slots.map((slot) => (
+                      <div key={slot.id} className={`relative p-6 rounded-[2rem] border transition-all duration-300 ${slot.isOverlapping ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50' : 'bg-slate-50/30 dark:bg-slate-950/30 border-gray-50 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-900/50 hover:shadow-xl shadow-inner'}`}>
+                        {slot.isOverlapping && (
+                          <div className="absolute -top-2 -right-2 bg-rose-600 text-white p-1.5 rounded-full shadow-2xl animate-bounce" title="Jadwal Bentrok!">
+                            <FiAlertCircle size={16} />
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between mb-5">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-2.5 rounded-xl ${slot.isOverlapping ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400' : 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'}`}>
+                               <FiClock size={18} />
+                            </div>
+                            <span className={`text-[13px] font-bold tracking-tight ${slot.isOverlapping ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'}`}>
+                              {slot.jam_mulai.substring(0, 5)} — {slot.jam_selesai.substring(0, 5)}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                             <button onClick={() => openEdit(slot)} className="p-3 text-slate-400 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white dark:bg-slate-900 rounded-xl transition-all shadow-sm"><FiEdit size={16} /></button>
+                             <button onClick={() => setDeleteModal({ open: true, schedule: slot })} className="p-3 text-slate-400 dark:text-slate-600 hover:text-rose-600 bg-white dark:bg-slate-900 rounded-xl transition-all shadow-sm"><FiTrash2 size={16} /></button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between px-2">
+                           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wide">Sesi Durasi</span>
+                           <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 px-4 py-1.5 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-sm">{slot.slot_duration} menit</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </main>
       </div>
 
-      {/* Modern Add/Edit Modal */}
       <AnimatePresence>
         {(addModal || editModal.open) && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
-              onClick={() => !submitting && (addModal ? setAddModal(false) : setEditModal({ open: false, schedule: null }))}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xl"
+              onClick={() => !submitting && (addModal ? setAddModal(false) : setEditModal({ open: false, schedule: null }))} />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] w-full max-w-lg overflow-hidden border border-gray-100 dark:border-slate-800"
             >
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {addModal ? 'Tambah Jam Kerja Baru' : 'Perbarui Jam Kerja'}
+              <div className="px-10 py-12 bg-slate-50/50 dark:bg-slate-950/30 border-b border-gray-100 dark:border-slate-800">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-5 tracking-tight">
+                   <div className="w-14 h-14 bg-indigo-600 text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-indigo-100"><FiPlus size={28} /></div>
+                   {addModal ? 'Tambah Jadwal' : 'Edit Jadwal'}
                 </h3>
-                <button
-                  onClick={() => !submitting && (addModal ? setAddModal(false) : setEditModal({ open: false, schedule: null }))}
-                  className="text-gray-400 hover:text-gray-600 bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm"
-                >
-                  <FiX size={16} />
-                </button>
               </div>
-
-              <form onSubmit={addModal ? handleAddSchedule : handleEditSchedule} className="p-6">
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Konselor Bertugas</label>
-                    <select
-                      name="counselor_id"
-                      value={formData.counselor_id}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                    >
+              <form onSubmit={addModal ? handleAddSchedule : handleEditSchedule} className="p-10 space-y-10">
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest px-2">Konselor Bertugas</label>
+                    <select name="counselor_id" value={formData.counselor_id} onChange={handleInputChange} required
+                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-xs font-bold text-slate-900 dark:text-white outline-none transition-all shadow-inner cursor-pointer">
                       <option value="">Pilih Konselor...</option>
-                      {counselors.map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
+                      {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Hari Operasional</label>
-                    <select
-                      name="hari"
-                      value={formData.hari}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                    >
-                      {DAYS.map(day => <option key={day} value={day}>{day}</option>)}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Jam Buka</label>
-                      <TimePicker24h
-                        value={formData.jam_mulai}
-                        onChange={val => handleInputChange({ target: { name: 'jam_mulai', value: val } })}
-                      />
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest px-2">Hari</label>
+                      <select name="hari" value={formData.hari} onChange={handleInputChange} required
+                        className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-xs font-bold text-slate-900 dark:text-white outline-none appearance-none cursor-pointer">
+                        {DAYS_ORDER.map(day => <option key={day} value={day}>{day}</option>)}
+                      </select>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Jam Tutup</label>
-                      <TimePicker24h
-                        value={formData.jam_selesai}
-                        onChange={val => handleInputChange({ target: { name: 'jam_selesai', value: val } })}
-                      />
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest px-2">Sesi (Menit)</label>
+                      <input type="number" name="slot_duration" value={formData.slot_duration} onChange={handleInputChange} required min="15" max="240" step="15"
+                        className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-sm font-bold text-slate-900 dark:text-white outline-none shadow-inner" />
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Interval Sesi (Menit)</label>
-                    <input
-                      type="number"
-                      name="slot_duration"
-                      value={formData.slot_duration}
-                      onChange={handleInputChange}
-                      required
-                      min="15"
-                      max="120"
-                      step="15"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none"
-                    />
-                    <p className="text-[10px] text-gray-500 mt-1.5 ml-1">Menentukan lama waktu konsultasi per mahasiswa.</p>
+                  <div className="grid grid-cols-2 gap-8">
+                    <TimePicker24h label="JAM MULAI" value={formData.jam_mulai} onChange={val => handleInputChange({ target: { name: 'jam_mulai', value: val } })} />
+                    <TimePicker24h label="JAM SELESAI" value={formData.jam_selesai} onChange={val => handleInputChange({ target: { name: 'jam_selesai', value: val } })} />
                   </div>
-
-                  <div className="pt-2">
-                    <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                      <div className="relative flex items-center">
-                        <input
-                          type="checkbox"
-                          name="is_active"
-                          checked={formData.is_active}
-                          onChange={handleInputChange}
-                          className="w-5 h-5 accent-green-600 rounded cursor-pointer"
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900">Status Aktif</span>
-                        <span className="text-[10px] text-gray-500">Jadwal ini tersedia dan bisa dipilih oleh mahasiswa.</span>
-                      </div>
-                    </label>
-                  </div>
+                  <label className="flex items-center gap-5 p-6 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-[2.5rem] cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all group shadow-inner">
+                    <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleInputChange} className="w-6 h-6 accent-indigo-600 rounded-lg shadow-sm" />
+                    <div className="flex flex-col">
+                       <span className="text-[11px] font-bold text-slate-900 dark:text-white tracking-widest group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">Jadwal Aktif</span>
+                       <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-1">Dapat dipilih oleh mahasiswa di dashboard.</span>
+                    </div>
+                  </label>
                 </div>
-
-                <div className="mt-8 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { addModal ? setAddModal(false) : setEditModal({ open: false, schedule: null }) }}
-                    disabled={submitting}
-                    className="flex-1 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 active:scale-[0.98] transition-all"
+                <div className="pt-6 flex gap-6">
+                  <button type="button" disabled={submitting} onClick={() => { addModal ? setAddModal(false) : setEditModal({ open: false, schedule: null }) }}
+                    className="flex-1 py-5 text-slate-400 dark:text-slate-600 font-bold text-xs hover:text-rose-500 transition-all">Batal</button>
+                  <button type="submit" disabled={submitting}
+                    className="flex-[2] py-6 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center justify-center gap-4 active:scale-95"
                   >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-200 hover:bg-green-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2"
-                  >
-                    {submitting ? <FiRefreshCw className="animate-spin" /> : <FiCheck />}
-                    {submitting ? 'Menyimpan...' : 'Simpan Jadwal'}
+                    {submitting ? <FiRefreshCw className="animate-spin" /> : <FiSave size={20} />}
+                    {submitting ? 'Memproses...' : 'Simpan Jadwal'}
                   </button>
                 </div>
               </form>
@@ -547,46 +376,18 @@ const CounselorScheduleManagementPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Modern Delete Modal */}
       <AnimatePresence>
         {deleteModal.open && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
-              onClick={() => !submitting && setDeleteModal({ open: false, schedule: null })}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl w-full max-w-sm p-12 text-center border border-gray-100 dark:border-slate-800"
             >
-              <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-200 shrink-0">
-                <FiTrash2 className="text-red-600 w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Jadwal?</h3>
-              <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                Konfirmasi hapus jadwal <strong>{deleteModal.schedule?.hari}</strong> Konselor <strong>{deleteModal.schedule?.counselor?.name}</strong>? Tindakan ini tidak dapat dikembalikan.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteModal({ open: false, schedule: null })}
-                  disabled={submitting}
-                  className="flex-1 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-100 active:scale-[0.98] transition-all"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleDeleteSchedule}
-                  disabled={submitting}
-                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-200 hover:bg-red-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2"
-                >
-                  {submitting ? <FiRefreshCw className="animate-spin" /> : null}
-                  {submitting ? 'Menghapus...' : 'Hapus Jadwal'}
-                </button>
+              <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 text-rose-600 shadow-inner"><FiTrash2 size={40} /></div>
+              <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-3">Hapus Jadwal?</h3>
+              <p className="text-[11px] font-medium text-slate-400 mb-12 leading-relaxed">Sesi di hari <span className="text-slate-900 font-bold">{deleteModal.schedule?.hari}</span> akan dihapus permanen.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setDeleteModal({ open: false, schedule: null })} disabled={submitting} className="flex-1 py-5 text-slate-400 font-bold text-xs uppercase hover:text-slate-900 transition-all">Batal</button>
+                <button onClick={handleDeleteSchedule} disabled={submitting} className="flex-[2] py-5 bg-rose-600 text-white rounded-full text-xs font-bold shadow-xl shadow-rose-100 hover:bg-rose-700 transition-all active:scale-95">Ya, Hapus</button>
               </div>
             </motion.div>
           </div>

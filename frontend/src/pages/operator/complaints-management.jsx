@@ -265,7 +265,7 @@ const ComplaintsManagementPage = () => {
                 </button>
                 <FiFileText className="text-blue-600" /> Manajemen Pengaduan
               </h1>
-              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
+              <p className="text-gray-500 text-[11px] sm:text-sm mt-1 font-medium">
                 Kelola laporan pengaduan dan proses tindak lanjut PolijeCare
               </p>
             </div>
@@ -431,7 +431,7 @@ const ComplaintsManagementPage = () => {
                 <div className="absolute inset-0 border-4 border-purple-50 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-purple-600 rounded-full border-t-transparent animate-spin"></div>
               </div>
-              <p className="mt-6 text-gray-500 font-bold tracking-tight animate-pulse">Menyiapkan data pengaduan...</p>
+              <p className="mt-6 text-gray-500 font-bold tracking-tight">Menyiapkan data pengaduan...</p>
             </div>
           ) : complaints.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-sm">
@@ -454,7 +454,7 @@ const ComplaintsManagementPage = () => {
                         </div>
                         <div className="overflow-hidden">
                           <h3 className="text-base font-bold text-gray-900 leading-tight truncate" title={c.report_id}>{c.report_id}</h3>
-                          <p className="text-xs text-gray-400 font-medium truncate italic">{c.user_name || 'Tanpa Nama'}</p>
+                          <p className="text-xs text-gray-400 font-medium truncate">{c.user_name || 'Tanpa Nama'}</p>
                         </div>
                       </div>
                     </div>
@@ -495,14 +495,13 @@ const ComplaintsManagementPage = () => {
                             href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(template)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2.5 p-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 rounded-xl border border-[#25D366]/30 transition-colors"
-                            onClick={e => e.stopPropagation()}
+                            className="flex items-center gap-2.5 p-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 rounded-xl border border-[#25D366]/20 transition-all cursor-pointer"
                           >
                             <svg viewBox="0 0 32 32" className="w-5 h-5 shrink-0 fill-[#25D366]" xmlns="http://www.w3.org/2000/svg">
                               <path d="M16 2C8.268 2 2 8.268 2 16c0 2.52.693 4.881 1.9 6.912L2 30l7.302-1.876A13.934 13.934 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.5a11.43 11.43 0 0 1-5.824-1.594l-.417-.248-4.337 1.114 1.138-4.228-.272-.435A11.453 11.453 0 0 1 4.5 16C4.5 9.649 9.649 4.5 16 4.5S27.5 9.649 27.5 16 22.351 27.5 16 27.5zm6.29-8.474c-.344-.172-2.034-1.003-2.349-1.118-.315-.115-.545-.172-.774.172-.23.344-.888 1.118-1.09 1.347-.2.229-.4.258-.745.086-.344-.172-1.452-.535-2.767-1.707-1.022-.913-1.712-2.04-1.913-2.384-.2-.344-.021-.53.15-.701.155-.154.344-.4.516-.6.172-.2.229-.344.344-.573.115-.23.057-.43-.029-.602-.086-.172-.774-1.866-1.06-2.556-.279-.671-.563-.58-.774-.59l-.66-.012c-.23 0-.602.086-.917.43s-1.204 1.176-1.204 2.87 1.233 3.33 1.405 3.56c.172.23 2.428 3.71 5.882 5.205.823.355 1.465.567 1.966.725.826.263 1.578.226 2.172.137.663-.099 2.034-.831 2.32-1.634.287-.803.287-1.491.2-1.634-.086-.143-.315-.229-.66-.4z"/>
                             </svg>
                             <div>
-                              <p className="text-[9px] font-black text-[#128C7E] uppercase leading-none mb-0.5">{label}</p>
+                              <p className="text-[9px] font-bold text-[#128C7E] uppercase leading-none mb-0.5">{label}</p>
                               <p className="text-xs font-bold text-[#075E54]">{phone}</p>
                             </div>
                           </a>
@@ -510,7 +509,7 @@ const ComplaintsManagementPage = () => {
                       })()}
 
                       <div className="flex items-center justify-between mt-6">
-                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusBadge(c.status)}`}>
+                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${getStatusBadge(c.status)}`}>
                           {c.status}
                         </span>
                         <span className="text-[10px] font-bold text-gray-400">
@@ -523,21 +522,21 @@ const ComplaintsManagementPage = () => {
                   <div className="px-7 py-5 bg-gray-50/50 border-t border-gray-100 flex grid grid-cols-3 gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => navigate(`/operator/complaint-detail/${c.id}`)}
-                      className="py-2.5 px-2 bg-white border border-gray-200 text-gray-600 hover:border-gray-500 hover:bg-gray-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                      className="py-2.5 px-2 bg-white border border-gray-200 text-gray-600 hover:border-gray-500 hover:bg-gray-50 rounded-xl text-[10px] font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
                     >
-                      <FiEye size={14} /> DETAIL
+                      <FiEye size={14} /> Detail
                     </button>
                     <button
                       onClick={() => openStatus(c)}
-                      className="py-2.5 px-2 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                      className="py-2.5 px-2 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-[10px] font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
                     >
-                      <FiEdit size={14} /> STATUS
+                      <FiEdit size={14} /> Status
                     </button>
                     <button
                       onClick={() => openSchedule(c)}
-                      className="py-2.5 px-2 bg-white border border-gray-200 text-purple-600 hover:border-purple-500 hover:bg-purple-50 rounded-xl text-[10px] font-black transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
+                      className="py-2.5 px-2 bg-white border border-gray-200 text-purple-600 hover:border-purple-500 hover:bg-purple-50 rounded-xl text-[10px] font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm"
                     >
-                      <FiCalendar size={14} /> JADWAL
+                      <FiCalendar size={14} /> Jadwal
                     </button>
                   </div>
                 </div>
@@ -548,8 +547,8 @@ const ComplaintsManagementPage = () => {
           {/* Pagination Controls */}
           {!isLoading && pagination.last_page > 1 && (
             <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-6 rounded-[32px] border border-gray-100/80 shadow-sm">
-              <p className="text-sm font-medium text-gray-400 italic">
-                Showing <span className="font-bold text-gray-900 not-italic">{((pagination.current_page - 1) * pagination.per_page) + 1}</span> to <span className="font-bold text-gray-900 not-italic">{Math.min(pagination.current_page * pagination.per_page, pagination.total)}</span> of <span className="font-bold text-gray-900 not-italic">{pagination.total}</span> entries
+              <p className="text-sm font-medium text-gray-400">
+                Showing <span className="font-bold text-gray-900">{((pagination.current_page - 1) * pagination.per_page) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(pagination.current_page * pagination.per_page, pagination.total)}</span> of <span className="font-bold text-gray-900">{pagination.total}</span> entries
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -560,7 +559,7 @@ const ComplaintsManagementPage = () => {
                   <FiChevronLeft size={20} />
                 </button>
                 <div className="flex items-center gap-1.5 px-4">
-                  <span className="text-sm font-black text-gray-900">{pagination.current_page}</span>
+                  <span className="text-sm font-bold text-gray-900">{pagination.current_page}</span>
                   <span className="text-sm font-bold text-gray-300">/</span>
                   <span className="text-sm font-bold text-gray-400">{pagination.last_page}</span>
                 </div>
@@ -585,7 +584,7 @@ const ComplaintsManagementPage = () => {
             <div className="w-20 h-20 bg-blue-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
               <FiEdit className="text-blue-600" size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight text-center">Ubah Status</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Ubah Status</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium text-center">{statusModal.complaint?.report_id}</p>
 
             <div className="space-y-4 mb-8">
@@ -617,8 +616,8 @@ const ComplaintsManagementPage = () => {
             )}
 
             <div className="flex gap-4">
-              <button disabled={isSubmitting} onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending', rejection_reason: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-              <button disabled={isSubmitting} onClick={submitStatus} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
+              <button disabled={isSubmitting} onClick={() => setStatusModal({ open: false, complaint: null, status: 'pending', rejection_reason: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
+              <button disabled={isSubmitting} onClick={submitStatus} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'Menyimpan...' : 'Simpan'}</button>
             </div>
           </div>
         </div>
@@ -632,7 +631,7 @@ const ComplaintsManagementPage = () => {
             <div className="w-20 h-20 bg-purple-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
               <FiCalendar className="text-purple-600" size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Konseling</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Konseling</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium text-center">{scheduleModal.complaint?.report_id}</p>
 
             <div className="space-y-4 mb-4">
@@ -662,8 +661,8 @@ const ComplaintsManagementPage = () => {
             </div>
 
             <div className="flex gap-4">
-              <button disabled={isSubmitting} onClick={() => setScheduleModal({ open: false, complaint: null, counseling_schedule: '', counselor_id: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-              <button disabled={isSubmitting} onClick={submitSchedule} className="flex-1 py-4 bg-purple-600 text-white rounded-3xl text-sm font-black hover:bg-purple-700 shadow-xl shadow-purple-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'MENYIMPAN...' : 'SIMPAN'}</button>
+              <button disabled={isSubmitting} onClick={() => setScheduleModal({ open: false, complaint: null, counseling_schedule: '', counselor_id: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
+              <button disabled={isSubmitting} onClick={submitSchedule} className="flex-1 py-4 bg-purple-600 text-white rounded-3xl text-sm font-bold hover:bg-purple-700 shadow-xl shadow-purple-500/20 disabled:opacity-50 transition-all active:scale-95">{isSubmitting ? 'Menyimpan...' : 'Simpan'}</button>
             </div>
           </div>
         </div>

@@ -98,7 +98,7 @@ const Profile = () => {
                 {/* Avatar */}
                 <div className="relative group">
                   <div className="w-28 h-28 md:w-36 md:h-36 rounded-[32px] bg-white p-1.5 shadow-2xl relative z-10 rotate-2 group-hover:rotate-0 transition-transform duration-500 overflow-hidden">
-                    <div className={`w-full h-full rounded-[26px] bg-gradient-to-br ${theme.primary} flex items-center justify-center text-4xl md:text-5xl font-black text-white shadow-inner`}>
+                    <div className={`w-full h-full rounded-[26px] bg-gradient-to-br ${theme.primary} flex items-center justify-center text-4xl md:text-5xl font-bold text-white shadow-inner`}>
                       {initial}
                     </div>
                   </div>
@@ -107,10 +107,10 @@ const Profile = () => {
 
                 <div className="flex-1 space-y-2 mb-2">
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                    <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight leading-tight">
                       {user?.name || 'Loading...'}
                     </h1>
-                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white text-[9px] font-black uppercase tracking-[0.2em]">
+                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white text-[9px] font-bold uppercase tracking-[0.1em]">
                       {theme.roleLabel}
                     </div>
                   </div>
@@ -135,14 +135,14 @@ const Profile = () => {
                         </div>
                         <div>
                           <h2 className="text-xl font-bold text-gray-900 tracking-tight">Informasi Dasar</h2>
-                          <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-0.5">Detail Identitas PolijeCare</p>
+                          <p className="text-gray-400 text-[10px] font-semibold uppercase tracking-widest mt-0.5">Detail Identitas PolijeCare</p>
                         </div>
                       </div>
                    </div>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiHash className="text-indigo-500" /> NIM / ID PETUGAS
                         </label>
                         <p className="text-gray-900 font-bold text-lg tabular-nums tracking-tight">
@@ -152,7 +152,7 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiPhone className="text-emerald-500" /> NOMOR WHATSAPP
                         </label>
                         <p className="text-gray-900 font-bold text-lg tabular-nums tracking-tight">
@@ -162,7 +162,7 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiBriefcase className="text-rose-500" /> POSISI / UNIT
                         </label>
                         <p className="text-gray-900 font-bold text-lg tracking-tight uppercase">
@@ -172,7 +172,7 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiShield className="text-amber-500" /> STATUS AKUN
                         </label>
                         <div className="flex items-center gap-2 mt-1">
@@ -192,7 +192,7 @@ const Profile = () => {
                         <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 border border-indigo-500/30">
                            <FiSettings size={20} />
                         </div>
-                        <h3 className="text-2xl font-black tracking-tight text-white">Keamanan & Layanan</h3>
+                        <h3 className="text-2xl font-bold tracking-tight text-white">Keamanan & Layanan</h3>
                      </div>
                      <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm">
                        Butuh bantuan teknis atau ingin memperbarui keamanan akun? Silakan hubungi tim IT Satgas atau gunakan tombol logout di bawah.
@@ -201,9 +201,9 @@ const Profile = () => {
                    <div className="flex gap-4 relative z-10 shrink-0">
                       <button 
                         onClick={handleLogout}
-                        className="px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-[24px] text-xs font-black tracking-widest uppercase transition-all shadow-xl shadow-rose-500/30 flex items-center gap-3 active:scale-95"
+                        className="px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-[24px] text-xs font-bold tracking-widest uppercase transition-all shadow-xl shadow-rose-500/30 flex items-center gap-3 active:scale-95"
                       >
-                        <FiLogOut /> KELUAR AKUN
+                        <FiLogOut /> Keluar Akun
                       </button>
                    </div>
                 </div>
@@ -218,16 +218,16 @@ const Profile = () => {
                       </div>
                       <div>
                         <h2 className="text-lg font-bold text-gray-900 tracking-tight">Ringkasan</h2>
-                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Statistik Penggunaan</p>
+                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">Statistik Penggunaan</p>
                       </div>
                    </div>
 
                    <div className="space-y-6">
                       {/* Contribution Card */}
                       <div className="p-8 rounded-[32px] bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100/50 group hover:shadow-md transition-all duration-500">
-                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">{stats.label}</p>
+                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3">{stats.label}</p>
                         <div className="flex items-end gap-3">
-                          <span className="text-6xl font-black text-indigo-600 tracking-tighter transition-transform group-hover:scale-105 duration-500 inline-block origin-left">
+                          <span className="text-6xl font-bold text-indigo-600 tracking-tighter transition-transform group-hover:scale-105 duration-500 inline-block origin-left">
                             {isLoading ? '...' : stats.total_contribution}
                           </span>
                           <span className="text-lg font-bold text-indigo-400 mb-2">Item</span>
@@ -237,7 +237,7 @@ const Profile = () => {
                       {/* Verification Card */}
                       <div className="p-8 rounded-[32px] bg-gray-50 border border-gray-100 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Verifikasi</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Verifikasi</p>
                           <p className="text-lg font-bold text-gray-900">Email Kampus</p>
                         </div>
                         <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
@@ -249,7 +249,7 @@ const Profile = () => {
                       <div className="p-6 bg-amber-50 rounded-[32px] border border-amber-100">
                         <div className="flex gap-4">
                           <FiInfo className="text-amber-600 shrink-0 mt-0.5" size={18} />
-                          <p className="text-[11px] text-amber-700 font-medium leading-relaxed italic">
+                          <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
                             Data identitas ditarik langsung dari sistem keanggotaan Polije. Untuk perubahan nama atau ID, harap hubungi administrator.
                           </p>
                         </div>

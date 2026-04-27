@@ -5,9 +5,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { fadeIn, slideDown } from '../utils/motionVariants';
-import Switch from './sky-toggle';
 import LoginModal from './LoginModal';
-
+import logoPolije from '/logo_polije.png';
+import logoPolijecare from '/logo_polijecare_new.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,7 +23,7 @@ const Navbar = () => {
     { name: 'Tentang Kami', href: '#about' },
     { name: 'Cara Melapor', href: '#services' },
     { name: 'Artikel', href: '#articles' },
-    { name: 'Materi', href: '#materials' },
+    { name: 'Edukasi', href: '#materials' },
     { name: 'Kontak', href: '#contact' }
   ];
 
@@ -32,7 +32,7 @@ const Navbar = () => {
     { title: "Tentang Kami", icon: Info },
     { title: "Cara Melapor", icon: FileText },
     { title: "Artikel", icon: BookOpen },
-    { title: "Materi", icon: Library },
+    { title: "Edukasi", icon: Library },
     { title: "Kontak", icon: Phone },
   ];
 
@@ -133,7 +133,6 @@ const Navbar = () => {
               }}
               trailingElement={
                 <div className="flex items-center gap-2">
-                  <Switch />
                   {isAuthenticated ? (
                     <>
                       <button
@@ -151,7 +150,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <button
-                      onClick={() => window.location.href = '/login-new'}
+                      onClick={() => navigate('/login-new')}
                       className="px-6 py-2.5 text-sm font-medium bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg"
                     >
                       Masuk
@@ -168,21 +167,22 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 dark:bg-slate-950/90 backdrop-blur-md border-b border-white/20 dark:border-slate-800 shadow-sm will-change-transform"
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm will-change-transform"
           >
             <div className="w-full px-8 lg:px-12">
               <div className="flex items-center justify-between h-20">
                 {/* Logo Section - Left */}
-                <Link to="/" className="flex items-center space-x-2 cursor-default dark:bg-white/90 dark:px-3 dark:py-1.5 dark:rounded-2xl transition-all">
+                <Link to="/" className="flex items-center space-x-2 cursor-default transition-all group">
                   <img
-                    src="/logo_polije.png"
+                    src={logoPolije}
                     alt="Logo Polije"
-                    className="h-12 w-auto object-contain transition-all duration-300"
+                    className="h-10 w-auto object-contain transition-all duration-300 opacity-95 group-hover:opacity-100"
                   />
-                  <img
-                    src="/logo_polijecare.png"
-                    alt="Polijecare Logo"
-                    className="h-12 w-auto object-contain transition-all duration-300"
+                  <div className="h-8 w-[1px] bg-gray-200 hidden sm:block mx-2"></div>
+                  <img 
+                    src={logoPolijecare} 
+                    alt="Polijecare Logo" 
+                    className="h-11 w-auto object-contain transition-all duration-300 group-hover:scale-105"
                   />
                 </Link>
 
@@ -196,8 +196,8 @@ const Navbar = () => {
                         handleNavClick(link.href);
                       }}
                       className={`px-5 py-2.5 text-base font-medium rounded-full transition-all duration-200 ${activeLink === link.href
-                        ? 'bg-[#191970] dark:bg-indigo-600 text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]'
-                        : 'text-gray-600 dark:text-gray-300 hover:text-[#191970] dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-slate-800/50'
+                        ? 'bg-[#191970] text-white shadow-[0_4px_15px_rgba(25,25,112,0.4)]'
+                        : 'text-gray-600 hover:text-[#191970] hover:bg-gray-100'
                         }`}
                     >
                       {link.name}
@@ -207,7 +207,6 @@ const Navbar = () => {
 
                 {/* Right Section - Auth & Theme */}
                 <div className="hidden md:flex items-center space-x-4">
-                  <Switch />
 
                   {isAuthenticated ? (
                     <>
@@ -226,7 +225,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <button
-                      onClick={() => window.location.href = '/login-new'}
+                      onClick={() => navigate('/login-new')}
                       className="px-6 py-2.5 bg-[#191970] text-white rounded-full hover:bg-blue-900 transition-all duration-300 hover:shadow-lg font-medium text-sm"
                     >
                       Masuk
@@ -313,6 +312,7 @@ const Navbar = () => {
                     ))}
 
                     <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                      
                       {isAuthenticated ? (
                         <>
                           <button
@@ -331,7 +331,7 @@ const Navbar = () => {
                       ) : (
                         <button
                           onClick={() => {
-                            window.location.href = '/login-new';
+                            navigate('/login-new');
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all duration-300 font-medium"

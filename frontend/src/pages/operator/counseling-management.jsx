@@ -57,8 +57,24 @@ const CounselingManagementPage = () => {
     current_page: 1, last_page: 1, per_page: 10, total: 0
   });
   const [activeTab, setActiveTab] = useState('new'); // 'new', 'ongoing', 'archive'
+  const [categories, setCategories] = useState([]);
 
   // Modal states
+  const [manualEntryModal, setManualEntryModal] = useState(false);
+  const [manualFormData, setManualFormData] = useState({
+    counselor_id: '',
+    counselee_name: '',
+    guest_nim: '',
+    guest_email: '',
+    guest_phone: '',
+    tanggal: dayjs().format('YYYY-MM-DD'),
+    jam_mulai: '09:00',
+    jam_selesai: '10:00',
+    metode: 'offline',
+    lokasi: 'Ruang Satgas PPKS',
+    jenis_pengaduan: '',
+    is_record_only: false
+  });
   const [detailModal, setDetailModal] = useState({ open: false, schedule: null, loading: false });
   const [approvalModal, setApprovalModal] = useState({ open: false, schedule: null });
   const [rejectionModal, setRejectionModal] = useState({ open: false, schedule: null, reason: '' });
@@ -67,7 +83,17 @@ const CounselingManagementPage = () => {
   useEffect(() => {
     fetchSchedules();
     fetchCounselors();
+    fetchCategories();
   }, [activeTab]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('/public-categories');
+      if (response.data.success) setCategories(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
 
   const fetchCounselors = async () => {
     try {
@@ -176,6 +202,39 @@ const CounselingManagementPage = () => {
   };
 
   const handleFilterChange = () => fetchSchedules(1);
+
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await axios.post('/operator/counseling/request', manualFormData);
+      if (response.data.success) {
+        showToast('Jadwal manual berhasil dibuat!');
+        setManualEntryModal(false);
+        setManualFormData({
+          counselor_id: '',
+          counselee_name: '',
+          guest_nim: '',
+          guest_email: '',
+          guest_phone: '',
+          tanggal: dayjs().format('YYYY-MM-DD'),
+          jam_mulai: '09:00',
+          jam_selesai: '10:00',
+          metode: 'offline',
+          lokasi: 'Ruang Satgas PPKS',
+          jenis_pengaduan: '',
+          is_record_only: false
+        });
+        fetchSchedules(1);
+      } else {
+        showToast(response.data.message || 'Gagal membuat jadwal', 'error');
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Gagal membuat jadwal manual', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const resetFilters = () => {
     setSearchQuery(''); setStatusFilter('all'); setMethodFilter('all');
@@ -326,7 +385,7 @@ const CounselingManagementPage = () => {
                 </button>
                 <FiClock className="text-blue-600" /> Jadwal Konseling
               </h1>
-              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
+              <p className="text-gray-500 text-[11px] sm:text-sm mt-1 font-medium">
                 Sistem Penjadwalan & Konsultasi PolijeCare
               </p>
             </div>
@@ -335,9 +394,10 @@ const CounselingManagementPage = () => {
                 className="p-2.5 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-50 active:scale-95 transition-all shadow-sm" title="Refresh Data">
                 <FiRefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
               </button>
-              <button onClick={resetFilters}
-                className="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-2xl text-sm font-bold hover:bg-gray-50 active:scale-95 transition-all shadow-sm">
-                Reset
+              <button 
+                onClick={() => setManualEntryModal(true)}
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200 flex items-center gap-2">
+                <FiPlus size={18} /> Tambah Jadwal Manual
               </button>
             </div>
           </div>
@@ -462,7 +522,7 @@ const CounselingManagementPage = () => {
                 <div className="absolute inset-0 border-4 border-blue-50 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
               </div>
-              <p className="mt-6 text-gray-500 font-bold tracking-tight animate-pulse">Menyiapkan data jadwal...</p>
+              <p className="mt-6 text-gray-500 font-bold tracking-tight">Menyiapkan data jadwal...</p>
             </div>
           ) : schedules.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-sm">
@@ -509,7 +569,7 @@ const CounselingManagementPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-6">
-                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusBadge(s.status)}`}>
+                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${getStatusBadge(s.status)}`}>
                           {getStatusLabel(s.status)}
                         </span>
                         <span className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-xl ${s.metode === 'online' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -521,13 +581,13 @@ const CounselingManagementPage = () => {
                   </div>
                   <div className="px-7 py-5 bg-gray-50/50 border-t border-gray-100 grid grid-cols-2 gap-3 opacity-90 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => openDetailModal(s)}
-                      className="py-2.5 px-4 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-2xl text-[11px] font-black transition-all flex items-center justify-center gap-2 shadow-sm">
-                      <FiEye size={14} /> DETAIL
+                      className="py-2.5 px-4 bg-white border border-gray-200 text-blue-600 hover:border-blue-500 hover:bg-blue-50 rounded-2xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                      <FiEye size={14} /> Detail
                     </button>
                     {s.complaint_id && (
                       <button onClick={() => goToComplaintDetail(s)}
-                        className="py-2.5 px-4 bg-white border border-gray-200 text-purple-600 hover:border-purple-500 hover:bg-purple-50 rounded-2xl text-[11px] font-black transition-all flex items-center justify-center gap-2 shadow-sm">
-                        <FiFileText size={14} /> ADUAN
+                        className="py-2.5 px-4 bg-white border border-gray-200 text-purple-600 hover:border-purple-500 hover:bg-purple-50 rounded-2xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <FiFileText size={14} /> Aduan
                       </button>
                     )}
                   </div>
@@ -548,7 +608,7 @@ const CounselingManagementPage = () => {
                   <FiChevronLeft size={20} />
                 </button>
                 <div className="flex items-center gap-1.5 px-4">
-                  <span className="text-sm font-black text-gray-900">{pagination.current_page}</span>
+                  <span className="text-sm font-bold text-gray-900">{pagination.current_page}</span>
                   <span className="text-sm font-bold text-gray-300">/</span>
                   <span className="text-sm font-bold text-gray-400">{pagination.last_page}</span>
                 </div>
@@ -562,6 +622,126 @@ const CounselingManagementPage = () => {
         </main>
       </div>
 
+      {/* ── Manual Entry Modal ─────────────────────────────────────────────── */}
+      {manualEntryModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => !isLoading && setManualEntryModal(false)} />
+          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+            <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Input Jadwal Manual</h3>
+                <p className="text-xs font-bold text-gray-400 mt-1 uppercase">Buat Sesi Konseling Langsung</p>
+              </div>
+              <button onClick={() => setManualEntryModal(false)} className="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-2xl text-gray-400">
+                <FiX size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleManualSubmit} className="p-10 overflow-y-auto space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Data Mahasiswa */}
+                <div className="space-y-4 md:col-span-2">
+                  <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <FiUser size={12} /> Data Mahasiswa / Konseli
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Nama Lengkap <span className="text-red-500">*</span></label>
+                      <input type="text" required value={manualFormData.counselee_name} onChange={e => setManualFormData({...manualFormData, counselee_name: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder="Contoh: Budi Santoso" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">NIM (Opsional)</label>
+                      <input type="text" value={manualFormData.guest_nim} onChange={e => setManualFormData({...manualFormData, guest_nim: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder="E412xxxx" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Email <span className="text-red-500">*</span></label>
+                      <input type="email" required value={manualFormData.guest_email} onChange={e => setManualFormData({...manualFormData, guest_email: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder="budi@student.polije.ac.id" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">No. WhatsApp</label>
+                      <input type="text" value={manualFormData.guest_phone} onChange={e => setManualFormData({...manualFormData, guest_phone: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder="0812xxxx" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-gray-100 md:col-span-2"></div>
+
+                {/* Sesi & Petugas */}
+                <div className="space-y-4 md:col-span-2">
+                  <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <FiCalendar size={12} /> Detail Sesi & Petugas
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Konselor <span className="text-red-500">*</span></label>
+                      <select required value={manualFormData.counselor_id} onChange={e => setManualFormData({...manualFormData, counselor_id: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer">
+                        <option value="">Pilih Konselor...</option>
+                        {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Kategori Masalah <span className="text-red-500">*</span></label>
+                      <select required value={manualFormData.jenis_pengaduan} onChange={e => setManualFormData({...manualFormData, jenis_pengaduan: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer">
+                        <option value="">Pilih Kategori...</option>
+                        {categories.map(cat => <option key={cat.unique_id} value={cat.name}>{cat.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase px-1">Tanggal <span className="text-red-500">*</span></label>
+                  <input type="date" required value={manualFormData.tanggal} onChange={e => setManualFormData({...manualFormData, tanggal: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase px-1">Mulai</label>
+                    <input type="time" required value={manualFormData.jam_mulai} onChange={e => setManualFormData({...manualFormData, jam_mulai: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase px-1">Selesai</label>
+                    <input type="time" required value={manualFormData.jam_selesai} onChange={e => setManualFormData({...manualFormData, jam_selesai: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase px-1">Metode</label>
+                  <div className="flex gap-2 p-1.5 bg-gray-100 rounded-2xl">
+                    <button type="button" onClick={() => setManualFormData({...manualFormData, metode: 'offline', lokasi: 'Ruang Satgas PPKS'})}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${manualFormData.metode === 'offline' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}>Offline</button>
+                    <button type="button" onClick={() => setManualFormData({...manualFormData, metode: 'online', lokasi: 'Google Meet'})}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${manualFormData.metode === 'online' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}>Online</button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 uppercase px-1">Lokasi / Link</label>
+                  <input type="text" value={manualFormData.lokasi} onChange={e => setManualFormData({...manualFormData, lokasi: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder={manualFormData.metode === 'online' ? 'https://meet.google.com/...' : 'Ruang Konseling...'} />
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button type="submit" disabled={isLoading}
+                  className="w-full py-4 bg-blue-600 text-white rounded-[24px] text-sm font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50">
+                  {isLoading ? <FiRefreshCw className="animate-spin" /> : <FiCheckCircle />} Simpan Jadwal Konsultasi
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* ── Detail Modal ─────────────────────────────────────────────────────── */}
       {detailModal.open && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -569,7 +749,7 @@ const CounselingManagementPage = () => {
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
             <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
               <div>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Detail Konseling</h3>
+                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Detail Konseling</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">ID: #{detailModal.schedule?.id}</span>
                 </div>
@@ -591,10 +771,10 @@ const CounselingManagementPage = () => {
                     <div className="space-y-6">
                       {/* Mahasiswa */}
                       <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50">
-                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                           <FiUser size={12} /> Mahasiswa
                         </p>
-                        <p className="text-lg font-black text-gray-900 leading-tight">{detailModal.schedule?.user?.name || 'N/A'}</p>
+                        <p className="text-lg font-bold text-gray-900 leading-tight">{detailModal.schedule?.user?.name || 'N/A'}</p>
                         {detailModal.schedule?.user?.nim && (
                           <p className="text-xs text-gray-500 mt-1">NIM: {detailModal.schedule.user.nim}</p>
                         )}
@@ -605,7 +785,7 @@ const CounselingManagementPage = () => {
                       {/* Konselor */}
                       <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100">
                         <div className="flex items-center justify-between mb-4">
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                             <FiUser size={12} /> Konselor Bertugas
                           </p>
                           {(detailModal.schedule?.status === 'approved' || detailModal.schedule?.status === 'pending') && (
@@ -622,7 +802,7 @@ const CounselingManagementPage = () => {
                     <div className="space-y-6">
                       {/* Waktu */}
                       <div className="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100/50">
-                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-4">Waktu Terjadwal</p>
+                        <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-4">Waktu Terjadwal</p>
                         <div className="space-y-3">
                           <div className="flex items-center gap-3 text-sm font-bold text-gray-700">
                             <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-indigo-500"><FiCalendar size={14} /></div>
@@ -637,27 +817,27 @@ const CounselingManagementPage = () => {
                       {/* Status & Metode */}
                       <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4">
                         <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Status</p>
-                          <span className={`inline-flex px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest ${getStatusBadge(detailModal.schedule?.status)}`}>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Status</p>
+                          <span className={`inline-flex px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-widest ${getStatusBadge(detailModal.schedule?.status)}`}>
                             {getStatusLabel(detailModal.schedule?.status)}
                           </span>
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Metode</p>
-                          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black ${detailModal.schedule?.metode === 'online' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Metode</p>
+                          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-bold ${detailModal.schedule?.metode === 'online' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>
                             {detailModal.schedule?.metode === 'online' ? <FiVideo size={14} /> : <FiMapPin size={14} />}
                             {detailModal.schedule?.metode === 'online' ? 'Online' : 'Offline / Tatap Muka'}
                           </span>
                         </div>
                         {detailModal.schedule?.metode === 'offline' && detailModal.schedule?.lokasi && (
                           <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lokasi</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Lokasi</p>
                             <p className="text-sm font-medium text-gray-700 flex items-center gap-2"><FiMapPin size={14} className="text-emerald-500" />{detailModal.schedule.lokasi}</p>
                           </div>
                         )}
                         {detailModal.schedule?.metode === 'online' && detailModal.schedule?.meeting_link && (
                           <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Link Meeting</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Link Meeting</p>
                             <a href={detailModal.schedule.meeting_link} target="_blank" rel="noopener noreferrer"
                               className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-2">
                               <FiExternalLink size={14} /> Buka Link
@@ -670,14 +850,14 @@ const CounselingManagementPage = () => {
 
                   {detailModal.schedule?.alasan_penolakan && (
                     <div className="p-6 bg-rose-50 rounded-[32px] border border-rose-100">
-                      <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-2"><FiXCircle size={14} /> Catatan Penolakan</p>
+                      <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-2"><FiXCircle size={14} /> Catatan Penolakan</p>
                       <p className="text-sm font-medium text-rose-900 leading-relaxed italic">"{detailModal.schedule.alasan_penolakan}"</p>
                     </div>
                   )}
 
                   {detailModal.schedule?.status === 'completed' && detailModal.schedule?.feedback_notes && (
                     <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6">
-                      <h4 className="text-sm font-black text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Konseling (Feedback)</h4>
+                      <h4 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Konseling (Feedback)</h4>
                       <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                         {detailModal.schedule.feedback_notes}
                       </div>
@@ -700,8 +880,8 @@ const CounselingManagementPage = () => {
 
             <div className="p-10 bg-gray-50/50 border-t border-gray-100 flex gap-4">
               <button onClick={() => setDetailModal({ open: false, schedule: null, loading: false })}
-                className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-[24px] text-sm font-black hover:bg-gray-50 transition-all shadow-sm active:scale-95">
-                TUTUP
+                className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-[24px] text-sm font-bold hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+                Tutup Detail
               </button>
             </div>
           </div>
@@ -716,13 +896,13 @@ const CounselingManagementPage = () => {
             <div className="w-20 h-20 bg-emerald-100 rounded-[30px] flex items-center justify-center mx-auto mb-8 rotate-6 shadow-sm">
               <FiCheck className="text-emerald-600" size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Kirim Persetujuan?</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Kirim Persetujuan?</h3>
             <p className="text-gray-500 text-sm mb-10 font-medium leading-relaxed">
               Anda akan menyetujui sesi konseling untuk <strong>{approvalModal.schedule.user?.name}</strong>.
             </p>
             <div className="flex gap-4">
-              <button onClick={() => setApprovalModal({ open: false, schedule: null })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-              <button onClick={() => handleApprove(approvalModal.schedule.id)} className="flex-1 py-4 bg-emerald-600 text-white rounded-3xl text-sm font-black hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">YA, SETUJU</button>
+              <button onClick={() => setApprovalModal({ open: false, schedule: null })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
+              <button onClick={() => handleApprove(approvalModal.schedule.id)} className="flex-1 py-4 bg-emerald-600 text-white rounded-3xl text-sm font-bold hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">Ya, Setuju</button>
             </div>
           </div>
         </div>
@@ -736,15 +916,15 @@ const CounselingManagementPage = () => {
             <div className="w-20 h-20 bg-rose-100 rounded-[30px] flex items-center justify-center mb-8 -rotate-6 shadow-sm">
               <FiX className="text-rose-600" size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Tolak Permintaan</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Tolak Permintaan</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium">Berikan alasan agar mahasiswa dapat menjadwalkan ulang.</p>
             <textarea value={rejectionModal.reason} onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
               placeholder="Contoh: Mohon maaf, konselor sudah memiliki agenda lain di jam tersebut..."
               rows={4}
               className="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-[32px] text-sm focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all mb-8 resize-none font-medium" />
             <div className="flex gap-4">
-              <button onClick={() => setRejectionModal({ open: false, schedule: null, reason: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-              <button onClick={handleReject} disabled={!rejectionModal.reason.trim()} className="flex-1 py-4 bg-rose-600 text-white rounded-3xl text-sm font-black hover:bg-rose-700 shadow-xl shadow-rose-500/20 disabled:opacity-50 transition-all active:scale-95">KIRIM PENOLAKAN</button>
+              <button onClick={() => setRejectionModal({ open: false, schedule: null, reason: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
+              <button onClick={handleReject} disabled={!rejectionModal.reason.trim()} className="flex-1 py-4 bg-rose-600 text-white rounded-3xl text-sm font-bold hover:bg-rose-700 shadow-xl shadow-rose-500/20 disabled:opacity-50 transition-all active:scale-95">Kirim Penolakan</button>
             </div>
           </div>
         </div>
@@ -755,7 +935,7 @@ const CounselingManagementPage = () => {
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setReassignModal({ open: false, schedule: null, selectedCounselorId: '' })} />
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Ganti Konselor</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Ganti Konselor</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium">Pilih konselor baru untuk sesi konseling ini.</p>
             <div className="mb-8">
               <label className="block text-xs font-bold text-gray-700 mb-2">Pilih Konselor <span className="text-red-500">*</span></label>
@@ -771,8 +951,8 @@ const CounselingManagementPage = () => {
               </select>
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setReassignModal({ open: false, schedule: null, selectedCounselorId: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-black hover:bg-gray-50 transition-all">BATAL</button>
-              <button onClick={handleReassign} disabled={!reassignModal.selectedCounselorId} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">SIMPAN</button>
+              <button onClick={() => setReassignModal({ open: false, schedule: null, selectedCounselorId: '' })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
+              <button onClick={handleReassign} disabled={!reassignModal.selectedCounselorId} className="flex-1 py-4 bg-blue-600 text-white rounded-3xl text-sm font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95">Simpan</button>
             </div>
           </div>
         </div>

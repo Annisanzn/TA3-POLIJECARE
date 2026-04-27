@@ -28,18 +28,7 @@ Route::get('/test', function () {
 Route::get('/test-users', [UserController::class, 'index']);
 
 // Articles (public) — hanya tampil yang aktif & sudah publish, limit 6
-Route::get('/articles', function () {
-    try {
-        $articles = \App\Models\Article::published()->latest()->limit(6)->get();
-        return response()->json([
-            'success' => true,
-            'data' => \App\Http\Resources\ArticleResource::collection($articles),
-            'meta' => ['total' => $articles->count()],
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Gagal mengambil artikel', 'err' => $e->getMessage()], 500);
-    }
-});
+Route::get('/articles', [ArticleController::class, 'index']);
 Route::get('/articles/{slug}', [ArticleController::class, 'show']);
 Route::get('/materials', [MaterialController::class, 'index']);
 
@@ -60,10 +49,10 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleC
 
 // Public routes
 Route::post('/public-complaints', [\App\Http\Controllers\API\PublicComplaintController::class, 'store']);
-Route::get('/public-categories', function () {
-    $categories = \App\Models\ViolenceCategory::orderBy('name')->get(['unique_id', 'name']);
-    return response()->json(['success' => true, 'data' => $categories]);
-});
+Route::get('/public-categories', [\App\Http\Controllers\API\ViolenceCategoryController::class, 'publicIndex']);
+
+// Public Materials Route
+Route::get('/public-materials', [\App\Http\Controllers\API\MaterialController::class, 'index']);
 
 // File Proxy Route (Fixes 403 on static storage)
 Route::get('/files/view', [FileController::class, 'view']);

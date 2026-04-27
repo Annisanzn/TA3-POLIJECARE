@@ -3,8 +3,10 @@ import Sidebar from '../../components/layout/Sidebar';
 import {
   FiUsers, FiUserPlus, FiSearch, FiFilter, FiEdit, FiTrash2,
   FiCheckCircle, FiAlertCircle, FiDownload, FiPrinter,
-  FiUser, FiMessageSquare, FiChevronLeft, FiChevronRight, FiEye, FiEyeOff, FiMenu
+  FiUser, FiMessageSquare, FiChevronLeft, FiChevronRight, FiEye, FiEyeOff, FiMenu,
+  FiMoreVertical, FiTrendingUp, FiLoader, FiX, FiShield, FiSave
 } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 import { userService } from '../../services/userService';
 
 const UserManagementPage = () => {
@@ -23,12 +25,12 @@ const UserManagementPage = () => {
   });
   const [pagination, setPagination] = useState({
     total: 0,
-    per_page: 6,
+    per_page: 8,
     total_pages: 1
   });
 
   const [showUserModal, setShowUserModal] = useState(false);
-  const [modalMode, setModalMode] = useState('create'); // create | edit
+  const [modalMode, setModalMode] = useState('create');
   const [selectedUser, setSelectedUser] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -44,104 +46,33 @@ const UserManagementPage = () => {
     nim: '',
   });
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
-  // Stats data untuk cards — dinamis dari API
-  const growth = stats.growth || {};
   const statsData = [
-    {
-      title: 'Total User',
-      value: stats.total_users?.toString() || '0',
-      icon: <FiUsers size={20} />,
-      color: 'from-purple-500 to-purple-600',
-      change: growth.total_percent !== undefined
-        ? `${growth.total_percent >= 0 ? '+' : ''}${growth.total_percent}%`
-        : null,
-      changeCount: growth.total_change,
-    },
-    {
-      title: 'Operator',
-      value: stats.operator?.toString() || '0',
-      icon: <FiUser size={20} />,
-      color: 'from-green-500 to-green-600',
-      change: growth.operator_change !== undefined
-        ? `+${growth.operator_change}`
-        : null,
-      changeCount: growth.operator_change,
-    },
-    {
-      title: 'Konselor',
-      value: stats.konselor?.toString() || '0',
-      icon: <FiMessageSquare size={20} />,
-      color: 'from-blue-500 to-blue-600',
-      change: growth.konselor_change !== undefined
-        ? `+${growth.konselor_change}`
-        : null,
-      changeCount: growth.konselor_change,
-    },
-    {
-      title: 'Pengguna',
-      value: stats.pengguna?.toString() || '0',
-      icon: <FiUser size={20} />,
-      color: 'from-gray-500 to-gray-600',
-      change: growth.pengguna_change !== undefined
-        ? `+${growth.pengguna_change}`
-        : null,
-      changeCount: growth.pengguna_change,
-    },
+    { title: 'Total User', value: stats.total_users || 0, icon: <FiUsers />, color: 'bg-indigo-600', shadow: 'shadow-indigo-200 dark:shadow-indigo-900/20' },
+    { title: 'Operator', value: stats.operator || 0, icon: <FiShield />, color: 'bg-emerald-600', shadow: 'shadow-emerald-200 dark:shadow-emerald-900/20' },
+    { title: 'Konselor', value: stats.konselor || 0, icon: <FiMessageSquare />, color: 'bg-blue-600', shadow: 'shadow-blue-200 dark:shadow-blue-900/20' },
+    { title: 'Pengguna', value: stats.pengguna || 0, icon: <FiUser />, color: 'bg-rose-600', shadow: 'shadow-rose-200 dark:shadow-rose-900/20' },
   ];
 
-  const itemsPerPage = pagination.per_page;
-  const totalPages = pagination.total_pages;
-
-  // Fetch data from backend
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      setErrorMessage('');
-      console.log('🔍 Fetching user data...');
-      console.log('🔑 Token exists:', !!localStorage.getItem('token'));
-
-      // Fetch stats
       const statsResponse = await userService.getUserStats();
-      console.log('📊 Stats response:', statsResponse);
-      if (statsResponse && statsResponse.success) {
-        setStats(statsResponse.data);
-        console.log('✅ Stats loaded:', statsResponse.data);
-      } else {
-        console.warn('⚠️ Stats API returned unsuccessful:', statsResponse);
-      }
+      if (statsResponse?.success) setStats(statsResponse.data);
 
-      // Fetch users with current filters
       const usersResponse = await userService.getUsers({
         page: currentPage,
-        per_page: itemsPerPage,
+        per_page: pagination.per_page,
         search: searchQuery,
         role: roleFilter === 'all' ? 'all' : roleFilter
       });
 
-      console.log('👥 Users response:', usersResponse);
-
-      // Check if response has success property
-      if (usersResponse && usersResponse.success) {
+      if (usersResponse?.success) {
         setUsers(usersResponse.data.users);
         setPagination(usersResponse.data.pagination);
-        setErrorMessage('');
-        console.log('✅ Users loaded successfully:', usersResponse.data.users.length, 'items');
-      } else {
-        console.warn('⚠️ Users API returned unsuccessful:', usersResponse);
-        console.warn('⚠️ Response structure:', usersResponse);
-        setUsers([]);
-        setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
-        setErrorMessage('Gagal mengambil data pengguna.');
       }
     } catch (error) {
-      console.error('❌ Error fetching user data:', error);
-      console.error('❌ Error details:', error?.response);
-      setUsers([]);
-      setPagination({ total: 0, per_page: itemsPerPage, total_pages: 0 });
       setErrorMessage(error?.response?.data?.message || 'Gagal mengambil data pengguna.');
     } finally {
       setIsLoading(false);
@@ -152,24 +83,15 @@ const UserManagementPage = () => {
     fetchData();
   }, [currentPage, searchQuery, roleFilter]);
 
-  const handleAddUser = async () => {
+  const handleAddUser = () => {
     setModalMode('create');
     setSelectedUser(null);
     setFormError('');
-    setFormData({
-      name: '',
-      email: '',
-      password: '',
-      role: 'user',
-      nim: '',
-    });
+    setFormData({ name: '', email: '', password: '', role: 'user', nim: '' });
     setShowUserModal(true);
   };
 
-  const handleEditUser = (id) => {
-    const user = users.find(u => u.id === id);
-    if (!user) return;
-
+  const handleEditUser = (user) => {
     setModalMode('edit');
     setSelectedUser(user);
     setFormError('');
@@ -183,31 +105,20 @@ const UserManagementPage = () => {
     setShowUserModal(true);
   };
 
-  const handleDeleteUser = (id) => {
-    const user = users.find(u => u.id === id);
-    if (user) {
-      setUserToDelete(user);
-      setShowDeleteModal(true);
-    }
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
   };
 
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
-
     try {
       setIsDeleting(true);
-      setErrorMessage('');
       await userService.deleteUser(userToDelete.id);
-
-      // Refresh data
       await fetchData();
-
       setShowDeleteModal(false);
-      setUserToDelete(null);
     } catch (error) {
-      setErrorMessage(error?.message || 'Gagal menghapus pengguna.');
-      setShowDeleteModal(false);
-      setUserToDelete(null);
+      setErrorMessage('Gagal menghapus pengguna.');
     } finally {
       setIsDeleting(false);
     }
@@ -216,49 +127,24 @@ const UserManagementPage = () => {
   const handleSubmitUser = async (e) => {
     e.preventDefault();
     setFormError('');
-
-    if (!formData.name.trim()) {
-      setFormError('Nama wajib diisi');
-      return;
-    }
-    if (!formData.email.trim()) {
-      setFormError('Email wajib diisi');
-      return;
+    if (!formData.name.trim() || !formData.email.trim()) {
+      setFormError('Nama dan Email wajib diisi'); return;
     }
     if (modalMode === 'create' && !formData.password) {
-      setFormError('Password wajib diisi');
-      return;
+      setFormError('Password wajib diisi'); return;
     }
 
     try {
       setIsSubmitting(true);
-
-      const payload = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        role: formData.role,
-        nim: formData.nim ? formData.nim.trim() : null,
-      };
-
+      const payload = { ...formData, nim: formData.nim?.trim() || null };
       if (modalMode === 'create') {
-        payload.password = formData.password;
         await userService.createUser(payload);
       } else {
-        if (!selectedUser?.id) {
-          setFormError('User tidak valid');
-          return;
-        }
-
-        if (formData.password) {
-          payload.password = formData.password;
-        }
-
+        if (!formData.password) delete payload.password;
         await userService.updateUser(selectedUser.id, payload);
       }
-
       setShowUserModal(false);
-      setSelectedUser(null);
-      await fetchData();
+      fetchData();
     } catch (error) {
       setFormError(error?.message || 'Gagal menyimpan pengguna.');
     } finally {
@@ -267,641 +153,218 @@ const UserManagementPage = () => {
   };
 
   const exportCsv = () => {
-    const headers = ['ID', 'Nama', 'Email', 'Role', 'NIM', 'Tanggal Dibuat'];
-    const rows = users.map((u) => [
-      u.id,
-      u.name,
-      u.email,
-      u.role,
-      u.nim || '',
-      u.created_at || '',
-    ]);
-
-    const escape = (value) => {
-      const s = String(value ?? '');
-      if (/[\n\r",]/.test(s)) {
-        return `"${s.replaceAll('"', '""')}"`;
-      }
-      return s;
-    };
-
-    const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const headers = ['ID', 'Nama', 'Email', 'Role', 'NIM'];
+    const csv = [headers, ...users.map(u => [u.id, u.name, u.email, u.role, u.nim || ''])].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `users_page_${pagination.current_page || currentPage}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = 'users.csv'; a.click();
   };
-
-  const printTable = () => {
-    const win = window.open('', 'PRINT', 'height=700,width=1000');
-    if (!win) return;
-
-    const rowsHtml = users.map((u) => {
-      const createdAt = u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '';
-      return `
-        <tr>
-          <td>${u.id}</td>
-          <td>${u.name ?? ''}</td>
-          <td>${u.email ?? ''}</td>
-          <td>${u.role ?? ''}</td>
-          <td>${u.nim ?? ''}</td>
-          <td>${createdAt}</td>
-        </tr>
-      `;
-    }).join('');
-
-    win.document.write(`
-      <html>
-        <head>
-          <title>Manajemen Pengguna</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 24px; }
-            h1 { margin: 0 0 12px 0; font-size: 18px; }
-            p { margin: 0 0 16px 0; color: #555; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
-            th { background: #f3f4f6; text-align: left; }
-          </style>
-        </head>
-        <body>
-          <h1>Manajemen Pengguna</h1>
-          <p>Halaman ${pagination.current_page || currentPage} dari ${totalPages} — total ${pagination.total} pengguna</p>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nama</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>NIM</th>
-                <th>Tanggal Dibuat</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
-  };
-
-  const getRoleBadgeColor = (role) => {
-    const roleLower = role.toLowerCase();
-    switch (roleLower) {
-      case 'konselor': return 'bg-blue-100 text-blue-800';
-      case 'operator': return 'bg-green-100 text-green-800';
-      case 'pengguna': return 'bg-gray-100 text-gray-800';
-      case 'user': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  // NOTE: fetch happens only in the single useEffect above (no debounce) to avoid double fetch.
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-['Poppins'] overflow-hidden transition-colors duration-500">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+      `}</style>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-8 py-6 h-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                <button 
-                  onClick={toggleSidebar}
-                  className="p-2 bg-gray-50 rounded-lg lg:hidden hover:bg-gray-100 text-gray-600 transition-colors"
-                >
-                  <FiMenu size={20} />
-                </button>
-                <FiUsers className="text-blue-600" /> Manajemen Pengguna
-              </h1>
-              <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
-                Kelola data pengguna sistem pelaporan PolijeCare
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="relative w-full sm:w-80">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Cari pengguna..."
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setCurrentPage(1);
-                    setSearchQuery(e.target.value);
-                  }}
-                />
-              </div>
+      <div className="flex-none h-full overflow-y-auto no-scrollbar border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
+        <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
+      </div>
 
-              <button
-                onClick={handleAddUser}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2.5 rounded-xl font-medium flex items-center justify-center space-x-2 hover:shadow-lg hover:scale-[1.03] transition-all duration-200 w-full sm:w-auto"
-              >
-                <FiUserPlus size={18} />
-                <span className="whitespace-nowrap">Tambah Pengguna</span>
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-slate-800 px-4 md:px-8 py-4 md:py-6 shrink-0 z-30 transition-all">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <button onClick={toggleSidebar} className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl lg:hidden hover:bg-gray-50 dark:hover:bg-slate-700 transition-all">
+                <FiMenu size={20} className="dark:text-white" />
               </button>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 tracking-tight">
+                  <FiUsers className="text-indigo-600 dark:text-indigo-400" /> Manajemen Pengguna
+                </h1>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Direktori & Akses Kontrol PolijeCare</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+               <div className="relative w-full sm:w-64 group">
+                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-all" />
+                  <input type="text" placeholder="Cari..." value={searchQuery} onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-transparent focus:bg-white focus:border-indigo-500 rounded-2xl text-[11px] font-bold text-slate-900 outline-none transition-all shadow-inner" />
+               </div>
+               <button onClick={handleAddUser} className="w-full sm:w-auto px-6 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-100 active:scale-95 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+                 <FiUserPlus size={18} /> Tambah
+               </button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-6 overflow-x-auto">
-          {errorMessage && !isLoading && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <div className="flex items-start gap-3 text-red-700">
-                <FiAlertCircle className="mt-0.5" />
-                <div>
-                  <p className="font-semibold text-sm">Gagal memuat data</p>
-                  <p className="text-sm">{errorMessage}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Stats Cards Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-            {statsData.map((stat, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-xs sm:text-sm">{stat.title}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{stat.value}</p>
-                  </div>
-                  <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.color}`}>
-                    <div className="text-white">
-                      {stat.icon}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 sm:mt-4">
-                  {stat.change !== null ? (
-                    <span className={`text-xs sm:text-sm font-medium ${
-                      stat.changeCount > 0 ? 'text-green-600' : 'text-gray-400'
-                    }`}>
-                      {stat.changeCount > 0 ? stat.change : '0'} baru bulan ini
-                    </span>
-                  ) : (
-                    <span className="text-gray-400 text-xs sm:text-sm font-medium">—</span>
-                  )}
-                </div>
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 bg-slate-50/50 dark:bg-slate-950/50 custom-scrollbar transition-all">
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {statsData.map((stat, idx) => (
+              <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-5 hover:shadow-xl transition-all group overflow-hidden relative">
+                 <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-xl transition-transform group-hover:scale-110`}>
+                   {React.cloneElement(stat.icon, { size: 24 })}
+                 </div>
+                 <div className="relative z-10">
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.title}</p>
+                   <p className="text-2xl font-bold text-slate-900 tracking-tight">{stat.value}</p>
+                 </div>
               </div>
             ))}
           </div>
 
-          {/* Premium Table Section */}
-          <div className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 overflow-hidden relative">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-
-            {/* Header Toolbar */}
-            <div className="px-6 py-5 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Direktori Pengguna</h2>
-                <p className="text-gray-500 text-sm mt-1 font-medium">
-                  Menampilkan <span className="text-gray-900">{users.length}</span> dari {pagination.total} pengguna
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Role Filter */}
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiFilter className="text-gray-400 group-focus-within:text-purple-500 transition-colors" />
-                  </div>
-                  <select
-                    className="pl-9 pr-8 py-2.5 bg-gray-50 border-0 ring-1 ring-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:ring-gray-300 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all appearance-none cursor-pointer"
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                  >
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-all">
+            <div className="px-8 py-6 border-b border-gray-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30 dark:bg-slate-800/30">
+               <div>
+                 <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Direktori Pengguna</h2>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total {pagination.total} Entri</p>
+               </div>
+               <div className="flex items-center gap-3">
+                  <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
+                    className="px-6 py-2.5 bg-white border border-gray-100 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-600 outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
                     <option value="all">Semua Peran</option>
                     <option value="konselor">Konselor</option>
                     <option value="operator">Operator</option>
-                    <option value="user">Pengguna</option>
+                    <option value="user">User</option>
                   </select>
-                </div>
-
-                {/* Export Buttons */}
-                <div className="flex items-center gap-2 bg-gray-50 p-1 ring-1 ring-gray-200 rounded-xl">
-                  <button
-                    onClick={exportCsv}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all"
-                  >
-                    <FiDownload size={14} />
-                    <span className="hidden sm:inline font-medium">CSV</span>
+                  <button onClick={exportCsv} className="p-2.5 bg-white border border-gray-100 rounded-xl text-slate-400 hover:text-emerald-500 transition-all shadow-sm">
+                    <FiDownload size={18} />
                   </button>
-                  <div className="w-px h-4 bg-gray-300"></div>
-                  <button
-                    onClick={printTable}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-sm transition-all"
-                  >
-                    <FiPrinter size={14} />
-                    <span className="hidden sm:inline font-medium">Cetak</span>
-                  </button>
-                </div>
-              </div>
+               </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Pengguna</th>
-                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Kontak & Status</th>
-                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Peran</th>
-                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden lg:table-cell">Identitas</th>
-                    <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase text-right">Aksi</th>
+                <thead className="bg-slate-50/50 dark:bg-slate-950/50">
+                  <tr>
+                    <th className="py-5 px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pengguna</th>
+                    <th className="py-5 px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role & Akses</th>
+                    <th className="py-5 px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Identitas</th>
+                    <th className="py-5 px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                   {isLoading ? (
-                    // Premium Skeleton
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <tr key={index} className="animate-pulse bg-white">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-gray-200"></div>
-                            <div className="space-y-2">
-                              <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                              <div className="h-3 w-16 bg-gray-100 rounded"></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 hidden md:table-cell">
-                          <div className="space-y-2">
-                            <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                            <div className="h-4 w-20 bg-gray-100 rounded-full"></div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="h-6 w-20 bg-gray-200 rounded-lg"></div>
-                        </td>
-                        <td className="py-4 px-6 hidden lg:table-cell">
-                          <div className="space-y-2">
-                            <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                            <div className="h-3 w-16 bg-gray-100 rounded"></div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex justify-end gap-2">
-                            <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
-                            <div className="w-8 h-8 bg-gray-200 rounded-xl"></div>
-                          </div>
-                        </td>
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td colSpan="4" className="py-8 px-8"><div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full" /></td>
                       </tr>
                     ))
-                  ) : users.length > 0 ? (
-                    users.map((user) => (
-                      <tr
-                        key={user.id}
-                        className="group bg-white hover:bg-slate-50/80 transition-all duration-300"
-                      >
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-4">
-                            <div className="relative shrink-0">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.2)] transition-all duration-300">
-                                {user.name.charAt(0).toUpperCase()}
-                              </div>
-                              <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${user.email_verified_at ? 'bg-emerald-400' : 'bg-amber-400'} shadow-sm`}></div>
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors truncate">{user.name}</div>
-                              <div className="text-[11px] font-medium text-gray-400 mt-0.5">ID: #{user.id}</div>
-                              {/* Mobile email fallback */}
-                              <div className="text-[11px] text-gray-500 md:hidden mt-0.5 truncate max-w-[150px]">{user.email}</div>
-                            </div>
+                  ) : users.map(user => (
+                    <tr key={user.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
+                      <td className="py-6 px-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600 font-bold text-base shadow-inner border border-gray-200/50 group-hover:scale-110 transition-all">
+                            {user.name[0].toUpperCase()}
                           </div>
-                        </td>
-                        <td className="py-4 px-6 hidden md:table-cell">
-                          <div className="flex flex-col gap-1.5">
-                            <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
-                              {user.email}
-                            </span>
-                            {user.email_verified_at ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit border border-emerald-200/50">
-                                <FiCheckCircle size={10} /> TERVERIFIKASI
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit border border-amber-200/50">
-                                <FiAlertCircle size={10} /> BELUM VERIFIKASI
-                              </span>
-                            )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">{user.name}</p>
+                            <p className="text-[11px] text-slate-400 font-medium truncate">{user.email}</p>
                           </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest border ${user.role === 'konselor' ? 'bg-blue-50/50 text-blue-600 border-blue-200' :
-                            user.role === 'operator' ? 'bg-indigo-50/50 text-indigo-600 border-indigo-200' :
-                              'bg-gray-50 text-gray-600 border-gray-200'
-                            }`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6 hidden lg:table-cell">
-                          <div className="text-sm font-semibold text-gray-800">{user.nim || '-'}</div>
-                          <div className="text-[11px] text-gray-400 mt-0.5 block">Tergabung: {new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          <div className="flex items-center justify-end gap-1 sm:gap-2">
-                            <button
-                              onClick={() => handleEditUser(user.id)}
-                              className="p-2 sm:p-2.5 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
-                              title="Edit Pengguna"
-                            >
-                              <FiEdit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="p-2 sm:p-2.5 text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 rounded-xl transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:translate-x-4 sm:group-hover:translate-x-0 group-hover:duration-300"
-                              title="Hapus Pengguna"
-                            >
-                              <FiTrash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="py-16 text-center">
-                        <div className="inline-flex flex-col items-center justify-center">
-                          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-gray-100">
-                            <FiUsers className="text-3xl text-gray-400" />
-                          </div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">Pengguna Tidak Ditemukan</h3>
-                          <p className="text-sm text-gray-500 max-w-sm">Kami tidak dapat menemukan pengguna yang sesuai dengan kriteria filter Anda saat ini.</p>
+                        </div>
+                      </td>
+                      <td className="py-6 px-8">
+                         <span className={`px-3 py-1 text-[10px] font-bold rounded-lg border uppercase tracking-widest ${
+                           user.role === 'operator' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                           user.role === 'konselor' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                           'bg-slate-100 text-slate-600 border-slate-200'
+                         }`}>
+                           {user.role}
+                         </span>
+                      </td>
+                      <td className="py-6 px-8">
+                         <p className="text-xs font-bold text-slate-700 tracking-tight">{user.nim || 'N/A'}</p>
+                         <p className="text-[10px] text-slate-400 uppercase font-medium mt-1 tracking-widest">{new Date(user.created_at).toLocaleDateString('id-ID')}</p>
+                      </td>
+                      <td className="py-6 px-8 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                           <button onClick={() => handleEditUser(user)} className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all active:scale-95"><FiEdit size={16} /></button>
+                           <button onClick={() => handleDeleteUser(user)} className="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-400 hover:text-rose-600 rounded-xl transition-all active:scale-95"><FiTrash2 size={16} /></button>
                         </div>
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Pagination Component (Premium) */}
-            {!isLoading && users.length > 0 && (
-              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="text-sm font-medium text-gray-500">
-                  Menampilkan <span className="text-gray-900 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> hingga <span className="text-gray-900 font-bold">{Math.min(currentPage * itemsPerPage, pagination.total)}</span> dari <span className="text-gray-900 font-bold">{pagination.total}</span> pengguna
-                </div>
-
-                <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 w-fit">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-                  >
-                    <FiChevronLeft size={16} />
-                  </button>
-
-                  <div className="flex items-center">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`min-w-[32px] h-8 px-2 mx-0.5 rounded-lg text-sm font-bold transition-all ${currentPage === pageNum
-                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-200'
-                            : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-                  >
-                    <FiChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="px-8 py-5 border-t border-gray-50 dark:border-slate-800 flex items-center justify-between bg-gray-50/30 dark:bg-slate-950/50">
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Halaman {currentPage} dari {pagination.total_pages}</p>
+               <div className="flex gap-2">
+                  <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg disabled:opacity-30 transition-all"><FiChevronLeft /></button>
+                  <button disabled={currentPage === pagination.total_pages} onClick={() => setCurrentPage(p => p + 1)} className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg disabled:opacity-30 transition-all"><FiChevronRight /></button>
+               </div>
+            </div>
           </div>
         </main>
-
-        {showUserModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-black/40"
-              onClick={() => {
-                if (!isSubmitting) {
-                  setShowUserModal(false);
-                  setSelectedUser(null);
-                }
-              }}
-            />
-
-            <div className="relative w-full max-w-xl rounded-2xl bg-white shadow-xl border border-gray-100">
-              <div className="px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {modalMode === 'create' ? 'Tambah Pengguna' : 'Edit Pengguna'}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {modalMode === 'create'
-                    ? 'Isi data pengguna baru lalu simpan.'
-                    : 'Ubah data pengguna lalu simpan.'}
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmitUser} className="px-6 py-5 space-y-4">
-                {formError && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {formError}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Nama lengkap"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="email@polije.ac.id"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password {modalMode === 'edit' ? '(opsional)' : ''}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 pr-11 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder={modalMode === 'create' ? 'Minimal 8 karakter' : 'Kosongkan jika tidak diganti'}
-                        disabled={isSubmitting}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((v) => !v)}
-                        className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
-                        aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
-                        disabled={isSubmitting}
-                      >
-                        {showPassword ? <FiEyeOff /> : <FiEye />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => setFormData((p) => ({ ...p, role: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      disabled={isSubmitting}
-                    >
-                      <option value="user">Pengguna</option>
-                      <option value="konselor">Konselor</option>
-                      <option value="operator">Operator</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Admin dianggap sebagai Operator.</p>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">NIM (opsional)</label>
-                    <input
-                      type="text"
-                      value={formData.nim}
-                      onChange={(e) => setFormData((p) => ({ ...p, nim: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Contoh: 2021001"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!isSubmitting) {
-                        setShowUserModal(false);
-                        setSelectedUser(null);
-                      }
-                    }}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={isSubmitting}
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors disabled:opacity-60"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              onClick={() => !isDeleting && setShowDeleteModal(false)}
-            />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
-              <div className="flex flex-col items-center text-center mt-4">
-                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4 ring-8 ring-rose-50">
-                  <FiAlertCircle size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Hapus Pengguna</h3>
-                <p className="text-gray-500 text-sm mb-6">
-                  Apakah Anda yakin ingin menghapus pengguna <br />
-                  <span className="font-bold text-gray-800">{userToDelete?.name}</span>?
-                  <br /><span className="text-rose-500 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
-                </p>
-
-                <div className="flex justify-center gap-3 w-full">
-                  <button
-                    onClick={() => setShowDeleteModal(false)}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all disabled:opacity-50"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={confirmDeleteUser}
-                    disabled={isDeleting}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium hover:from-rose-600 hover:to-red-700 focus:ring-4 focus:ring-rose-100 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-                  >
-                    {isDeleting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span className="ml-2">Menghapus...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FiTrash2 size={18} />
-                        <span>Ya, Hapus</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
+
+      <AnimatePresence>
+        {showUserModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+               <div className="absolute top-0 left-0 w-full h-2 bg-indigo-600" />
+               <div className="px-10 py-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between">
+                  <h3 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">{modalMode === 'create' ? 'Tambah Pengguna' : 'Edit Pengguna'}</h3>
+                  <button onClick={() => setShowUserModal(false)} className="text-slate-400 hover:text-rose-600 transition-colors"><FiX size={24} /></button>
+               </div>
+               <form onSubmit={handleSubmitUser} className="p-10 space-y-6">
+                  {formError && <div className="p-4 bg-rose-50 text-rose-600 text-[10px] font-bold uppercase rounded-2xl border border-rose-100">{formError}</div>}
+                  <div className="grid grid-cols-2 gap-6">
+                     <div className="col-span-2 space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Nama Lengkap</label>
+                        <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Email</label>
+                        <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Peran</label>
+                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-500 shadow-inner">
+                           <option value="user">User</option>
+                           <option value="konselor">Konselor</option>
+                           <option value="operator">Operator</option>
+                        </select>
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">NIM / Identitas</label>
+                        <input type="text" value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                     </div>
+                     <div className="space-y-2 relative">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Password</label>
+                        <input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-[48px] text-slate-400 hover:text-indigo-600 transition-all">{showPassword ? <FiEyeOff size={18}/> : <FiEye size={18}/>}</button>
+                     </div>
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                     <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
+                     <button type="submit" disabled={isSubmitting} className="flex-[2] py-5 bg-indigo-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-indigo-100 uppercase">{isSubmitting ? <FiLoader className="animate-spin mx-auto"/> : <><FiSave className="inline mr-2"/> Simpan</>}</button>
+                  </div>
+               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[120] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 max-w-sm text-center border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+               <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-rose-600"><FiTrash2 size={32} /></div>
+               <h3 className="text-2xl font-bold text-slate-900 uppercase tracking-tight mb-2">Hapus User?</h3>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10 opacity-70">Aksi ini tidak dapat dibatalkan</p>
+               <div className="flex gap-4">
+                  <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
+                  <button onClick={confirmDeleteUser} disabled={isDeleting} className="flex-[2] py-4 bg-rose-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-rose-100 uppercase">Hapus</button>
+               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
