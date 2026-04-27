@@ -26,7 +26,7 @@ const Toast = ({ toast, onClose }) => {
       toast.type === 'success' ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800' : 'bg-rose-50/90 border-rose-200 text-rose-800'
     }`}>
       {toast.type === 'success' ? <FiCheckCircle className="shrink-0" /> : <FiAlertCircle className="shrink-0" />}
-      <span className="text-sm font-black tracking-tight uppercase">{toast.message}</span>
+      <span className="text-sm font-bold tracking-tight">{toast.message}</span>
     </div>
   );
 };
@@ -314,7 +314,7 @@ const CounselorCaseManagement = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2 sm:gap-3">
                   <FiFileText className="text-purple-600 shrink-0" /> <span className="truncate">Manajemen Kasus</span>
                 </h1>
-                <p className="text-gray-500 text-[10px] sm:text-sm mt-0.5 font-medium italic hidden xs:block">
+                <p className="text-gray-500 text-[11px] sm:text-sm mt-0.5 font-medium hidden xs:block">
                   Pusat Kendali Laporan & Sesi Konseling
                 </p>
               </div>
@@ -327,8 +327,7 @@ const CounselorCaseManagement = () => {
                 className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 hover:from-teal-600 hover:to-emerald-700 transition-all text-[11px] sm:text-sm font-bold active:scale-95 whitespace-nowrap"
               >
                 <FiPlus size={16} />
-                <span className="hidden sm:inline">KONSELING MANUAL</span>
-                <span className="sm:hidden">MANUAL</span>
+                <span>KONSELING MANUAL</span>
               </button>
               <button 
                 onClick={() => setExportModal({ ...exportModal, open: true })}
@@ -362,7 +361,7 @@ const CounselorCaseManagement = () => {
           <div className="flex flex-wrap items-center gap-4 mb-8">
             <div className="bg-[#F5F3FF] px-6 py-3 rounded-3xl shadow-xl shadow-purple-100 border border-purple-200/50 flex items-center gap-4">
                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse shadow-[0_0_8px_#8b5cf6]" />
-               <span className="text-xs font-bold text-purple-700 uppercase tracking-widest border-r border-purple-300 pr-4">KONSELOR AKTIF</span>
+               <span className="text-xs font-bold text-purple-700 uppercase tracking-widest border-r border-purple-300 pr-4">Konselor Aktif</span>
                <div className="flex flex-col">
                   <span className="text-[10px] font-semibold text-purple-500 leading-none">TOTAL KASUS SAYA</span>
                   <span className="text-lg font-bold text-purple-900 leading-tight">{stats.total || 0}</span>
@@ -372,7 +371,7 @@ const CounselorCaseManagement = () => {
             <div className="bg-white px-5 py-3 rounded-2xl border border-gray-100 flex items-center gap-3 shadow-sm hover:shadow-md transition-all">
                 <div className="p-2 bg-rose-50 rounded-lg text-rose-600"><FiTrendingUp size={16} /></div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-semibold text-gray-400 uppercase leading-none mb-0.5 tracking-tighter">Butuh Atensi</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase leading-none mb-0.5 tracking-tight">Butuh Atensi</span>
                     <span className="text-sm font-bold text-gray-900 leading-tight">{stats.pending || 0}</span>
                 </div>
             </div>
@@ -387,7 +386,7 @@ const CounselorCaseManagement = () => {
              
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div className="space-y-3">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Cari ID Laporan</label>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Cari ID Laporan</label>
                   <div className="relative group">
                     <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
                     <input 
@@ -401,7 +400,7 @@ const CounselorCaseManagement = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Tingkat Urgensi</label>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Tingkat Urgensi</label>
                   <select 
                     value={urgencyFilter}
                     onChange={e => setUrgencyFilter(e.target.value)}
@@ -416,7 +415,7 @@ const CounselorCaseManagement = () => {
                 </div>
 
                 <div className="lg:col-span-2 space-y-3">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">Filter Lanjutan</label>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Filter Lanjutan</label>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <select 
                       value={statusFilter}
@@ -432,7 +431,7 @@ const CounselorCaseManagement = () => {
                       onClick={handleFilterChange}
                       className="w-full sm:w-auto px-10 py-4 bg-purple-600 text-white rounded-[28px] text-xs font-bold tracking-widest hover:bg-purple-700 hover:shadow-xl hover:shadow-purple-500/20 active:scale-95 transition-all shadow-lg"
                     >
-                      TERAPKAN
+                      Terapkan
                     </button>
                   </div>
                 </div>
@@ -469,7 +468,7 @@ const CounselorCaseManagement = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-40 gap-4">
               <div className="w-16 h-16 border-4 border-purple-600/10 border-t-purple-600 rounded-full animate-spin" />
-              <p className="text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">Memuat data anda...</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest animate-pulse">Memuat data anda...</p>
             </div>
           ) : data.length === 0 ? (
             <div className="text-center py-40 bg-white rounded-[40px] border-2 border-dashed border-gray-100">
@@ -521,7 +520,7 @@ const CounselorCaseManagement = () => {
                            <div className="flex flex-wrap gap-6">
                               <div className="flex items-center gap-3">
                                 <FiCalendar className="text-indigo-600" />
-                                <span className="text-sm font-black text-indigo-700">{dayjs(schedule.tanggal).format('DD MMMM YYYY')}</span>
+                                <span className="text-sm font-bold text-indigo-700">{dayjs(schedule.tanggal).format('DD MMMM YYYY')}</span>
                               </div>
                               <div className="flex items-center gap-3">
                                 <FiClock className="text-indigo-600" />
@@ -537,7 +536,7 @@ const CounselorCaseManagement = () => {
                            <div className="w-10 h-10 bg-gray-100 rounded-[14px] flex items-center justify-center text-gray-400"><FiUser size={16} /></div>
                            <div className="min-w-0 text-left">
                              <div className="flex items-center gap-2">
-                               <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Pelapor</p>
+                               <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Pelapor</p>
                                {(report?.user_phone || report?.guest_phone || item?.user_phone) && (
                                  <a 
                                    href={`https://wa.me/${(report?.user_phone || report?.guest_phone || item?.user_phone || '').replace(/^0/, '62')}?text=${encodeURIComponent(
@@ -561,7 +560,7 @@ const CounselorCaseManagement = () => {
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 bg-gray-100 rounded-[14px] flex items-center justify-center text-gray-400"><FiUsers size={16} /></div>
                            <div className="min-w-0 text-left">
-                             <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">Konselor Penanggung Jawab</p>
+                             <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Konselor Penanggung Jawab</p>
                              <p className="text-xs font-bold text-gray-900 truncate">
                                {report?.counselor_name || report?.counselor?.name || item?.counselor_name || 'Belum diplot'}
                              </p>
@@ -582,7 +581,7 @@ const CounselorCaseManagement = () => {
                            }}
                            className="flex-1 py-4 bg-gray-900 text-white rounded-[24px] text-[10px] font-bold tracking-[0.1em] uppercase hover:bg-purple-600 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-2"
                         >
-                           <FiEye /> {report?.id || item?.complaint_id ? 'DETAIL LENGKAP' : 'SESI MANUAL'}
+                           <FiEye /> {report?.id || item?.complaint_id ? 'Detail Lengkap' : 'Sesi Manual'}
                         </button>
                         
                         {activeTab === 'new' ? (
@@ -658,7 +657,7 @@ const CounselorCaseManagement = () => {
                   <FiChevronLeft size={20} />
                 </button>
                 <div className="flex items-center gap-2 px-6">
-                  <span className="text-sm font-black text-gray-900">{pagination.current_page}</span>
+                  <span className="text-sm font-bold text-gray-900">{pagination.current_page}</span>
                   <span className="text-sm font-bold text-gray-300">/</span>
                   <span className="text-sm font-bold text-gray-400">{pagination.last_page}</span>
                 </div>
@@ -700,7 +699,7 @@ const CounselorCaseManagement = () => {
 
              {(statusModal.status === 'rejected' || statusModal.isRejectOnly) && (
                <div className="space-y-2 mb-8 text-left">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Alasan Penolakan</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2">Alasan Penolakan</label>
                 <textarea 
                    placeholder="Berikan alasan mengapa laporan ini ditolak oleh anda..."
                    value={statusModal.rejection_reason}
@@ -715,7 +714,7 @@ const CounselorCaseManagement = () => {
                   onClick={() => setStatusModal({ open: false })} 
                   className="flex-1 py-4 border-2 border-gray-100 text-gray-400 font-bold rounded-[22px] text-xs"
                 >
-                  BATAL
+                  Batal
                 </button>
                 <button 
                   onClick={submitStatus} 
@@ -723,7 +722,7 @@ const CounselorCaseManagement = () => {
                     statusModal.isRejectOnly ? 'bg-rose-600 shadow-rose-500/20' : 'bg-purple-600 shadow-purple-500/20'
                   }`}
                 >
-                  {isSubmitting ? '...' : 'SIMPAN'}
+                  {isSubmitting ? '...' : 'Simpan'}
                 </button>
              </div>
           </div>
@@ -735,12 +734,12 @@ const CounselorCaseManagement = () => {
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => setScheduleModal({ open: false, complaint: null })} />
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-12 animate-in zoom-in-95 duration-200">
-            <h3 className="text-3xl font-black text-gray-900 mb-2 text-center uppercase tracking-tighter">DELEGASI KASUS</h3>
-            <p className="text-gray-400 text-xs font-bold text-center mb-10 tracking-widest">{scheduleModal.complaint?.report_id}</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center uppercase tracking-tight">Delegasi Kasus</h3>
+            <p className="text-gray-400 text-[11px] font-bold text-center mb-10 tracking-widest">{scheduleModal.complaint?.report_id}</p>
 
             <div className="space-y-6 mb-10 text-left">
                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2 block">Pilih Rekan Konselor</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2 block">Pilih Rekan Konselor</label>
                   <select 
                     value={scheduleModal.counselor_id}
                     onChange={e => setScheduleModal(p => ({...p, counselor_id: e.target.value}))}
@@ -752,7 +751,7 @@ const CounselorCaseManagement = () => {
                </div>
 
                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2 block">Jadwal Sesi Pertama</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2 block">Jadwal Sesi Pertama</label>
                   <input 
                     type="datetime-local"
                     value={scheduleModal.counseling_schedule}
@@ -763,8 +762,8 @@ const CounselorCaseManagement = () => {
             </div>
 
             <div className="flex gap-4">
-               <button onClick={() => setScheduleModal({ open: false })} className="flex-1 py-5 border-2 border-gray-100 text-gray-400 font-black rounded-[32px] tracking-widest text-xs">BATAL</button>
-               <button onClick={submitSchedule} className="flex-[2] py-5 bg-purple-600 text-white font-black rounded-[32px] shadow-2xl shadow-purple-500/20 tracking-widest text-xs hover:bg-purple-700">{isSubmitting ? 'MEMPROSES...' : 'DELEGASIKAN KASUS'}</button>
+               <button onClick={() => setScheduleModal({ open: false })} className="flex-1 py-5 border-2 border-gray-100 text-gray-400 font-bold rounded-[32px] tracking-widest text-xs">Batal</button>
+               <button onClick={submitSchedule} className="flex-[2] py-5 bg-purple-600 text-white font-bold rounded-[32px] shadow-2xl shadow-purple-500/20 tracking-widest text-xs hover:bg-purple-700">{isSubmitting ? 'Memproses...' : 'Delegasikan Kasus'}</button>
             </div>
           </div>
         </div>

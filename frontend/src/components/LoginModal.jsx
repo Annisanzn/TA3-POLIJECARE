@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiMail, FiLock, FiAlertCircle, FiEye, FiEyeOff, FiX } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import logoPolijecare from '/logo_polijecare_new.png';
 
 // Motion variants for animations
 const fadeIn = {
@@ -227,7 +228,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <img 
-                    src="/logo_polijecare_new.png" 
+                    src={logoPolijecare} 
                     alt="Polijecare Logo" 
                     className="w-10 h-10 object-contain transition-all duration-300 dark:invert dark:hue-rotate-180"
                   />

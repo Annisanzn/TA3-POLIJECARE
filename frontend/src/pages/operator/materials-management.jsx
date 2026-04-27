@@ -50,12 +50,6 @@ const MaterialsManagement = () => {
   });
 
   const kategoriOptions = [
-    'Modul Pelatihan',
-    'Panduan Konseling',
-    'Artikel',
-    'Video Tutorial',
-    'Template',
-    'Lainnya',
     ...violenceCategories.map(cat => cat.name)
   ];
 

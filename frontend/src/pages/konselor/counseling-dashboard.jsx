@@ -310,7 +310,7 @@ const CounselorCounselingDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Jadwal</h1>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm font-medium">
                     Selamat datang, {user?.name || 'Konselor'}! Kelola jadwal konseling Anda
                   </p>
                 </div>
@@ -754,7 +754,7 @@ const CounselorCounselingDashboard = () => {
                 <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
                   <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 tracking-tight">Detail Konseling</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Detail Konseling</h3>
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 block">ID: #{detailModal.schedule?.id}</span>
                     </div>
                     <button onClick={() => setDetailModal({ open: false, schedule: null, loading: false })}
@@ -772,20 +772,20 @@ const CounselorCounselingDashboard = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className="space-y-6">
                             <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50">
-                              <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2"><FiUser size={12} /> Subjek: {detailModal.schedule?.counselee_type || 'Pelapor'}</p>
-                              <p className="text-lg font-black text-gray-900">{detailModal.schedule?.counselee_name || detailModal.schedule?.user?.name || 'N/A'}</p>
+                              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2"><FiUser size={12} /> Subjek: {detailModal.schedule?.counselee_type || 'Pelapor'}</p>
+                              <p className="text-lg font-bold text-gray-900">{detailModal.schedule?.counselee_name || detailModal.schedule?.user?.name || 'N/A'}</p>
                               {detailModal.schedule?.user?.nim && <p className="text-xs text-gray-500 mt-1 font-bold">NIM: {detailModal.schedule.user.nim}</p>}
                               <p className="text-xs font-medium text-blue-600 mt-2 flex items-center gap-2"><FiMail size={14} /> {detailModal.schedule?.user?.email || '-'}</p>
                             </div>
                             <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100">
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><FiUser size={12} /> Konselor Bertugas</p>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><FiUser size={12} /> Konselor Bertugas</p>
                               <p className="text-base font-bold text-gray-900">{detailModal.schedule?.counselor?.name || 'Saya'}</p>
                               <p className="text-xs font-medium text-gray-500 mt-1 italic">{detailModal.schedule?.counselor?.email || ''}</p>
                             </div>
                           </div>
                           <div className="space-y-6">
                             <div className="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100/50">
-                              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-4">Waktu Terjadwal</p>
+                              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-4">Waktu Terjadwal</p>
                               <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-sm font-bold text-gray-700">
                                   <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-indigo-500"><FiCalendar size={14} /></div>
@@ -799,27 +799,27 @@ const CounselorCounselingDashboard = () => {
                             </div>
                             <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4">
                               <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Status</p>
-                                <span className={`inline-flex px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest ${getStatusBadge(detailModal.schedule?.status)}`}>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Status</p>
+                                <span className={`inline-flex px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-widest ${getStatusBadge(detailModal.schedule?.status)}`}>
                                   {getStatusLabel(detailModal.schedule?.status)}
                                 </span>
                               </div>
                               <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Metode</p>
-                                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black ${detailModal.schedule?.metode === 'online' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Metode</p>
+                                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold ${detailModal.schedule?.metode === 'online' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>
                                   {detailModal.schedule?.metode === 'online' ? <FiVideo size={14} /> : <FiMapPin size={14} />}
                                   {detailModal.schedule?.metode === 'online' ? 'Online' : 'Offline / Tatap Muka'}
                                 </span>
                               </div>
                               {detailModal.schedule?.metode === 'offline' && detailModal.schedule?.lokasi && (
                                 <div>
-                                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lokasi</p>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Lokasi</p>
                                   <p className="text-sm font-medium text-gray-700 flex items-center gap-2"><FiMapPin size={14} className="text-emerald-500" />{detailModal.schedule.lokasi}</p>
                                 </div>
                               )}
                               {detailModal.schedule?.metode === 'online' && detailModal.schedule?.meeting_link && (
                                 <div>
-                                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Link Meeting</p>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Link Meeting</p>
                                   <a href={detailModal.schedule.meeting_link} target="_blank" rel="noopener noreferrer"
                                     className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-2">
                                     <FiExternalLink size={14} /> Buka Link
@@ -831,7 +831,7 @@ const CounselorCounselingDashboard = () => {
                         </div>
                         {detailModal.schedule?.alasan_penolakan && (
                           <div className="p-6 bg-rose-50 rounded-[32px] border border-rose-100">
-                            <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-2"><FiXCircle size={14} /> Catatan Penolakan</p>
+                            <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-2"><FiXCircle size={14} /> Catatan Penolakan</p>
                             <p className="text-sm font-medium text-rose-900 leading-relaxed italic">"{detailModal.schedule.alasan_penolakan}"</p>
                           </div>
                         )}
@@ -839,11 +839,11 @@ const CounselorCounselingDashboard = () => {
 
                         {(detailModal.schedule?.status === 'completed' || detailModal.schedule?.is_record_only) && (detailModal.schedule?.keterangan_pihak || detailModal.schedule?.saran_konselor) && (
                           <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6 space-y-6">
-                            <h4 className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2"><FiFileText size={16} /> Hasil Pertemuan</h4>
+                            <h4 className="text-sm font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2"><FiFileText size={16} /> Hasil Pertemuan</h4>
                             
                             {detailModal.schedule.keterangan_pihak && (
                               <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan / Pengakuan</p>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Keterangan / Pengakuan</p>
                                 <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                                   {detailModal.schedule.keterangan_pihak}
                                 </div>
@@ -852,7 +852,7 @@ const CounselorCounselingDashboard = () => {
 
                             {detailModal.schedule.saran_konselor && (
                               <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Saran / Tindak Lanjut</p>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Saran / Tindak Lanjut</p>
                                 <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50 text-sm text-blue-900 leading-relaxed whitespace-pre-wrap italic">
                                   {detailModal.schedule.saran_konselor}
                                 </div>
@@ -865,7 +865,7 @@ const CounselorCounselingDashboard = () => {
                   </div>
                   <div className="p-10 bg-gray-50/50 border-t border-gray-100">
                     <button onClick={() => setDetailModal({ open: false, schedule: null, loading: false })}
-                      className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-[24px] text-sm font-black hover:bg-gray-50 transition-all shadow-sm active:scale-95">TUTUP</button>
+                      className="w-full py-4 bg-white border border-gray-200 text-gray-900 rounded-[24px] text-sm font-bold hover:bg-gray-50 transition-all shadow-sm active:scale-95">Tutup</button>
                   </div>
                 </div>
               </div>

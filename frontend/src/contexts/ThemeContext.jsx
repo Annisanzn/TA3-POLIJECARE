@@ -11,37 +11,27 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    // Check localStorage or system preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme;
-    }
-    // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  // POIN: Mematikan dark mode sepenuhnya sesuai permintaan user
+  // Mengunci tema ke 'light'
+  const [theme] = useState('light');
 
   useEffect(() => {
     const root = document.documentElement;
-    
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    // Selalu hapus class dark untuk memastikan mode terang aktif
+    root.classList.remove('dark');
+    // Hapus juga dari localStorage agar tidak ada sisa preferensi
+    localStorage.removeItem('theme');
+  }, []);
 
+  // Fungsi toggle dibuat tidak melakukan apa-apa
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    console.log('Dark mode has been disabled by system administrator.');
   };
 
   const value = {
-    theme,
+    theme: 'light',
     toggleTheme,
-    isDark: theme === 'dark'
+    isDark: false
   };
 
   return (

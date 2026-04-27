@@ -5,7 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import { ScrollParticles } from './components/ui/scroll-particles';
+
 import Sidebar from './components/layout/Sidebar';
 import PageTransition from './components/layout/PageTransition';
 
@@ -45,6 +45,7 @@ import KonselorMateri from './pages/konselor/materi';
 import Profile from './pages/shared/Profile';
 import CounselorCaseManagement from './pages/konselor/case-management';
 import ManualCounseling from './pages/konselor/manual-counseling';
+import OperatorManualCounseling from './pages/operator/manual-counseling';
 
 /* ── Animated Routes (useLocation must be inside Router) ── */
 const AnimatedRoutes = () => {
@@ -237,6 +238,15 @@ const AnimatedRoutes = () => {
           }
         />
 
+        <Route
+          path="/operator/manual-counseling"
+          element={
+            <NewProtectedRoute requiredRole="operator">
+              <PageTransition><OperatorManualCounseling /></PageTransition>
+            </NewProtectedRoute>
+          }
+        />
+
         {/* Counseling Management for Operator - Redirected to Unified Case Management */}
         <Route
           path="/operator/counseling-management"
@@ -368,7 +378,7 @@ const AnimatedRoutes = () => {
 function App() {
   return (
     <ThemeProvider>
-      <ScrollParticles />
+
       <AuthProvider>
         <Router>
           <AnimatedRoutes />

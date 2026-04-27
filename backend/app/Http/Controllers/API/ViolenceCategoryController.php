@@ -138,4 +138,24 @@ class ViolenceCategoryController extends Controller
             'message' => 'Kategori kekerasan berhasil dihapus',
         ]);
     }
+
+    /**
+     * Display a listing of categories for public/counselor access.
+     */
+    public function publicIndex()
+    {
+        try {
+            $categories = ViolenceCategory::orderBy('name')->get(['unique_id', 'name']);
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil kategori',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

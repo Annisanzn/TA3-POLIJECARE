@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Facebook, Instagram, Twitter, Linkedin, Heart, Shield, Mail, Phone, MapPin } from 'lucide-react';
+import logoPolijecare from '/logo_polijecare_new.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -50,7 +51,7 @@ const Footer = () => {
               className="flex items-center gap-4"
             >
               <img
-                src="/logo_polijecare_new.png"
+                src={logoPolijecare}
                 alt="PolijeCare Logo"
                 className="w-14 h-14 object-contain filter drop-shadow-sm transition-all duration-300 dark:invert dark:hue-rotate-180"
               />

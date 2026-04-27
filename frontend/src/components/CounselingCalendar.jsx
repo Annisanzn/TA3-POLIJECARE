@@ -154,12 +154,18 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
             if (!s.tanggal) return;
             const d = String(s.tanggal).split('T')[0];
             if (!map[d]) map[d] = [];
+            
+            // POIN 4: Logic cerdas pencarian nama konselor
+            const cName = s.counselor?.name || s.counselor_name || s.complaint?.counselor?.name || s.complaint?.counselor_name;
+            const uName = s.user?.name || s.complaint?.user?.name || s.guest_name || '';
+            
             map[d].push({
                 id: `s-${s.id}`,
                 title: s.jenis_pengaduan || 'Sesi Konseling',
                 time: s.jam_mulai ? String(s.jam_mulai).substring(0, 5) + ' WIB' : '',
                 status: s.status || 'pending',
-                nama: s.user?.name || '',
+                nama: uName,
+                counselorName: cName,
             });
         });
         externalAgendas.forEach(a => {
@@ -242,7 +248,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-gray-100 dark:border-slate-800 overflow-hidden"
         >
             {/* Header */}
             <div className="flex flex-col sm:flex-row shadow-sm relative z-10 items-center justify-between px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/80 backdrop-blur-sm">
@@ -251,8 +257,8 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                         <FiCalendar className="text-white" size={16} />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg">Kalender Konseling</h3>
-                        <p className="text-xs text-gray-500">Sesi dari sistem + agenda eksternal</p>
+                        <h3 className="font-bold text-slate-900 text-lg">Kalender Konseling</h3>
+                        <p className="text-[11px] text-slate-500 font-medium tracking-wide">Sesi dari sistem + agenda eksternal</p>
                     </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 sm:mt-0 w-full sm:w-auto">
@@ -260,7 +266,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                         <button onClick={goToPrevMonth} className="p-2.5 hover:bg-white rounded-lg transition-all text-gray-600 shadow-sm sm:shadow-none"><FiChevronLeft size={20} /></button>
                         <div className="flex items-center gap-1 px-3">
                             <select
-                                className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none text-right hover:text-indigo-600 rounded"
+                                className="bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer appearance-none text-right hover:text-indigo-600 rounded"
                                 value={currentMonth}
                                 onChange={(e) => setCurrentMonth(Number(e.target.value))}
                                 title="Pilih Bulan"
@@ -270,13 +276,13 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                 ))}
                             </select>
                             <select
-                                className="bg-transparent font-bold text-gray-800 text-sm focus:outline-none cursor-pointer appearance-none hover:text-indigo-600 rounded"
+                                className="bg-transparent font-bold text-slate-900 text-sm focus:outline-none cursor-pointer appearance-none hover:text-indigo-600 rounded"
                                 value={currentYear}
                                 onChange={(e) => setCurrentYear(Number(e.target.value))}
                                 title="Pilih Tahun"
                             >
                                 {Array.from({ length: 10 }, (_, i) => today.getFullYear() - 2 + i).map(y => (
-                                    <option key={y} value={y}>{y}</option>
+                                    <option key={y} value={y} className="text-black font-bold">{y}</option>
                                 ))}
                             </select>
                         </div>
@@ -330,7 +336,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                             ${isToday ? 'bg-indigo-50/30' : ''}
                                         `}
                                     >
-                                        <span className={`text-xs font-black block mb-1.5 ${isToday ? 'text-indigo-600' : 'text-gray-700'}`}>{day}</span>
+                                        <span className={`text-xs font-bold block mb-1.5 ${isToday ? 'text-indigo-600' : 'text-slate-700'}`}>{day}</span>
                                         <div className="flex flex-wrap gap-1">
                                             {dayEvents.slice(0, 3).map(ev => (
                                                 <motion.span
@@ -403,10 +409,23 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                             >
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-bold text-gray-800 leading-tight mb-1">{ev.title}</p>
-                                                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                            {ev.time && <span className="flex items-center gap-1 text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full"><FiClock size={10} />{ev.time}</span>}
-                                                            {ev.nama && <span className="flex items-center gap-1 text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[120px]"><FiUser size={10} />{ev.nama}</span>}
+                                                        <p className="text-sm font-bold text-gray-800 dark:text-white leading-tight mb-1">{ev.title}</p>
+                                                        <div className="flex flex-col gap-2 mt-2">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                {ev.time && <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100"><FiClock size={10} />{ev.time}</span>}
+                                                                {ev.nama && <span className="flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 truncate max-w-[150px]"><FiUser size={10} />{ev.nama}</span>}
+                                                            </div>
+                                                            {/* POIN 4: Tampilkan Nama Konselor jika ada */}
+                                                            {ev.counselorName && (
+                                                                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 w-fit">
+                                                                    <FiShield size={10} /> {ev.counselorName}
+                                                                </span>
+                                                            )}
+                                                            {!ev.counselorName && !ev.isExternal && !ev.id.startsWith('holiday') && (
+                                                                <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 w-fit">
+                                                                    <FiAlertCircle size={10} /> Belum Diplot
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -440,8 +459,8 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                     <FiCalendar size={32} className="text-gray-400" />
                                 </div>
-                                <h4 className="text-gray-600 font-bold mb-1">Pilih Tanggal</h4>
-                                <p className="text-xs text-gray-400 max-w-[200px] leading-relaxed">Klik pada tanggal kalender di sebelah kiri untuk melihat detail sesi dan agenda.</p>
+                                <h4 className="text-gray-600 dark:text-slate-300 font-bold mb-1">Pilih Tanggal</h4>
+                                <p className="text-[11px] text-slate-500 max-w-[200px] leading-relaxed font-medium">Klik pada tanggal kalender di sebelah kiri untuk melihat detail sesi dan agenda.</p>
                                 {!loading && sessions.length > 0 && (
                                     <div className="mt-6 inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[11px] font-bold">
                                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
