@@ -5,13 +5,14 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import { ScrollParticles } from './components/ui/scroll-particles';
+
 import Sidebar from './components/layout/Sidebar';
 import PageTransition from './components/layout/PageTransition';
 
 // Pages
 import LandingPage from './pages/LandingPage';
 import LaporUmum from './pages/public/LaporUmum';
+import PusatEdukasi from './pages/public/PusatEdukasi';
 import UserDashboard from './pages/user/dashboard';
 import KonselorDashboard from './pages/konselor/dashboard';
 import OperatorDashboard from './pages/operator/dashboard';
@@ -44,6 +45,7 @@ import KonselorMateri from './pages/konselor/materi';
 import Profile from './pages/shared/Profile';
 import CounselorCaseManagement from './pages/konselor/case-management';
 import ManualCounseling from './pages/konselor/manual-counseling';
+import OperatorManualCounseling from './pages/operator/manual-counseling';
 
 /* ── Animated Routes (useLocation must be inside Router) ── */
 const AnimatedRoutes = () => {
@@ -59,6 +61,7 @@ const AnimatedRoutes = () => {
         <Route path="/articles" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/contact" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/lapor-umum" element={<PageTransition><LaporUmum /></PageTransition>} />
+        <Route path="/edukasi" element={<PageTransition><PusatEdukasi /></PageTransition>} />
 
         {/* Article Detail - public reading page */}
         <Route path="/artikel/:slug" element={<PageTransition><ArticleDetail /></PageTransition>} />
@@ -235,6 +238,15 @@ const AnimatedRoutes = () => {
           }
         />
 
+        <Route
+          path="/operator/manual-counseling"
+          element={
+            <NewProtectedRoute requiredRole="operator">
+              <PageTransition><OperatorManualCounseling /></PageTransition>
+            </NewProtectedRoute>
+          }
+        />
+
         {/* Counseling Management for Operator - Redirected to Unified Case Management */}
         <Route
           path="/operator/counseling-management"
@@ -366,7 +378,7 @@ const AnimatedRoutes = () => {
 function App() {
   return (
     <ThemeProvider>
-      <ScrollParticles />
+
       <AuthProvider>
         <Router>
           <AnimatedRoutes />

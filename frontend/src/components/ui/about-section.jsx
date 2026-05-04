@@ -141,84 +141,65 @@ export default function AboutSection() {
 
                     {/* Hero Image with clip path */}
                     <TimelineContent
-                        as="figure"
+                        as="div"
                         animationNum={4}
                         timelineRef={heroRef}
                         customVariants={scaleVariants}
-                        className="relative group"
+                        className="relative group overflow-hidden rounded-[2rem] aspect-[16/9] md:aspect-[100/40] shadow-2xl"
                     >
-                        <svg
-                            className="w-full"
-                            width={"100%"}
-                            height={"100%"}
-                            viewBox="0 0 100 40"
-                        >
-                            <defs>
-                                <clipPath
-                                    id="clip-inverted"
-                                    clipPathUnits={"userSpaceOnUse"}
-                                >
-                                    <path
-                                        transform="scale(100, 40)"
-                                        d="M0.0998072 1H0.422076H0.749756C0.767072 1 0.774207 0.961783 0.77561 0.942675V0.807325C0.777053 0.743631 0.791844 0.731953 0.799059 0.734076H0.969813C0.996268 0.730255 1.00088 0.693206 0.999875 0.675159V0.0700637C0.999875 0.0254777 0.985045 0.00477707 0.977629 0H0.902473C0.854975 0 0.890448 0.138535 0.850165 0.138535H0.0204424C0.00408849 0.142357 0 0.180467 0 0.199045V0.410828C0 0.449045 0.0136283 0.46603 0.0204424 0.469745H0.0523086C0.0696245 0.471019 0.0735527 0.497877 0.0733523 0.511146V0.915605C0.0723903 0.983121 0.090588 1 0.0998072 1Z"
-                                        fill="#D9D9D9"
-                                    />
-                                </clipPath>
-                            </defs>
-                            <g clipPath="url(#clip-inverted)">
-                                <AnimatePresence>
-                                    <motion.image
-                                        key={slideIndex}
-                                        preserveAspectRatio="xMidYMid slice"
-                                        width={"100%"}
-                                        height={"100%"}
-                                        xlinkHref={heroImages[slideIndex]}
-                                        initial={{ x: 100 }}
-                                        animate={{ x: 0 }}
-                                        exit={{ x: -100 }}
-                                        transition={{ duration: 0.6, ease: "easeInOut" }}
-                                    />
-                                </AnimatePresence>
-                            </g>
-                        </svg>
+                        <AnimatePresence mode="wait">
+                            <motion.img
+                                key={slideIndex}
+                                src={heroImages[slideIndex]}
+                                alt="PolijeCare Hero"
+                                className="absolute inset-0 w-full h-full object-cover"
+                                initial={{ opacity: 0, scale: 1.1 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                            />
+                        </AnimatePresence>
+
+                        {/* Overlay Gradient for better text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                         {/* Slide progress indicators */}
-                        <div className="absolute bottom-[3%] left-[10%] flex gap-3 items-center z-10">
+                        <div className="absolute bottom-4 left-4 md:bottom-[5%] md:left-[5%] flex gap-2 md:gap-3 items-center z-10">
                             {heroImages.map((_, i) => (
                                 <div
                                     key={i}
-                                    className="h-[6px] rounded-full overflow-hidden cursor-pointer shadow-sm transition-all duration-300"
+                                    className="h-[4px] md:h-[6px] rounded-full overflow-hidden cursor-pointer shadow-sm transition-all duration-300 bg-white/30"
                                     style={{
-                                        width: i === slideIndex ? '3rem' : '1.5rem',
-                                        backgroundColor: 'rgba(255,255,255,0.4)'
+                                        width: i === slideIndex ? '2.5rem' : '1.2rem',
                                     }}
                                     onClick={() => { setSlideIndex(i); setProgress(0); }}
                                 >
                                     <div
-                                        className="h-full rounded-full transition-all duration-100 ease-linear"
+                                        className="h-full rounded-full transition-all duration-100 ease-linear bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                                         style={{
                                             width: i === slideIndex ? `${progress}%` : i < slideIndex ? '100%' : '0%',
-                                            backgroundColor: '#fff',
-                                            boxShadow: '0 0 4px rgba(0,0,0,0.2)'
                                         }}
                                     />
                                 </div>
                             ))}
                         </div>
-                        {/* 100% stat in the white cutout */}
+
+                        {/* 100% stat - Improved Responsiveness & Visibility */}
                         <TimelineContent
                             as="div"
                             animationNum={5}
                             timelineRef={heroRef}
                             customVariants={revealVariants}
-                            className="absolute bottom-[10%] right-[0.5%] text-right"
+                            className="absolute bottom-4 right-4 md:bottom-[8%] md:right-[5%] text-right z-10 bg-white/10 dark:bg-black/20 backdrop-blur-md p-3 md:p-5 rounded-2xl border border-white/20 shadow-xl"
                         >
-                            <div className="flex items-baseline gap-2 justify-end" ref={counterRef}>
-                                <span className="text-[#191970] dark:text-indigo-400 font-extrabold text-2xl sm:text-3xl lg:text-4xl leading-none" style={{ fontFamily: "'Inter', sans-serif" }}>{count}%</span>
-                                <span className="text-gray-500 dark:text-gray-400 text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wider font-normal leading-none">Rahasia</span>
+                            <div className="flex items-baseline gap-1 md:gap-2 justify-end" ref={counterRef}>
+                                <span className="text-[#191970] dark:text-indigo-400 font-extrabold text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none" style={{ fontFamily: "'Inter', sans-serif" }}>{count}%</span>
+                                <span className="text-gray-900 dark:text-white font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-tight leading-none">Rahasia</span>
                             </div>
-                            <span className="text-gray-400 text-xs sm:text-sm mt-0.5 block text-left">kerahasiaan terjamin</span>
+                            <span className="text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs md:text-sm mt-1 block text-right font-medium">kerahasiaan terjamin</span>
                         </TimelineContent>
                     </TimelineContent>
+
 
                     {/* Stats */}
                     <div className="flex flex-wrap items-center justify-start gap-6 py-4 text-sm">

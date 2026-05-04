@@ -144,7 +144,7 @@ const ChartSection = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Chart 1: Sebaran Kekerasan per Kategori */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 lg:col-span-2">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-800 lg:col-span-2">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
@@ -254,7 +254,7 @@ const ChartSection = () => {
       </div>
 
       {/* Chart 2: Distribusi Gender Pelapor - Grouped Bar Chart */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-800">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -351,7 +351,7 @@ const ChartSection = () => {
       </div>
 
       {/* Chart 3: Sebaran Kekerasan Seksual per Gedung - Horizontal Ranking Bar Chart */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-800">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
@@ -368,15 +368,15 @@ const ChartSection = () => {
         </div>
 
         {/* Summary Highlight */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
+        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-100 dark:border-red-900/30 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-600">Jurusan dengan kasus tertinggi</div>
-              <div className="text-xl font-bold text-gray-900">Jurusan Teknologi Informasi</div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Jurusan dengan kasus tertinggi</div>
+              <div className="text-xl font-bold text-slate-900">Jurusan Teknologi Informasi</div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-red-600">36%</div>
-              <div className="text-sm text-gray-500">18 dari 50 kasus</div>
+              <div className="text-3xl font-bold text-slate-900">36%</div>
+              <div className="text-xs font-medium text-slate-500">18 dari 50 kasus</div>
             </div>
           </div>
         </div>

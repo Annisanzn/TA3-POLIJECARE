@@ -2,10 +2,6 @@
   RewriteEngine On
   RewriteBase /
 
-  # Jika ini adalah permintaan ke folder /api, biarkan Apache melanjutkannya (jangan diarahkan ke index.html)
-  RewriteCond %{REQUEST_URI} ^/api [NC]
-  RewriteRule .* - [L]
-
   # Redirect rute lainnya ke index.html agar ditangani oleh React Router
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f

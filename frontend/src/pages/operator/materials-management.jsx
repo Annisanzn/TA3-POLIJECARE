@@ -50,12 +50,6 @@ const MaterialsManagement = () => {
   });
 
   const kategoriOptions = [
-    'Modul Pelatihan',
-    'Panduan Konseling',
-    'Artikel',
-    'Video Tutorial',
-    'Template',
-    'Lainnya',
     ...violenceCategories.map(cat => cat.name)
   ];
 
@@ -268,10 +262,10 @@ const MaterialsManagement = () => {
                 >
                   <FiMenu size={20} />
                 </button>
-                <FiBookOpen className="text-blue-600" /> Manajemen Materi
+                <FiBookOpen className="text-blue-600" /> Pusat Edukasi
               </h1>
               <p className="text-gray-500 text-[10px] sm:text-sm mt-1 font-medium italic">
-                Kelola materi pelatihan dan panduan konseling PolijeCare
+                Kelola buku saku, SOP, dan materi edukasi PolijeCare
               </p>
             </div>
           </div>
@@ -321,7 +315,7 @@ const MaterialsManagement = () => {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Materi</p>
+                  <p className="text-sm text-gray-600 mb-1">Total Edukasi</p>
                   <p className="text-2xl font-bold text-gray-800">{pagination.total}</p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -415,7 +409,7 @@ const MaterialsManagement = () => {
                   className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <FiPlus className="w-4 h-4" />
-                  Tambah Materi
+                  Tambah Edukasi
                 </button>
               </div>
             </div>
@@ -449,14 +443,14 @@ const MaterialsManagement = () => {
                 <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
                   <FiFile className="w-10 h-10 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada materi</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada materi edukasi</h3>
                 <p className="text-gray-500 mb-6 max-w-sm mx-auto">Mulai dengan menambahkan materi pertama untuk bahan edukasi atau panduan.</p>
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-purple-200 transition-all flex items-center gap-2 mx-auto"
                 >
                   <FiPlus className="w-5 h-5" />
-                  Tambah Materi
+                  Tambah Edukasi
                 </button>
               </div>
             ) : (
@@ -465,7 +459,7 @@ const MaterialsManagement = () => {
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50/50">
                       <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">ID</th>
-                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Judul Materi</th>
+                      <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Judul Edukasi</th>
                       <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Kategori & Tipe</th>
                       <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase">Uploader</th>
                       <th className="py-4 px-6 text-[11px] font-bold tracking-widest text-gray-400 uppercase hidden md:table-cell">Tanggal</th>
@@ -639,7 +633,7 @@ const MaterialsManagement = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Tambah Materi</h2>
+                <h2 className="text-xl font-bold text-gray-800">Tambah Edukasi</h2>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -651,7 +645,7 @@ const MaterialsManagement = () => {
               <form onSubmit={handleAddMaterial} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Judul Materi
+                    Judul Edukasi
                   </label>
                   <input
                     type="text"

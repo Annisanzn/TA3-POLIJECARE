@@ -32,6 +32,7 @@ const materialService = {
   // Get file URL
   getFileUrl(filePath) {
     if (!filePath) return '#';
+    if (filePath.startsWith('http')) return filePath;
     // Encode the file path to handle spaces and special characters
     const encodedPath = encodeURIComponent(filePath);
     const baseUrl = axios.defaults.baseURL.replace(/\/api$/, '');

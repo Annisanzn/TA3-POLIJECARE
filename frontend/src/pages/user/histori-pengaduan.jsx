@@ -40,7 +40,7 @@ const StatCard = ({ label, value, icon: Icon, color, sub }) => (
         <div>
             <p className="text-[9px] md:text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{label}</p>
             <p className="text-xl md:text-3xl font-bold text-gray-900 leading-none">{value}</p>
-            {sub && <p className="text-[10px] md:text-xs text-gray-400 mt-1 font-medium italic">{sub}</p>}
+            {sub && <p className="text-[10px] md:text-xs text-gray-400 mt-1 font-medium">{sub}</p>}
         </div>
     </div>
 );
@@ -115,7 +115,7 @@ const HistoriPengaduan = () => {
                     {/* ── Page Header ─────────────────────────────────────────────── */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                         <div>
-                            <p className="text-[11px] font-bold text-violet-500 uppercase tracking-[0.2em] mb-2">Riwayat Saya</p>
+                            <p className="text-[11px] font-bold text-violet-500 uppercase tracking-widest mb-2">Riwayat Saya</p>
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Histori Pengaduan</h1>
                             <p className="text-gray-500 text-sm mt-1 font-medium">
                                 Daftar laporan tindak kekerasan yang pernah Anda ajukan
@@ -166,7 +166,7 @@ const HistoriPengaduan = () => {
                                 <FiFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
                             </div>
                         </div>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">
                             {filtered.length} dari {total} laporan
                         </p>
                     </div>
@@ -178,14 +178,14 @@ const HistoriPengaduan = () => {
                                 <div className="absolute inset-0 border-4 border-violet-50 rounded-full" />
                                 <div className="absolute inset-0 border-4 border-violet-600 rounded-full border-t-transparent animate-spin" />
                             </div>
-                            <p className="mt-6 text-gray-500 font-bold tracking-tight animate-pulse">Memuat data laporan...</p>
+                            <p className="mt-6 text-gray-500 font-bold tracking-tight">Memuat data laporan...</p>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[40px] border border-gray-100 shadow-sm">
                             <div className="w-20 h-20 bg-violet-50 rounded-3xl flex items-center justify-center mb-6">
                                 <FiFileText className="text-violet-400" size={32} />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Tidak Ada Laporan</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Tidak Ada Laporan</h3>
                             <p className="text-gray-400 text-sm font-medium text-center max-w-xs">
                                 {search || statusFilter
                                     ? 'Tidak ada laporan yang cocok dengan filter.'
@@ -279,7 +279,7 @@ const HistoriPengaduan = () => {
                                                     to={`/user/histori-pengaduan/${item.id}`}
                                                     className="w-full py-2.5 px-4 bg-white border border-gray-200 text-violet-600 hover:border-violet-500 hover:bg-violet-50 rounded-2xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
                                                 >
-                                                    <FiEye size={14} /> LIHAT DETAIL
+                                                    <FiEye size={14} /> Lihat Detail
                                                 </Link>
                                             </div>
                                         </motion.div>
@@ -292,11 +292,11 @@ const HistoriPengaduan = () => {
                     {/* ── Pagination ──────────────────────────────────────────────── */}
                     {!loading && pagination && pagination.last_page > 1 && (
                         <div className="mt-10 flex items-center justify-between bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
-                            <p className="text-sm font-medium text-gray-400 italic">
+                            <p className="text-sm font-medium text-gray-400">
                                 Halaman{' '}
-                                <span className="font-black text-gray-900 not-italic">{currentPage}</span>{' '}
+                                <span className="font-bold text-gray-900">{currentPage}</span>{' '}
                                 dari{' '}
-                                <span className="font-black text-gray-900 not-italic">{pagination.last_page}</span>
+                                <span className="font-bold text-gray-900">{pagination.last_page}</span>
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
@@ -310,7 +310,7 @@ const HistoriPengaduan = () => {
                                     <button
                                         key={i + 1}
                                         onClick={() => setCurrentPage(i + 1)}
-                                        className={`w-10 h-10 rounded-2xl text-sm font-black transition-all ${currentPage === i + 1
+                                        className={`w-10 h-10 rounded-2xl text-sm font-bold transition-all ${currentPage === i + 1
                                             ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
                                             : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
                                             }`}
