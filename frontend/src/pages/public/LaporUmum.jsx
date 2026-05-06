@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
     AlertCircle, ArrowLeft, Shield, User, FileText,
-    MapPin, Calendar, Paperclip, CheckCircle, Search, X
+    MapPin, Calendar, Paperclip, CheckCircle, Search, X, Info, Clock, Check
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -84,9 +85,30 @@ const LocationMarker = ({ position, setPosition, onMapClick }) => {
 const LaporUmum = () => {
     const navigate = useNavigate();
     
+    const extractT = (v) => { 
+        if (!v) return "";
+        const parts = v.split(' ');
+        return parts.length > 1 ? parts[1].substring(0, 5) : v.substring(0, 5);
+    };
+
+    const formatDay = (day) => {
+        const days = {
+            'Monday': 'Senin',
+            'Tuesday': 'Selasa',
+            'Wednesday': 'Rabu',
+            'Thursday': 'Kamis',
+            'Friday': 'Jumat',
+            'Saturday': 'Sabtu',
+            'Sunday': 'Minggu'
+        };
+        return days[day] || day;
+    };
 
     const [categories, setCategories] = useState([]);
     const [counselors, setCounselors] = useState([]);
+    const [realSchedules, setRealSchedules] = useState([]);
+    const [loadingSchedules, setLoadingSchedules] = useState(false);
+    const [selectedSlots, setSelectedSlots] = useState([]);
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -220,7 +242,7 @@ const LaporUmum = () => {
                 if (catRes.ok) setCategories(catData?.data || catData);
 
                 // Fetch Counselors (Accessible API Path based on api.php)
-                const counRes = await fetch(`${API_BASE_URL}/user/counselors`, {
+                const counRes = await fetch(`${API_BASE_URL}/public-counselors`, {
                     method: 'GET',
                     headers: getAuthHeaders(),
                 });
@@ -232,6 +254,44 @@ const LaporUmum = () => {
         };
         fetchData();
     }, []);
+
+    const handleCounselorSelect = async (counselorId) => {
+        setFormData(prev => ({ ...prev, counselor_id: counselorId }));
+        setSelectedSlots([]); // Reset slots when switching counselor
+        
+        setLoadingSchedules(true);
+        try {
+            // Use public endpoint for counselor schedules if available, or fall back to /user/counselor-schedules
+            // Assuming we need a public endpoint for guest reports
+            const schedRes = await fetch(`${API_BASE_URL}/public-counselor-schedules?counselor_id=${counselorId}`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            const schedData = await schedRes.json();
+            if (schedRes.ok && schedData.data) {
+                setRealSchedules(schedData.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch schedules:", err);
+            toast.error("Gagal memuat jadwal konselor.");
+        } finally {
+            setLoadingSchedules(false);
+        }
+    };
+
+    const toggleSlotSelection = (slot) => {
+        setSelectedSlots(prev => {
+            const isAlreadySelected = prev.some(s => s.id === slot.id);
+            if (isAlreadySelected) {
+                return prev.filter(s => s.id !== slot.id);
+            }
+            if (prev.length >= 2) {
+                toast.error("Maksimal 2 slot terpilih.");
+                return prev;
+            }
+            return [...prev, slot];
+        });
+    };
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -324,6 +384,13 @@ const LaporUmum = () => {
             if (formData.attachments && formData.attachments.length > 0) {
                 formData.attachments.forEach((file) => {
                     payload.append('attachments[]', file);
+                });
+            }
+
+            // Append Selected Slots
+            if (selectedSlots.length > 0) {
+                selectedSlots.forEach(slotUid => {
+                    payload.append('selected_slots[]', slotUid);
                 });
             }
 
@@ -598,54 +665,253 @@ const LaporUmum = () => {
                         </div>
                     </section>
 
-                    {/* PEMILIHAN KONSELOR & INFORMASI TAMBAHAN */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hidden">
-                            <h2 className="text-lg font-bold text-gray-800 mb-1">Pemilihan Konselor</h2>
-                            <p className="text-xs text-gray-500 mb-4">Pilih konselor yang akan menangani laporan ini</p>
+                    {/* PEMILIHAN KONSELOR */}
+                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                                <User className="w-6 h-6 mr-3 text-[#8b5cf6]" /> Pemilihan Konselor Ahli
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1">Pilih konselor yang akan membantu menangani laporan Anda secara profesional</p>
+                        </div>
+                        
+                        <div className="p-8">
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Pilih Konselor yang Menangani <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+                                    <span>Pilih Konselor & Jadwal <span className="text-red-500">*</span></span>
+                                    {formData.counselor_id && (
+                                        <span className="text-xs text-[#8b5cf6] font-bold bg-purple-50 px-3 py-1 rounded-full animate-pulse">
+                                            {selectedSlots.length > 0 ? `✓ ${selectedSlots.length} Slot Terpilih` : '⚠ Pilih Slot Waktu'}
+                                        </span>
+                                    )}
+                                </label>
 
                                 {counselors.length === 0 ? (
-                                    <p className="text-xs text-red-500 mt-2">Gagal memuat data / Belum ada konselor tersedia.</p>
+                                    <div className="py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <Info className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                        <p className="text-sm text-gray-500">Belum ada konselor tersedia saat ini.</p>
+                                    </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-2">
-                                        {counselors.map((c, index) => (
-                                            <div
-                                                key={c.id}
-                                                onClick={() => setFormData(prev => ({ ...prev, counselor_id: c.id }))}
-                                                className={`cursor-pointer rounded-2xl overflow-hidden shadow-sm border transition-all duration-200 flex flex-col ${formData.counselor_id === c.id
-                                                    ? 'border-[#2e1065] ring-2 ring-[#2e1065] bg-purple-50 scale-[1.02] shadow-md'
-                                                    : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md hover:-translate-y-1'
-                                                    }`}
-                                            >
-                                                {/* Card Photo Header */}
-                                                <div className={`w-full h-40 flex justify-center items-end overflow-hidden ${index % 2 === 0 ? 'bg-gray-200' : 'bg-red-700'}`}>
-                                                    <img
-                                                        src={c.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || c.nama)}&background=random&color=fff&size=512`}
-                                                        alt="Photo Konselor"
-                                                        className="w-full h-full object-cover object-top mix-blend-multiply"
-                                                        style={{ mixBlendMode: 'normal' }}
-                                                    />
-                                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        {counselors.map((c, index) => {
+                                            const isActive = formData.counselor_id === c.id;
+                                            
+                                            return (
+                                                <motion.div
+                                                    key={c.id}
+                                                    layout
+                                                    initial={false}
+                                                    animate={{ 
+                                                        borderColor: isActive ? '#8b5cf6' : '#f3f4f6',
+                                                        backgroundColor: isActive ? '#fdfaff' : '#ffffff'
+                                                    }}
+                                                    className={`relative rounded-3xl border-2 transition-shadow overflow-hidden ${isActive ? 'shadow-lg ring-1 ring-purple-100' : 'hover:border-purple-200 hover:shadow-md cursor-pointer'}`}
+                                                    onClick={() => !isActive && handleCounselorSelect(c.id)}
+                                                >
+                                                    <div className="p-4 sm:p-5">
+                                                        <div className="flex items-start gap-4 sm:gap-6">
+                                                            {/* Profile Image */}
+                                                            <div className="relative flex-shrink-0">
+                                                                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 ${isActive ? 'border-purple-500' : 'border-gray-100 shadow-sm'}`}>
+                                                                    <img
+                                                                        src={c.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || c.nama)}&background=random&color=fff&size=200`}
+                                                                        alt={c.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                                {isActive && (
+                                                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#8b5cf6] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                                                                        <Check className="w-3 h-3" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
 
-                                                {/* Card Body (Name) */}
-                                                <div className="w-full p-4 flex flex-col items-center justify-center flex-grow bg-white border-t border-gray-100">
-                                                    <h4 className="font-bold text-gray-800 text-sm text-center line-clamp-2 leading-tight">
-                                                        {c.name || c.nama}
-                                                    </h4>
-                                                </div>
-                                            </div>
-                                        ))}
+                                                            {/* Info */}
+                                                            <div className="flex-grow">
+                                                                <div className="flex flex-col mb-2">
+                                                                    <h4 className={`text-xl font-bold leading-tight mb-1 ${isActive ? 'text-purple-900' : 'text-gray-800'}`}>
+                                                                        {c.name || c.nama}
+                                                                    </h4>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {(() => {
+                                                                            if (!isActive) return (
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 uppercase tracking-wider">
+                                                                                    Belum Dipilih
+                                                                                </span>
+                                                                            );
+                                                                            if (loadingSchedules) return (
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 animate-pulse uppercase tracking-wider">
+                                                                                    Mengecek...
+                                                                                </span>
+                                                                            );
+                                                                            const hasAvailable = realSchedules.some(sch => sch.is_active && !sch.is_booked);
+                                                                            return hasAvailable ? (
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">
+                                                                                    Tersedia
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
+                                                                                    Penuh
+                                                                                </span>
+                                                                            );
+                                                                        })()}
+                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-[#8b5cf6] uppercase tracking-wider">
+                                                                            {c.bio || 'Konselor'}
+                                                                        </span>
+                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
+                                                                            {c.availability_info?.display || '0/0 Slot'} Terisi
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                                                                    Specialist in handling student counseling and psychological support.
+                                                                </p>
+                                                                
+                                                                {!isActive && (
+                                                                    <button 
+                                                                        type="button"
+                                                                        className="text-xs font-bold text-[#8b5cf6] flex items-center gap-1 hover:underline"
+                                                                    >
+                                                                        Klik untuk pilih & lihat jadwal <Clock className="w-3 h-3" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Expanded Content: Schedules */}
+                                                        <AnimatePresence>
+                                                            {isActive && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, height: 0 }}
+                                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                                    exit={{ opacity: 0, height: 0 }}
+                                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                                    className="mt-6 pt-6 border-t border-purple-100"
+                                                                >
+                                                                    <div className="bg-white rounded-2xl p-4 border border-purple-50">
+                                                                        <div className="flex items-center justify-between mb-4">
+                                                                            <h5 className="font-bold text-gray-800 flex items-center gap-2">
+                                                                                <Calendar className="w-4 h-4 text-[#8b5cf6]" /> Slot Waktu Tersedia
+                                                                            </h5>
+                                                                            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Pilih Maksimal 2 Slot</span>
+                                                                        </div>
+
+                                                                        {loadingSchedules ? (
+                                                                            <div className="py-8 text-center">
+                                                                                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                                                                <p className="text-xs text-gray-400">Memuat jadwal...</p>
+                                                                            </div>
+                                                                        ) : realSchedules.length === 0 ? (
+                                                                            <div className="py-6 text-center text-xs text-gray-400">
+                                                                                Belum ada jadwal tersedia untuk konselor ini.
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                                                                                {(() => {
+                                                                                    const grouped = realSchedules.reduce((acc, sch) => {
+                                                                                        const key = sch.next_date || sch.hari;
+                                                                                        if (!acc[key]) acc[key] = { hari: sch.hari, next_date: sch.next_date, slots: [] };
+                                                                                        acc[key].slots.push(sch);
+                                                                                        return acc;
+                                                                                    }, {});
+
+                                                                                    return Object.values(grouped).map((group, gIdx) => (
+                                                                                        <div key={gIdx} className="space-y-2">
+                                                                                            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2">
+                                                                                                {formatDay(group.hari)}, {group.next_date ? new Date(group.next_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}
+                                                                                            </p>
+                                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                                                {group.slots.map(sch => {
+                                                                                                    const slotUid = `${sch.id}-${sch.jam_mulai}`;
+                                                                                                    const isAvailable = sch.is_active && !sch.is_booked;
+                                                                                                    const isSelected = selectedSlots.includes(slotUid);
+                                                                                                    const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
+
+                                                                                                    const toggleSlot = (e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        if (!isAvailable) return;
+                                                                                                        if (isSelected) {
+                                                                                                            setSelectedSlots(prev => prev.filter(id => id !== slotUid));
+                                                                                                        } else if (selectedSlots.length < 2) {
+                                                                                                            if (selectedSlots.length === 1) {
+                                                                                                                const firstId = selectedSlots[0];
+                                                                                                                const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
+                                                                                                                if (firstSch) {
+                                                                                                                    const thisDate = sch.next_date || sch.hari;
+                                                                                                                    const firstDate = firstSch.next_date || firstSch.hari;
+                                                                                                                    if (thisDate !== firstDate) {
+                                                                                                                        toast.error("Pilih slot di hari yang sama.");
+                                                                                                                        return;
+                                                                                                                    }
+                                                                                                                    const fE = extractT(firstSch.jam_selesai);
+                                                                                                                    const tS = extractT(sch.jam_mulai);
+                                                                                                                    const tE = extractT(sch.jam_selesai);
+                                                                                                                    const fS = extractT(firstSch.jam_mulai);
+                                                                                                                    if (fE !== tS && tE !== fS) {
+                                                                                                                        toast.error("Slot harus berurutan.");
+                                                                                                                        return;
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                            setSelectedSlots(prev => [...prev, slotUid]);
+                                                                                                        }
+                                                                                                    };
+
+                                                                                                    return (
+                                                                                                        <button
+                                                                                                            key={slotUid}
+                                                                                                            type="button"
+                                                                                                            onClick={toggleSlot}
+                                                                                                            disabled={isDisabled && !isSelected}
+                                                                                                            className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all text-center
+                                                                                                                ${isSelected 
+                                                                                                                    ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-sm ring-1 ring-purple-100' 
+                                                                                                                    : isAvailable 
+                                                                                                                        ? 'border-gray-100 bg-white hover:border-purple-200 text-gray-700' 
+                                                                                                                        : 'border-red-50 bg-red-50/30 text-red-300 cursor-not-allowed opacity-50'
+                                                                                                                }`}
+                                                                                                        >
+                                                                                                            <span className="text-xs font-bold leading-none mb-1">
+                                                                                                                {extractT(sch.jam_mulai)}
+                                                                                                            </span>
+                                                                                                            <span className={`text-[8px] font-bold uppercase tracking-tighter ${isSelected ? 'text-purple-600' : isAvailable ? 'text-green-500' : 'text-red-400'}`}>
+                                                                                                                {isSelected ? 'Terpilih' : isAvailable ? 'Tersedia' : 'Penuh'}
+                                                                                                            </span>
+                                                                                                        </button>
+                                                                                                    );
+                                                                                                })}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ));
+                                                                                })()}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
-                        </section>
+                        </div>
+                    </section>
 
-                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-gray-800 mb-1">Informasi Tambahan</h2>
-                            <p className="text-xs text-gray-500 mb-4">Lengkapi informasi tambahan untuk membantu proses penanganan</p>
+                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-purple-50 rounded-lg text-[#8b5cf6]">
+                                <Info className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">Informasi Tambahan</h2>
+                                <p className="text-sm text-gray-500">Lengkapi informasi berikut untuk klasifikasi laporan</p>
+                            </div>
+                        </div>
 
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
@@ -670,8 +936,7 @@ const LaporUmum = () => {
                                 </div>
 
                             </div>
-                        </section>
-                    </div>
+                    </section>
 
                     {/* INFORMASI DASAR */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

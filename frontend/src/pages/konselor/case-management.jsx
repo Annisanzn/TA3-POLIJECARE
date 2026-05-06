@@ -141,6 +141,7 @@ const CounselorCaseManagement = () => {
       setStats({
         ...statsRes.data.data,
         pending: compStatsRes.data.data.pending,
+        approved: compStatsRes.data.data.approved,
         archived: compStatsRes.data.data.archived,
         total: compStatsRes.data.data.total
       });
@@ -678,7 +679,8 @@ const CounselorCaseManagement = () => {
       {statusModal.open && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => setStatusModal({ open: false, complaint: null })} />
-          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200 overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
              <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center uppercase tracking-tight">
                {statusModal.isRejectOnly ? 'Tolak Laporan' : 'Perbarui Status'}
              </h3>
@@ -733,7 +735,8 @@ const CounselorCaseManagement = () => {
       {scheduleModal.open && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => setScheduleModal({ open: false, complaint: null })} />
-          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-12 animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-12 animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center uppercase tracking-tight">Delegasi Kasus</h3>
             <p className="text-gray-400 text-[11px] font-bold text-center mb-10 tracking-widest">{scheduleModal.complaint?.report_id}</p>
 
@@ -773,8 +776,9 @@ const CounselorCaseManagement = () => {
       {exportModal.open && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-md" onClick={() => setExportModal({ ...exportModal, open: false })} />
-          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
-             <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200 overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
+             <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mt-2 mb-6 mx-auto">
                <FiDownload className="text-emerald-600" size={32} />
              </div>
              <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Ekspor Laporan Saya</h3>

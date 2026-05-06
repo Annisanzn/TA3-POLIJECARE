@@ -122,128 +122,128 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
       )}
 
       <div
-      className={`sidebar-container h-screen flex flex-col transition-all duration-500 fixed z-50 inset-y-0 left-0 w-72
+        className={`sidebar-container h-screen flex flex-col transition-all duration-500 fixed z-50 inset-y-0 left-0 w-72
         ${collapsed ? '-translate-x-full' : 'translate-x-0'}
         lg:sticky lg:translate-x-0 ${collapsed ? 'lg:w-24' : 'lg:w-72'}
         overflow-hidden bg-white dark:bg-slate-950 border-r border-gray-100 dark:border-slate-800 transition-colors duration-500 shadow-2xl lg:shadow-none`}
-    >
-      {/* ── Header ── */}
-      <div className="p-8 border-b border-gray-50 dark:border-slate-800/50">
-        <div className="flex items-center justify-between">
-          {!collapsed && (
-            <div className="flex items-center space-x-4">
+      >
+        {/* ── Header ── */}
+        <div className="p-8 border-b border-gray-50 dark:border-slate-800/50">
+          <div className="flex items-center justify-between">
+            {!collapsed && (
+              <div className="flex items-center space-x-4">
+                <div
+                  className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-indigo-100"
+                  style={{ background: meta.color }}
+                >
+                  <span className="text-white font-bold text-xl tracking-tighter">PC</span>
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-slate-900 font-bold text-xl leading-none">PolijeCare</h2>
+                  <p className="text-slate-500 text-[10px] font-medium tracking-wide mt-1.5">{meta.label}</p>
+                </div>
+              </div>
+            )}
+            {collapsed && (
               <div
-                className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-indigo-100"
+                className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center mx-auto shadow-xl shadow-indigo-100 transition-all active:scale-95 cursor-pointer"
                 style={{ background: meta.color }}
+                onClick={toggleCollapse}
               >
                 <span className="text-white font-bold text-xl tracking-tighter">PC</span>
               </div>
-              <div className="min-w-0">
-                <h2 className="text-slate-900 font-bold text-xl leading-none">PolijeCare</h2>
-                <p className="text-slate-500 text-[10px] font-medium tracking-wide mt-1.5">{meta.label}</p>
-              </div>
-            </div>
-          )}
-          {collapsed && (
-            <div
-              className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center mx-auto shadow-xl shadow-indigo-100 transition-all active:scale-95 cursor-pointer"
-              style={{ background: meta.color }}
-              onClick={toggleCollapse}
-            >
-              <span className="text-white font-bold text-xl tracking-tighter">PC</span>
-            </div>
-          )}
-          {!collapsed && (
-            <button
-              onClick={toggleCollapse}
-              className="text-slate-400 hover:text-indigo-600 p-2 rounded-xl transition-all active:scale-90"
-            >
-               <FiChevronLeft size={24} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Menu ── */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
-        {menuSections.map((section, idx) => (
-          <div key={idx} className="space-y-4">
-            {!collapsed && (
-              <h3 className="text-slate-400 text-[11px] font-bold tracking-wider px-4">
-                {section.category}
-              </h3>
             )}
-            <ul className="space-y-2">
-              {section.items.map((item, i) => (
-                <li key={i}>
-                  <Link
-                    to={item.path}
-                    className={`w-full flex items-center px-5 py-4 rounded-[1.5rem] transition-all duration-300 ease-out group relative overflow-hidden ${isActive(item.path)
-                      ? 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-2xl shadow-indigo-200 dark:shadow-indigo-900/30'
-                      : 'text-slate-600 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-indigo-600 dark:hover:text-indigo-400'
-                      }`}
-                  >
-                    <span
-                      className={`text-2xl transition-all duration-300 ${collapsed ? 'mx-auto' : 'mr-4'} ${isActive(item.path) ? 'text-white' : 'group-hover:scale-110'}`}
-                    >
-                      {item.icon}
-                    </span>
-                    {!collapsed && (
-                      <span className="font-semibold text-sm whitespace-nowrap tracking-tight">
-                        {item.name}
-                      </span>
-                    )}
-                    {/* Active Indicator bar */}
-                    {isActive(item.path) && !collapsed && (
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-white rounded-l-full" />
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {!collapsed && (
+              <button
+                onClick={toggleCollapse}
+                className="text-slate-400 hover:text-indigo-600 p-2 rounded-xl transition-all active:scale-90"
+              >
+                <FiChevronLeft size={24} />
+              </button>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* ── Footer / User Info + Logout ── */}
-      <div className="p-8 border-t border-gray-50 dark:border-slate-800/50 bg-gray-50/30 dark:bg-slate-900/20">
-        <div className={`flex items-center ${collapsed ? 'justify-center flex-col gap-6' : 'justify-between'}`}>
-          {!collapsed && (
-            <div className="flex items-center space-x-4 min-w-0">
+        {/* ── Menu ── */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8">
+          {menuSections.map((section, idx) => (
+            <div key={idx} className="space-y-4">
+              {!collapsed && (
+                <h3 className="text-slate-400 text-[11px] font-bold tracking-wider px-4">
+                  {section.category}
+                </h3>
+              )}
+              <ul className="space-y-2">
+                {section.items.map((item, i) => (
+                  <li key={i}>
+                    <Link
+                      to={item.path}
+                      className={`w-full flex items-center px-5 py-4 rounded-[1.5rem] transition-all duration-300 ease-out group relative overflow-hidden ${isActive(item.path)
+                        ? 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-2xl shadow-indigo-200 dark:shadow-indigo-900/30'
+                        : 'text-slate-600 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:text-indigo-600 dark:hover:text-indigo-400'
+                        }`}
+                    >
+                      <span
+                        className={`text-2xl transition-all duration-300 ${collapsed ? 'mx-auto' : 'mr-4'} ${isActive(item.path) ? 'text-white' : 'group-hover:scale-110'}`}
+                      >
+                        {item.icon}
+                      </span>
+                      {!collapsed && (
+                        <span className="font-semibold text-sm whitespace-nowrap tracking-tight">
+                          {item.name}
+                        </span>
+                      )}
+                      {/* Active Indicator bar */}
+                      {isActive(item.path) && !collapsed && (
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-white rounded-l-full" />
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Footer / User Info + Logout ── */}
+        <div className="p-8 border-t border-gray-50 dark:border-slate-800/50 bg-gray-50/30 dark:bg-slate-900/20">
+          <div className={`flex items-center ${collapsed ? 'justify-center flex-col gap-6' : 'justify-between'}`}>
+            {!collapsed && (
+              <div className="flex items-center space-x-4 min-w-0">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white dark:border-slate-800"
+                  style={{ background: meta.color }}
+                >
+                  <span className="text-white text-base font-bold uppercase">
+                    {(user?.name || 'U')[0]}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-slate-900 text-sm font-bold truncate leading-none">{user?.name?.split(' ')[0] || 'Admin'}</p>
+                  <p className="text-slate-500 text-[10px] font-medium truncate mt-1.5">{user?.role || 'Operator'}</p>
+                </div>
+              </div>
+            )}
+            {collapsed && (
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white dark:border-slate-800"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white dark:border-slate-800 transition-transform active:scale-95"
                 style={{ background: meta.color }}
               >
                 <span className="text-white text-base font-bold uppercase">
                   {(user?.name || 'U')[0]}
                 </span>
               </div>
-              <div className="min-w-0">
-                <p className="text-slate-900 text-sm font-bold truncate leading-none">{user?.name?.split(' ')[0] || 'Admin'}</p>
-                <p className="text-slate-500 text-[10px] font-medium truncate mt-1.5">{user?.role || 'Operator'}</p>
-              </div>
-            </div>
-          )}
-          {collapsed && (
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white dark:border-slate-800 transition-transform active:scale-95"
-              style={{ background: meta.color }}
+            )}
+            <button
+              onClick={handleLogout}
+              title="Keluar Sesi"
+              className="text-slate-400 dark:text-slate-700 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-3 rounded-2xl transition-all active:scale-90 border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50 shadow-sm"
             >
-              <span className="text-white text-base font-bold uppercase">
-                {(user?.name || 'U')[0]}
-              </span>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            title="Keluar Sesi"
-            className="text-slate-400 dark:text-slate-700 hover:text-rose-600 dark:hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-3 rounded-2xl transition-all active:scale-90 border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50 shadow-sm"
-          >
-            <FiLogOut size={22} />
-          </button>
+              <FiLogOut size={22} />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
