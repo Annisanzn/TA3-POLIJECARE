@@ -113,15 +113,15 @@ const BuatLaporan = () => {
     const [scheduleLink, setScheduleLink] = useState('');
 
     // Time & Day Helpers
-    const extractT = (v) => { 
-        const s = String(v || ''); 
-        return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5); 
+    const extractT = (v) => {
+        const s = String(v || '');
+        return s.includes('T') ? s.split('T')[1].substring(0, 5) : s.substring(0, 5);
     };
 
     const formatDay = (dayStr) => {
-        const days = { 
-            'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 
-            'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu' 
+        const days = {
+            'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu',
+            'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu', 'sunday': 'Minggu'
         };
         return days[dayStr.toLowerCase()] || dayStr;
     };
@@ -192,7 +192,7 @@ const BuatLaporan = () => {
             }
 
             setScheduleSubmitted(true);
-            
+
             // AUTO REDIRECT TO WHATSAPP
             const waMsg = `Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${reprId || complId}*. Mohon konfirmasinya. Terima kasih.`;
             window.open(`https://wa.me/6282126432696?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -349,13 +349,13 @@ const BuatLaporan = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        
+
         if (name === 'guest_phone') {
             // Only allow digits
             const digits = value.replace(/\D/g, '');
             // If it starts with 0, remove it (assuming +62 prefix is handled elsewhere or prepended)
             const cleanDigits = digits.startsWith('0') ? digits.substring(1) : digits;
-            
+
             setFormData(prev => ({
                 ...prev,
                 [name]: cleanDigits
@@ -372,7 +372,7 @@ const BuatLaporan = () => {
     const handleCounselorSelect = async (counselorId) => {
         setFormData(prev => ({ ...prev, counselor_id: counselorId }));
         setSelectedSlots([]); // Reset slots when switching counselor
-        
+
         setLoadingSchedules(true);
         try {
             const schedRes = await fetch(`${API_BASE_URL}/user/counselor-schedules?counselor_id=${counselorId}`, {
@@ -402,9 +402,9 @@ const BuatLaporan = () => {
                 return true;
             });
 
-            setFormData(prev => ({ 
-                ...prev, 
-                attachments: [...(prev.attachments || []), ...validFiles] 
+            setFormData(prev => ({
+                ...prev,
+                attachments: [...(prev.attachments || []), ...validFiles]
             }));
         }
     };
@@ -418,6 +418,30 @@ const BuatLaporan = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Manual Validation for missing fields to show Popup
+        const missingFields = [];
+        if (!formData.title) missingFields.push('Judul Laporan');
+        if (!formData.violence_category_id) missingFields.push('Kategori Kekerasan');
+        if (!formData.guest_phone) missingFields.push('Nomor WhatsApp');
+        if (!formData.guest_email) missingFields.push('Email Aktif');
+        if (!formData.location) missingFields.push('Lokasi Kejadian');
+        if (!formData.incident_date) missingFields.push('Tanggal Kejadian');
+        if (!formData.chronology) missingFields.push('Kronologi Kejadian');
+        if (!formData.counselor_id) missingFields.push('Pilihan Konselor');
+        if (!formData.suspect_name) missingFields.push('Nama Terlapor');
+        if (!formData.suspect_affiliation) missingFields.push('Afiliasi Terlapor');
+        if (formData.victim_type === 'other') {
+            if (!formData.victim_name) missingFields.push('Nama Korban');
+            if (!formData.victim_relationship) missingFields.push('Hubungan dengan Korban');
+        }
+
+        if (missingFields.length > 0) {
+            const list = missingFields.join(', ');
+            alert(`⚠️ PERHATIAN: Masih ada data yang belum diisi:\n\n${list}\n\nMohon lengkapi semua bidang yang bertanda bintang (*) sebelum mengirim.`);
+            return;
+        }
+
         setLoading(true);
         setSubmitError('');
 
@@ -479,7 +503,7 @@ const BuatLaporan = () => {
             if (data?.data?.id) {
                 setCreatedComplaintId(data.data.id);
                 setCreatedReportId(data.data.report_id);
-                
+
                 // AUTOMATICALLY SUBMIT SCHEDULE
                 if (selectedSlots.length > 0) {
                     await handleScheduleSubmit(data.data.id, data.data.report_id);
@@ -524,7 +548,7 @@ const BuatLaporan = () => {
         return (
             <UserLayout user={currentUser}>
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#1e1b4b]/40 backdrop-blur-sm">
-                    <motion.div 
+                    <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden border border-purple-100"
@@ -532,7 +556,7 @@ const BuatLaporan = () => {
                         {/* Decorative Header */}
                         <div className="h-32 bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] relative flex items-center justify-center">
                             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
-                            <motion.div 
+                            <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", damping: 12, delay: 0.2 }}
@@ -553,13 +577,13 @@ const BuatLaporan = () => {
                             </p>
 
                             <div className="space-y-4">
-                                <a 
+                                <a
                                     href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
                                     target="_blank" rel="noopener noreferrer"
                                     className="w-full py-4 bg-[#25D366] text-white font-bold rounded-2xl hover:bg-[#20ba56] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-green-200 group"
                                 >
                                     <div className="bg-white/20 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
-                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
+                                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" /></svg>
                                     </div>
                                     Konfirmasi via WhatsApp
                                 </a>
@@ -625,7 +649,9 @@ const BuatLaporan = () => {
                             <h2 className="text-lg font-bold text-gray-800 flex items-center">
                                 <User className="w-5 h-5 mr-2 text-[#8b5cf6]" /> Data Pelapor
                             </h2>
-                            <p className="text-xs text-gray-500 mt-1">Identitas pelapor diambil secara otomatis dari sistem Polije</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                <span className="font-bold text-[#8b5cf6]">Definisi:</span> Pelapor adalah Anda (pengguna sistem) yang melaporkan kejadian, baik sebagai korban langsung maupun sebagai saksi yang mengetahui kejadian tersebut.
+                            </p>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
@@ -738,7 +764,7 @@ const BuatLaporan = () => {
                                                 <p className="text-xs text-gray-500 mb-2">Upload scan/foto KTP korban untuk mencegah laporan palsu.</p>
                                                 <input
                                                     type="file" required accept=".jpeg,.jpg,.png,.pdf"
-                                                    onChange={(e) => setFormData(prev => ({...prev, victim_identity_proof: e.target.files[0]}))}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, victim_identity_proof: e.target.files[0] }))}
                                                     className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
                                                 />
                                             </div>
@@ -755,7 +781,9 @@ const BuatLaporan = () => {
                             <h2 className="text-lg font-bold text-gray-800 flex items-center">
                                 <User className="w-5 h-5 mr-2 text-rose-500" /> Data Terlapor (Pelaku)
                             </h2>
-                            <p className="text-xs text-gray-500 mt-1">Identitas pelaku/tersangka dari Politeknik Negeri Jember</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                <span className="font-bold text-rose-500">Definisi:</span> Terlapor adalah orang yang diduga melakukan tindakan kekerasan atau pelanggaran yang Anda laporkan.
+                            </p>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
@@ -802,11 +830,16 @@ const BuatLaporan = () => {
                         </div>
                     </section>
 
-                    {/* PEMILIHAN KONSELOR & INFORMASI TAMBAHAN */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-gray-800 mb-1">Pemilihan Konselor</h2>
-                            <p className="text-xs text-gray-500 mb-4">Pilih konselor yang akan menangani laporan ini</p>
+                    {/* PEMILIHAN KONSELOR */}
+                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                                <User className="w-6 h-6 mr-3 text-[#8b5cf6]" /> Pemilihan Konselor Ahli
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1">Pilih konselor yang akan membantu menangani laporan Anda secara profesional</p>
+                        </div>
+
+                        <div className="p-8">
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
@@ -826,16 +859,16 @@ const BuatLaporan = () => {
                                         <p className="text-sm text-gray-500">Belum ada konselor tersedia saat ini.</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 gap-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                         {counselors.map((c, index) => {
                                             const isActive = formData.counselor_id === c.id;
-                                            
+
                                             return (
                                                 <motion.div
                                                     key={c.id}
                                                     layout
                                                     initial={false}
-                                                    animate={{ 
+                                                    animate={{
                                                         borderColor: isActive ? '#8b5cf6' : '#f3f4f6',
                                                         backgroundColor: isActive ? '#fdfaff' : '#ffffff'
                                                     }}
@@ -862,44 +895,47 @@ const BuatLaporan = () => {
 
                                                             {/* Info */}
                                                             <div className="flex-grow">
-                                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                                                                    <h4 className={`text-lg font-bold leading-tight ${isActive ? 'text-purple-900' : 'text-gray-800'}`}>
+                                                                <div className="flex flex-col mb-2">
+                                                                    <h4 className={`text-xl font-bold leading-tight mb-1 ${isActive ? 'text-purple-900' : 'text-gray-800'}`}>
                                                                         {c.name || c.nama}
                                                                     </h4>
-                                                                    <div className="flex gap-2">
+                                                                    <div className="flex flex-wrap gap-2">
                                                                         {(() => {
                                                                             if (!isActive) return (
-                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 uppercase tracking-wider">
                                                                                     Belum Dipilih
                                                                                 </span>
                                                                             );
                                                                             if (loadingSchedules) return (
-                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-600 animate-pulse">
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 animate-pulse uppercase tracking-wider">
                                                                                     Mengecek...
                                                                                 </span>
                                                                             );
                                                                             const hasAvailable = realSchedules.some(sch => sch.is_active && !sch.is_booked);
                                                                             return hasAvailable ? (
-                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">
                                                                                     Tersedia
                                                                                 </span>
                                                                             ) : (
-                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
                                                                                     Penuh
                                                                                 </span>
                                                                             );
                                                                         })()}
-                                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-[#8b5cf6] uppercase tracking-wider">
                                                                             {c.bio || 'Konselor'}
+                                                                        </span>
+                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
+                                                                            {c.availability_info?.display || '0/0 Slot'} Terisi
                                                                         </span>
                                                                     </div>
                                                                 </div>
                                                                 <p className="text-sm text-gray-500 line-clamp-2 mb-3">
                                                                     Specialist in handling student counseling and psychological support.
                                                                 </p>
-                                                                
+
                                                                 {!isActive && (
-                                                                    <button 
+                                                                    <button
                                                                         type="button"
                                                                         className="text-xs font-bold text-[#8b5cf6] flex items-center gap-1 hover:underline"
                                                                     >
@@ -995,10 +1031,10 @@ const BuatLaporan = () => {
                                                                                                             onClick={toggleSlot}
                                                                                                             disabled={isDisabled && !isSelected}
                                                                                                             className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all text-center
-                                                                                                                ${isSelected 
-                                                                                                                    ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-sm ring-1 ring-purple-100' 
-                                                                                                                    : isAvailable 
-                                                                                                                        ? 'border-gray-100 bg-white hover:border-purple-200 text-gray-700' 
+                                                                                                                ${isSelected
+                                                                                                                    ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-sm ring-1 ring-purple-100'
+                                                                                                                    : isAvailable
+                                                                                                                        ? 'border-gray-100 bg-white hover:border-purple-200 text-gray-700'
                                                                                                                         : 'border-red-50 bg-red-50/30 text-red-300 cursor-not-allowed opacity-50'
                                                                                                                 }`}
                                                                                                         >
@@ -1028,37 +1064,44 @@ const BuatLaporan = () => {
                                     </div>
                                 )}
                             </div>
-                        </section>
+                        </div>
+                    </section>
 
-                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-gray-800 mb-1">Informasi Tambahan</h2>
-                            <p className="text-xs text-gray-500 mb-4">Lengkapi informasi tambahan untuk membantu proses penanganan</p>
+                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-purple-50 rounded-lg text-[#8b5cf6]">
+                                <Info className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">Informasi Tambahan</h2>
+                                <p className="text-sm text-gray-500">Lengkapi informasi berikut untuk klasifikasi laporan</p>
+                            </div>
+                        </div>
 
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Jenis Korban <span className="text-red-500">*</span></label>
-                                        <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 block pointer-events-none">
-                                            {formData.victim_type === 'self' ? 'Diri Sendiri' : 'Orang Lain'}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Tingkat Urgensi <span className="text-red-500">*</span></label>
-                                        <select
-                                            name="urgency_level" required
-                                            value={formData.urgency_level} onChange={handleInputChange}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                        >
-                                            <option value="low">Rendah</option>
-                                            <option value="medium">Sedang</option>
-                                            <option value="high">Tinggi</option>
-                                        </select>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Jenis Korban <span className="text-red-500">*</span></label>
+                                    <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 block pointer-events-none">
+                                        {formData.victim_type === 'self' ? 'Diri Sendiri' : 'Orang Lain'}
                                     </div>
                                 </div>
-
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tingkat Urgensi <span className="text-red-500">*</span></label>
+                                    <select
+                                        name="urgency_level" required
+                                        value={formData.urgency_level} onChange={handleInputChange}
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
+                                    >
+                                        <option value="low">Rendah</option>
+                                        <option value="medium">Sedang</option>
+                                        <option value="high">Tinggi</option>
+                                    </select>
+                                </div>
                             </div>
-                        </section>
-                    </div>
+
+                        </div>
+                    </section>
 
                     {/* INFORMASI DASAR */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

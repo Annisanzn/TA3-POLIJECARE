@@ -146,7 +146,12 @@ const UserManagementPage = () => {
       setShowUserModal(false);
       fetchData();
     } catch (error) {
-      setFormError(error?.message || 'Gagal menyimpan pengguna.');
+      if (error?.response?.data?.errors) {
+        const firstError = Object.values(error.response.data.errors)[0];
+        setFormError(Array.isArray(firstError) ? firstError[0] : firstError);
+      } else {
+        setFormError(error?.response?.data?.message || error?.message || 'Gagal menyimpan pengguna.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -187,16 +192,6 @@ const UserManagementPage = () => {
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Direktori & Akses Kontrol PolijeCare</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-               <div className="relative w-full sm:w-64 group">
-                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-all" />
-                  <input type="text" placeholder="Cari..." value={searchQuery} onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-transparent focus:bg-white focus:border-indigo-500 rounded-2xl text-[11px] font-bold text-slate-900 outline-none transition-all shadow-inner" />
-               </div>
-               <button onClick={handleAddUser} className="w-full sm:w-auto px-6 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-100 active:scale-95 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
-                 <FiUserPlus size={18} /> Tambah
-               </button>
-            </div>
           </div>
         </header>
 
@@ -217,21 +212,27 @@ const UserManagementPage = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-all">
-            <div className="px-8 py-6 border-b border-gray-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30 dark:bg-slate-800/30">
-               <div>
-                 <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Direktori Pengguna</h2>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total {pagination.total} Entri</p>
+            <div className="px-8 py-6 border-b border-gray-50 dark:border-slate-800 flex flex-col lg:flex-row justify-between gap-4 bg-gray-50/30 dark:bg-slate-800/30">
+               <div className="flex-1">
+                  <div className="relative group max-w-md">
+                     <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-all" size={18} />
+                     <input type="text" placeholder="Cari pengguna..." value={searchQuery} onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
+                       className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 focus:bg-white focus:border-indigo-500 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 outline-none transition-all shadow-sm" />
+                  </div>
                </div>
-               <div className="flex items-center gap-3">
+               <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                   <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
-                    className="px-6 py-2.5 bg-white border border-gray-100 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-600 outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+                    className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 outline-none focus:border-indigo-500 cursor-pointer shadow-sm appearance-none">
                     <option value="all">Semua Peran</option>
                     <option value="konselor">Konselor</option>
                     <option value="operator">Operator</option>
                     <option value="user">User</option>
                   </select>
-                  <button onClick={exportCsv} className="p-2.5 bg-white border border-gray-100 rounded-xl text-slate-400 hover:text-emerald-500 transition-all shadow-sm">
+                  <button onClick={exportCsv} className="w-full sm:w-auto p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-all shadow-sm flex items-center justify-center" title="Ekspor CSV">
                     <FiDownload size={18} />
+                  </button>
+                  <button onClick={handleAddUser} className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+                    <FiUserPlus size={18} /> Tambah
                   </button>
                </div>
             </div>
@@ -315,34 +316,34 @@ const UserManagementPage = () => {
                   {formError && <div className="p-4 bg-rose-50 text-rose-600 text-[10px] font-bold uppercase rounded-2xl border border-rose-100">{formError}</div>}
                   <div className="grid grid-cols-2 gap-6">
                      <div className="col-span-2 space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Nama Lengkap</label>
-                        <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">Nama Lengkap</label>
+                        <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all" />
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Email</label>
-                        <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">Email</label>
+                        <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all" />
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Peran</label>
-                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-xs font-bold text-slate-900 outline-none focus:border-indigo-500 shadow-inner">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">Peran</label>
+                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all">
                            <option value="user">User</option>
                            <option value="konselor">Konselor</option>
                            <option value="operator">Operator</option>
                         </select>
                      </div>
                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">NIM / Identitas</label>
-                        <input type="text" value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">NIM / Identitas</label>
+                        <input type="text" value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all" />
                      </div>
                      <div className="space-y-2 relative">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Password</label>
-                        <input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 shadow-inner" />
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">Password</label>
+                        <input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all" />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-[48px] text-slate-400 hover:text-indigo-600 transition-all">{showPassword ? <FiEyeOff size={18}/> : <FiEye size={18}/>}</button>
                      </div>
                   </div>
                   <div className="flex gap-4 pt-4">
-                     <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
-                     <button type="submit" disabled={isSubmitting} className="flex-[2] py-5 bg-indigo-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-indigo-100 uppercase">{isSubmitting ? <FiLoader className="animate-spin mx-auto"/> : <><FiSave className="inline mr-2"/> Simpan</>}</button>
+                     <button type="button" onClick={() => setShowUserModal(false)} className="flex-1 py-4 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest text-xs hover:text-slate-900 transition-colors">Batal</button>
+                     <button type="submit" disabled={isSubmitting} className="flex-[2] py-5 bg-indigo-600 text-white font-bold rounded-full text-xs tracking-widest shadow-xl shadow-indigo-100 dark:shadow-none uppercase hover:bg-indigo-700 transition-all">{isSubmitting ? <FiLoader className="animate-spin mx-auto"/> : <><FiSave className="inline mr-2"/> Simpan</>}</button>
                   </div>
                </form>
             </motion.div>

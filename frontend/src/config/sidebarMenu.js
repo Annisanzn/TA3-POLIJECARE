@@ -27,7 +27,7 @@ export const sidebarMenu = {
       ]
     }
   ],
-  
+
   konselor: [
     {
       category: 'UTAMA',
@@ -52,7 +52,7 @@ export const sidebarMenu = {
       ]
     }
   ],
-  
+
   user: [
     {
       category: 'UTAMA',

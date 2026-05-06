@@ -239,7 +239,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             <div className="flex-1 flex flex-col transition-all duration-300 min-w-0">
                 <Topbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} title={`Laporan #${complaint?.report_id}`} />
 
-                <main className="p-4 md:p-8 w-full max-w-7xl mx-auto space-y-8">
+                <main className="p-2 md:p-4 w-full space-y-8">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
                             <button
@@ -570,7 +570,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                     <div>
                                         <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Nama Lengkap</p>
                                         <p className="font-bold text-slate-900 dark:text-white text-base tracking-tight uppercase border-b border-dashed border-gray-200 dark:border-slate-800 pb-3">
-                                            {complaint.user_name}
+                                            {complaint.user_name || complaint.guest_name || 'Nama Tidak Tersedia'}
                                         </p>
                                         {(complaint.user_phone || complaint.user_email) && (
                                             <div className="mt-6 space-y-4">

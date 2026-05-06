@@ -235,7 +235,7 @@ const ArticleDetail = () => {
 
           {/* Article Content */}
           <div
-            className="mt-8 pb-16 prose-article"
+            className="mt-8 pb-16 prose-article whitespace-pre-wrap"
             style={{
               color: '#374151',
               lineHeight: '1.9',

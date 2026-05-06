@@ -390,24 +390,6 @@ const ArticleManagementPage = () => {
                                 Kelola artikel & pengumuman landing page PolijeCare
                             </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <div className="relative w-full sm:w-72">
-                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Cari judul artikel..."
-                                    value={searchQuery}
-                                    onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
-                                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
-                            </div>
-                            <button
-                                onClick={() => setModal({ open: true, mode: 'create', article: null })}
-                                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 hover:shadow-lg hover:scale-[1.03] transition-all whitespace-nowrap"
-                            >
-                                <FiPlus size={18} /> Tambah Artikel
-                            </button>
-                        </div>
                     </div>
                 </header>
 
@@ -439,18 +421,24 @@ const ArticleManagementPage = () => {
                         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 
                         {/* Filter bar */}
-                        <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">Daftar Artikel</h2>
-                                <p className="text-gray-500 text-sm mt-1 font-medium">
-                                    Menampilkan <span className="text-gray-900">{articles.length}</span> dari {pagination.total} artikel
-                                </p>
+                        <div className="px-6 py-5 border-b border-gray-100 flex flex-col lg:flex-row justify-between gap-4">
+                            <div className="flex-1">
+                                <div className="relative group max-w-md">
+                                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-all" size={18} />
+                                    <input
+                                        type="text"
+                                        placeholder="Cari judul artikel..."
+                                        value={searchQuery}
+                                        onChange={e => { setCurrentPage(1); setSearchQuery(e.target.value); }}
+                                        className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 focus:bg-white focus:border-purple-500 rounded-xl text-sm font-medium text-gray-700 outline-none transition-all shadow-sm"
+                                    />
+                                </div>
                             </div>
-                            <div className="relative group">
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                                 <select
                                     value={statusFilter}
                                     onChange={e => { setCurrentPage(1); setStatusFilter(e.target.value); }}
-                                    className="pl-4 pr-10 py-2.5 bg-gray-50 border-0 ring-1 ring-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:ring-gray-300 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                                    className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:border-purple-500 cursor-pointer shadow-sm appearance-none"
                                 >
                                     <option value="all">Semua Status</option>
                                     <option value="published">Publish</option>
@@ -458,6 +446,12 @@ const ArticleManagementPage = () => {
                                     <option value="draft">Draft</option>
                                     <option value="inactive">Nonaktif</option>
                                 </select>
+                                <button
+                                    onClick={() => setModal({ open: true, mode: 'create', article: null })}
+                                    className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl text-sm font-medium shadow-md shadow-purple-200 hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                                >
+                                    <FiPlus size={18} /> Tambah Artikel
+                                </button>
                             </div>
                         </div>
 

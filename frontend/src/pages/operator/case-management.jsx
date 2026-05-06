@@ -326,7 +326,7 @@ const CaseManagementPage = () => {
                   <div className="relative group">
                     <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-colors" size={18} />
                     <input type="text" placeholder="Masukkan ID / Judul..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-sm font-bold text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
+                      className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-sm font-medium text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
                   </div>
                 </div>
 
@@ -334,7 +334,7 @@ const CaseManagementPage = () => {
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Urgensi</label>
                   <div className="relative">
                     <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)}
-                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-bold text-slate-800 outline-none transition-all appearance-none cursor-pointer shadow-inner">
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-medium text-slate-800 outline-none transition-all appearance-none cursor-pointer shadow-inner">
                       <option value="all">-- Semua Urgensi --</option>
                       <option value="critical">Critical</option>
                       <option value="high">High</option>
@@ -435,7 +435,7 @@ const CaseManagementPage = () => {
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-2">Pelapor</p>
                           <p className="text-xs font-bold text-slate-900 truncate flex items-center gap-2">
-                             <FiUser size={14} className="text-indigo-500" /> {report?.user_name || report?.guest_name || 'Anonim'}
+                             <FiUser size={14} className="text-indigo-500" /> {report?.user_name || report?.guest_name || report?.user?.name || 'Nama Tidak Tersedia'}
                           </p>
                         </div>
                         <div className="min-w-0">
@@ -502,8 +502,8 @@ const CaseManagementPage = () => {
       <AnimatePresence>
         {scheduleModal.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
-            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
-               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10 rounded-t-[2.5rem]" />
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10" />
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Plotting Konselor</h3>
               <div className="space-y-6 mb-10">
                  <div className="space-y-2">
@@ -532,7 +532,7 @@ const CaseManagementPage = () => {
       <AnimatePresence>
         {exportModal.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
-            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl w-full max-w-sm p-12 text-center border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl w-full max-w-sm p-12 overflow-hidden text-center border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Ekspor Laporan</h3>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10 opacity-70">Pilih Parameter Data</p>

@@ -8,10 +8,14 @@ import {
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
+import Articles from '../../components/Articles';
+import Materials from '../../components/Materials';
 import { useAuth } from '../../hooks/useAuth';
 import axios from '../../api/axios';
 import dayjs from 'dayjs';
 import 'dayjs/locale/id';
+import materialService from '../../services/materialService';
+import { normalizeImageUrl } from '../../utils/imageUrl';
 
 const StatCard = ({ label, value, icon: Icon, color, sub, onClick }) => (
   <div onClick={onClick} className="bg-white rounded-[24px] md:rounded-[28px] p-4 md:p-6 shadow-sm border border-gray-100 flex items-center gap-4 md:gap-5 cursor-pointer hover:shadow-md hover:border-violet-200 transition-all group">
@@ -39,6 +43,8 @@ const UserDashboard = () => {
     satgas_contact: { phone: '', email: '', location: '' }
   });
   const [loading, setLoading] = useState(true);
+  const [materialsData, setMaterialsData] = useState([]);
+  const [materialsLoading, setMaterialsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -60,7 +66,22 @@ const UserDashboard = () => {
       }
     };
 
+    const fetchMaterialsData = async () => {
+      try {
+        setMaterialsLoading(true);
+        const res = await materialService.getPublicMaterials();
+        if (res && res.materials) {
+          setMaterialsData((res.materials || []).slice(0, 4));
+        }
+      } catch (error) {
+        console.error('Failed to fetch materials', error);
+      } finally {
+        setMaterialsLoading(false);
+      }
+    };
+
     fetchDashboardData();
+    fetchMaterialsData();
   }, []);
 
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
@@ -90,7 +111,7 @@ const UserDashboard = () => {
             {/* Welcome Banner */}
             <motion.div variants={itemVariant} className="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[32px] p-8 sm:p-10 text-white shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-              <h1 className="text-3xl font-bold mb-3 text-white">Halo, {user?.name || 'Mahasiswa'}! 👋</h1>
+              <h1 className="text-3xl font-bold mb-3 text-white">Halo, {user?.name || 'Mahasiswa'}!</h1>
               <p className="opacity-90 max-w-2xl text-base sm:text-lg leading-relaxed font-medium text-white">
                 Ruang aman Anda untuk menyampaikan laporan dan mendapatkan dukungan penuh dari Satgas PPKS Polije. Kami siap mendengar dan membantu Anda.
               </p>
@@ -122,24 +143,23 @@ const UserDashboard = () => {
             <motion.div variants={itemVariant}>
               <h2 className="text-lg font-bold text-gray-900 mb-4 px-2">Akses Cepat</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button onClick={() => navigate('/user/buat-laporan')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3">
+                <button onClick={() => navigate('/user/report/create')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3">
                   <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                     <FiPlus size={22} />
                   </div>
                   <span className="font-semibold text-gray-800 text-sm leading-tight">Buat Laporan<br />Baru</span>
                 </button>
-                <button onClick={() => alert('Fitur Self Assessment akan segera hadir!')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3 relative overflow-hidden">
-                  <div className="absolute top-2 right-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-full uppercase">Beta</div>
-                  <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                    <FiActivity size={22} />
+                <button onClick={() => navigate('/user/histori-pengaduan')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3">
+                  <div className="w-12 h-12 bg-violet-50 rounded-full flex items-center justify-center text-violet-500 group-hover:scale-110 transition-transform">
+                    <FiFileText size={22} />
                   </div>
-                  <span className="font-semibold text-gray-800 text-sm leading-tight">Cek Kondisi<br />Psikologis</span>
+                  <span className="font-semibold text-gray-800 text-sm leading-tight">Riwayat<br />Pengaduan</span>
                 </button>
-                <button onClick={() => navigate('/articles')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3">
-                  <div className="w-12 h-12 bg-sky-50 rounded-full flex items-center justify-center text-sky-500 group-hover:scale-110 transition-transform">
-                    <FiBookOpen size={22} />
+                <button onClick={() => navigate('/user/counseling-request')} className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group text-center gap-3">
+                  <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                    <FiCalendar size={22} />
                   </div>
-                  <span className="font-semibold text-gray-800 text-sm leading-tight">Materi<br />Edukasi</span>
+                  <span className="font-semibold text-gray-800 text-sm leading-tight">Ajukan<br />Konseling</span>
                 </button>
               </div>
             </motion.div>
@@ -168,9 +188,6 @@ const UserDashboard = () => {
                         <FiFileText size={24} />
                       </div>
                       <p className="text-gray-500 font-medium">Belum ada aktivitas laporan saat ini.</p>
-                      <button onClick={() => navigate('/user/buat-laporan')} className="mt-4 text-violet-600 font-semibold hover:underline text-sm">
-                        Mulai buat laporan baru
-                      </button>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -209,7 +226,7 @@ const UserDashboard = () => {
                       </div>
                       <h3 className="text-gray-900 font-semibold mb-1">Belum Ada Jadwal</h3>
                       <p className="text-gray-500 text-sm mb-5 font-medium max-w-xs">Anda tidak memiliki jadwal konseling yang aktif atau disetujui dalam waktu dekat.</p>
-                      <button onClick={() => navigate('/user/counseling-schedule')} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-indigo-200">
+                      <button onClick={() => navigate('/user/counseling-request')} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-indigo-200">
                         Ajukan Konseling Baru
                       </button>
                     </div>
@@ -260,73 +277,8 @@ const UserDashboard = () => {
                     </div>
                   )}
                 </motion.div>
-              </div>
 
-              {/* RIGHT COLUMN */}
-              <div className="space-y-8">
-
-                {/* 6. Self Assessment Widget */}
-                <motion.div variants={itemVariant} className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-[32px] p-6 sm:p-8 shadow-sm relative overflow-hidden group">
-                  <div className="absolute -right-4 -bottom-4 text-amber-200 w-32 h-32 rotate-12 transition-transform group-hover:scale-110">
-                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                      <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.6,-46.3C91.4,-33.5,98,-18,97,-2.8C96,12.4,87.4,27.3,76.6,39.6C65.8,51.9,52.8,61.6,38.8,69.5C24.8,77.4,9.8,83.5,-5.8,88.1C-21.4,92.7,-37.6,95.8,-50.2,89.5C-62.8,83.2,-71.8,67.5,-79.3,51.8C-86.8,36.1,-92.8,20.4,-92.8,5.1C-92.8,-10.2,-86.8,-25.1,-78.9,-38.3C-71,-51.5,-61.2,-63,-48.6,-70.6C-36,-78.2,-20.6,-81.9,-4.9,-77.8C10.8,-73.7,21.6,-61.8,30.6,-73.5C39.6,-85.2,30.6,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
-                    </svg>
-                  </div>
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm mb-5">
-                      <FiActivity size={24} />
-                    </div>
-                    <h2 className="text-xl font-bold text-amber-950 mb-2 leading-tight">Cek Kondisi Mental Anda</h2>
-                    <p className="text-amber-800/80 font-medium text-sm mb-6 leading-relaxed">
-                      Sering merasa cemas, tertekan, atau tidak aman di kampus? Kenali kondisi Anda lebih awal.
-                    </p>
-                    <button onClick={() => alert('Fitur Self Assessment akan segera hadir!')} className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-amber-500/30">
-                      Mulai Self Assessment
-                    </button>
-                  </div>
-                </motion.div>
-
-                {/* 5. Edukasi dan Artikel */}
-                <motion.div variants={itemVariant} className="bg-white border border-gray-100 rounded-[32px] p-6 sm:p-8 shadow-sm">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900">Edukasi PPKS</h2>
-                  </div>
-
-                  {loading ? (
-                    <div className="animate-pulse space-y-4">
-                      {[1, 2].map(i => <div key={i} className="h-24 bg-gray-100 rounded-2xl w-full" />)}
-                    </div>
-                  ) : recent_articles.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-2xl text-sm font-medium">Belum ada artikel edukasi.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {recent_articles.map(article => (
-                        <Link to={`/articles/${article.slug}`} key={article.id} className="flex gap-4 group">
-                          {article.cover_image ? (
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gray-100">
-                              <img src={article.cover_image} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-20 rounded-2xl bg-sky-50 text-sky-300 flex items-center justify-center shrink-0">
-                              <FiBookOpen size={24} />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 group-hover:text-sky-600 transition-colors line-clamp-2 text-sm leading-snug mb-1">{article.title}</h4>
-                            <p className="text-xs text-gray-500 line-clamp-2">{article.excerpt}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-6 pt-4 border-t border-gray-100">
-                    <Link to="/articles" className="w-full py-2.5 bg-gray-50 text-gray-600 font-semibold rounded-xl text-sm hover:bg-gray-100 transition-colors block text-center">
-                      Jelajahi Semua Materi
-                    </Link>
-                  </div>
-                </motion.div>
-
-                {/* 7. Kontak Satgas PPKS (Emergency) */}
+                {/* 7. Kontak Satgas PPKS (Emergency) MOVED TO LEFT COLUMN */}
                 <motion.div variants={itemVariant} className="bg-gray-900 border border-gray-800 rounded-[32px] p-6 sm:p-8 shadow-xl shadow-gray-900/10">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-3 h-3 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
@@ -371,6 +323,116 @@ const UserDashboard = () => {
                     </div>
                   </div>
                 </motion.div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="space-y-8">
+
+                {/* 6. Ruang Aman & Rahasia Widget */}
+                <motion.div variants={itemVariant} className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-[32px] p-6 sm:p-8 shadow-sm relative overflow-hidden group">
+                  <div className="absolute -right-4 -bottom-4 text-emerald-200 w-32 h-32 rotate-12 transition-transform group-hover:scale-110">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                      <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.6,-46.3C91.4,-33.5,98,-18,97,-2.8C96,12.4,87.4,27.3,76.6,39.6C65.8,51.9,52.8,61.6,38.8,69.5C24.8,77.4,9.8,83.5,-5.8,88.1C-21.4,92.7,-37.6,95.8,-50.2,89.5C-62.8,83.2,-71.8,67.5,-79.3,51.8C-86.8,36.1,-92.8,20.4,-92.8,5.1C-92.8,-10.2,-86.8,-25.1,-78.9,-38.3C-71,-51.5,-61.2,-63,-48.6,-70.6C-36,-78.2,-20.6,-81.9,-4.9,-77.8C10.8,-73.7,21.6,-61.8,30.6,-73.5C39.6,-85.2,30.6,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+                    </svg>
+                  </div>
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm mb-5">
+                      <FiShield size={24} />
+                    </div>
+                    <h2 className="text-xl font-bold text-emerald-950 mb-2 leading-tight">Ruang Aman & Rahasia</h2>
+                    <p className="text-emerald-800/80 font-medium text-sm mb-6 leading-relaxed">
+                      PolijeCare menjamin kerahasiaan penuh atas identitas dan cerita Anda. Sistem ini dienkripsi dan hanya dapat diakses oleh Satgas PPKPT yang terikat kode etik kerahasiaan.
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* 5b. Materi Edukasi */}
+                <motion.div variants={itemVariant} className="bg-white border border-gray-100 rounded-[32px] p-6 sm:p-8 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900">Materi Edukasi</h2>
+                  </div>
+
+                  {materialsLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[1, 2].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl w-full" />)}
+                    </div>
+                  ) : materialsData.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-2xl text-sm font-medium">Belum ada materi.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {materialsData.map(material => (
+                        <div 
+                          key={material.unique_id} 
+                          onClick={() => {
+                            if (material.tipe === 'file') {
+                              window.open(materialService.getFileUrl(material.file_path), '_blank');
+                            } else {
+                              window.open(material.link, '_blank');
+                            }
+                          }}
+                          className="flex gap-4 group cursor-pointer"
+                        >
+                          <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-400 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                            {material.tipe === 'file' ? <FiFileText size={24} /> : <FiBookOpen size={24} />}
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">{material.kategori}</span>
+                            <h4 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 text-sm leading-snug">{material.judul}</h4>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-6 pt-4 border-t border-gray-100">
+                    <Link to="/edukasi" className="w-full py-2.5 bg-gray-50 text-gray-600 font-semibold rounded-xl text-sm hover:bg-gray-100 transition-colors block text-center">
+                      Jelajahi Semua Materi
+                    </Link>
+                  </div>
+                </motion.div>
+
+                {/* 5. Artikel dan Berita */}
+                <motion.div variants={itemVariant} className="bg-white border border-gray-100 rounded-[32px] p-6 sm:p-8 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900">Artikel & Pengumuman</h2>
+                  </div>
+
+                  {loading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[1, 2].map(i => <div key={i} className="h-24 bg-gray-100 rounded-2xl w-full" />)}
+                    </div>
+                  ) : recent_articles.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-2xl text-sm font-medium">Belum ada artikel edukasi.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {recent_articles.map(article => {
+                        const imageUrl = normalizeImageUrl(article.image || article.cover_image);
+                        return (
+                          <Link to={`/artikel/${article.slug}`} key={article.id} className="flex gap-4 group">
+                            {imageUrl ? (
+                              <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gray-100">
+                                <img src={imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              </div>
+                            ) : (
+                              <div className="w-20 h-20 rounded-2xl bg-sky-50 text-sky-300 flex items-center justify-center shrink-0">
+                                <FiBookOpen size={24} />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 group-hover:text-sky-600 transition-colors line-clamp-2 text-sm leading-snug mb-1">{article.title}</h4>
+                              <p className="text-xs text-gray-500 line-clamp-2">{article.excerpt}</p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="mt-6 pt-4 border-t border-gray-100">
+                    <Link to="/articles" className="w-full py-2.5 bg-gray-50 text-gray-600 font-semibold rounded-xl text-sm hover:bg-gray-100 transition-colors block text-center">
+                      Jelajahi Semua Artikel
+                    </Link>
+                  </div>
+                </motion.div>
+
 
               </div>
             </div>

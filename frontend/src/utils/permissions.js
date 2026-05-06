@@ -33,7 +33,7 @@ export const getDefaultRedirect = (userRole) => {
     [roles.KONSELOR]: '/konselor/dashboard',
     [roles.USER]: '/user/dashboard'
   };
-  
+
   return defaultRedirects[userRole] || '/';
 };
 
@@ -45,7 +45,7 @@ export const getDefaultRedirect = (userRole) => {
  */
 export const filterMenuByRole = (menuItems, userRole) => {
   if (!menuItems || !userRole) return [];
-  
+
   return menuItems.filter(item => {
     // If item has roles property, check if user role is included
     if (item.roles && Array.isArray(item.roles)) {
@@ -95,7 +95,7 @@ export const getRoleDisplayName = (role) => {
     [roles.KONSELOR]: 'Konselor',
     [roles.USER]: 'Pengguna'
   };
-  
+
   return roleNames[role] || 'Pengguna';
 };
 

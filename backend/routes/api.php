@@ -50,6 +50,8 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleC
 // Public routes
 Route::post('/public-complaints', [\App\Http\Controllers\API\PublicComplaintController::class, 'store']);
 Route::get('/public-categories', [\App\Http\Controllers\API\ViolenceCategoryController::class, 'publicIndex']);
+Route::get('/public-counselors', [\App\Http\Controllers\API\CounselingController::class, 'getCounselors']);
+Route::get('/public-counselor-schedules', [\App\Http\Controllers\API\CounselorScheduleController::class, 'publicIndex']);
 
 // Public Materials Route
 Route::get('/public-materials', [\App\Http\Controllers\API\MaterialController::class, 'index']);

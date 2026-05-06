@@ -1,12 +1,22 @@
 <?php
-require __DIR__.'/vendor/autoload.php';
-$app = require_once __DIR__.'/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-$kernel->bootstrap();
+require __DIR__ . '/vendor/autoload.php';
+$app = require_once __DIR__ . '/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-$user = \App\Models\User::where('email', 'siti@polije.ac.id')->first();
-$request = Illuminate\Http\Request::create('/api/konselor/counselor-schedules', 'GET');
-$request->setUserResolver(function() use ($user) { return $user; });
-$response = app()->handle($request);
-echo "Status: " . $response->getStatusCode() . "\n";
-echo "Content: " . $response->getContent() . "\n";
+$request = Illuminate\Http\Request::create('/api/operator/categories', 'GET', ['per_page' => 10]);
+// Simulate authentication for operator
+$user = App\Models\User::where('role', 'operator')->first();
+if ($user) {
+    $request->setUserResolver(function () use ($user) {
+        return $user;
+    });
+    // For Sanctum/Auth
+    auth()->login($user);
+}
+
+try {
+    $response = $app->handle($request);
+    echo $response->getContent();
+} catch (Exception $e) {
+    echo "ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString();
+}
