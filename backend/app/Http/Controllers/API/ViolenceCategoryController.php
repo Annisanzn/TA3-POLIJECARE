@@ -90,7 +90,7 @@ class ViolenceCategoryController extends Controller
         $category = ViolenceCategory::findOrFail($unique_id);
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:violence_categories,name,' . $unique_id,
+            'name' => 'required|string|max:255|unique:violence_categories,name,' . $unique_id . ',unique_id',
             'description' => 'nullable|string|max:1000',
         ], [
             'name.required' => 'Nama kategori wajib diisi',

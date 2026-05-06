@@ -404,6 +404,104 @@ class CounselorScheduleController extends Controller
     }
 
     /**
+     * Public endpoint for counselor schedules (no auth required).
+     * Used by the public complaint form (LaporUmum) for guest reports.
+     */
+    public function publicIndex(Request $request)
+    {
+        $query = CounselorSchedule::with('counselor')->active();
+
+        if ($request->has('counselor_id')) {
+            $query->where('counselor_id', $request->counselor_id);
+        }
+
+        // Filter hari
+        if ($request->has('hari')) {
+            $query->where('hari', $request->hari);
+        }
+
+        $schedules = $query->orderBy('hari')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Apply same slot-splitting logic as authenticated user view
+        $dayMap = [
+            'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4,
+            'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0,
+            'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4,
+            'Friday' => 5, 'Saturday' => 6, 'Sunday' => 0,
+        ];
+
+        $schedules = $schedules->flatMap(function ($slot) use ($dayMap) {
+            $dayNum = $dayMap[$slot->hari] ?? null;
+            $nextDate = null;
+
+            if ($dayNum !== null) {
+                $today = now();
+                $diff = $dayNum - $today->dayOfWeek;
+                if ($diff <= 0) $diff += 7;
+                $nextDate = $today->copy()->addDays($diff)->toDateString();
+            }
+
+            if (!$nextDate) {
+                $slot->is_booked = false;
+                $slot->next_date = null;
+                return [$slot];
+            }
+
+            $chunkDuration = $slot->slot_duration ?? 60;
+            $startTimeStr = is_object($slot->jam_mulai) ? $slot->jam_mulai->format('H:i') : substr($slot->jam_mulai, 0, 5);
+            $endTimeStr = is_object($slot->jam_selesai) ? $slot->jam_selesai->format('H:i') : substr($slot->jam_selesai, 0, 5);
+
+            $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+            $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+
+            $chunks = [];
+            while ($startTime->copy()->addMinutes($chunkDuration)->lte($endTime)) {
+                $chunkSlot = clone $slot;
+                $chunkSlot->id = $slot->id . '_' . $startTime->format('Hi');
+                $chunkSlot->jam_mulai = $startTime->format('H:i:s');
+                $chunkEnd = $startTime->copy()->addMinutes($chunkDuration);
+                $chunkSlot->jam_selesai = $chunkEnd->format('H:i:s');
+                $chunkSlot->durasi_menit = $chunkDuration;
+
+                $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $slot->counselor_id)
+                    ->where('tanggal', $nextDate)
+                    ->timeOverlap($chunkSlot->jam_mulai, $chunkSlot->jam_selesai)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->exists();
+
+                $chunkSlot->is_booked = $isBooked;
+                $chunkSlot->next_date = $nextDate;
+
+                $chunks[] = $chunkSlot;
+                $startTime->addMinutes($chunkDuration);
+            }
+
+            if (empty($chunks)) {
+                $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $slot->counselor_id)
+                    ->where('tanggal', $nextDate)
+                    ->timeOverlap($startTimeStr, $endTimeStr)
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->exists();
+
+                $slot->is_booked = $isBooked;
+                $slot->next_date = $nextDate;
+                $slot->durasi_menit = $startTime->diffInMinutes($endTime);
+                return [$slot];
+            }
+
+            return $chunks;
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $schedules,
+            'message' => 'Data jadwal konselor berhasil diambil'
+        ]);
+    }
+
+    /**
      * Get counselors with their schedules.
      */
     public function getCounselorsWithSchedules()

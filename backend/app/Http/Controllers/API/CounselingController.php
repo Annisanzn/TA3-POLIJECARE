@@ -59,6 +59,13 @@ class CounselingController extends Controller
             $query->where('tanggal', '<=', $request->date_to);
         }
 
+        if ($request->has('urgency_level') && $request->urgency_level !== 'all') {
+            $urgency = $request->urgency_level;
+            $query->whereHas('complaint', function ($q) use ($urgency) {
+                $q->where('urgency_level', $urgency);
+            });
+        }
+
         // Search
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -220,6 +227,46 @@ class CounselingController extends Controller
             ->map(function ($counselor) {
                 if ($counselor->profile_photo) {
                     $counselor->profile_photo = asset('storage/' . $counselor->profile_photo);
+                }
+                
+                $dayMap = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6,'Minggu'=>0];
+                $activeSchedules = \App\Models\CounselorSchedule::where('counselor_id', $counselor->id)
+                    ->where('is_active', true)->orderBy('hari')->orderBy('jam_mulai')->get();
+                $today = now(); $todayDow = $today->dayOfWeek;
+                $bestDay = null; $bestDiff = 999; $dayStats = [];
+                
+                foreach ($activeSchedules as $sched) {
+                    $dayNum = $dayMap[$sched->hari] ?? null;
+                    if ($dayNum === null) continue;
+                    $diff = $dayNum - $todayDow;
+                    if ($diff <= 0) $diff += 7;
+                    $nextDate = $today->copy()->addDays($diff)->toDateString();
+                    $chunkDuration = $sched->slot_duration ?? 60;
+                    $startTimeStr = is_object($sched->jam_mulai) ? $sched->jam_mulai->format('H:i') : substr($sched->jam_mulai, 0, 5);
+                    $endTimeStr = is_object($sched->jam_selesai) ? $sched->jam_selesai->format('H:i') : substr($sched->jam_selesai, 0, 5);
+                    $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                    $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                    $totalChunks = 0; $bookedChunks = 0; $cursor = $startTime->copy();
+                    while ($cursor->copy()->addMinutes($chunkDuration)->lte($endTime)) {
+                        $totalChunks++;
+                        $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $counselor->id)
+                            ->where('tanggal', $nextDate)->timeOverlap($cursor->format('H:i:s'), $cursor->copy()->addMinutes($chunkDuration)->format('H:i:s'))
+                            ->whereIn('status', ['pending', 'approved'])->exists();
+                        if ($isBooked) $bookedChunks++;
+                        $cursor->addMinutes($chunkDuration);
+                    }
+                    if ($totalChunks === 0) { $totalChunks = 1; }
+                    if (!isset($dayStats[$sched->hari])) $dayStats[$sched->hari] = ['total'=>0,'booked'=>0];
+                    $dayStats[$sched->hari]['total'] += $totalChunks;
+                    $dayStats[$sched->hari]['booked'] += $bookedChunks;
+                    if ($diff < $bestDiff) { $bestDiff = $diff; $bestDay = $sched->hari; }
+                }
+                
+                if ($bestDay && isset($dayStats[$bestDay])) {
+                    $s = $dayStats[$bestDay];
+                    $counselor->availability_info = ['total'=>$s['total'],'booked'=>$s['booked'],'display'=>$bestDay.': '.$s['booked'].'/'.$s['total'].' Slot'];
+                } else {
+                    $counselor->availability_info = ['total'=>0,'booked'=>0,'display'=>'0/0 Slot'];
                 }
                 return $counselor;
             });
@@ -820,6 +867,9 @@ class CounselingController extends Controller
         // Role-based filtering
         if ($user->role === 'konselor') {
             $query->where('counselor_id', $user->id);
+            $query->where('counselee_type', 'pelapor');
+        } elseif ($user->role === 'operator') {
+            $query->where('counselee_type', 'pelapor');
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
         }

@@ -16,7 +16,7 @@ class ComplaintController extends Controller
 
             $search = $request->query('search');
             $status = $request->query('status');
-            $urgency = $request->query('urgency');
+            $urgency = $request->query('urgency_level') ?? $request->query('urgency');
             $dateFrom = $request->query('date_from');
             $dateTo = $request->query('date_to');
 
@@ -99,7 +99,7 @@ class ComplaintController extends Controller
                         'ip_address' => $c->ip_address,
                         'user_agent' => $c->user_agent,
                         'file_path' => $c->file_path ? url('/api/files/view?path=' . $c->file_path) : null,
-                        'attachments' => $c->attachments->map(function($a) {
+                        'attachments' => $c->attachments->map(function ($a) {
                             return [
                                 'id' => $a->id,
                                 'file_path' => url('/api/files/view?path=' . $a->file_path),
@@ -136,7 +136,7 @@ class ComplaintController extends Controller
         // If counselor, ensure they're authorized to see this complaint
         if ($authUser && $authUser->role === 'konselor') {
             $isAssignedDirectly = (int) $complaint->counselor_id === (int) $authUser->id;
-            
+
             // Check if there's a counseling schedule linking this counselor to the complaint
             $hasSchedule = \App\Models\CounselingSchedule::where('complaint_id', $complaint->id)
                 ->where('counselor_id', $authUser->id)
@@ -207,6 +207,16 @@ class ComplaintController extends Controller
                 'ip_address' => $complaint->ip_address,
                 'user_agent' => $complaint->user_agent,
                 'file_path' => $complaint->file_path ? asset('storage/' . $complaint->file_path) : null,
+                'attachments' => $complaint->attachments->map(function ($a) {
+                    return [
+                        'id' => $a->id,
+                        'file_path' => $a->file_path,
+                        'file_name' => $a->file_name,
+                        'file_type' => $a->file_type,
+                        'file_size' => $a->file_size,
+                        'url' => url('/api/files/view?path=' . $a->file_path),
+                    ];
+                }),
                 'created_at' => $complaint->created_at->toDateTimeString(),
                 'updated_at' => $complaint->updated_at->toDateTimeString(),
                 'counseling_notes' => $complaint->counselingSchedules->map(function ($s) {
@@ -235,7 +245,12 @@ class ComplaintController extends Controller
 
         $baseQuery = Complaint::query();
         if ($authUser && $authUser->role === 'konselor') {
-            $baseQuery->where('counselor_id', $authUser->id);
+            $baseQuery->where(function($q) use ($authUser) {
+                $q->where('counselor_id', $authUser->id)
+                  ->orWhereHas('counselingSchedules', function($sq) use ($authUser) {
+                      $sq->where('counselor_id', $authUser->id);
+                  });
+            });
         }
 
         $total = (clone $baseQuery)->count();
@@ -278,31 +293,31 @@ class ComplaintController extends Controller
         $complaints = $query->orderBy('created_at', 'desc')->get();
 
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-type" => "text/csv",
             "Content-Disposition" => "attachment; filename=laporan-pengaduan-" . now()->format('Ymd_His') . ".csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
 
-        $callback = function() use($complaints) {
+        $callback = function () use ($complaints) {
             $file = fopen('php://output', 'w');
             // Adding UTF-8 BOM for Excel compatibility
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             fputcsv($file, [
-                'ID Laporan', 
-                'Tanggal Lapor', 
-                'Kategori Kekerasan', 
-                'Tingkat Urgensi', 
-                'Status', 
+                'ID Laporan',
+                'Tanggal Lapor',
+                'Kategori Kekerasan',
+                'Tingkat Urgensi',
+                'Status',
                 'Nama Korban/Pelapor',
                 'Tipe Korban',
                 'Hubungan Korban',
-                'Lokasi', 
-                'Judul Aduan', 
-                'Deskripsi', 
-                'Konselor Penanggung Jawab', 
+                'Lokasi',
+                'Judul Aduan',
+                'Deskripsi',
+                'Konselor Penanggung Jawab',
                 'Jadwal Konseling',
                 'Alasan Penolakan'
             ]);

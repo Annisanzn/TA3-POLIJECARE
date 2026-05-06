@@ -26,9 +26,8 @@ class FileController extends Controller
             return response()->json(['message' => 'File not found on storage: ' . $path], 404);
         }
 
-        $file = Storage::disk('public')->get($path);
-        $type = Storage::disk('public')->mimeType($path);
+        $fullPath = Storage::disk('public')->path($path);
 
-        return response($file, 200)->header('Content-Type', $type);
+        return response()->file($fullPath);
     }
 }

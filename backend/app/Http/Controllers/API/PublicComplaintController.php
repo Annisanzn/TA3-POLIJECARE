@@ -34,6 +34,9 @@ class PublicComplaintController extends Controller
             'longitude' => 'nullable|numeric',
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'counselor_id' => 'nullable|exists:users,id',
+            'selected_slots' => 'nullable|array',
+            'selected_slots.*' => 'string',
         ]);
 
         try {
@@ -49,7 +52,7 @@ class PublicComplaintController extends Controller
 
             $complaint = Complaint::create([
                 'user_id' => null, // Guest report
-                'counselor_id' => null, // Unassigned
+                'counselor_id' => $validated['counselor_id'] ?? null,
                 'guest_name' => $validated['guest_name'],
                 'guest_email' => $validated['guest_email'] ?? null,
                 'guest_phone' => $validated['guest_phone'],
@@ -98,6 +101,48 @@ class PublicComplaintController extends Controller
                     'file_type' => $request->file('attachment')->getClientMimeType(),
                     'file_size' => $request->file('attachment')->getSize(),
                 ]);
+            }
+
+            // Handle Slot Bookings
+            if (!empty($validated['selected_slots']) && $complaint->counselor_id) {
+                $dayMap = [
+                    'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4,
+                    'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0,
+                    'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4,
+                    'Friday' => 5, 'Saturday' => 6, 'Sunday' => 0,
+                ];
+
+                foreach ($validated['selected_slots'] as $slotUid) {
+                    // slotUid format: {schedule_id}_{HHmm}-{jam_mulai} or {schedule_id}-{jam_mulai}
+                    // Extract the base schedule ID (numeric part before underscore or first hyphen)
+                    $baseId = preg_replace('/[_-].*/', '', $slotUid);
+                    
+                    $baseSchedule = \App\Models\CounselorSchedule::find($baseId);
+                    if ($baseSchedule) {
+                        // Calculate next occurrence date from day name
+                        $dayNum = $dayMap[$baseSchedule->hari] ?? null;
+                        if ($dayNum !== null) {
+                            $today = now();
+                            $diff = $dayNum - $today->dayOfWeek;
+                            if ($diff <= 0) $diff += 7;
+                            $nextDate = $today->copy()->addDays($diff)->toDateString();
+                        } else {
+                            $nextDate = now()->addDay()->toDateString();
+                        }
+
+                        \App\Models\CounselingSchedule::create([
+                            'complaint_id' => $complaint->id,
+                            'counselor_id' => $complaint->counselor_id,
+                            'tanggal' => $nextDate,
+                            'jam_mulai' => $baseSchedule->jam_mulai,
+                            'jam_selesai' => $baseSchedule->jam_selesai,
+                            'metode' => 'offline', // Default for public
+                            'status' => 'pending',
+                            'counselee_type' => $complaint->victim_type === 'self' ? 'korban' : 'pelapor',
+                            'counselee_name' => $complaint->guest_name,
+                        ]);
+                    }
+                }
             }
 
             // Notify via WA (optional)
