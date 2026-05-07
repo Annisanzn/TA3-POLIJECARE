@@ -34,7 +34,7 @@ const konselorMaterialService = {
     },
 };
 
-const KonselorMateri = () => {
+const SatgasMateri = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const [materials, setMaterials] = useState([]);
     const [violenceCategories, setViolenceCategories] = useState([]);
@@ -180,7 +180,7 @@ const KonselorMateri = () => {
             <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
-                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Pusat Edukasi" />
+                <Topbar onMenuClick={() => setSidebarCollapsed(v => !v)} title="Pusat Edukasi Satgas" />
 
                 <main className="flex-1 p-6 overflow-x-auto no-scrollbar">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
@@ -390,4 +390,4 @@ const KonselorMateri = () => {
     );
 };
 
-export default KonselorMateri;
+export default SatgasMateri;

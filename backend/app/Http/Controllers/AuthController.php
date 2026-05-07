@@ -58,11 +58,8 @@ class AuthController extends Controller
             ], 401);
         }
         
-        // Update user role if changed
-        if ($user->role !== $role) {
-            $user->role = $role;
-            $user->save();
-        }
+        // Role is managed in database, no automatic overwriting here
+
         
         // Create token
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -77,7 +74,12 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'nim' => $user->nim,
+                'semester' => $user->semester,
                 'phone' => $user->phone,
+                'gender' => $user->gender,
+                'unit' => $user->unit,
+                'prodi' => $user->prodi,
+                'bio' => $user->bio,
             ]
         ]);
     }
@@ -100,15 +102,21 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
+        $user = User::find($request->user()->id);
         return response()->json([
             'success' => true,
             'user' => [
-                'id' => $request->user()->id,
-                'name' => $request->user()->name,
-                'email' => $request->user()->email,
-                'role' => $request->user()->role,
-                'nim' => $request->user()->nim,
-                'phone' => $request->user()->phone,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'nim' => $user->nim,
+                'semester' => $user->semester,
+                'phone' => $user->phone,
+                'gender' => $user->gender,
+                'unit' => $user->unit,
+                'prodi' => $user->prodi,
+                'bio' => $user->bio,
             ]
         ]);
     }
@@ -118,17 +126,8 @@ class AuthController extends Controller
      */
     private function assignRoleByEmail(string $email): string
     {
-        // Student email pattern: nim@student.polije.ac.id
-        if (str_contains($email, 'student.polije.ac.id')) {
-            return 'user';
-        }
-        
-        // Staff email pattern: name@polije.ac.id
-        if (str_contains($email, 'polije.ac.id')) {
-            return 'konselor'; // Default to konselor for staff
-        }
-        
-        // Default fallback
+        // Default to 'user' for all new registrations or role determinations
+        // Privileged roles (operator, admin, konselor) must be set via database/admin panel
         return 'user';
     }
 }

@@ -16,13 +16,18 @@ class PublicComplaintController extends Controller
             'guest_name' => 'required|string|max:255',
             'guest_email' => 'required|email|max:255',
             'guest_phone' => 'required|string|max:20',
+            'guest_nim' => 'nullable|string|max:50',
+            'guest_prodi' => 'nullable|string|max:255',
+            'guest_unit' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'violence_category_id' => 'required|exists:violence_categories,unique_id',
             'victim_type' => 'required|in:self,other',
             'victim_name' => 'required_if:victim_type,other|nullable|string|max:255',
+            'victim_gender' => 'required|in:Laki-laki,Perempuan',
             'victim_relationship' => 'required_if:victim_type,other|nullable|string|max:255',
             'suspect_name' => 'required|string|max:255',
+            'suspect_gender' => 'nullable|in:Laki-laki,Perempuan',
             'suspect_status' => 'required|string|max:255',
             'suspect_affiliation' => 'required|string|max:255',
             'suspect_phone' => 'nullable|string|max:30',
@@ -34,9 +39,8 @@ class PublicComplaintController extends Controller
             'longitude' => 'nullable|numeric',
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'victim_identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'counselor_id' => 'nullable|exists:users,id',
-            'selected_slots' => 'nullable|array',
-            'selected_slots.*' => 'string',
+            'proposed_date' => 'required|date|after_or_equal:today',
+            'proposed_time' => 'required|string',
         ]);
 
         try {
@@ -52,19 +56,24 @@ class PublicComplaintController extends Controller
 
             $complaint = Complaint::create([
                 'user_id' => null, // Guest report
-                'counselor_id' => $validated['counselor_id'] ?? null,
+                'counselor_id' => null, // Case open to all Satgas initially
                 'guest_name' => $validated['guest_name'],
                 'guest_email' => $validated['guest_email'] ?? null,
                 'guest_phone' => $validated['guest_phone'],
+                'guest_nim' => $validated['guest_nim'] ?? null,
+                'guest_prodi' => $validated['guest_prodi'] ?? null,
+                'guest_unit' => $validated['guest_unit'] ?? null,
                 'violence_category_id' => $validated['violence_category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'victim_type' => $validated['victim_type'],
                 'victim_name' => $validated['victim_name'] ?? null,
+                'victim_gender' => $validated['victim_gender'],
                 'victim_relationship' => $validated['victim_relationship'] ?? null,
                 'is_external_victim' => true,
                 'victim_identity_proof' => $identityProofPath,
                 'suspect_name' => $validated['suspect_name'],
+                'suspect_gender' => $validated['suspect_gender'] ?? null,
                 'suspect_status' => $validated['suspect_status'],
                 'suspect_affiliation' => $validated['suspect_affiliation'],
                 'suspect_phone' => $validated['suspect_phone'] ?? null,
@@ -78,6 +87,7 @@ class PublicComplaintController extends Controller
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'status' => 'pending',
+                'counseling_schedule' => $validated['proposed_date'] . ' ' . $validated['proposed_time'] . ':00',
             ]);
 
             // Handle multiple attachments if present
@@ -103,46 +113,20 @@ class PublicComplaintController extends Controller
                 ]);
             }
 
-            // Handle Slot Bookings
-            if (!empty($validated['selected_slots']) && $complaint->counselor_id) {
-                $dayMap = [
-                    'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4,
-                    'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0,
-                    'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4,
-                    'Friday' => 5, 'Saturday' => 6, 'Sunday' => 0,
-                ];
-
-                foreach ($validated['selected_slots'] as $slotUid) {
-                    // slotUid format: {schedule_id}_{HHmm}-{jam_mulai} or {schedule_id}-{jam_mulai}
-                    // Extract the base schedule ID (numeric part before underscore or first hyphen)
-                    $baseId = preg_replace('/[_-].*/', '', $slotUid);
-                    
-                    $baseSchedule = \App\Models\CounselorSchedule::find($baseId);
-                    if ($baseSchedule) {
-                        // Calculate next occurrence date from day name
-                        $dayNum = $dayMap[$baseSchedule->hari] ?? null;
-                        if ($dayNum !== null) {
-                            $today = now();
-                            $diff = $dayNum - $today->dayOfWeek;
-                            if ($diff <= 0) $diff += 7;
-                            $nextDate = $today->copy()->addDays($diff)->toDateString();
-                        } else {
-                            $nextDate = now()->addDay()->toDateString();
-                        }
-
-                        \App\Models\CounselingSchedule::create([
-                            'complaint_id' => $complaint->id,
-                            'counselor_id' => $complaint->counselor_id,
-                            'tanggal' => $nextDate,
-                            'jam_mulai' => $baseSchedule->jam_mulai,
-                            'jam_selesai' => $baseSchedule->jam_selesai,
-                            'metode' => 'offline', // Default for public
-                            'status' => 'pending',
-                            'counselee_type' => $complaint->victim_type === 'self' ? 'korban' : 'pelapor',
-                            'counselee_name' => $complaint->guest_name,
-                        ]);
-                    }
-                }
+            // Handle Initial Counseling Schedule (Unassigned)
+            if (!empty($validated['proposed_date']) && !empty($validated['proposed_time'])) {
+                \App\Models\CounselingSchedule::create([
+                    'complaint_id' => $complaint->id,
+                    'counselor_id' => null, // Waiting for Satgas to claim
+                    'tanggal' => $validated['proposed_date'],
+                    'jam_mulai' => $validated['proposed_time'],
+                    'jam_selesai' => \Carbon\Carbon::parse($validated['proposed_time'])->addHour()->format('H:i'),
+                    'metode' => 'offline', // Default for public guest
+                    'status' => 'pending',
+                    'counselee_type' => 'pelapor',
+                    'counselee_name' => $complaint->guest_name,
+                    'jenis_pengaduan' => 'Tindak Lanjut Laporan Publik',
+                ]);
             }
 
             // Notify via WA (optional)

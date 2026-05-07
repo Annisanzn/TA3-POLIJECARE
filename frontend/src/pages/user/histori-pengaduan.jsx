@@ -249,7 +249,7 @@ const HistoriPengaduan = () => {
                                                             <FiUser size={13} className="text-blue-500" />
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Konselor</p>
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-0.5">Satgas</p>
                                                             <p className="text-xs font-semibold text-gray-800 truncate">
                                                                 {item.counselor?.name || 'Belum ditugaskan'}
                                                             </p>

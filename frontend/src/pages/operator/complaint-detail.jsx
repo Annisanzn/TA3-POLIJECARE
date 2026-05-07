@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { getStorageUrl } from '../../utils/imageUrl';
 import axios from '../../api/axios';
+import { toast } from 'react-hot-toast';
 
 // WhatsApp clickable link component
 const WaLink = ({ phone, label }) => {
@@ -65,7 +66,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
         jam_mulai: '09:00',
         jam_selesai: '10:00',
         metode: 'offline',
-        lokasi: 'Ruang Satgas PPKS'
+        lokasi: 'Ruang Satgas PPKPT'
     });
     const [isAssigning, setIsAssigning] = useState(false);
 
@@ -90,6 +91,11 @@ const ComplaintDetail = ({ isCounselor = false }) => {
     const handleAssignSubmit = async (e) => {
         e.preventDefault();
         setIsAssigning(true);
+        if (assignForm.jam_selesai <= assignForm.jam_mulai) {
+            toast.error('Jam selesai harus lebih besar dari jam mulai.');
+            setIsAssigning(false);
+            return;
+        }
         try {
             const payload = {
                 ...assignForm,
@@ -104,10 +110,10 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             if (res.data.success) {
                 setAssignModal(false);
                 fetchComplaint();
-                alert('Konselor berhasil ditugaskan dan jadwal dibuat!');
+                toast.success('Tim Satgas berhasil ditugaskan dan sesi penanganan telah dijadwalkan!');
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal menugaskan konselor');
+            toast.error(err.response?.data?.message || 'Gagal menugaskan tim Satgas');
         } finally {
             setIsAssigning(false);
         }
@@ -145,12 +151,13 @@ const ComplaintDetail = ({ isCounselor = false }) => {
             });
 
             if (res.data.success) {
+                toast.success('Catatan perkembangan berhasil disimpan!');
                 setNoteForm({ activeSessionId: null, counselee_type: 'pelapor', counselee_name: '', keterangan_pihak: '', saran_konselor: '', attachment: null });
                 fetchComplaint();
             }
         } catch (err) {
             console.error(err);
-            alert('Gagal menyimpan catatan');
+            toast.error('Gagal menyimpan catatan');
         } finally {
             setIsSubmittingNote(false);
         }
@@ -514,9 +521,18 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                                                         <FiCheckCircle size={14} /> Selesaikan
                                                                     </button>
                                                                 )}
-                                                                <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                                    <FiCalendar size={14} /> {new Date(note.tanggal || note.created_at).toLocaleDateString('id-ID')}
-                                                                    <FiClock size={14} className="ml-2" /> {note.jam_mulai?.slice(0, 5)}
+                                                                <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <FiCalendar size={14} /> {new Date(note.tanggal || note.created_at).toLocaleDateString('id-ID')}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <FiClock size={14} /> {note.jam_mulai?.slice(0, 5)}
+                                                                    </div>
+                                                                    {note.counselor_name && (
+                                                                        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                                                            <FiUser size={14} /> {note.counselor_name}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -541,7 +557,7 @@ const ComplaintDetail = ({ isCounselor = false }) => {
 
                                                          {note.feedback_attachment && (
                                                             <a
-                                                                href={`https://api.polijecare.my.id/api/files/view?path=${encodeURIComponent(note.feedback_attachment)}`}
+                                                                href={getStorageUrl(note.feedback_attachment)}
                                                                 target="_blank" rel="noopener noreferrer"
                                                                 className="inline-flex items-center gap-3 mt-6 px-5 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all shadow-sm"
                                                             >
@@ -572,6 +588,10 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                         <p className="font-bold text-slate-900 dark:text-white text-base tracking-tight uppercase border-b border-dashed border-gray-200 dark:border-slate-800 pb-3">
                                             {complaint.user_name || complaint.guest_name || 'Nama Tidak Tersedia'}
                                         </p>
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Jenis Kelamin:</span>
+                                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md border border-indigo-100 dark:border-indigo-800">{complaint.victim_gender || '-'}</span>
+                                        </div>
                                         {(complaint.user_phone || complaint.user_email) && (
                                             <div className="mt-6 space-y-4">
                                                 {complaint.user_phone && (
@@ -609,6 +629,10 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                         <p className="font-bold text-slate-900 dark:text-white text-base tracking-tight uppercase border-b border-dashed border-gray-200 dark:border-slate-800 pb-3">
                                             {complaint.suspect_name || '-'}
                                         </p>
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Jenis Kelamin:</span>
+                                            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase bg-rose-50 dark:bg-rose-900/30 px-2 py-1 rounded-md border border-rose-100 dark:border-rose-800">{complaint.suspect_gender || '-'}</span>
+                                        </div>
                                     </div>
                                      <div className="grid grid-cols-1 gap-4">
                                         <div>
@@ -634,37 +658,76 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                             {/* Counseling Info */}
                              <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-[2.5rem] shadow-sm overflow-hidden border-l-4 border-l-indigo-600">
                                 <div className="px-8 py-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 flex items-center gap-3">
-                                    <FiCalendar className="text-indigo-600" />
-                                    <h2 className="font-bold text-slate-900 dark:text-white uppercase tracking-tight text-sm">Penanganan</h2>
+                                     <FiCalendar className="text-indigo-600" />
+                                     <h2 className="font-bold text-slate-900 dark:text-white uppercase tracking-tight text-sm">Tim Satgas</h2>
                                 </div>
                                  <div className="p-8 space-y-6">
-                                    <div>
-                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Konselor</p>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase">
-                                                {complaint.counselor_name?.substring(0, 2).toUpperCase() || '??'}
-                                            </div>
-                                            <p className="font-bold text-slate-900 dark:text-white text-sm tracking-tight uppercase">
-                                                {complaint.counselor_name || 'Belum Diplot'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                     <div className="bg-indigo-600 dark:bg-indigo-500 p-5 rounded-[1.5rem] shadow-xl shadow-indigo-200 dark:shadow-none">
-                                        <p className="text-[9px] text-white/70 mb-2 font-bold uppercase tracking-widest">Jadwal Sesi</p>
-                                        <div className="flex items-center justify-between">
-                                            <p className="font-bold text-white text-sm uppercase tracking-tight">
-                                                {complaint.counseling_schedule ? new Date(complaint.counseling_schedule).toLocaleDateString('id-ID', {
-                                                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                                                }) : 'Belum Dijadwalkan'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                     {user?.role === 'operator' && !complaint.counselor_id && (
+                                     <div>
+                                         <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Tim Satgas Bertugas</p>
+                                         <div className="space-y-3">
+                                             {complaint.counseling_notes && complaint.counseling_notes.length > 0 ? (
+                                                 // Get unique names of Satgas involved
+                                                 [...new Set(complaint.counseling_notes.map(s => s.counselor_name))]
+                                                     .filter(name => name && name !== 'Belum diplot')
+                                                     .map((name, i) => (
+                                                         <div key={i} className="flex items-center gap-3 bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                                                             <div className="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-[10px] uppercase">
+                                                                 {name.substring(0, 2).toUpperCase()}
+                                                             </div>
+                                                             <p className="font-bold text-slate-900 dark:text-white text-xs tracking-tight uppercase">
+                                                                 {name}
+                                                             </p>
+                                                         </div>
+                                                     ))
+                                             ) : (
+                                                 <div className="flex items-center gap-3">
+                                                     <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase">
+                                                         {complaint.counselor_name?.substring(0, 2).toUpperCase() || '??'}
+                                                     </div>
+                                                     <p className="font-bold text-slate-900 dark:text-white text-sm tracking-tight uppercase">
+                                                         {complaint.counselor_name || 'Belum Diplot'}
+                                                     </p>
+                                                 </div>
+                                             )}
+                                         </div>
+                                     </div>
+                                     {/* Multiple Sessions List */}
+                                     <div className="space-y-4">
+                                         <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Jadwal Sesi Penanganan</p>
+                                         {complaint.counseling_notes && complaint.counseling_notes.length > 0 ? (
+                                             complaint.counseling_notes.map((session, idx) => (
+                                                 <div key={idx} className="bg-indigo-600 dark:bg-indigo-500 p-4 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none border border-indigo-400/20">
+                                                     <div className="flex items-center justify-between mb-2">
+                                                         <p className="text-[9px] text-white/70 font-bold uppercase tracking-widest">Sesi {complaint.counseling_notes.length - idx}</p>
+                                                         <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter ${
+                                                             session.status === 'completed' ? 'bg-green-400/20 text-green-100' : 'bg-white/20 text-white'
+                                                         }`}>
+                                                             {session.status === 'completed' ? 'Selesai' : 'Terjadwal'}
+                                                         </span>
+                                                     </div>
+                                                     <p className="font-bold text-white text-xs uppercase tracking-tight mb-1">
+                                                         {session.tanggal ? new Date(session.tanggal).toLocaleDateString('id-ID', {
+                                                             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                                                         }) : 'Belum Dijadwalkan'}
+                                                     </p>
+                                                     <p className="text-[10px] text-white/80 font-medium italic">
+                                                         {session.jam_mulai} - {session.jam_selesai} • {session.counselor_name}
+                                                     </p>
+                                                 </div>
+                                             ))
+                                         ) : (
+                                             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800 text-center">
+                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Belum ada sesi penanganan</p>
+                                             </div>
+                                         )}
+                                     </div>
+
+                                     {user?.role === 'operator' && (
                                         <button
                                             onClick={() => setAssignModal(true)}
                                             className="w-full mt-4 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3"
                                         >
-                                            <FiPlus size={18} /> Plot & Jadwal
+                                            <FiPlus size={18} /> {complaint.counselor_id ? 'Tambah Sesi / Satgas' : 'Plot & Jadwal'}
                                         </button>
                                     )}
                                 </div>
@@ -704,15 +767,15 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                         <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10 rounded-t-[2.5rem]" />
                             <div className="px-10 py-8 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gray-50/50 dark:bg-slate-800/50">
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight uppercase">Plotting Konselor</h3>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight uppercase">Penugasan Satgas</h3>
                                 <button onClick={() => !isAssigning && setAssignModal(false)} className="text-slate-400 hover:text-rose-500 transition-colors p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm"><FiX size={20} /></button>
                             </div>
                             <form onSubmit={handleAssignSubmit} className="p-10 space-y-6">
                                  <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Pilih Konselor Bertugas <span className="text-rose-500">*</span></label>
+                                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Pilih Satgas Bertugas <span className="text-rose-500">*</span></label>
                                     <select required value={assignForm.counselor_id} onChange={e => setAssignForm({...assignForm, counselor_id: e.target.value})}
                                         className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-xs font-bold uppercase tracking-widest dark:text-white outline-none focus:border-indigo-500 transition-all shadow-inner appearance-none cursor-pointer">
-                                        <option value="">-- Cari Konselor --</option>
+                                        <option value="">-- Pilih Satgas --</option>
                                         {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
@@ -737,9 +800,9 @@ const ComplaintDetail = ({ isCounselor = false }) => {
                                 </div>
 
                                  <div className="space-y-3">
-                                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Metode Konseling</label>
+                                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Metode Penanganan</label>
                                     <div className="flex gap-3 p-1.5 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-gray-100 dark:border-slate-800">
-                                        <button type="button" onClick={() => setAssignForm({...assignForm, metode: 'offline', lokasi: 'Ruang Satgas PPKS'})}
+                                        <button type="button" onClick={() => setAssignForm({...assignForm, metode: 'offline', lokasi: 'Ruang Satgas PPKPT'})}
                                             className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${assignForm.metode === 'offline' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Offline</button>
                                         <button type="button" onClick={() => setAssignForm({...assignForm, metode: 'online', lokasi: 'Google Meet'})}
                                             className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${assignForm.metode === 'online' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Online</button>

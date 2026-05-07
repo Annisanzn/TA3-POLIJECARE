@@ -113,7 +113,7 @@ const UserDashboard = () => {
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
               <h1 className="text-3xl font-bold mb-3 text-white">Halo, {user?.name || 'Mahasiswa'}!</h1>
               <p className="opacity-90 max-w-2xl text-base sm:text-lg leading-relaxed font-medium text-white">
-                Ruang aman Anda untuk menyampaikan laporan dan mendapatkan dukungan penuh dari Satgas PPKS Polije. Kami siap mendengar dan membantu Anda.
+                Ruang aman Anda untuk menyampaikan laporan dan mendapatkan dukungan penuh dari Satgas PPKPT Polije. Kami siap mendengar dan membantu Anda.
               </p>
             </motion.div>
 
@@ -159,7 +159,7 @@ const UserDashboard = () => {
                   <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
                     <FiCalendar size={22} />
                   </div>
-                  <span className="font-semibold text-gray-800 text-sm leading-tight">Ajukan<br />Konseling</span>
+                  <span className="font-semibold text-gray-800 text-sm leading-tight">Ajukan<br />Penanganan</span>
                 </button>
               </div>
             </motion.div>
@@ -215,7 +215,7 @@ const UserDashboard = () => {
 
                 {/* 4. Jadwal Konseling Saya */}
                 <motion.div variants={itemVariant} className="bg-white border border-gray-100 rounded-[32px] p-6 sm:p-8 shadow-sm">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">Jadwal Konseling Terdekat</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Jadwal Penanganan Terdekat</h2>
 
                   {loading ? (
                     <div className="animate-pulse h-32 bg-gray-100 rounded-[24px]" />
@@ -225,9 +225,9 @@ const UserDashboard = () => {
                         <FiCalendar size={28} />
                       </div>
                       <h3 className="text-gray-900 font-semibold mb-1">Belum Ada Jadwal</h3>
-                      <p className="text-gray-500 text-sm mb-5 font-medium max-w-xs">Anda tidak memiliki jadwal konseling yang aktif atau disetujui dalam waktu dekat.</p>
+                      <p className="text-gray-500 text-sm mb-5 font-medium max-w-xs">Anda tidak memiliki jadwal penanganan yang aktif atau disetujui dalam waktu dekat.</p>
                       <button onClick={() => navigate('/user/counseling-request')} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-indigo-200">
-                        Ajukan Konseling Baru
+                        Ajukan Penanganan Baru
                       </button>
                     </div>
                   ) : (
@@ -246,14 +246,14 @@ const UserDashboard = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-100">
                           <div>
-                            <p className="text-gray-500 text-xs font-semibold uppercase mb-1">Konselor Bertugas</p>
+                            <p className="text-gray-500 text-xs font-semibold uppercase mb-1">Satgas Bertugas</p>
                             <p className="font-semibold text-gray-800 flex items-center gap-2"><FiHeart size={14} className="text-rose-500" /> {upcoming_schedule.counselor?.name || 'TBA'}</p>
                           </div>
                           <div>
                             <p className="text-gray-500 text-xs font-semibold uppercase mb-1">Metode & Lokasi</p>
                             <p className="font-semibold text-gray-800 flex items-center gap-2">
                               {upcoming_schedule.metode === 'online' ? <FiVideo size={14} className="text-sky-500" /> : <FiMapPin size={14} className="text-emerald-500" />}
-                              {upcoming_schedule.metode === 'online' ? 'Konseling Online (Meet)' : 'Tatap Muka (Offline)'}
+                              {upcoming_schedule.metode === 'online' ? 'Penanganan Online (Meet)' : 'Tatap Muka (Offline)'}
                             </p>
                           </div>
                         </div>
@@ -278,7 +278,7 @@ const UserDashboard = () => {
                   )}
                 </motion.div>
 
-                {/* 7. Kontak Satgas PPKS (Emergency) MOVED TO LEFT COLUMN */}
+                {/* 7. Kontak Satgas PPKPT (Emergency) MOVED TO LEFT COLUMN */}
                 <motion.div variants={itemVariant} className="bg-gray-900 border border-gray-800 rounded-[32px] p-6 sm:p-8 shadow-xl shadow-gray-900/10">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-3 h-3 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
@@ -305,7 +305,7 @@ const UserDashboard = () => {
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Email Satgas</p>
                         <a href={`mailto:${satgas_contact?.email || ''}`} className="font-semibold text-sm text-white hover:text-blue-400 transition-colors">
-                          {satgas_contact?.email || 'satgas.ppks@polije.ac.id'}
+                          {satgas_contact?.email || 'satgas.ppkpt@polije.ac.id'}
                         </a>
                       </div>
                     </div>

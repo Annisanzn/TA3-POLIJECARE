@@ -14,7 +14,7 @@ const Contact = () => {
     const mockContactInfo = {
       address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',
       phone: '0821-2643-2696',
-      email: 'satgas.ppks@polije.ac.id',
+      email: 'satgas.ppkpt@polije.ac.id',
       instagram: '@ppkptpolije',
       whatsapp: '+62 821-2643-2696',
       facebook: 'SatgasPPKPTPolije',
@@ -28,7 +28,7 @@ const Contact = () => {
   const defaultContact = {
     address: 'Jl. Mastrip PO Box 164, Jember 68121, Jawa Timur, Indonesia',
     phone: '0821-2643-2696',
-    email: 'satgas.ppks@polije.ac.id',
+    email: 'satgas.ppkpt@polije.ac.id',
     instagram: '@ppkptpolije',
     whatsapp: '+62 821-2643-2696'
   };

@@ -9,6 +9,7 @@ import {
 import axios from '../../api/axios';
 import Sidebar from '../../components/layout/Sidebar';
 import TimePicker24h from '../../components/ui/TimePicker24h';
+import { toast } from 'react-hot-toast';
 
 const OperatorManualCounseling = () => {
   const navigate = useNavigate();
@@ -44,7 +45,6 @@ const OperatorManualCounseling = () => {
   });
   
   const [manualSubmitting, setManualSubmitting] = useState(false);
-  const [manualError, setManualError] = useState('');
 
   // Fetch init data
   useEffect(() => {
@@ -75,7 +75,6 @@ const OperatorManualCounseling = () => {
   const handleManualSubmit = async (e) => {
     e.preventDefault();
     setManualSubmitting(true);
-    setManualError('');
 
     try {
       const now = new Date();
@@ -84,44 +83,59 @@ const OperatorManualCounseling = () => {
 
       // Basic Time Order Check
       if (manualForm.jam_selesai <= manualForm.jam_mulai) {
-        throw new Error('Jam selesai harus lebih besar dari jam mulai.');
+        toast.error('Jam selesai harus lebih besar dari jam mulai.');
+        setManualSubmitting(false);
+        return;
       }
       
       if (!manualForm.counselor_id) {
-        throw new Error('Pilih Konselor yang akan menangani sesi ini.');
+        toast.error('Pilih anggota Satgas yang akan menangani sesi ini.');
+        setManualSubmitting(false);
+        return;
       }
 
       if (!manualForm.is_record_only) {
         // Validation for FUTURE mode (Jadwalkan)
         if (selectedStart < now) {
-          throw new Error('Untuk penjadwalan masa depan, silakan pilih tanggal dan jam yang belum terlewati.');
+          toast.error('Untuk penjadwalan masa depan, silakan pilih tanggal dan jam yang belum terlewati.');
+          setManualSubmitting(false);
+          return;
         }
       } else {
         // Validation for ARCHIVE mode (Arsip Selesai)
         if (manualForm.tanggal > todayStr) {
-          throw new Error('Mode arsip hanya digunakan untuk mencatat sesi yang sudah terjadi (hari ini atau lampau).');
+          toast.error('Mode arsip hanya digunakan untuk mencatat sesi yang sudah terjadi (hari ini atau lampau).');
+          setManualSubmitting(false);
+          return;
         }
       }
 
       if (manualForm.metode === 'offline' && !manualForm.lokasi) {
-        throw new Error('Silakan isi lokasi untuk pertemuan tatap muka.');
+        toast.error('Silakan isi lokasi untuk pertemuan tatap muka.');
+        setManualSubmitting(false);
+        return;
       }
       if (manualForm.metode === 'online' && !manualForm.meeting_link) {
-        throw new Error('Silakan isi Link Meeting untuk konseling online.');
+        toast.error('Silakan isi Link Meeting untuk penanganan online.');
+        setManualSubmitting(false);
+        return;
       }
       if (!manualForm.keterangan_pihak) {
-        throw new Error('Deskripsi Kasus & Kronologi Singkat wajib diisi.');
+        toast.error('Deskripsi Kasus & Kronologi Singkat wajib diisi.');
+        setManualSubmitting(false);
+        return;
       }
 
       await axios.post('/operator/counseling/request', manualForm);
+      toast.success('Berhasil menyimpan sesi penanganan.');
       navigate('/operator/case-management'); // redirect back on success
     } catch (err) {
       console.error('Error saat menyimpan jadwal/sesi manual:', err);
       // Conflict checking
       if (err.response && err.response.status === 409) {
-        setManualError(err.response.data.message || 'Jadwal bertabrakan dengan sesi lain.');
+        toast.error(err.response.data.message || 'Jadwal bertabrakan dengan sesi lain.');
       } else {
-        setManualError(err.response?.data?.message || err.message || 'Gagal menyimpan sesi. Coba lagi.');
+        toast.error(err.response?.data?.message || err.message || 'Gagal menyimpan sesi. Coba lagi.');
       }
     } finally {
       setManualSubmitting(false);
@@ -153,7 +167,7 @@ const OperatorManualCounseling = () => {
               </button>
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-3 tracking-tight">
-                  <FiPlus className="text-indigo-600" /> Konseling Manual
+                  <FiPlus className="text-indigo-600" /> Penanganan Satgas Manual
                 </h1>
                 <p className="text-[11px] text-slate-500 font-medium tracking-wide">Dokumentasi & Penjadwalan Langsung</p>
               </div>
@@ -175,24 +189,12 @@ const OperatorManualCounseling = () => {
                 <div className="absolute top-0 right-0 p-8 opacity-10">
                   <FiAlertCircle size={80} className="text-purple-600" />
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Form Konseling Manual</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Form Penanganan Satgas Manual</h2>
                 <p className="text-base text-gray-500 mt-1 font-medium">Lengkapi data laporan dan sesi untuk administrasi internal Satgas.</p>
               </div>
 
               <form onSubmit={handleManualSubmit} className="px-10 py-8 space-y-10">
-                {/* Error Banner */}
-                {manualError && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-rose-50 border-2 border-rose-100 text-rose-700 px-8 py-5 rounded-[24px] text-sm font-medium flex items-center gap-4 shadow-sm"
-                  >
-                    <div className="bg-rose-500 text-white p-2 rounded-full">
-                      <FiAlertCircle size={20} />
-                    </div>
-                    {manualError}
-                  </motion.div>
-                )}
+
 
                 {/* Mode Toggle & Info */}
                 <section className="space-y-4">
@@ -229,7 +231,7 @@ const OperatorManualCounseling = () => {
                     <FiShield size={18} className="shrink-0" />
                     <p className="leading-relaxed">
                       {manualForm.is_record_only
-                        ? 'Sesi ditandai SELESAI. Digunakan untuk mencatat obrolan walk-in yang sudah terjadi. Input Saran Konselor akan terbuka.'
+                        ? 'Sesi ditandai SELESAI. Digunakan untuk mencatat obrolan walk-in yang sudah terjadi. Input Saran Satgas akan terbuka.'
                         : 'Sesi ditandai AKAN DATANG. Digunakan untuk booking jadwal tatap muka di masa depan melalui sistem.'
                       }
                     </p>
@@ -266,7 +268,7 @@ const OperatorManualCounseling = () => {
                       </select>
                     </div>
                     <div className="space-y-2">
-                       <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Pilih Konselor <span className="text-rose-500">*</span></label>
+                       <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Pilih Satgas <span className="text-rose-500">*</span></label>
                        <select
                         name="counselor_id"
                         value={manualForm.counselor_id}
@@ -275,7 +277,7 @@ const OperatorManualCounseling = () => {
                         className="w-full px-6 py-4 bg-white border-2 border-transparent hover:border-purple-100 focus:border-purple-500 rounded-[28px] text-base font-medium outline-none transition-all cursor-pointer shadow-sm shadow-purple-900/5 appearance-none"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.25rem' }}
                       >
-                        <option value="">-- PILIH KONSELOR --</option>
+                        <option value="">-- PILIH SATGAS --</option>
                         {counselors.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
@@ -285,7 +287,7 @@ const OperatorManualCounseling = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Tanggal Konseling <span className="text-rose-500">*</span></label>
+                      <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Tanggal Sesi <span className="text-rose-500">*</span></label>
                       <input
                         type="date"
                         name="tanggal"
@@ -526,7 +528,7 @@ const OperatorManualCounseling = () => {
                       className="space-y-4 pt-4 border-t-2 border-dashed border-blue-100"
                     >
                       <label className="text-xs font-semibold text-blue-700 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
-                        <FiSave /> CATATAN TERAPI / SARAN KONSELOR
+                        <FiSave /> CATATAN TERAPI / SARAN SATGAS
                       </label>
                       <textarea
                         name="saran_konselor"

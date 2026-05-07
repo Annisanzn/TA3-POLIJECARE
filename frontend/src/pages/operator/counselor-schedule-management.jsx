@@ -10,33 +10,16 @@ import axios from '../../api/axios';
 import Sidebar from '../../components/layout/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import TimePicker24h from '../../components/ui/TimePicker24h';
+import { toast } from 'react-hot-toast';
 
-/* ── Toast Component ───────────────────────────────────────────────────────── */
-const Toast = ({ toast, onClose }) => {
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(onClose, 3500);
-    return () => clearTimeout(t);
-  }, [toast]);
-  if (!toast) return null;
-  return (
-    <motion.div initial={{ opacity: 0, y: -20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-      className={`fixed top-8 right-8 z-[150] flex items-center gap-4 px-8 py-5 rounded-[2rem] shadow-2xl text-white text-[11px] font-bold uppercase tracking-widest border backdrop-blur-xl ${toast.type === 'success' ? 'bg-emerald-600/90 border-emerald-400 shadow-emerald-500/20' : 'bg-rose-600/90 border-rose-400 shadow-rose-500/20'}`}>
-      {toast.type === 'success' ? <FiCheckCircle size={22} /> : <FiAlertCircle size={22} />}
-      <span>{toast.msg}</span>
-    </motion.div>
-  );
-};
 
-const CounselorScheduleManagementPage = () => {
+
+const SatgasScheduleManagementPage = () => {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState([]);
   const [counselors, setCounselors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
-  const [toast, setToast] = useState(null);
-
-  const showToast = (msg, type = 'success') => setToast({ msg, type });
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +55,7 @@ const CounselorScheduleManagementPage = () => {
         setSchedules(response.data.data);
       }
     } catch (err) {
-      showToast('Gagal memuat daftar jadwal', 'error');
+      toast.error('Gagal memuat daftar jadwal');
     } finally {
       setIsLoading(false);
     }
@@ -92,17 +75,21 @@ const CounselorScheduleManagementPage = () => {
 
   const handleAddSchedule = async (e) => {
     e.preventDefault();
+    if (formData.jam_selesai <= formData.jam_mulai) {
+      toast.error('Jam selesai harus lebih besar dari jam mulai.');
+      return;
+    }
     setSubmitting(true);
     try {
       const response = await axios.post('/operator/counselor-schedules', formData);
       if (response.data.success) {
-        showToast('Jadwal berhasil ditambahkan');
+        toast.success('Jadwal berhasil ditambahkan');
         setAddModal(false);
         setFormData(BLANK_FORM);
         fetchSchedules();
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
+      toast.error(err.response?.data?.message || 'Terjadi kesalahan sistem');
     } finally {
       setSubmitting(false);
     }
@@ -110,16 +97,20 @@ const CounselorScheduleManagementPage = () => {
 
   const handleEditSchedule = async (e) => {
     e.preventDefault();
+    if (formData.jam_selesai <= formData.jam_mulai) {
+      toast.error('Jam selesai harus lebih besar dari jam mulai.');
+      return;
+    }
     setSubmitting(true);
     try {
       const response = await axios.put(`/operator/counselor-schedules/${editModal.schedule.id}`, formData);
       if (response.data.success) {
-        showToast('Jadwal berhasil diperbarui');
+        toast.success('Jadwal berhasil diperbarui');
         setEditModal({ open: false, schedule: null });
         fetchSchedules();
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
+      toast.error(err.response?.data?.message || 'Terjadi kesalahan sistem');
     } finally {
       setSubmitting(false);
     }
@@ -130,12 +121,12 @@ const CounselorScheduleManagementPage = () => {
     try {
       const response = await axios.delete(`/operator/counselor-schedules/${deleteModal.schedule.id}`);
       if (response.data.success) {
-        showToast('Jadwal berhasil dihapus');
+        toast.success('Jadwal berhasil dihapus');
         setDeleteModal({ open: false, schedule: null });
         fetchSchedules();
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
+      toast.error(err.response?.data?.message || 'Terjadi kesalahan sistem');
     } finally {
       setSubmitting(false);
     }
@@ -197,7 +188,7 @@ const CounselorScheduleManagementPage = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
       `}</style>
-      <Toast toast={toast} onClose={() => setToast(null)} />
+
       
       <div className="flex-none h-full overflow-y-auto no-scrollbar border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
         <Sidebar collapsed={sidebarCollapsed} toggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
@@ -209,9 +200,9 @@ const CounselorScheduleManagementPage = () => {
             <div className="flex items-center gap-4 w-full md:w-auto">
                <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl lg:hidden text-slate-600 dark:text-white transition-all"><FiMenu size={20} /></button>
                 <div>
-                   <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
-                     <FiCalendar className="text-indigo-600 dark:text-indigo-400" /> Jadwal Kerja Konselor
-                   </h1>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
+                      <FiCalendar className="text-indigo-600 dark:text-indigo-400" /> Jadwal Kerja Satgas
+                    </h1>
                    <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium tracking-wide mt-1.5">Manajemen Ketersediaan Layanan PolijeCare</p>
                 </div>
             </div>
@@ -234,13 +225,13 @@ const CounselorScheduleManagementPage = () => {
           <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row gap-6 shadow-sm transition-all">
             <div className="flex-1 relative group">
               <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-all" size={20} />
-              <input type="text" placeholder="Cari Nama Konselor..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              <input type="text" placeholder="Cari Nama Satgas..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-16 pr-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-sm font-medium text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
             </div>
              <div className="w-full md:w-80">
               <select value={counselorFilter} onChange={(e) => setCounselorFilter(e.target.value)}
                 className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-xs font-bold text-slate-600 dark:text-slate-400 outline-none appearance-none cursor-pointer shadow-inner">
-                <option value="all">Semua Konselor</option>
+                <option value="all">Semua Satgas</option>
                 {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
@@ -327,10 +318,10 @@ const CounselorScheduleManagementPage = () => {
               <form onSubmit={addModal ? handleAddSchedule : handleEditSchedule} className="p-10 space-y-10">
                 <div className="space-y-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest px-2">Konselor Bertugas</label>
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest px-2">Satgas Bertugas</label>
                     <select name="counselor_id" value={formData.counselor_id} onChange={handleInputChange} required
                       className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 rounded-[2rem] text-xs font-bold text-slate-900 dark:text-white outline-none transition-all shadow-inner cursor-pointer">
-                      <option value="">Pilih Konselor...</option>
+                      <option value="">Pilih Satgas...</option>
                       {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
@@ -397,4 +388,4 @@ const CounselorScheduleManagementPage = () => {
   );
 };
 
-export default CounselorScheduleManagementPage;
+export default SatgasScheduleManagementPage;

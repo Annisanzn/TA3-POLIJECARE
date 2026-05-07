@@ -130,7 +130,7 @@ const OperatorDashboard = () => {
           <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="space-y-2">
               <h1 className="text-3xl md:text-4xl font-bold mb-1 text-slate-900 tracking-tight">
-                Selamat Datang, <span className="text-indigo-600">{user?.name?.split(' ')[0]}!</span>
+                Selamat Datang, Satgas <span className="text-indigo-600">{user?.name?.split(' ')[0]}!</span>
               </h1>
               <p className="text-slate-500 dark:text-slate-400 max-w-2xl font-medium text-sm leading-relaxed">
                 Ada <span className="font-bold text-rose-600 px-1.5 py-0.5 bg-rose-50 rounded-lg">{stats.summary.new} laporan baru</span> yang menunggu atensi Anda hari ini.

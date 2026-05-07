@@ -59,9 +59,18 @@
     font-size: 18px;
     font-weight: 700;
     color: #1f2937;
-    margin: 0 0 24px 0;
+    margin: 0;
+    padding-bottom: 8px;
+}
+
+.sectionDesc {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 24px;
     padding-bottom: 16px;
     border-bottom: 1px solid #f3f4f6;
+    display: block;
+    line-height: 1.5;
 }
 
 .sectionTitle svg {
@@ -243,6 +252,65 @@
     color: #166534;
 }
 
+
+.tipsContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.tipCard {
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+}
+
+.tipCard.blue { background: #eff6ff; border-color: #dbeafe; }
+.tipCard.rose { background: #fff1f2; border-color: #ffe4e6; }
+.tipCard.amber { background: #fffbeb; border-color: #fef3c7; }
+
+.tipCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.tipTitle {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tipTitle.blue { color: #1e40af; }
+.tipTitle.rose { color: #9f1239; }
+.tipTitle.amber { color: #92400e; }
+
+.tipDesc {
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.tipDesc.blue { color: #1d4ed8; }
+.tipDesc.rose { color: #be123c; }
+.tipDesc.amber { color: #b45309; }
+
+.guideHeader {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .formGrid {
@@ -251,5 +319,9 @@
 
     .radioGroup {
         flex-direction: column;
+    }
+
+    .tipsContainer {
+        grid-template-columns: 1fr;
     }
 }

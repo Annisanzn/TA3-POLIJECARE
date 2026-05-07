@@ -92,7 +92,7 @@ export const getRoleDisplayName = (role) => {
   const roleNames = {
     [roles.ADMIN]: 'Administrator',
     [roles.OPERATOR]: 'Operator',
-    [roles.KONSELOR]: 'Konselor',
+    [roles.KONSELOR]: 'Satgas',
     [roles.USER]: 'Pengguna'
   };
 

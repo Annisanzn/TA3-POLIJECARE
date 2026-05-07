@@ -32,7 +32,7 @@ const Toast = ({ toast, onClose }) => {
 };
 
 /* ── Counselor Case Management Component ────────────────────────────────────── */
-const CounselorCaseManagement = () => {
+const SatgasCaseManagement = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -199,7 +199,7 @@ const CounselorCaseManagement = () => {
   const submitSchedule = async () => {
     if (!scheduleModal.complaint) return;
     if (!scheduleModal.counselor_id || !scheduleModal.counseling_schedule) {
-      showToast('Mohon pilih konselor dan jadwal', 'error');
+      showToast('Mohon pilih Satgas dan jadwal', 'error');
       return;
     }
     setIsSubmitting(true);
@@ -316,19 +316,19 @@ const CounselorCaseManagement = () => {
                   <FiFileText className="text-purple-600 shrink-0" /> <span className="truncate">Manajemen Kasus</span>
                 </h1>
                 <p className="text-gray-500 text-[11px] sm:text-sm mt-0.5 font-medium hidden xs:block">
-                  Pusat Kendali Laporan & Sesi Konseling
+                  Pusat Kendali Laporan & Sesi Penanganan
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto sm:overflow-visible no-scrollbar pb-1 sm:pb-0">
               <button 
-                id="btn-tambah-konseling-manual"
+                id="btn-tambah-penanganan-manual"
                 onClick={() => navigate('/konselor/manual-counseling')}
                 className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 hover:from-teal-600 hover:to-emerald-700 transition-all text-[11px] sm:text-sm font-bold active:scale-95 whitespace-nowrap"
               >
                 <FiPlus size={16} />
-                <span>KONSELING MANUAL</span>
+                <span>PENANGANAN MANUAL</span>
               </button>
               <button 
                 onClick={() => setExportModal({ ...exportModal, open: true })}
@@ -362,7 +362,7 @@ const CounselorCaseManagement = () => {
           <div className="flex flex-wrap items-center gap-4 mb-8">
             <div className="bg-[#F5F3FF] px-6 py-3 rounded-3xl shadow-xl shadow-purple-100 border border-purple-200/50 flex items-center gap-4">
                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse shadow-[0_0_8px_#8b5cf6]" />
-               <span className="text-xs font-bold text-purple-700 uppercase tracking-widest border-r border-purple-300 pr-4">Konselor Aktif</span>
+               <span className="text-xs font-bold text-purple-700 uppercase tracking-widest border-r border-purple-300 pr-4">Satgas Aktif</span>
                <div className="flex flex-col">
                   <span className="text-[10px] font-semibold text-purple-500 leading-none">TOTAL KASUS SAYA</span>
                   <span className="text-lg font-bold text-purple-900 leading-tight">{stats.total || 0}</span>
@@ -382,7 +382,7 @@ const CounselorCaseManagement = () => {
           <div className="bg-white rounded-[40px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100 mb-8">
              <div className="flex items-center gap-3 mb-8">
                 <div className="w-1.5 h-6 bg-purple-600 rounded-full" />
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">FILTER KASUS</h2>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Manajemen Kasus Satgas</h1>
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -508,10 +508,10 @@ const CounselorCaseManagement = () => {
                       {/* Content */}
                       <div className="mb-8">
                          <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight line-clamp-1 group-hover:text-purple-600 transition-colors">
-                            {report?.title || `Sesi Konseling Langsung: ${item?.jenis_pengaduan || 'Umum'}`}
+                            {report?.title || `Sesi Penanganan Langsung: ${item?.jenis_pengaduan || 'Umum'}`}
                          </h3>
                          <p className="text-gray-500 text-sm font-medium line-clamp-2 leading-relaxed italic">
-                            "{report?.description || item?.keterangan_pihak || 'Data sesi konseling ditambahkan secara manual (Walk-in / Tatap Muka)'}"
+                            "{report?.description || item?.keterangan_pihak || 'Data sesi penanganan ditambahkan secara manual (Walk-in / Tatap Muka)'}"
                          </p>
                       </div>
 
@@ -541,7 +541,7 @@ const CounselorCaseManagement = () => {
                                {(report?.user_phone || report?.guest_phone || item?.user_phone) && (
                                  <a 
                                    href={`https://wa.me/${(report?.user_phone || report?.guest_phone || item?.user_phone || '').replace(/^0/, '62')}?text=${encodeURIComponent(
-                                     `Halo ${report?.user_name || item?.user_name || 'Pelapor'}, saya adalah konselor Anda dari Satgas PPKS Polije. Ada yang bisa saya bantu terkait jadwal kita?`
+                                     `Halo ${report?.user_name || item?.user_name || 'Pelapor'}, saya adalah tim Satgas dari Satgas PPKPT Polije. Ada yang bisa saya bantu terkait jadwal kita?`
                                    )}`}
                                    target="_blank"
                                    rel="noopener noreferrer"
@@ -561,9 +561,9 @@ const CounselorCaseManagement = () => {
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 bg-gray-100 rounded-[14px] flex items-center justify-center text-gray-400"><FiUsers size={16} /></div>
                            <div className="min-w-0 text-left">
-                             <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Konselor Penanggung Jawab</p>
+                             <p className="text-[9px] font-bold text-gray-400 uppercase mb-0.5">Satgas Penanggung Jawab</p>
                              <p className="text-xs font-bold text-gray-900 truncate">
-                               {report?.counselor_name || report?.counselor?.name || item?.counselor_name || 'Belum diplot'}
+                               {report?.counselor_name || report?.counselor?.name || item?.counselor_name || 'Satgas Belum Diplot'}
                              </p>
                            </div>
                         </div>
@@ -577,7 +577,7 @@ const CounselorCaseManagement = () => {
                              if (targetId) {
                                navigate(`/konselor/complaint-detail/${targetId}`);
                              } else {
-                               showToast('Ini adalah sesi manual / walk-in. Silakan kelola lewat menu Jadwal Konseling.', 'info');
+                               showToast('Ini adalah sesi manual / walk-in. Silakan kelola lewat menu Jadwal Satgas.', 'info');
                              }
                            }}
                            className="flex-1 py-4 bg-gray-900 text-white rounded-[24px] text-[10px] font-bold tracking-[0.1em] uppercase hover:bg-purple-600 shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-2"
@@ -625,7 +625,7 @@ const CounselorCaseManagement = () => {
                                   counselor_id: report.counselor_id || '', 
                                   counseling_schedule: report.counseling_schedule ? dayjs(report.counseling_schedule).format('YYYY-MM-DDTHH:mm') : '' 
                                 })}
-                                title="Ganti Konselor / Delegasi"
+                                title="Ganti Satgas / Delegasi"
                                 className="p-4 bg-purple-50 text-purple-600 rounded-[20px] hover:bg-purple-600 hover:text-white transition-all"
                              >
                                 <FiUsers size={18} />
@@ -742,13 +742,13 @@ const CounselorCaseManagement = () => {
 
             <div className="space-y-6 mb-10 text-left">
                <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2 block">Pilih Rekan Konselor</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2 block">Pilih Rekan Satgas</label>
                   <select 
                     value={scheduleModal.counselor_id}
                     onChange={e => setScheduleModal(p => ({...p, counselor_id: e.target.value}))}
                     className="w-full px-6 py-5 bg-gray-50 border-2 border-transparent focus:border-purple-500 rounded-[28px] outline-none text-sm font-bold"
                   >
-                    <option value="">-- PILIH KONSELOR --</option>
+                    <option value="">-- PILIH SATGAS --</option>
                     {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                </div>
@@ -818,4 +818,4 @@ const CounselorCaseManagement = () => {
   );
 };
 
-export default CounselorCaseManagement;
+export default SatgasCaseManagement;

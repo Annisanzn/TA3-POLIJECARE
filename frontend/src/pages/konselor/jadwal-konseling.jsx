@@ -79,7 +79,7 @@ const ScheduleForm = ({ data, onChange }) => (
 );
 
 /* ── Main ─────────────────────────────────────────────────────────────────────── */
-const KonselorJadwalKonselor = () => {
+const SatgasJadwalSatgas = () => {
     const { user } = useAuth();
 
     const [collapsed, setCollapsed] = useState(false);
@@ -179,7 +179,7 @@ const KonselorJadwalKonselor = () => {
             const res = await axios.delete(`/konselor/counselor-schedules/${deleteModal.schedule.id}`);
             if (res.data.success) {
                 showToast('Jadwal berhasil dihapus!');
-                setDelete({ open: false, schedule: null });
+                setDeleteModal({ open: false, schedule: null });
                 fetchSchedules();
             } else {
                 showToast(res.data.message || 'Gagal menghapus', 'error');
@@ -202,14 +202,14 @@ const KonselorJadwalKonselor = () => {
             <Sidebar collapsed={collapsed} toggleCollapse={() => setCollapsed(v => !v)} />
 
             <div className="flex-1 flex flex-col min-w-0">
-                <Topbar onMenuClick={() => setCollapsed(v => !v)} title="Jadwal Konselor" />
+                <Topbar onMenuClick={() => setCollapsed(v => !v)} title="Jadwal Satgas" />
 
                 <main className="flex-1 p-6">
                     {/* Page Title & Actions */}
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Jadwal Konselor</h2>
-                            <p className="text-gray-600 mt-1">Kelola jadwal ketersediaan Anda untuk sesi konseling</p>
+                            <h2 className="text-2xl font-bold text-gray-900">Jadwal Satgas</h2>
+                            <p className="text-gray-600 mt-1">Kelola jadwal ketersediaan Anda untuk sesi penanganan</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <button onClick={fetchSchedules} disabled={isLoading} className="p-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">
@@ -305,7 +305,7 @@ const KonselorJadwalKonselor = () => {
                                                 <button onClick={() => openEdit(s)} className="flex-1 py-2 text-sm bg-yellow-50 text-yellow-700 hover:bg-yellow-100 rounded-xl font-medium transition-colors">
                                                     <FiEdit className="inline mr-1" size={14} /> Edit
                                                 </button>
-                                                <button onClick={() => setDelete({ open: true, schedule: s })} className="flex-1 py-2 text-sm bg-red-50 text-red-700 hover:bg-red-100 rounded-xl font-medium transition-colors">
+                                                <button onClick={() => setDeleteModal({ open: true, schedule: s })} className="flex-1 py-2 text-sm bg-red-50 text-red-700 hover:bg-red-100 rounded-xl font-medium transition-colors">
                                                     <FiTrash2 className="inline mr-1" size={14} /> Hapus
                                                 </button>
                                             </div>
@@ -355,7 +355,7 @@ const KonselorJadwalKonselor = () => {
             {/* Delete Modal */}
             {deleteModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => !submitting && setDelete({ open: false, schedule: null })} />
+                    <div className="absolute inset-0 bg-black/40" onClick={() => !submitting && setDeleteModal({ open: false, schedule: null })} />
                     <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
                         <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <FiTrash2 className="text-red-600" size={22} />
@@ -363,7 +363,7 @@ const KonselorJadwalKonselor = () => {
                         <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Jadwal</h3>
                         <p className="text-gray-500 text-sm mb-6">Yakin ingin menghapus jadwal <strong>{deleteModal.schedule?.hari}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
                         <div className="flex gap-3">
-                            <button onClick={() => setDelete({ open: false, schedule: null })} disabled={submitting} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm hover:bg-gray-50">Batal</button>
+                            <button onClick={() => setDeleteModal({ open: false, schedule: null })} disabled={submitting} className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm hover:bg-gray-50">Batal</button>
                             <button onClick={handleDelete} disabled={submitting} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-60">{submitting ? 'Menghapus...' : 'Hapus'}</button>
                         </div>
                     </div>
@@ -373,4 +373,4 @@ const KonselorJadwalKonselor = () => {
     );
 };
 
-export default KonselorJadwalKonselor;
+export default SatgasJadwalSatgas;

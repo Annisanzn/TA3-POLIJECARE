@@ -8,9 +8,11 @@ import CounselingCalendar from '../../components/CounselingCalendar';
 import ActivityList from '../../components/ActivityList';
 import api from '../../api/axios';
 import { FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
+import { useAuth } from '../../hooks/useAuth';
 import DashboardNotification from '../../components/DashboardNotification';
 
-const KonselorDashboard = () => {
+const SatgasDashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [stats, setStats] = useState(null);
@@ -101,10 +103,12 @@ const KonselorDashboard = () => {
           {/* Welcome Banner */}
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-gray-900">Selamat Datang, Konselor!</h1>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                Selamat Datang, Satgas {user?.name?.split(' ')[0]}!
+              </h1>
               <p className="text-gray-600 max-w-2xl">
                 Anda memiliki <span className="font-bold text-gray-900">{j.pending ?? 0} jadwal menunggu konfirmasi</span> yang membutuhkan perhatian segera.
-                Pantau aktivitas konseling dan kelola jadwal dengan efisien.
+                Pantau aktivitas penanganan dan kelola jadwal dengan efisien.
               </p>
               <div className="flex items-center space-x-4 mt-6">
                 <button
@@ -188,4 +192,4 @@ const KonselorDashboard = () => {
   );
 };
 
-export default KonselorDashboard;
+export default SatgasDashboard;

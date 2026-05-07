@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Sidebar from './components/layout/Sidebar';
 import PageTransition from './components/layout/PageTransition';
+import { Toaster } from 'react-hot-toast';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -26,8 +27,8 @@ import DetailPengaduan from './pages/user/detail-pengaduan';
 import BuatLaporan from './pages/user/buat-laporan';
 import CreateComplaintPage from './pages/user/CreateComplaintPage';
 import ViolenceCategoriesManagement from './pages/operator/violence-categories-management';
-import CounselingManagementPage from './pages/operator/counseling-management';
-import CounselorScheduleManagementPage from './pages/operator/counselor-schedule-management';
+import SatgasManagementPage from './pages/operator/counseling-management';
+import SatgasScheduleManagementPage from './pages/operator/counselor-schedule-management';
 import CounselingRequestPage from './pages/user/counseling-request';
 import CounselorCounselingDashboard from './pages/konselor/counseling-dashboard';
 import MyScheduleManagementPage from './pages/konselor/my-schedule-management';
@@ -43,7 +44,7 @@ import KonselorPengaduan from './pages/konselor/pengaduan';
 import KonselorComplaintDetail from './pages/konselor/complaint-detail';
 import KonselorMateri from './pages/konselor/materi';
 import Profile from './pages/shared/Profile';
-import CounselorCaseManagement from './pages/konselor/case-management';
+import SatgasCaseManagement from './pages/konselor/case-management';
 import ManualCounseling from './pages/konselor/manual-counseling';
 import OperatorManualCounseling from './pages/operator/manual-counseling';
 
@@ -99,15 +100,14 @@ const AnimatedRoutes = () => {
           }
         />
 
-        {/* Konselor: Jadwal */}
-        <Route
-          path="/konselor/jadwal"
-          element={
-            <NewProtectedRoute requiredRole="konselor">
-              <PageTransition><KonselorJadwal /></PageTransition>
-            </NewProtectedRoute>
-          }
-        />
+        {/* <Route
+           path="/konselor/jadwal"
+           element={
+             <NewProtectedRoute requiredRole="konselor">
+               <PageTransition><KonselorJadwal /></PageTransition>
+             </NewProtectedRoute>
+           }
+         /> */}
 
         {/* Konselor: Pengaduan */}
         <Route
@@ -151,7 +151,7 @@ const AnimatedRoutes = () => {
           path="/konselor/case-management"
           element={
             <NewProtectedRoute requiredRole="konselor">
-              <PageTransition><CounselorCaseManagement /></PageTransition>
+              <PageTransition><SatgasCaseManagement /></PageTransition>
             </NewProtectedRoute>
           }
         />
@@ -201,6 +201,8 @@ const AnimatedRoutes = () => {
             </NewProtectedRoute>
           }
         />
+
+
 
         <Route
           path="/operator/complaint-detail/:id"
@@ -252,20 +254,19 @@ const AnimatedRoutes = () => {
           path="/operator/counseling-management"
           element={
             <NewProtectedRoute requiredRole="operator">
-              <PageTransition><CaseManagementPage /></PageTransition>
+              <PageTransition><SatgasManagementPage /></PageTransition>
             </NewProtectedRoute>
           }
         />
 
-        {/* Counselor Schedule Management for Operator (and also accessible by counselors for admin view) */}
-        <Route
+        {/* <Route
           path="/operator/counselor-schedule-management"
           element={
             <NewProtectedRoute requiredRole={['operator', 'konselor']}>
-              <PageTransition><CounselorScheduleManagementPage /></PageTransition>
+              <PageTransition><SatgasScheduleManagementPage /></PageTransition>
             </NewProtectedRoute>
           }
-        />
+        /> */}
 
         {/* Counseling Request for User */}
         <Route
@@ -287,15 +288,14 @@ const AnimatedRoutes = () => {
           }
         />
 
-        {/* My Schedule Management for Counselor (also accessible by operators to view counselor perspective) */}
-        <Route
+        {/* <Route
           path="/konselor/my-schedule-management"
           element={
             <NewProtectedRoute requiredRole={['konselor', 'operator']}>
               <PageTransition><MyScheduleManagementPage /></PageTransition>
             </NewProtectedRoute>
           }
-        />
+        /> */}
 
         {/* Protected Dashboard Routes */}
         <Route
@@ -380,6 +380,7 @@ function App() {
     <ThemeProvider>
 
       <AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
         <Router>
           <AnimatedRoutes />
         </Router>

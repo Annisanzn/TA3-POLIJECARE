@@ -70,7 +70,8 @@ const CaseManagementPage = () => {
     open: false, complaint: null, counselor_id: '', counseling_schedule: '' 
   });
   const [exportModal, setExportModal] = useState({ 
-    open: false, date_from: '', date_to: '', status: 'all' 
+    open: false, date_from: '', date_to: '', status: 'all',
+    selectedColumns: ['report_id', 'created_at', 'category', 'urgency', 'status', 'victim_name', 'title', 'chronology']
   });
   const [counselors, setCounselors] = useState([]);
 
@@ -172,7 +173,7 @@ const CaseManagementPage = () => {
   const submitSchedule = async () => {
     if (!scheduleModal.complaint) return;
     if (!scheduleModal.counselor_id || !scheduleModal.counseling_schedule) {
-      showToast('Mohon pilih konselor dan jadwal', 'error'); return;
+      showToast('Mohon pilih Satgas dan jadwal', 'error'); return;
     }
     setIsSubmitting(true);
     try {
@@ -219,6 +220,9 @@ const CaseManagementPage = () => {
       if (exportModal.date_from) params.date_from = exportModal.date_from;
       if (exportModal.date_to) params.date_to = exportModal.date_to;
       if (exportModal.status !== 'all') params.status = exportModal.status;
+      if (exportModal.selectedColumns?.length > 0) {
+        params.columns = exportModal.selectedColumns.join(',');
+      }
       const response = await axios.get('/operator/complaints/export', { params, responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -439,7 +443,7 @@ const CaseManagementPage = () => {
                           </p>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-2">Konselor</p>
+                          <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-2">Satgas Bertugas</p>
                           <p className={`text-xs font-bold truncate flex items-center gap-2 ${counselorName ? 'text-slate-900' : 'text-rose-500 opacity-80'}`}>
                              <FiShield size={14} className={counselorName ? 'text-emerald-500' : 'text-rose-500'} /> {counselorName || 'Belum Diplot'}
                           </p>
@@ -504,16 +508,16 @@ const CaseManagementPage = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10" />
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Plotting Konselor</h3>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Penugasan Satgas</h3>
               <div className="space-y-6 mb-10">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Pilih Konselor Bertugas</label>
-                    <select value={scheduleModal.counselor_id} onChange={e => setScheduleModal(p => ({...p, counselor_id: e.target.value}))}
-                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none text-xs font-bold uppercase tracking-widest dark:text-white appearance-none cursor-pointer">
-                    <option value="">-- Pilih Konselor --</option>
-                    {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                 </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Pilih Satgas Bertugas</label>
+                     <select value={scheduleModal.counselor_id} onChange={e => setScheduleModal(p => ({...p, counselor_id: e.target.value}))}
+                     className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none text-xs font-bold uppercase tracking-widest dark:text-white appearance-none cursor-pointer">
+                     <option value="">-- Pilih Satgas --</option>
+                     {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                     </select>
+                  </div>
                  <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Jadwal Sesi</label>
                     <input type="datetime-local" value={scheduleModal.counseling_schedule} onChange={e => setScheduleModal(p => ({...p, counseling_schedule: e.target.value}))}
@@ -531,24 +535,108 @@ const CaseManagementPage = () => {
 
       <AnimatePresence>
         {exportModal.open && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
-            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl w-full max-w-sm p-12 overflow-hidden text-center border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
-               <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500" />
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Ekspor Laporan</h3>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10 opacity-70">Pilih Parameter Data</p>
-               <div className="space-y-4 mb-10">
-                  <input type="date" value={exportModal.date_from} onChange={e => setExportModal({...exportModal, date_from: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-[10px] font-bold uppercase tracking-widest dark:text-white" />
-                  <input type="date" value={exportModal.date_to} onChange={e => setExportModal({...exportModal, date_to: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-[10px] font-bold uppercase tracking-widest dark:text-white" />
-                  <select value={exportModal.status} onChange={e => setExportModal({...exportModal, status: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl text-[10px] font-bold uppercase tracking-widest dark:text-white">
-                     <option value="all">Semua Status</option>
-                     <option value="pending">Pending</option>
-                     <option value="approved">Approved</option>
-                     <option value="completed">Completed</option>
-                  </select>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[110] flex justify-center p-4 md:p-8 backdrop-blur-md bg-slate-900/40 dark:bg-slate-950/80 transition-all overflow-y-auto custom-scrollbar"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }} 
+              animate={{ scale: 1, y: 0 }} 
+              exit={{ scale: 0.95, y: 20 }} 
+              className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl p-10 md:p-12 my-auto border border-slate-100 dark:border-slate-800" 
+              onClick={e => e.stopPropagation()}
+            >
+               <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500 rounded-t-[2.5rem]" />
+               
+               <div className="mb-10 text-center">
+                 <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Ekspor Laporan</h3>
+                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pilih rentang waktu dan data yang ingin Anda unduh</p>
                </div>
-               <div className="flex gap-4">
-                  <button onClick={() => setExportModal({ ...exportModal, open: false })} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
-                  <button onClick={handleExport} className="flex-[2] py-5 bg-emerald-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-emerald-200 dark:shadow-none hover:bg-emerald-700">Unduh CSV</button>
+               
+               <div className="space-y-10 mb-12">
+                  {/* Row 1: Dates */}
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Rentang Waktu</label>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-semibold text-slate-500 ml-1">Dari Tanggal</span>
+                        <input type="date" value={exportModal.date_from} onChange={e => setExportModal({...exportModal, date_from: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
+                      </div>
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-semibold text-slate-500 ml-1">Sampai Tanggal</span>
+                        <input type="date" value={exportModal.date_to} onChange={e => setExportModal({...exportModal, date_to: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Status */}
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Status Laporan</label>
+                    <select value={exportModal.status} onChange={e => setExportModal({...exportModal, status: e.target.value})} className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all appearance-none cursor-pointer shadow-sm">
+                       <option value="all">Semua Status (Laporan Masuk, Proses, Selesai)</option>
+                       <option value="pending">Hanya Laporan Baru (Pending)</option>
+                       <option value="approved">Hanya Laporan Diproses (Approved)</option>
+                       <option value="completed">Hanya Laporan Selesai (Completed)</option>
+                    </select>
+                  </div>
+
+                  {/* Row 3: Columns Grid */}
+                  <div className="space-y-5">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Pilih Kolom Data (CSV)</label>
+                    <div className="bg-slate-50/50 dark:bg-slate-950/30 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50">
+                       <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+                         {[
+                           { id: 'report_id', label: 'ID Laporan' },
+                           { id: 'created_at', label: 'Tanggal Lapor' },
+                           { id: 'category', label: 'Kategori' },
+                           { id: 'urgency', label: 'Urgensi' },
+                           { id: 'status', label: 'Status' },
+                           { id: 'victim_name', label: 'Nama Korban' },
+                           { id: 'victim_gender', label: 'J.K Korban' },
+                           { id: 'victim_type', label: 'Tipe Korban' },
+                           { id: 'location', label: 'Lokasi' },
+                           { id: 'title', label: 'Judul' },
+                           { id: 'chronology', label: 'Kronologi' },
+                           { id: 'suspect_name', label: 'Terlapor' },
+                           { id: 'suspect_gender', label: 'J.K Terlapor' },
+                           { id: 'suspect_status', label: 'Status Terlapor' },
+                           { id: 'counselor', label: 'Satgas' },
+                           { id: 'schedule', label: 'Jadwal' },
+                           { id: 'rejection_reason', label: 'Alasan Tolak' }
+                         ].map(col => (
+                           <label key={col.id} className="flex items-center gap-3 cursor-pointer group">
+                              <div className="relative flex items-center justify-center">
+                                <input 
+                                  type="checkbox" 
+                                  checked={exportModal.selectedColumns?.includes(col.id)} 
+                                  onChange={(e) => {
+                                    const cols = [...(exportModal.selectedColumns || [])];
+                                    if (e.target.checked) cols.push(col.id);
+                                    else if (cols.length > 1) {
+                                      const idx = cols.indexOf(col.id);
+                                      cols.splice(idx, 1);
+                                    }
+                                    setExportModal({ ...exportModal, selectedColumns: cols });
+                                  }}
+                                  className="peer w-5 h-5 accent-emerald-500 rounded-md border-slate-300 transition-all cursor-pointer" 
+                                />
+                              </div>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 transition-colors whitespace-nowrap">{col.label}</span>
+                           </label>
+                         ))}
+                       </div>
+                    </div>
+                  </div>
+               </div>
+
+               <div className="flex items-center gap-4 mt-8">
+                  <button onClick={() => setExportModal({ ...exportModal, open: false })} className="flex-1 py-4 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-rose-600 transition-colors">Batal</button>
+                  <button onClick={handleExport} className="flex-[2] py-5 bg-emerald-600 text-white font-bold rounded-full text-[10px] tracking-[0.2em] shadow-xl shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    {isSubmitting ? <FiLoader className="animate-spin" /> : <FiDownload size={14} />}
+                    UNDUH CSV
+                  </button>
                </div>
             </motion.div>
           </motion.div>

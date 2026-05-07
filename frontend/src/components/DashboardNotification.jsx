@@ -55,8 +55,8 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                     icon: <FiClock className="text-green-700" size={16} />,
                     color: 'border-green-200 bg-green-50 shadow-sm',
                     badgeColor: 'bg-green-500',
-                    title: `Sesi konseling hari ini pukul ${time}`,
-                    body: s.jenis_pengaduan || 'Sesi Konseling',
+                    title: `Sesi penanganan hari ini pukul ${time}`,
+                    body: s.jenis_pengaduan || 'Sesi Penanganan',
                     sub: s.user?.name ? `dengan ${s.user.name}` : '',
                     link: role === 'konselor' ? '/konselor/jadwal' : '/operator/case-management',
                 });
@@ -76,7 +76,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                 icon: <FiCalendar className="text-blue-700" size={16} />,
                 color: 'border-blue-200 bg-blue-50 shadow-sm',
                 badgeColor: 'bg-blue-500',
-                title: `${tomorrowSessions.length} sesi konseling besok`,
+                title: `${tomorrowSessions.length} sesi penanganan besok`,
                 body: tomorrowSessions.map(s => s.jam_mulai ? String(s.jam_mulai).substring(0, 5) + ' WIB' : '').join(', '),
                 sub: '',
                 link: role === 'konselor' ? '/konselor/jadwal' : '/operator/case-management',
@@ -94,7 +94,7 @@ const DashboardNotification = ({ role = 'konselor' }) => {
                 color: 'border-yellow-200 bg-yellow-50 shadow-sm',
                 badgeColor: 'bg-yellow-500',
                 title: `${pendingSessions.length} permintaan sesi menunggu konfirmasi`,
-                body: 'Segera tinjau dan setujui permintaan konseling',
+                body: 'Segera tinjau dan setujui permintaan penanganan',
                 sub: '',
                 link: role === 'konselor' ? '/konselor/case-management' : '/operator/case-management',
             });

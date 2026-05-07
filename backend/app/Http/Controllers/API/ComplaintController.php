@@ -29,9 +29,8 @@ class ComplaintController extends Controller
                     'violenceCategory',
                     'attachments'
                 ])
-                ->when($authUser && $authUser->role === 'konselor', function ($q) use ($authUser) {
-                    $q->where('counselor_id', $authUser->id);
-                })
+                // All counselors can see all reports (Open Case System)
+
                 ->when($search, function ($q) use ($search) {
                     $q->where(function ($qq) use ($search) {
                         $qq->where('report_id', 'like', "%{$search}%")
@@ -80,6 +79,7 @@ class ComplaintController extends Controller
                         'chronology' => $c->chronology,
                         'victim_type' => $c->victim_type,
                         'victim_name' => $c->victim_name,
+                        'victim_gender' => $c->victim_gender,
                         'victim_relationship' => $c->victim_relationship,
                         'is_external_victim' => $c->is_external_victim,
                         'victim_identity_proof' => $c->victim_identity_proof,
@@ -134,29 +134,8 @@ class ComplaintController extends Controller
         $authUser = $request->user();
 
         // If counselor, ensure they're authorized to see this complaint
-        if ($authUser && $authUser->role === 'konselor') {
-            $isAssignedDirectly = (int) $complaint->counselor_id === (int) $authUser->id;
+        // All counselors can see all reports (Open Case System)
 
-            // Check if there's a counseling schedule linking this counselor to the complaint
-            $hasSchedule = \App\Models\CounselingSchedule::where('complaint_id', $complaint->id)
-                ->where('counselor_id', $authUser->id)
-                ->exists();
-
-            \Illuminate\Support\Facades\Log::info('Counselor Auth Debug', [
-                'authUserId' => $authUser->id,
-                'complaintId' => $complaint->id,
-                'complaintCounselorId' => $complaint->counselor_id,
-                'isAssignedDirectly' => $isAssignedDirectly,
-                'hasSchedule' => $hasSchedule
-            ]);
-
-            if (!$isAssignedDirectly && !$hasSchedule) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access to this complaint',
-                ], 403);
-            }
-        }
 
         $complaint->load([
             'user:id,name,email,phone',
@@ -164,7 +143,7 @@ class ComplaintController extends Controller
             'violenceCategory',
             'attachments',
             'counselingSchedules' => function ($q) {
-                $q->orderBy('created_at', 'desc');
+                $q->with('counselor:id,name')->orderBy('created_at', 'desc');
             }
         ]);
 
@@ -189,10 +168,12 @@ class ComplaintController extends Controller
                 'chronology' => $complaint->chronology,
                 'victim_type' => $complaint->victim_type,
                 'victim_name' => $complaint->victim_name,
+                'victim_gender' => $complaint->victim_gender,
                 'victim_relationship' => $complaint->victim_relationship,
                 'is_external_victim' => $complaint->is_external_victim,
                 'victim_identity_proof' => $complaint->victim_identity_proof ? asset('storage/' . $complaint->victim_identity_proof) : null,
                 'suspect_name' => $complaint->suspect_name,
+                'suspect_gender' => $complaint->suspect_gender,
                 'suspect_status' => $complaint->suspect_status,
                 'suspect_affiliation' => $complaint->suspect_affiliation,
                 'suspect_phone' => $complaint->suspect_phone,
@@ -233,6 +214,7 @@ class ComplaintController extends Controller
                         'saran_konselor' => $s->saran_konselor,
                         'feedback_attachment' => $s->feedback_attachment ? asset('storage/' . $s->feedback_attachment) : null,
                         'created_at' => $s->created_at->toDateTimeString(),
+                        'counselor_name' => optional($s->counselor)->name ?? 'Belum diplot',
                     ];
                 }),
             ]
@@ -244,14 +226,8 @@ class ComplaintController extends Controller
         $authUser = $request->user();
 
         $baseQuery = Complaint::query();
-        if ($authUser && $authUser->role === 'konselor') {
-            $baseQuery->where(function($q) use ($authUser) {
-                $q->where('counselor_id', $authUser->id)
-                  ->orWhereHas('counselingSchedules', function($sq) use ($authUser) {
-                      $sq->where('counselor_id', $authUser->id);
-                  });
-            });
-        }
+        // All counselors see aggregate stats (Open Case System)
+
 
         $total = (clone $baseQuery)->count();
         $pending = (clone $baseQuery)->where('status', 'pending')->count();
@@ -276,7 +252,8 @@ class ComplaintController extends Controller
     {
         $type = $request->query('type', 'all'); // all, daily, monthly, yearly
         $date = $request->query('date', now()->toDateString());
-
+        $columnsParam = $request->query('columns'); // comma separated keys
+        
         $query = Complaint::with(['user', 'counselor', 'violenceCategory']);
 
         if ($type === 'daily') {
@@ -300,45 +277,74 @@ class ComplaintController extends Controller
             "Expires" => "0"
         ];
 
-        $callback = function () use ($complaints) {
+        // Define all possible columns mapping
+        $allColumns = [
+            'report_id' => 'ID Laporan',
+            'created_at' => 'Tanggal Lapor',
+            'category' => 'Kategori Kekerasan',
+            'urgency' => 'Tingkat Urgensi',
+            'status' => 'Status',
+            'victim_name' => 'Nama Korban/Pelapor',
+            'victim_gender' => 'Jenis Kelamin Korban',
+            'victim_type' => 'Tipe Korban',
+            'victim_relationship' => 'Hubungan Korban',
+            'location' => 'Lokasi',
+            'title' => 'Judul Aduan',
+            'description' => 'Deskripsi',
+            'chronology' => 'Kronologi',
+            'suspect_name' => 'Nama Terlapor',
+            'suspect_gender' => 'Jenis Kelamin Terlapor',
+            'suspect_status' => 'Status Terlapor',
+            'suspect_affiliation' => 'Afiliasi Terlapor',
+            'counselor' => 'Konselor Penanggung Jawab',
+            'schedule' => 'Jadwal Konseling',
+            'rejection_reason' => 'Alasan Penolakan'
+        ];
+
+        // Determine which columns to export
+        $selectedKeys = $columnsParam ? explode(',', $columnsParam) : array_keys($allColumns);
+        $exportHeaders = [];
+        foreach ($selectedKeys as $key) {
+            if (isset($allColumns[$key])) {
+                $exportHeaders[] = $allColumns[$key];
+            }
+        }
+
+        $callback = function () use ($complaints, $selectedKeys, $exportHeaders) {
             $file = fopen('php://output', 'w');
             // Adding UTF-8 BOM for Excel compatibility
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, [
-                'ID Laporan',
-                'Tanggal Lapor',
-                'Kategori Kekerasan',
-                'Tingkat Urgensi',
-                'Status',
-                'Nama Korban/Pelapor',
-                'Tipe Korban',
-                'Hubungan Korban',
-                'Lokasi',
-                'Judul Aduan',
-                'Deskripsi',
-                'Konselor Penanggung Jawab',
-                'Jadwal Konseling',
-                'Alasan Penolakan'
-            ]);
+            fputcsv($file, $exportHeaders);
 
             foreach ($complaints as $c) {
-                fputcsv($file, [
-                    $c->report_id,
-                    $c->created_at->format('d/m/Y H:i'),
-                    optional($c->violenceCategory)->name ?? optional($c->violenceCategory)->kategori,
-                    $c->urgency_level,
-                    strtoupper($c->status),
-                    $c->user_id ? optional($c->user)->name : $c->guest_name,
-                    $c->victim_type,
-                    $c->victim_relationship,
-                    $c->location,
-                    $c->title,
-                    $c->description,
-                    optional($c->counselor)->name,
-                    $c->counseling_schedule ? $c->counseling_schedule->format('d/m/Y H:i') : '-',
-                    $c->rejection_reason ?? '-'
-                ]);
+                $row = [];
+                foreach ($selectedKeys as $key) {
+                    switch ($key) {
+                        case 'report_id': $row[] = $c->report_id; break;
+                        case 'created_at': $row[] = $c->created_at->format('d/m/Y H:i'); break;
+                        case 'category': $row[] = optional($c->violenceCategory)->name ?? optional($c->violenceCategory)->kategori; break;
+                        case 'urgency': $row[] = strtoupper($c->urgency_level); break;
+                        case 'status': $row[] = strtoupper($c->status); break;
+                        case 'victim_name': $row[] = $c->user_id ? optional($c->user)->name : $c->guest_name; break;
+                        case 'victim_gender': $row[] = $c->victim_gender; break;
+                        case 'victim_type': $row[] = $c->victim_type; break;
+                        case 'victim_relationship': $row[] = $c->victim_relationship; break;
+                        case 'location': $row[] = $c->location; break;
+                        case 'title': $row[] = $c->title; break;
+                        case 'description': $row[] = $c->description; break;
+                        case 'chronology': $row[] = $c->chronology; break;
+                        case 'suspect_name': $row[] = $c->suspect_name; break;
+                        case 'suspect_gender': $row[] = $c->suspect_gender; break;
+                        case 'suspect_status': $row[] = $c->suspect_status; break;
+                        case 'suspect_affiliation': $row[] = $c->suspect_affiliation; break;
+                        case 'counselor': $row[] = optional($c->counselor)->name; break;
+                        case 'schedule': $row[] = $c->counseling_schedule ? $c->counseling_schedule->format('d/m/Y H:i') : '-'; break;
+                        case 'rejection_reason': $row[] = $c->rejection_reason ?? '-'; break;
+                        default: $row[] = ''; break;
+                    }
+                }
+                fputcsv($file, $row);
             }
 
             fclose($file);
@@ -354,12 +360,8 @@ class ComplaintController extends Controller
             'rejection_reason' => 'nullable|string',
         ]);
 
-        if ($request->user()->role === 'konselor' && (int) $complaint->counselor_id !== (int) $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda hanya dapat memperbarui status laporan yang ditugaskan kepada Anda.'
-            ], 403);
-        }
+        // All counselors can update status in Open Case System
+
 
         $complaint->update([
             'status' => $validated['status'],
@@ -387,12 +389,8 @@ class ComplaintController extends Controller
             'counseling_schedule' => 'nullable|date',
         ]);
 
-        if ($request->user()->role === 'konselor' && (int) $complaint->counselor_id !== (int) $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda hanya dapat mengatur jadwal laporan yang ditugaskan kepada Anda.'
-            ], 403);
-        }
+        // All counselors can set schedule in Open Case System
+
 
         $updateData = [
             'counselor_id' => $validated['counselor_id'] ?? $complaint->counselor_id,
