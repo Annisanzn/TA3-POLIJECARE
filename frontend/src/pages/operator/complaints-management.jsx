@@ -204,7 +204,7 @@ const ComplaintsManagementPage = () => {
   const submitSchedule = async () => {
     if (!scheduleModal.complaint?.id) return;
     if (!scheduleModal.counselor_id) {
-      showToast('Pilih konselor terlebih dahulu.', 'error');
+      showToast('Pilih Satgas terlebih dahulu.', 'error');
       return;
     }
 
@@ -214,11 +214,11 @@ const ComplaintsManagementPage = () => {
         counselor_id: scheduleModal.counselor_id,
         counseling_schedule: scheduleModal.counseling_schedule,
       });
-      showToast('Jadwal konseling berhasil ditetapkan!');
+      showToast('Jadwal penanganan berhasil ditetapkan!');
       setScheduleModal({ open: false, complaint: null, counseling_schedule: '', counselor_id: '' });
       fetchData(pagination.current_page);
     } catch (error) {
-      showToast(error?.message || 'Gagal menjadwalkan konseling.', 'error');
+      showToast(error?.message || 'Gagal menjadwalkan penanganan.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -487,8 +487,8 @@ const ComplaintsManagementPage = () => {
                         const isGuest = !c.user_id;
                         const greeting = isGuest ? (c.guest_name || 'Bapak/Ibu') : c.user_name;
                         const template = isGuest
-                          ? `Halo ${greeting},\n\nPerkenalkan kami dari Satuan Tugas Pencegahan dan Penanganan Kekerasan di Kampus (Satgas PPKPT) Politeknik Negeri Jember.\n\nKami telah menerima laporan pengaduan Anda dengan nomor registrasi *${c.report_id}* dan saat ini sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, kami akan menjadwalkan sesi konsultasi/konseling bersama. Mohon informasikan kepada kami, pada *hari dan waktu* apa Anda bisa ditemui atau dihubungi untuk konsultasi lanjutan?\n\nTerima kasih atas kepercayaan Anda kepada kami. 🙏`
-                          : `Halo ${greeting},\n\nPerkenalkan kami dari Satgas PPKPT Politeknik Negeri Jember.\n\nTerkait laporan Anda dengan nomor *${c.report_id}*, kami ingin menginformasikan bahwa laporan Anda sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, mohon informasikan kepada kami pada *hari dan waktu* yang nyaman bagi Anda untuk sesi konsultasi/konseling.\n\nTerima kasih. 🙏`;
+                          ? `Halo ${greeting},\n\nPerkenalkan kami dari Satuan Tugas Pencegahan dan Penanganan Kekerasan di Kampus (Satgas PPKPT) Politeknik Negeri Jember.\n\nKami telah menerima laporan pengaduan Anda dengan nomor registrasi *${c.report_id}* dan saat ini sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, kami akan menjadwalkan sesi konsultasi/penanganan bersama. Mohon informasikan kepada kami, pada *hari dan waktu* apa Anda bisa ditemui atau dihubungi untuk konsultasi lanjutan?\n\nTerima kasih atas kepercayaan Anda kepada kami. 🙏`
+                          : `Halo ${greeting},\n\nPerkenalkan kami dari Satgas PPKPT Politeknik Negeri Jember.\n\nTerkait laporan Anda dengan nomor *${c.report_id}*, kami ingin menginformasikan bahwa laporan Anda sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, mohon informasikan kepada kami pada *hari dan waktu* yang nyaman bagi Anda untuk sesi konsultasi/penanganan.\n\nTerima kasih. 🙏`;
                         const label = isGuest ? 'WA Pelapor Umum' : 'WA Pelapor';
                         return (
                           <a
@@ -631,18 +631,18 @@ const ComplaintsManagementPage = () => {
             <div className="w-20 h-20 bg-purple-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
               <FiCalendar className="text-purple-600" size={40} />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Konseling</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Penanganan</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium text-center">{scheduleModal.complaint?.report_id}</p>
 
             <div className="space-y-4 mb-4">
-              <label className="text-xs font-bold text-gray-500 uppercase px-1">Konselor Penanganan</label>
+              <label className="text-xs font-bold text-gray-500 uppercase px-1">Satgas Penanganan</label>
               <select
                 value={scheduleModal.counselor_id}
                 onChange={(e) => setScheduleModal((p) => ({ ...p, counselor_id: e.target.value }))}
                 className="w-full px-5 py-4 bg-gray-50/50 border-2 border-gray-100 rounded-[24px] text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all cursor-pointer font-medium"
                 disabled={isSubmitting}
               >
-                <option value="">-- Pilih Konselor --</option>
+                <option value="">-- Pilih Satgas --</option>
                 {counselors.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}

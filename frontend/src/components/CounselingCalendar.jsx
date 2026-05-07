@@ -139,7 +139,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
             console.log(`[Calendar] Total sessions found: ${allSessions.length}`);
             setSessions(allSessions);
         } catch (err) {
-            console.error('Gagal mengambil jadwal konseling:', err);
+            console.error('Gagal mengambil jadwal penanganan:', err);
         } finally {
             setLoading(false);
         }
@@ -161,7 +161,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
             
             map[d].push({
                 id: `s-${s.id}`,
-                title: s.jenis_pengaduan || 'Sesi Konseling',
+                title: s.jenis_pengaduan || 'Sesi Penanganan',
                 time: s.jam_mulai ? String(s.jam_mulai).substring(0, 5) + ' WIB' : '',
                 status: s.status || 'pending',
                 nama: uName,
@@ -257,7 +257,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                         <FiCalendar className="text-white" size={16} />
                     </div>
                     <div>
-                        <h3 className="font-bold text-slate-900 text-lg">Kalender Konseling</h3>
+                        <h3 className="font-bold text-slate-900 text-lg">Kalender Penanganan</h3>
                         <p className="text-[11px] text-slate-500 font-medium tracking-wide">Sesi dari sistem + agenda eksternal</p>
                     </div>
                 </div>
@@ -497,7 +497,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">Judul Agenda <span className="text-red-500">*</span></label>
                                     <input type="text" value={addForm.title} onChange={e => setAddForm(p => ({ ...p, title: e.target.value }))}
-                                        placeholder="Contoh: Konseling Individu - Mahasiswa X"
+                                        placeholder="Contoh: Penanganan Individu - Mahasiswa X"
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">

@@ -5,8 +5,10 @@ import { API_BASE_URL } from '../config';
 import { toast } from 'react-hot-toast';
 import { FiMail, FiLock, FiAlertCircle, FiEye, FiEyeOff, FiLogIn } from 'react-icons/fi';
 import api from '../api/axios';
+import { useAuth } from '../hooks/useAuth';
 
 const NewLoginPage = () => {
+  const { setUser } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -130,6 +132,9 @@ const NewLoginPage = () => {
         // Save token and user data to localStorage
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('user', JSON.stringify(responseData.user));
+        
+        // Update global auth state
+        setUser(responseData.user);
 
         console.log('Token saved to localStorage');
 
@@ -273,7 +278,7 @@ const NewLoginPage = () => {
               PolijeCare Login
             </h1>
             <p className="text-gray-600 mb-3">
-              Masuk ke sistem PolijeCare untuk akses layanan pengaduan dan konseling
+              Masuk ke sistem PolijeCare untuk akses layanan pengaduan dan penanganan
             </p>
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2 rounded-full border border-green-100">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

@@ -25,6 +25,12 @@ class User extends Authenticatable
         'password',
         'role',
         'nim',
+        'semester',
+        'gender',
+        'unit',
+        'prodi',
+        'bio',
+        'profile_photo',
         'google_id',
         'avatar',
     ];
@@ -61,15 +67,23 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is konselor
+     * Check if user is Satgas (Petugas Satgas)
      */
-    public function isKonselor(): bool
+    public function isSatgas(): bool
     {
         return $this->role === 'konselor';
     }
 
     /**
-     * Check if user is operator
+     * Check if user is Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'operator';
+    }
+
+    /**
+     * Check if user is operator (Legacy support)
      */
     public function isOperator(): bool
     {

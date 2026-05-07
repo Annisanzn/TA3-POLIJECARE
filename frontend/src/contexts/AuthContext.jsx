@@ -3,10 +3,10 @@ import axios from '../utils/axiosConfig';
 
 // Initial state
 const initialState = {
-  user: null,
+  user: JSON.parse(localStorage.getItem('user')) || null,
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
-  isLoading: false, // Changed to false initially
+  isAuthenticated: !!localStorage.getItem('token'),
+  isLoading: false,
   error: null,
 };
 
@@ -123,8 +123,9 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: AUTH_ACTIONS.LOAD_USER_START });
 
         try {
-          const response = await axios.get('/user');
+          const response = await axios.get(`/user?t=${new Date().getTime()}`);
           if (response.data.success) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             dispatch({
               type: AUTH_ACTIONS.LOAD_USER_SUCCESS,
               payload: response.data.user,
@@ -168,8 +169,9 @@ export const AuthProvider = ({ children }) => {
       if (response.data && response.data.success) {
         const { token, user } = response.data;
 
-        // Store token
+        // Store token and user
         localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
 
         // Set axios header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -222,6 +224,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       delete axios.defaults.headers.common['Authorization'];
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
@@ -232,11 +235,22 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
+  // Update user state manually
+  const setUser = (user) => {
+    localStorage.setItem('user', JSON.stringify(user));
+    dispatch({
+      type: AUTH_ACTIONS.LOAD_USER_SUCCESS,
+      payload: user,
+    });
+  };
+
   const value = {
     ...state,
     login,
     logout,
     clearError,
+    setUser,
+    loading: state.isLoading,
   };
 
   return (

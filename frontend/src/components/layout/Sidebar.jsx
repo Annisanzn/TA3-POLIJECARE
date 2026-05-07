@@ -20,7 +20,7 @@ const OPERATOR_MENU = [
     items: [
       { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/operator/case-management' },
       { name: 'Manajemen Pengguna', icon: <FiUsers />, path: '/operator/user-management' },
-      { name: 'Manajemen Jadwal Konselor', icon: <FiClock />, path: '/operator/counselor-schedule-management' },
+      // { name: 'Manajemen Jadwal Satgas', icon: <FiClock />, path: '/operator/counselor-schedule-management' },
       { name: 'Pusat Edukasi', icon: <FiBook />, path: '/operator/materials-management' },
       { name: 'Kategori Kekerasan', icon: <FiTag />, path: '/operator/violence-categories-management' },
       { name: 'Manajemen Artikel', icon: <FiBell />, path: '/operator/article-management' },
@@ -29,7 +29,7 @@ const OPERATOR_MENU = [
   {
     category: 'PENGATURAN',
     items: [
-      { name: 'Profil Operator', icon: <FiUser />, path: '/profile' },
+      { name: 'Profil Super Admin', icon: <FiUser />, path: '/profile' },
     ],
   },
 ];
@@ -45,7 +45,7 @@ const KONSELOR_MENU = [
     category: 'MANAJEMEN',
     items: [
       { name: 'Manajemen Kasus', icon: <FiFileText />, path: '/konselor/case-management' },
-      { name: 'Manajemen Jadwal Konselor', icon: <FiCalendar />, path: '/konselor/jadwal' },
+      // { name: 'Manajemen Jadwal Satgas', icon: <FiCalendar />, path: '/konselor/jadwal' },
       { name: 'Pusat Edukasi', icon: <FiBook />, path: '/konselor/materi' },
     ],
   },
@@ -81,8 +81,8 @@ const USER_MENU = [
 
 /* ── Role metadata ───────────────────────────────────────────────────────────── */
 const ROLE_META = {
-  operator: { label: 'Operator Dashboard', color: '#6366f1' }, // Indigo-500
-  konselor: { label: 'Konselor Dashboard', color: '#8b5cf6' }, // Violet-500
+  operator: { label: 'Super Admin Dashboard', color: '#6366f1' }, // Indigo-500
+  konselor: { label: 'Satgas Dashboard', color: '#8b5cf6' }, // Violet-500
   user: { label: 'User Dashboard', color: '#ec4899' }, // Pink-500
 };
 
@@ -91,9 +91,10 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const role = user?.role || 'operator';
+  const rawRole = user?.role || '';
+  const role = rawRole.toLowerCase();
 
-  const menuSections = role === 'konselor' ? KONSELOR_MENU : (role === 'user' ? USER_MENU : OPERATOR_MENU);
+  const menuSections = role === 'konselor' ? KONSELOR_MENU : (role === 'user' ? USER_MENU : (role === 'operator' ? OPERATOR_MENU : []));
   const meta = ROLE_META[role] || ROLE_META.user;
 
   const isActive = (path) => location.pathname === path;
@@ -220,7 +221,7 @@ const Sidebar = ({ collapsed, toggleCollapse }) => {
                 </div>
                 <div className="min-w-0">
                   <p className="text-slate-900 text-sm font-bold truncate leading-none">{user?.name?.split(' ')[0] || 'Admin'}</p>
-                  <p className="text-slate-500 text-[10px] font-medium truncate mt-1.5">{user?.role || 'Operator'}</p>
+                  <p className="text-slate-500 text-[10px] font-medium truncate mt-1.5">{user?.role === 'operator' ? 'Super Admin' : (user?.role === 'konselor' ? 'Satgas (Petugas)' : (user?.role || 'User'))}</p>
                 </div>
               </div>
             )}

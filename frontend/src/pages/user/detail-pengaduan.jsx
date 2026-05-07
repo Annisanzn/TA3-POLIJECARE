@@ -23,7 +23,7 @@ const DetailPengaduan = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
-    const [counselingSchedule, setCounselingSchedule] = useState(null);
+    const [counselingSchedules, setCounselingSchedules] = useState([]);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -37,8 +37,7 @@ const DetailPengaduan = () => {
                     const schedData = schedRes.data?.data || schedRes.data;
                     const items = Array.isArray(schedData?.data) ? schedData.data
                         : Array.isArray(schedData) ? schedData : [];
-                    // Get the latest schedule
-                    setCounselingSchedule(items.length > 0 ? items[items.length - 1] : null);
+                    setCounselingSchedules(items);
                 } catch {
                     // No schedule yet — that's OK
                 }
@@ -126,7 +125,8 @@ const DetailPengaduan = () => {
     }
 
     const statusInfo = getComplaintStatusInfo(complaint.status);
-    const counselingStepIdx = counselingSchedule ? getCounselingStepIndex(counselingSchedule.status) : -1;
+    const latestSchedule = counselingSchedules.length > 0 ? counselingSchedules[counselingSchedules.length - 1] : null;
+    const counselingStepIdx = latestSchedule ? getCounselingStepIndex(latestSchedule.status) : -1;
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -198,65 +198,68 @@ const DetailPengaduan = () => {
                                     </div>
                                 )}
 
-                                {/* 4-Step Counseling Status Tracker */}
-                                {counselingSchedule ? (
+                                {/* Multiple Sessions Tracker */}
+                                {counselingSchedules.length > 0 ? (
                                     <div className="mt-6 pt-6 border-t border-gray-100">
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-5">Status Jadwal Konseling</p>
-                                        <div className="relative">
-                                            {/* Connector line */}
-                                            <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 z-0" style={{ left: '12.5%', right: '12.5%' }} />
-                                            <div className="flex justify-between relative z-10">
-                                                {COUNSELING_STEPS.map((step, idx) => {
-                                                    const isCurrent = idx === counselingStepIdx;
-                                                    const isDone = idx < counselingStepIdx;
-                                                    const isActive = isCurrent || isDone;
-                                                    return (
-                                                        <div key={step.key} className="flex flex-col items-center w-1/4">
-                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all
-                                                                ${isActive ? step.color + ' ring-4 ' + step.ring : 'bg-gray-200 text-gray-400'}
-                                                                ${isCurrent ? 'scale-110 shadow-lg' : ''}`}>
-                                                                {isDone ? <FiCheckCircle size={16} /> : idx + 1}
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-5">Jadwal Sesi Penanganan</p>
+                                        
+                                        <div className="space-y-4">
+                                            {counselingSchedules.map((schedule, sIdx) => (
+                                                <div key={schedule.id || sIdx} className="p-5 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 bg-[#8B5CF6] text-white rounded-lg flex items-center justify-center text-[10px] font-bold">
+                                                                {counselingSchedules.length - sIdx}
                                                             </div>
-                                                            <p className={`text-center text-[10px] mt-2 font-semibold leading-tight whitespace-pre-line
-                                                                ${isCurrent ? step.text : isDone ? 'text-gray-500' : 'text-gray-300'}`}>
-                                                                {step.label}
-                                                            </p>
+                                                            <span className="text-sm font-bold text-gray-800">Sesi Penanganan</span>
                                                         </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                        {/* Schedule details */}
-                                        <div className="mt-5 p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-2 text-sm">
-                                            <div className="flex items-center gap-2 text-gray-700">
-                                                <FiCalendar size={14} className="text-indigo-500" />
-                                                <span className="font-medium">Tanggal:</span>
-                                                <span>{counselingSchedule.tanggal ? dayjs(counselingSchedule.tanggal).format('DD MMMM YYYY') : '-'}</span>
-                                                <span className="text-gray-400">·</span>
-                                                <FiClock size={14} className="text-indigo-500" />
-                                                <span>{counselingSchedule.jam_mulai?.substring(0, 5)} – {counselingSchedule.jam_selesai?.substring(0, 5)} WIB</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-gray-700">
-                                                {counselingSchedule.metode === 'online'
-                                                    ? <FiWifi size={14} className="text-blue-500" />
-                                                    : <FiMapPin size={14} className="text-green-500" />}
-                                                <span className="font-medium capitalize">{counselingSchedule.metode}:</span>
-                                                <span className="text-gray-600">{counselingSchedule.metode === 'online' ? (counselingSchedule.meeting_link || 'Link akan dikirimkan') : (counselingSchedule.lokasi || '-')}</span>
-                                            </div>
-                                            {counselingSchedule.status === 'rejected' && counselingSchedule.rejection_reason && (
-                                                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                                    <p className="text-xs font-bold text-yellow-700 mb-1">Alasan Penjadwalan Ulang:</p>
-                                                    <p className="text-xs text-yellow-600">{counselingSchedule.rejection_reason}</p>
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                                                            schedule.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                            {schedule.status === 'completed' ? 'Selesai' : 'Terjadwal'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <FiCalendar size={14} className="text-[#8B5CF6]" />
+                                                            <span className="font-medium">Tanggal:</span>
+                                                            <span>{schedule.tanggal ? dayjs(schedule.tanggal).format('DD MMMM YYYY') : '-'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <FiClock size={14} className="text-[#8B5CF6]" />
+                                                            <span className="font-medium">Waktu:</span>
+                                                            <span>{schedule.jam_mulai?.substring(0, 5)} – {schedule.jam_selesai?.substring(0, 5)} WIB</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            {schedule.metode === 'online'
+                                                                ? <FiWifi size={14} className="text-blue-500" />
+                                                                : <FiMapPin size={14} className="text-green-500" />}
+                                                            <span className="font-medium capitalize">{schedule.metode}:</span>
+                                                            <span className="text-gray-600 truncate max-w-[150px]">{schedule.metode === 'online' ? (schedule.meeting_link || 'Link akan dikirimkan') : (schedule.lokasi || '-')}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-gray-700">
+                                                            <FiUser size={14} className="text-indigo-500" />
+                                                            <span className="font-medium text-gray-900">{schedule.counselor?.name || schedule.counselor_name || 'Satgas PPKPT'}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {schedule.status === 'rejected' && schedule.rejection_reason && (
+                                                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                                            <p className="text-[10px] font-bold text-yellow-700 mb-1 uppercase">Catatan Penjadwalan Ulang:</p>
+                                                            <p className="text-xs text-yellow-600 italic">"{schedule.rejection_reason}"</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            ))}
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="mt-6 pt-6 border-t border-gray-100">
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Status Jadwal Konseling</p>
-                                        <div className="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-center">
-                                            <FiCalendar size={20} className="mx-auto mb-2 text-gray-300" />
-                                            <p className="text-xs text-gray-400">Belum ada jadwal konseling yang terhubung ke laporan ini</p>
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Status Jadwal Penanganan</p>
+                                        <div className="p-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-center">
+                                            <FiCalendar size={24} className="mx-auto mb-2 text-gray-300" />
+                                            <p className="text-xs text-gray-400 font-medium">Laporan Anda sedang menunggu antrean untuk dijadwalkan penanganan oleh Tim Satgas.</p>
                                         </div>
                                     </div>
                                 )}
@@ -310,6 +313,72 @@ const DetailPengaduan = () => {
                                             {complaint.chronology || <span className="text-gray-400 italic">Tidak ada rincian kronologi yang dilampirkan.</span>}
                                         </div>
                                     </section>
+
+                                    {/* Counseling Notes Timeline for User */}
+                                    {complaint.counseling_notes && complaint.counseling_notes.length > 0 && (
+                                        <section className="mb-10">
+                                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
+                                                <FiRefreshCw className="text-[#8B5CF6]" /> Perkembangan Penanganan
+                                            </h3>
+                                            <div className="space-y-6 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                                                {complaint.counseling_notes.map((note, idx) => (
+                                                    <div key={note.id || idx} className="relative pl-12 group">
+                                                        <div className="absolute left-0 top-1 w-10 h-10 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center z-10 group-hover:border-[#8B5CF6] transition-colors shadow-sm">
+                                                            <FiMessageSquare className="w-4 h-4 text-gray-400 group-hover:text-[#8B5CF6]" />
+                                                        </div>
+                                                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                                                <div>
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded uppercase tracking-wider">
+                                                                            {note.counselee_type === 'pelapor' ? 'Sesi Korban' : 'Sesi Terlapor/Saksi'}
+                                                                        </span>
+                                                                        <span className="text-xs text-gray-400 font-medium italic">
+                                                                            {note.counselee_name}
+                                                                        </span>
+                                                                    </div>
+                                                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                                        <FiUser className="w-3.5 h-3.5 text-gray-400" />
+                                                                        Ditangani oleh: {note.counselor_name || 'Tim Satgas'}
+                                                                    </h4>
+                                                                </div>
+                                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-3">
+                                                                    <span className="flex items-center gap-1"><FiCalendar /> {dayjs(note.tanggal || note.created_at).format('DD/MM/YY')}</span>
+                                                                    <span className="flex items-center gap-1"><FiClock /> {note.jam_mulai?.slice(0, 5)}</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {(note.keterangan_pihak || note.feedback_notes) && (
+                                                                <div className="mb-4">
+                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Hasil Sesi / Keterangan:</p>
+                                                                    <p className="text-sm text-gray-700 leading-relaxed font-medium bg-gray-50/50 p-4 rounded-xl border border-gray-50">
+                                                                        {note.keterangan_pihak || note.feedback_notes}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+
+                                                            {note.saran_konselor && (
+                                                                <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                                                                    <p className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-widest mb-1 flex items-center gap-1.5"><FiCheckCircle size={12} /> Saran & Tindak Lanjut:</p>
+                                                                    <p className="text-sm text-purple-900 font-bold leading-relaxed">{note.saran_konselor}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {note.feedback_attachment && (
+                                                                <a
+                                                                    href={getStorageUrl(note.feedback_attachment)}
+                                                                    target="_blank" rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-gray-600 hover:text-[#8B5CF6] hover:border-[#8B5CF6] transition-all shadow-sm"
+                                                                >
+                                                                    <FiLink size={14} /> Lihat Lampiran Bukti
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    )}
 
                                     {(complaint.attachments && complaint.attachments.length > 0) ? (
                                         <section className="text-gray-800">
@@ -402,10 +471,27 @@ const DetailPengaduan = () => {
                                         </h3>
                                         <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3 text-xs text-gray-600">
                                             <div>
-                                                <span className="block text-gray-400 mb-0.5">Penanganan Konselor</span>
-                                                <span className="font-medium text-gray-800">
-                                                    {complaint.counselor ? complaint.counselor.name : 'Dalam antrean plotting'}
-                                                </span>
+                                                <span className="block text-gray-400 mb-0.5">Tim Satgas Bertugas</span>
+                                                <div className="space-y-2 mt-1">
+                                                    {complaint.counseling_notes && complaint.counseling_notes.length > 0 ? (
+                                                        // Get unique names of Satgas involved
+                                                        [...new Set(complaint.counseling_notes.map(s => s.counselor_name))]
+                                                            .filter(name => name && name !== 'Belum diplot')
+                                                            .map((name, i) => (
+                                                                <div key={i} className="flex items-center gap-2 font-medium text-slate-800">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                                    {name}
+                                                                </div>
+                                                            ))
+                                                    ) : (
+                                                        <span className="font-medium text-gray-800 italic">
+                                                            {complaint.counselor ? complaint.counselor.name : 'Dalam antrean plotting'}
+                                                        </span>
+                                                    )}
+                                                    {(!complaint.counseling_notes || complaint.counseling_notes.length === 0) && !complaint.counselor && (
+                                                        <span className="text-gray-400 italic">Belum ada Satgas bertugas</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="pt-2 border-t border-gray-50">
                                                 <span className="block text-gray-400 mb-0.5">IP Address Perekam</span>

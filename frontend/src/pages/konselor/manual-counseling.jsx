@@ -9,8 +9,9 @@ import axios from '../../api/axios';
 import Topbar from '../../components/layout/Topbar';
 import Sidebar from '../../components/layout/Sidebar';
 import TimePicker24h from '../../components/ui/TimePicker24h';
+import { toast } from 'react-hot-toast';
 
-const ManualCounseling = () => {
+const SatgasManualCounseling = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
@@ -43,7 +44,6 @@ const ManualCounseling = () => {
   });
   
   const [manualSubmitting, setManualSubmitting] = useState(false);
-  const [manualError, setManualError] = useState('');
 
   // Fetch init data
   useEffect(() => {
@@ -74,7 +74,6 @@ const ManualCounseling = () => {
   const handleManualSubmit = async (e) => {
     e.preventDefault();
     setManualSubmitting(true);
-    setManualError('');
 
     try {
       const now = new Date();
@@ -84,40 +83,53 @@ const ManualCounseling = () => {
 
       // Basic Time Order Check
       if (manualForm.jam_selesai <= manualForm.jam_mulai) {
-        throw new Error('Jam selesai harus lebih besar dari jam mulai.');
+        toast.error('Jam selesai harus lebih besar dari jam mulai.');
+        setManualSubmitting(false);
+        return;
       }
 
       if (!manualForm.is_record_only) {
         // Validation for FUTURE mode (Jadwalkan)
         if (selectedStart < now) {
-          throw new Error('Untuk penjadwalan masa depan, silakan pilih tanggal dan jam yang belum terlewati.');
+          toast.error('Untuk penjadwalan masa depan, silakan pilih tanggal dan jam yang belum terlewati.');
+          setManualSubmitting(false);
+          return;
         }
       } else {
         // Validation for ARCHIVE mode (Arsip Selesai)
         if (manualForm.tanggal > todayStr) {
-          throw new Error('Mode arsip hanya digunakan untuk mencatat sesi yang sudah terjadi (hari ini atau lampau).');
+          toast.error('Mode arsip hanya digunakan untuk mencatat sesi yang sudah terjadi (hari ini atau lampau).');
+          setManualSubmitting(false);
+          return;
         }
       }
 
       if (manualForm.metode === 'offline' && !manualForm.lokasi) {
-        throw new Error('Silakan isi lokasi untuk pertemuan tata muka.');
+        toast.error('Silakan isi lokasi untuk pertemuan tata muka.');
+        setManualSubmitting(false);
+        return;
       }
       if (manualForm.metode === 'online' && !manualForm.meeting_link) {
-        throw new Error('Silakan isi Link Meeting untuk konseling online.');
+        toast.error('Silakan isi Link Meeting untuk penanganan online.');
+        setManualSubmitting(false);
+        return;
       }
       if (!manualForm.keterangan_pihak) {
-        throw new Error('Deskripsi Kasus & Kronologi Singkat wajib diisi.');
+        toast.error('Deskripsi Kasus & Kronologi Singkat wajib diisi.');
+        setManualSubmitting(false);
+        return;
       }
 
       await axios.post('/konselor/jadwal', manualForm);
+      toast.success('Berhasil menyimpan sesi penanganan.');
       navigate('/konselor/case-management'); // redirect back on success
     } catch (err) {
       console.error('Error saat menyimpan jadwal/sesi manual:', err);
       // Conflict checking
       if (err.response && err.response.status === 409) {
-        setManualError(err.response.data.message || 'Jadwal bertabrakan dengan sesi lain.');
+        toast.error(err.response.data.message || 'Jadwal bertabrakan dengan sesi lain.');
       } else {
-        setManualError(err.response?.data?.message || err.message || 'Gagal menyimpan sesi. Coba lagi.');
+        toast.error(err.response?.data?.message || err.message || 'Gagal menyimpan sesi. Coba lagi.');
       }
     } finally {
       setManualSubmitting(false);
@@ -137,7 +149,7 @@ const ManualCounseling = () => {
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-20' : 'ml-64'} flex flex-col h-screen overflow-hidden`}>
         <div className="flex-none">
-          <Topbar onMenuClick={toggleSidebar} title="Konseling Manual" subtitle="Pencatatan sesi tatap muka & pelaporan langsung" />
+          <Topbar onMenuClick={toggleSidebar} title="Penanganan Manual" subtitle="Pencatatan sesi tatap muka & pelaporan langsung" />
         </div>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
@@ -154,24 +166,12 @@ const ManualCounseling = () => {
                 <div className="absolute top-0 right-0 p-8 opacity-10">
                   <FiAlertCircle size={80} className="text-purple-600" />
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Form Konseling Manual</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Form Penanganan Manual</h2>
                 <p className="text-base text-gray-500 mt-1 font-medium">Lengkapi data laporan dan sesi untuk administrasi internal Satgas.</p>
               </div>
 
               <form onSubmit={handleManualSubmit} className="px-10 py-8 space-y-10">
-                {/* Error Banner */}
-                {manualError && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-rose-50 border-2 border-rose-100 text-rose-700 px-8 py-5 rounded-[24px] text-sm font-medium flex items-center gap-4 shadow-sm"
-                  >
-                    <div className="bg-rose-500 text-white p-2 rounded-full">
-                      <FiAlertCircle size={20} />
-                    </div>
-                    {manualError}
-                  </motion.div>
-                )}
+
 
                 {/* Mode Toggle & Info */}
                 <section className="space-y-4">
@@ -208,7 +208,7 @@ const ManualCounseling = () => {
                     <FiShield size={18} className="shrink-0" />
                     <p className="leading-relaxed">
                       {manualForm.is_record_only
-                        ? 'Sesi ditandai SELESAI. Digunakan untuk mencatat obrolan walk-in yang sudah terjadi. Input Saran Konselor akan terbuka.'
+                        ? 'Sesi ditandai SELESAI. Digunakan untuk mencatat obrolan walk-in yang sudah terjadi. Input Saran Satgas akan terbuka.'
                         : 'Sesi ditandai AKAN DATANG. Digunakan untuk booking jadwal tatap muka di masa depan melalui sistem.'
                       }
                     </p>
@@ -245,7 +245,7 @@ const ManualCounseling = () => {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Tanggal Konseling <span className="text-rose-500">*</span></label>
+                      <label className="text-xs font-medium text-gray-400 uppercase tracking-widest px-1">Tanggal Penanganan <span className="text-rose-500">*</span></label>
                       <input
                         type="date"
                         name="tanggal"
@@ -489,7 +489,7 @@ const ManualCounseling = () => {
                       className="space-y-4 pt-4 border-t-2 border-dashed border-blue-100"
                     >
                       <label className="text-xs font-semibold text-blue-700 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
-                        <FiSave /> CATATAN TERAPI / SARAN KONSELOR
+                        <FiSave /> CATATAN PENANGANAN / SARAN SATGAS
                       </label>
                       <textarea
                         name="saran_konselor"
@@ -540,4 +540,4 @@ const ManualCounseling = () => {
   );
 };
 
-export default ManualCounseling;
+export default SatgasManualCounseling;

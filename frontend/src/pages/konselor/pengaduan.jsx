@@ -10,7 +10,7 @@ import {
 import { konselorComplaintService } from '../../services/konselorComplaintService';
 import { useNavigate } from 'react-router-dom';
 
-const KonselorPengaduan = () => {
+const SatgasPengaduan = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
     const navigate = useNavigate();
 
@@ -109,7 +109,7 @@ const KonselorPengaduan = () => {
 
     const submitSchedule = async () => {
         if (!scheduleModal.complaint?.id || !scheduleModal.counseling_schedule) {
-            setErrorMessage('Jadwal konseling wajib diisi.');
+            setErrorMessage('Jadwal penanganan wajib diisi.');
             return;
         }
         try {
@@ -118,7 +118,7 @@ const KonselorPengaduan = () => {
             setScheduleModal({ open: false, complaint: null, counseling_schedule: '' });
             fetchData();
         } catch {
-            setErrorMessage('Gagal menjadwalkan konseling.');
+            setErrorMessage('Gagal menjadwalkan penanganan.');
         } finally {
             setIsSubmitting(false);
         }
@@ -135,7 +135,7 @@ const KonselorPengaduan = () => {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
                             <h2 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Pengaduan</h2>
-                            <p className="text-gray-600">Kelola laporan pengaduan mahasiswa yang ditangani Anda</p>
+                            <p className="text-gray-600">Kelola laporan pengaduan pelapor yang ditangani Anda</p>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
@@ -365,8 +365,8 @@ const KonselorPengaduan = () => {
                                                 const isGuest = !c.user_id;
                                                 const greeting = isGuest ? (c.guest_name || 'Bapak/Ibu') : c.user_name;
                                                 const template = isGuest
-                                                    ? `Halo ${greeting},\n\nPerkenalkan kami dari Satuan Tugas Pencegahan dan Penanganan Kekerasan di Kampus (Satgas PPKPT) Politeknik Negeri Jember.\n\nKami telah menerima laporan pengaduan Anda dengan nomor registrasi *${c.report_id}* dan saat ini sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, kami akan menjadwalkan sesi konsultasi/konseling bersama. Mohon informasikan kepada kami, pada *hari dan waktu* apa Anda bisa ditemui atau dihubungi untuk konsultasi lanjutan?\n\nTerima kasih atas kepercayaan Anda kepada kami. 🙏`
-                                                    : `Halo ${greeting},\n\nPerkenalkan kami dari Satgas PPKPT Politeknik Negeri Jember.\n\nTerkait laporan Anda dengan nomor *${c.report_id}*, kami ingin menginformasikan bahwa laporan Anda sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, mohon informasikan kepada kami pada *hari dan waktu* yang nyaman bagi Anda untuk sesi konsultasi/konseling.\n\nTerima kasih. 🙏`;
+                                                    ? `Halo ${greeting},\n\nPerkenalkan kami dari Satuan Tugas Pencegahan dan Penanganan Kekerasan di Kampus (Satgas PPKPT) Politeknik Negeri Jember.\n\nKami telah menerima laporan pengaduan Anda dengan nomor registrasi *${c.report_id}* dan saat ini sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, kami akan menjadwalkan sesi konsultasi/penanganan bersama. Mohon informasikan kepada kami, pada *hari dan waktu* apa Anda bisa ditemui atau dihubungi untuk konsultasi lanjutan?\n\nTerima kasih atas kepercayaan Anda kepada kami. 🙏`
+                                                    : `Halo ${greeting},\n\nPerkenalkan kami dari Satgas PPKPT Politeknik Negeri Jember.\n\nTerkait laporan Anda dengan nomor *${c.report_id}*, kami ingin menginformasikan bahwa laporan Anda sedang dalam proses penanganan.\n\nUntuk langkah selanjutnya, mohon informasikan kepada kami pada *hari dan waktu* yang nyaman bagi Anda untuk sesi konsultasi/penanganan.\n\nTerima kasih. 🙏`;
                                                 const label = isGuest ? 'WA Pelapor Umum' : 'WA Pelapor';
                                                 return (
                                                     <a
@@ -510,7 +510,7 @@ const KonselorPengaduan = () => {
                             <div className="w-20 h-20 bg-purple-100 rounded-[30px] flex items-center justify-center mb-8 rotate-3 shadow-sm mx-auto">
                                 <FiCalendar className="text-purple-600" size={40} />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Konseling</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight text-center">Jadwalkan Penanganan</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium text-center">{scheduleModal.complaint?.report_id}</p>
 
                             <div className="space-y-4 mb-8">
@@ -536,4 +536,4 @@ const KonselorPengaduan = () => {
     );
 };
 
-export default KonselorPengaduan;
+export default SatgasPengaduan;

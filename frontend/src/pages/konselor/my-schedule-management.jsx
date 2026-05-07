@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 import TimePicker24h from '../../components/ui/TimePicker24h';
 import Sidebar from '../../components/layout/Sidebar';
 
-const MyScheduleManagementPage = () => {
+const SatgasScheduleManagementPage = () => {
   const { user } = useAuth();
   const [schedules, setSchedules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,7 +164,7 @@ const MyScheduleManagementPage = () => {
                   <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-4">
                     <FiCalendar className="text-indigo-600" /> Jadwal Saya
                   </h1>
-                  <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Atur ketersediaan waktu Anda untuk melayani mahasiswa.</p>
+                  <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Atur ketersediaan waktu Anda untuk melayani pelapor.</p>
                </div>
             </div>
             <div className="flex items-center gap-3 w-full md:w-auto">
@@ -281,8 +281,8 @@ const MyScheduleManagementPage = () => {
                 <label className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition-all group">
                   <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleInputChange} className="w-5 h-5 accent-indigo-600 rounded" />
                   <div className="flex flex-col">
-                     <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-700">Tampilkan ke Mahasiswa</span>
-                     <span className="text-[10px] text-slate-400 font-medium">Jadwal ini akan aktif dan dapat dipesan oleh mahasiswa.</span>
+                     <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-700">Tampilkan ke Pelapor</span>
+                     <span className="text-[10px] text-slate-400 font-medium">Jadwal ini akan aktif dan dapat dipesan oleh pelapor.</span>
                   </div>
                 </label>
 
@@ -324,4 +324,4 @@ const MyScheduleManagementPage = () => {
   );
 };
 
-export default MyScheduleManagementPage;
+export default SatgasScheduleManagementPage;

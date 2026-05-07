@@ -51,7 +51,7 @@ const UserManagementPage = () => {
   const statsData = [
     { title: 'Total User', value: stats.total_users || 0, icon: <FiUsers />, color: 'bg-indigo-600', shadow: 'shadow-indigo-200 dark:shadow-indigo-900/20' },
     { title: 'Operator', value: stats.operator || 0, icon: <FiShield />, color: 'bg-emerald-600', shadow: 'shadow-emerald-200 dark:shadow-emerald-900/20' },
-    { title: 'Konselor', value: stats.konselor || 0, icon: <FiMessageSquare />, color: 'bg-blue-600', shadow: 'shadow-blue-200 dark:shadow-blue-900/20' },
+    { title: 'Satgas', value: stats.konselor || 0, icon: <FiMessageSquare />, color: 'bg-blue-600', shadow: 'shadow-blue-200 dark:shadow-blue-900/20' },
     { title: 'Pengguna', value: stats.pengguna || 0, icon: <FiUser />, color: 'bg-rose-600', shadow: 'shadow-rose-200 dark:shadow-rose-900/20' },
   ];
 
@@ -224,7 +224,7 @@ const UserManagementPage = () => {
                   <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
                     className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 outline-none focus:border-indigo-500 cursor-pointer shadow-sm appearance-none">
                     <option value="all">Semua Peran</option>
-                    <option value="konselor">Konselor</option>
+                    <option value="konselor">Satgas</option>
                     <option value="operator">Operator</option>
                     <option value="user">User</option>
                   </select>
@@ -273,7 +273,7 @@ const UserManagementPage = () => {
                            user.role === 'konselor' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                            'bg-slate-100 text-slate-600 border-slate-200'
                          }`}>
-                           {user.role}
+                           {user.role === 'konselor' ? 'Satgas' : user.role}
                          </span>
                       </td>
                       <td className="py-6 px-8">
@@ -327,7 +327,7 @@ const UserManagementPage = () => {
                         <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest px-2">Peran</label>
                         <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all">
                            <option value="user">User</option>
-                           <option value="konselor">Konselor</option>
+                           <option value="konselor">Satgas</option>
                            <option value="operator">Operator</option>
                         </select>
                      </div>

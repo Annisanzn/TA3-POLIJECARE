@@ -6,7 +6,7 @@ import api from '../api/axios';
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { loadUserFromToken } = useAuth(); // or we just set token and let context load it
+  const { setUser } = useAuth();
   
   useEffect(() => {
     const handleCallback = async () => {
@@ -31,6 +31,7 @@ const GoogleCallback = () => {
           if (response.data && response.data.success) {
             const user = response.data.user;
             localStorage.setItem('user', JSON.stringify(user));
+            setUser(user);
             
             // Redirect based on role
             switch (user.role) {

@@ -24,7 +24,7 @@ const Topbar = ({ onMenuClick, title = "Overview" }) => {
               <div className="flex items-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                 <span className="text-[#6666DE] dark:text-indigo-400 font-medium">Layanan</span>
                 <span className="mx-1 sm:mx-2">/</span>
-                <span className="capitalize">{user?.role}</span>
+                <span className="capitalize">{user?.role === 'konselor' ? 'Satgas' : user?.role}</span>
               </div>
               <h1 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight truncate max-w-[150px] sm:max-w-none">
                 {title}
@@ -45,7 +45,7 @@ const Topbar = ({ onMenuClick, title = "Overview" }) => {
             <div className="flex items-center space-x-3">
               <div className="text-right hidden md:block">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role === 'user' ? 'Mahasiswa' : user?.role || 'Guest'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role === 'user' ? 'Mahasiswa' : (user?.role === 'konselor' ? 'Satgas' : user?.role || 'Guest')}</p>
               </div>
               <div className="relative">
                 <button 

@@ -27,7 +27,7 @@ const Services = () => {
       features: ['Respons 24/7', 'Konsultasi Privat', 'Pendampingan Awal'],
       buttonText: 'Chat WhatsApp Sekarang',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      buttonLink: `https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKS Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`,
+      buttonLink: `https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKPT Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`,
       gradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
       iconColor: 'text-green-600 dark:text-green-400',
       spotlightColor: 'rgba(34, 197, 94, 0.2)' // Green glow for WhatsApp
@@ -286,7 +286,7 @@ const Services = () => {
           </div>
           <FlowButton
             text="Hubungi Sekarang"
-            href={`https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKS Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`}
+            href={`https://wa.me/6282126432696?text=${encodeURIComponent('Halo Satgas PPKPT Polije, saya memerlukan bantuan darurat untuk menangani kasus saya. Mohon bantuan dan arahannya. Terima kasih.')}`}
             target="_blank"
             colorStr="#dc2626"
             hoverColorStr="#dc2626"

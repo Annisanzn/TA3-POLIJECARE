@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { 
   FiUser, FiMail, FiPhone, FiInfo, FiCalendar, 
   FiArrowLeft, FiLogOut, FiBriefcase, FiHash,
@@ -11,11 +12,42 @@ import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    gender: user?.gender || '',
+    unit: user?.unit || '',
+    prodi: user?.prodi || '',
+    nim: user?.nim || '',
+    semester: user?.semester || '',
+    bio: user?.bio || ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
   const [stats, setStats] = useState({ total_contribution: 0, label: 'Kontribusi' });
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        phone: user.phone || '',
+        gender: user.gender || '',
+        unit: user.unit || '',
+        prodi: user.prodi || '',
+        nim: user.nim || '',
+        semester: user.semester || '',
+        bio: user.bio || ''
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchProfileStats = async () => {
@@ -38,6 +70,37 @@ const Profile = () => {
     navigate('/login-new');
   };
 
+  const handleSaveProfile = async () => {
+    if (!formData.name || !formData.gender || !formData.unit) {
+      toast.error('Nama, Jenis Kelamin, dan Unit wajib diisi!');
+      return;
+    }
+
+    toast.dismiss();
+    setIsSaving(true);
+    try {
+      const response = await axios.put('/profile', formData);
+      if (response.data.success) {
+        // Update local auth state so changes reflect immediately
+        if (response.data.user) {
+          setUser(response.data.user);
+        }
+        
+        toast.success('Profil berhasil diperbarui!', {
+          duration: 4000,
+          icon: '✅'
+        });
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      const message = error.response?.data?.message || 'Gagal memperbarui profil. Silakan coba lagi.';
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getRoleTheme = () => {
     switch (user?.role) {
       case 'operator':
@@ -57,7 +120,7 @@ const Profile = () => {
           text: 'text-purple-600',
           border: 'border-purple-100',
           iconBg: 'bg-purple-100',
-          roleLabel: 'Konselor Spesialis'
+          roleLabel: 'Tim Satgas PPKPT'
         };
       default:
         return {
@@ -66,7 +129,7 @@ const Profile = () => {
           text: 'text-emerald-600',
           border: 'border-emerald-100',
           iconBg: 'bg-emerald-100',
-          roleLabel: 'Pelapor (Mahasiswa/Umum)'
+          roleLabel: 'Pelapor'
         };
     }
   };
@@ -74,12 +137,10 @@ const Profile = () => {
   const theme = getRoleTheme();
   const initial = user?.name ? user.name[0].toUpperCase() : 'U';
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  const isProfileIncomplete = user?.role === 'user' && (!user?.gender || !user?.unit || !user?.name);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 font-['Poppins']">
       <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
@@ -107,10 +168,20 @@ const Profile = () => {
 
                 <div className="flex-1 space-y-2 mb-2">
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight leading-tight">
-                      {user?.name || 'Loading...'}
-                    </h1>
-                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white text-[9px] font-bold uppercase tracking-[0.1em]">
+                    {isEditing ? (
+                       <input 
+                        type="text" 
+                        value={formData.name} 
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        className="bg-white/20 backdrop-blur-md border border-white/40 text-white text-2xl md:text-3xl font-semibold px-4 py-2 rounded-2xl outline-none placeholder:text-white/50 w-full md:w-auto"
+                        placeholder="Nama Lengkap"
+                       />
+                    ) : (
+                      <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+                        {user?.name || 'Loading...'}
+                      </h1>
+                    )}
+                    <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white text-[10px] font-medium tracking-wide">
                       {theme.roleLabel}
                     </div>
                   </div>
@@ -118,11 +189,60 @@ const Profile = () => {
                     <FiMail className="opacity-60" /> {user?.email}
                   </p>
                 </div>
+
+                <div className="mb-2">
+                   {!isEditing ? (
+                     <button 
+                      onClick={() => setIsEditing(true)}
+                      className="px-6 py-3 bg-white text-slate-900 rounded-2xl text-xs font-semibold tracking-wide shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+                     >
+                        <FiSettings /> Edit Profil
+                     </button>
+                   ) : (
+                     <div className="flex gap-3">
+                        <button 
+                          onClick={() => setIsEditing(false)}
+                          className="px-6 py-3 bg-white/20 text-white rounded-2xl text-xs font-semibold tracking-wide border border-white/40 hover:bg-white/30 transition-all"
+                        >
+                            Batal
+                        </button>
+                        <button 
+                          onClick={handleSaveProfile}
+                          disabled={isSaving}
+                          className="px-6 py-3 bg-white text-emerald-600 rounded-2xl text-xs font-semibold tracking-wide shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+                        >
+                            {isSaving ? 'Menyimpan...' : 'Simpan'}
+                        </button>
+                     </div>
+                   )}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="max-w-6xl mx-auto px-4 md:px-8 -mt-8 md:-mt-10 relative z-20 pb-20">
+            {isProfileIncomplete && (
+              <div className="mb-8 p-6 bg-amber-50 border-2 border-amber-200 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-amber-500/10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600">
+                    <FiInfo size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-amber-900">Profil Belum Lengkap!</h3>
+                    <p className="text-amber-700 text-xs">Mohon lengkapi Jenis Kelamin dan Unit sebelum dapat membuat laporan baru.</p>
+                  </div>
+                </div>
+                {!isEditing && (
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="px-6 py-3 bg-amber-500 text-white rounded-xl text-xs font-semibold tracking-wide hover:bg-amber-600 transition-all"
+                  >
+                    Lengkapi Sekarang
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
               
               {/* ── Left Column: Identity Info ── */}
@@ -135,53 +255,177 @@ const Profile = () => {
                         </div>
                         <div>
                           <h2 className="text-xl font-bold text-gray-900 tracking-tight">Informasi Dasar</h2>
-                          <p className="text-gray-400 text-[10px] font-semibold uppercase tracking-widest mt-0.5">Detail Identitas PolijeCare</p>
+                          <p className="text-gray-400 text-[10px] font-medium uppercase tracking-widest mt-0.5">Detail Identitas PolijeCare</p>
                         </div>
                       </div>
                    </div>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiHash className="text-indigo-500" /> NIM / ID PETUGAS
                         </label>
-                        <p className="text-gray-900 font-bold text-lg tabular-nums tracking-tight">
-                          {user?.nim || '—'}
-                        </p>
+                        {isEditing ? (
+                          <input 
+                            type="text" 
+                            value={formData.nim} 
+                            onChange={(e) => setFormData({...formData, nim: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-indigo-500 transition-all"
+                            placeholder="Masukkan NIM / ID"
+                            maxLength="20"
+                          />
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tabular-nums tracking-tight">
+                            {user?.nim || '—'}
+                          </p>
+                        )}
                         <div className="h-px w-full bg-gray-50 mt-2" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <FiCalendar className="text-amber-500" /> SEMESTER
+                        </label>
+                        {isEditing ? (
+                          <input 
+                            type="number" 
+                            value={formData.semester} 
+                            onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-amber-500 transition-all"
+                            placeholder="Contoh: 4"
+                            min="1"
+                            max="14"
+                          />
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tabular-nums tracking-tight">
+                            {user?.semester ? `Semester ${user.semester}` : 'Belum diisi'}
+                          </p>
+                        )}
+                        <div className="h-px w-full bg-gray-50 mt-2" />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                           <FiPhone className="text-emerald-500" /> NOMOR WHATSAPP
                         </label>
-                        <p className="text-gray-900 font-bold text-lg tabular-nums tracking-tight">
-                          {user?.phone || 'Belum diisi'}
-                        </p>
+                        {isEditing ? (
+                          <input 
+                            type="text" 
+                            value={formData.phone} 
+                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-emerald-500 transition-all"
+                            placeholder="Contoh: 08123456789"
+                            maxLength="25"
+                          />
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tabular-nums tracking-tight">
+                            {user?.phone || 'Belum diisi'}
+                          </p>
+                        )}
                         <div className="h-px w-full bg-gray-50 mt-2" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                          <FiBriefcase className="text-rose-500" /> POSISI / UNIT
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <FiActivity className="text-purple-500" /> JENIS KELAMIN
                         </label>
-                        <p className="text-gray-900 font-bold text-lg tracking-tight uppercase">
-                          {user?.role === 'user' ? 'Mahasiswa' : 'Satgas PPKPKT'}
-                        </p>
+                        {isEditing ? (
+                          <select 
+                            value={formData.gender} 
+                            onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-purple-500 transition-all cursor-pointer"
+                          >
+                            <option value="">Pilih Jenis Kelamin</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                          </select>
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tracking-tight">
+                            {user?.gender || 'Belum diisi'}
+                          </p>
+                        )}
                         <div className="h-px w-full bg-gray-50 mt-2" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                          <FiShield className="text-amber-500" /> STATUS AKUN
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <FiBriefcase className="text-rose-500" /> UNIT / DEPARTEMEN
                         </label>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
-                          <p className="text-gray-900 font-bold text-lg tracking-tight">Aktif & Terverifikasi</p>
-                        </div>
+                        {isEditing ? (
+                          <input 
+                            type="text" 
+                            value={formData.unit} 
+                            onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-rose-500 transition-all"
+                            placeholder="Contoh: Jurusan Teknologi Informasi"
+                            maxLength="255"
+                          />
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tracking-tight">
+                            {user?.unit || 'Belum diisi'}
+                          </p>
+                        )}
+                        <div className="h-px w-full bg-gray-50 mt-2" />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <FiBriefcase className="text-sky-500" /> PROGRAM STUDI
+                        </label>
+                        {isEditing ? (
+                          <input 
+                            type="text" 
+                            value={formData.prodi} 
+                            onChange={(e) => setFormData({...formData, prodi: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-sky-500 transition-all"
+                            placeholder="Contoh: Teknik Informatika"
+                            maxLength="255"
+                          />
+                        ) : (
+                          <p className="text-gray-900 font-semibold text-lg tracking-tight">
+                            {user?.prodi || 'Belum diisi'}
+                          </p>
+                        )}
+                        <div className="h-px w-full bg-gray-50 mt-2" />
+                      </div>
+
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <FiInfo className="text-blue-500" /> BIOGRAFI / CATATAN
+                        </label>
+                        {isEditing ? (
+                          <textarea 
+                            value={formData.bio} 
+                            onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                            className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium outline-none focus:border-blue-500 transition-all min-h-[100px]"
+                            placeholder="Tuliskan sedikit tentang Anda..."
+                          />
+                        ) : (
+                          <p className="text-gray-600 text-sm font-medium leading-relaxed">
+                            {user?.bio || 'Tidak ada biografi.'}
+                          </p>
+                        )}
                         <div className="h-px w-full bg-gray-50 mt-2" />
                       </div>
                    </div>
+
+                   {isEditing && (
+                     <div className="mt-12 pt-8 border-t border-gray-50 flex justify-end gap-4">
+                        <button 
+                          onClick={() => setIsEditing(false)}
+                          className="px-8 py-4 bg-gray-100 text-gray-500 rounded-2xl text-xs font-semibold tracking-wide hover:bg-gray-200 transition-all"
+                        >
+                            Batal
+                        </button>
+                        <button 
+                          onClick={handleSaveProfile}
+                          disabled={isSaving}
+                          className="px-10 py-4 bg-emerald-500 text-white rounded-2xl text-xs font-semibold tracking-wide shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all flex items-center gap-2"
+                        >
+                            {isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                        </button>
+                     </div>
+                   )}
                 </div>
 
                 {/* Quick Actions Card - FIXED CONTRAST */}

@@ -45,7 +45,7 @@ const CounselingRequestPage = () => {
         setCounselors(response.data);
       }
     } catch (err) {
-      setError('Gagal memuat data konselor');
+      setError('Gagal memuat data Satgas');
       console.error('Error fetching counselors:', err);
     } finally {
       setIsLoading(false);
@@ -94,7 +94,7 @@ const CounselingRequestPage = () => {
     }
 
     if (method === 'offline' && !location) {
-      setError('Harap isi lokasi untuk konseling offline');
+      setError('Harap isi lokasi untuk penanganan offline');
       return;
     }
 
@@ -117,7 +117,7 @@ const CounselingRequestPage = () => {
       const response = await counselingService.requestSchedule(scheduleData);
 
       if (response.success) {
-        setSuccess('Permintaan jadwal konseling berhasil dikirim!');
+        setSuccess('Permintaan jadwal penanganan berhasil dikirim!');
         // Reset form
         resetForm();
       } else {
@@ -179,9 +179,9 @@ const CounselingRequestPage = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajukan Jadwal Konseling</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajukan Jadwal Penanganan Satgas</h1>
               <p className="text-gray-600">
-                Pilih konselor, tanggal, dan waktu untuk sesi konseling Anda
+                Pilih anggota Satgas, tanggal, dan waktu untuk sesi penanganan Anda
               </p>
             </div>
             <motion.div
@@ -225,7 +225,7 @@ const CounselingRequestPage = () => {
               <div className="flex-1">
                 <p className="text-green-700 font-medium">{success}</p>
                 <p className="text-green-600 text-sm mt-1">
-                  Notifikasi telah dikirim ke konselor dan operator. Anda akan menerima konfirmasi via email.
+                  Notifikasi telah dikirim ke tim Satgas dan operator. Anda akan menerima konfirmasi via email.
                 </p>
               </div>
               <button onClick={() => setSuccess('')} className="text-green-500 hover:text-green-700">
@@ -249,12 +249,12 @@ const CounselingRequestPage = () => {
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   <FiUser className="w-4 h-4 text-blue-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Pilih Konselor</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Pilih Satgas Pendamping</h2>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Konselor <span className="text-red-500">*</span>
+                  Satgas Pendamping <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedCounselor}
@@ -263,7 +263,7 @@ const CounselingRequestPage = () => {
                   required
                   disabled={isLoading}
                 >
-                  <option value="">Pilih Konselor</option>
+                  <option value="">Pilih Anggota Satgas</option>
                   {counselors.map((counselor) => (
                     <option key={counselor.id} value={counselor.id}>
                       {counselor.name} - {counselor.email}
@@ -271,7 +271,7 @@ const CounselingRequestPage = () => {
                   ))}
                 </select>
                 <p className="text-sm text-gray-500 mt-1">
-                  Pilih konselor yang sesuai dengan kebutuhan Anda
+                  Pilih anggota Satgas yang sesuai dengan kebutuhan Anda
                 </p>
               </div>
             </div>
@@ -340,7 +340,7 @@ const CounselingRequestPage = () => {
                       <div className="col-span-2 text-center py-4 text-gray-500">
                         {selectedCounselor && selectedDate
                           ? 'Memuat slot waktu...'
-                          : 'Pilih konselor dan tanggal terlebih dahulu'}
+                          : 'Pilih anggota Satgas dan tanggal terlebih dahulu'}
                       </div>
                     )}
                   </div>
@@ -386,7 +386,7 @@ const CounselingRequestPage = () => {
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                   <FiVideo className="w-4 h-4 text-green-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Pilih Metode Konseling</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Pilih Metode Penanganan</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -495,12 +495,12 @@ const CounselingRequestPage = () => {
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Ruangan Konseling, Gedung A, Lantai 3"
+                        placeholder="Ruangan Penanganan, Gedung A, Lantai 3"
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         required={method === 'offline'}
                       />
                       <p className="text-sm text-gray-500 mt-1">
-                        Tentukan lokasi pertemuan untuk konseling offline
+                        pilih lokasi pertemuan untuk penanganan offline
                       </p>
                     </div>
                   </motion.div>
@@ -530,7 +530,7 @@ const CounselingRequestPage = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Jika konseling terkait dengan pengaduan tertentu
+                    Jika penanganan terkait dengan pengaduan tertentu
                   </p>
                 </div>
 
@@ -576,13 +576,13 @@ const CounselingRequestPage = () => {
                   ) : (
                     <>
                       <FiCheck className="w-5 h-5" />
-                      Ajukan Jadwal Konseling
+                      Ajukan Jadwal Penanganan Satgas
                     </>
                   )}
                 </button>
               </div>
               <p className="text-sm text-gray-500 mt-4 text-center">
-                Setelah diajukan, permintaan akan ditinjau oleh operator dan konselor. Anda akan menerima notifikasi via email.
+                Setelah diajukan, permintaan akan ditinjau oleh operator dan tim Satgas. Anda akan menerima notifikasi via email.
               </p>
             </div>
           </form>

@@ -97,6 +97,12 @@ class NewLoginController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'nim' => $user->nim,
+                    'semester' => $user->semester,
+                    'phone' => $user->phone,
+                    'gender' => $user->gender,
+                    'unit' => $user->unit,
+                    'prodi' => $user->prodi,
+                    'bio' => $user->bio,
                 ],
                 'token' => $token
             ], 200);
@@ -147,14 +153,16 @@ class NewLoginController extends Controller
      */
     public function user(Request $request)
     {
-        $user = $request->user();
+        $authUser = $request->user();
         
-        if (!$user) {
+        if (!$authUser) {
             return response()->json([
                 'success' => false,
                 'message' => 'User tidak terautentikasi'
             ], 401);
         }
+
+        $user = User::find($authUser->id);
 
         return response()->json([
             'success' => true,
@@ -164,6 +172,12 @@ class NewLoginController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'nim' => $user->nim,
+                'semester' => $user->semester,
+                'phone' => $user->phone,
+                'gender' => $user->gender,
+                'unit' => $user->unit,
+                'prodi' => $user->prodi,
+                'bio' => $user->bio,
             ]
         ]);
     }

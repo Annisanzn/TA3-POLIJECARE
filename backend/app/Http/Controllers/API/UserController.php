@@ -238,6 +238,69 @@ class UserController extends Controller
     }
 
     /**
+     * Update the authenticated user's profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $authUser = $request->user();
+        $user = User::find($authUser->id);
+        
+        \Log::info('Update Profile Request', [
+            'user_id' => $user->id,
+            'data' => $request->all()
+        ]);
+
+        try {
+            $validated = $request->validate([
+                'name' => 'sometimes|string|max:255',
+                'phone' => 'nullable|string|max:25',
+                'gender' => 'sometimes|in:Laki-laki,Perempuan',
+                'unit' => 'sometimes|string|max:255',
+                'prodi' => 'nullable|string|max:255',
+                'nim' => 'nullable|string|max:20',
+                'semester' => 'nullable|integer|min:1|max:14',
+                'bio' => 'nullable|string',
+            ]);
+
+            $user->fill($validated);
+            $user->save();
+            $user->refresh();
+
+            \Log::info('Profile updated successfully', ['user' => $user->toArray()]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berhasil diperbarui',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'nim' => $user->nim,
+                    'semester' => $user->semester,
+                    'phone' => $user->phone,
+                    'gender' => $user->gender,
+                    'unit' => $user->unit,
+                    'prodi' => $user->prodi,
+                    'bio' => $user->bio,
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal: ' . implode(', ', \Illuminate\Support\Arr::flatten($e->errors())),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Profile update failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui profil: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get display name for role.
      */
     private function getRoleDisplayName($role)

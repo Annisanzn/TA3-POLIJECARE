@@ -1,311 +1,97 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import {
-    AlertCircle, ArrowLeft, Shield, User, FileText,
-    MapPin, Calendar, Paperclip, CheckCircle, Search, X, Info, Clock, Check
+import { 
+    FileText, User, MapPin, AlertCircle, ArrowLeft, Send, CheckCircle, Shield, Clock, Paperclip, X, Calendar, Info 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
+import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
 import { API_BASE_URL } from '../../config';
-
-const CAMPUS_LOCATIONS = [
-    // POLIJE LOCATIONS
-    { name: 'Gedung Asih Polije (Gedung A)', lat: -8.15783, lng: 113.72265 },
-    { name: 'Gedung Baju Polije (Gedung B)', lat: -8.15758, lng: 113.72252 },
-    { name: 'Gedung Cerdas Polije (Gedung C)', lat: -8.15730, lng: 113.72230 },
-    { name: 'Gedung Jurusan Teknologi Informasi Polije (JTI)', lat: -8.15850, lng: 113.72200 },
-    { name: 'Gedung Jurusan Kesehatan Polije', lat: -8.15810, lng: 113.72300 },
-    { name: 'Gedung Jurusan Manajemen Agribisnis Polije (JMA)', lat: -8.15700, lng: 113.72350 },
-    { name: 'Gedung Jurusan Produksi Pertanian Polije', lat: -8.15650, lng: 113.72400 },
-    { name: 'Gedung Jurusan Peternakan Polije', lat: -8.15600, lng: 113.72450 },
-    { name: 'Gedung Jurusan Teknik Polije', lat: -8.15900, lng: 113.72100 },
-    { name: 'Gedung Jurusan Bahasa Polije', lat: -8.15800, lng: 113.72150 },
-    { name: 'Perpustakaan Polije', lat: -8.15750, lng: 113.72300 },
-    { name: 'Masjid Al-Kautsar Polije', lat: -8.15820, lng: 113.72450 },
-    { name: 'GOR Perjuangan 45 Polije', lat: -8.15950, lng: 113.72250 },
-    { name: 'Poliklinik Polije', lat: -8.15680, lng: 113.72180 },
-    { name: 'Kantin Polije (Pujasera)', lat: -8.15880, lng: 113.72350 },
-    { name: 'Asrama Mahasiswa Polije', lat: -8.16000, lng: 113.72500 },
-
-    // UNEJ LOCATIONS
-    { name: 'Rektorat Universitas Jember (Unej)', lat: -8.16388, lng: 113.71536 },
-    { name: 'Fakultas Ilmu Komputer (FASILKOM) Unej', lat: -8.16250, lng: 113.71600 },
-    { name: 'Fakultas Kedokteran (FK) Unej', lat: -8.16450, lng: 113.71350 },
-    { name: 'Fakultas Kedokteran Gigi (FKG) Unej', lat: -8.16500, lng: 113.71400 },
-    { name: 'Fakultas Farmasi Unej', lat: -8.16480, lng: 113.71450 },
-    { name: 'Fakultas Kesehatan Masyarakat (FKM) Unej', lat: -8.16400, lng: 113.71300 },
-    { name: 'Fakultas Keperawatan Unej', lat: -8.16350, lng: 113.71250 },
-    { name: 'Fakultas Teknik (FT) Unej', lat: -8.16100, lng: 113.71700 },
-    { name: 'Fakultas Pertanian (FAPERTA) Unej', lat: -8.16200, lng: 113.71800 },
-    { name: 'Fakultas Teknologi Pertanian (FTP) Unej', lat: -8.16150, lng: 113.71850 },
-    { name: 'Fakultas Matematika dan Ilmu Pengetahuan Alam (FMIPA) Unej', lat: -8.16300, lng: 113.71650 },
-    { name: 'Fakultas Hukum (FH) Unej', lat: -8.16550, lng: 113.71500 },
-    { name: 'Fakultas Keguruan dan Ilmu Pendidikan (FKIP) Unej', lat: -8.16600, lng: 113.71600 },
-    { name: 'Fakultas Ekonomi dan Bisnis (FEB) Unej', lat: -8.16650, lng: 113.71700 },
-    { name: 'Fakultas Ilmu Sosial dan Ilmu Politik (FISIP) Unej', lat: -8.16500, lng: 113.71800 },
-    { name: 'Fakultas Ilmu Budaya (FIB) Unej', lat: -8.16550, lng: 113.71900 },
-    { name: 'Double Way Unej', lat: -8.16400, lng: 113.71500 },
-    { name: 'Perpustakaan Pusat Unej', lat: -8.16350, lng: 113.71450 },
-    { name: 'Masjid Al-Hikmah Unej', lat: -8.16300, lng: 113.71350 },
-    { name: 'Gedung Soetardjo Unej', lat: -8.16420, lng: 113.71580 },
-    { name: 'Gedung PKM Unej', lat: -8.16480, lng: 113.71650 },
-    { name: 'Kawasan Stadion Unej', lat: -8.16200, lng: 113.71400 },
-    { name: 'Auditorium Unej', lat: -8.16450, lng: 113.71550 },
-    { name: 'Asrama Mahasiswa (Rusunawa) Unej', lat: -8.16100, lng: 113.71200 },
-];
-
-// Fix Leaflet missing icon issue in React
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-const LocationMarker = ({ position, setPosition, onMapClick }) => {
-    useMapEvents({
-        click(e) {
-            setPosition(e.latlng);
-            if (onMapClick) onMapClick(e.latlng);
-        },
-    });
-
-    return position === null ? null : (
-        <Marker position={position}></Marker>
-    );
-};
+import styles from '../user/CreateComplaintPage.module.css';
 
 const LaporUmum = () => {
     const navigate = useNavigate();
     
-    const extractT = (v) => { 
-        if (!v) return "";
-        const parts = v.split(' ');
-        return parts.length > 1 ? parts[1].substring(0, 5) : v.substring(0, 5);
-    };
-
-    const formatDay = (day) => {
-        const days = {
-            'Monday': 'Senin',
-            'Tuesday': 'Selasa',
-            'Wednesday': 'Rabu',
-            'Thursday': 'Kamis',
-            'Friday': 'Jumat',
-            'Saturday': 'Sabtu',
-            'Sunday': 'Minggu'
-        };
-        return days[day] || day;
-    };
-
     const [categories, setCategories] = useState([]);
-    const [counselors, setCounselors] = useState([]);
-    const [realSchedules, setRealSchedules] = useState([]);
-    const [loadingSchedules, setLoadingSchedules] = useState(false);
-    const [selectedSlots, setSelectedSlots] = useState([]);
-
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [submitError, setSubmitError] = useState('');
-    const [createdComplaintId, setCreatedComplaintId] = useState(null);
-    const [createdReportId, setCreatedReportId] = useState('');
+    const [reportId, setReportId] = useState('');
 
-    const defaultCenter = [-8.1643, 113.7169]; // Jember Default Coordinate
-    const [mapPosition, setMapPosition] = useState(null);
-    const [mapSearchQuery, setMapSearchQuery] = useState('');
-    const [isSearchingMap, setIsSearchingMap] = useState(false);
-    const mapRef = useRef(null);
+    const [proposedDate, setProposedDate] = useState('');
+    const [proposedTime, setProposedTime] = useState('08:00');
+    const [scheduleWarning, setScheduleWarning] = useState('');
 
-    const handleMapSearch = async () => {
-        if (!mapSearchQuery.trim()) return;
-        setIsSearchingMap(true);
-        try {
-            // First Priority: Try to match manual internal campus predefined location
-            const searchLower = mapSearchQuery.toLowerCase();
-            const campusMatch = CAMPUS_LOCATIONS.find(loc =>
-                loc.name.toLowerCase().includes(searchLower)
-            );
-
-            if (campusMatch) {
-                const newPos = { lat: campusMatch.lat, lng: campusMatch.lng };
-                setMapPosition(newPos);
-                if (mapRef.current) {
-                    mapRef.current.flyTo(newPos, 16);
-                }
-                setFormData(prev => ({ ...prev, location: campusMatch.name }));
-                setIsSearchingMap(false);
-                return;
-            }
-
-            // Second Priority: Fetch from Nominatim API
-            let osmMapsQuery = mapSearchQuery;
-            if (!osmMapsQuery.toLowerCase().includes("jember")) {
-                osmMapsQuery += " Jember"; // Automate scope
-            }
-
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(osmMapsQuery)}`);
-            const data = await res.json();
-            if (data && data.length > 0) {
-                const { lat, lon, display_name } = data[0];
-                const newPos = { lat: parseFloat(lat), lng: parseFloat(lon) };
-                setMapPosition(newPos);
-                if (mapRef.current) {
-                    mapRef.current.flyTo(newPos, 15);
-                }
-                setFormData(prev => ({ ...prev, location: display_name.split(',')[0] }));
-            } else {
-                toast.error('Lokasi tidak ditemukan. Coba nama spesifik seperti "Gedung JTI Polije" atau "Fasilkom Unej".', {
-                    duration: 4000,
-                    position: 'top-center'
-                });
-            }
-        } catch (error) {
-            console.error('Error pencarian peta:', error);
-            toast.error('Gagal mencari lokasi. Coba lagi nanti.', { position: 'top-center' });
-        } finally {
-            setIsSearchingMap(false);
+    // Validasi Hari Operasional (Senin - Kamis)
+    useEffect(() => {
+        if (!proposedDate) {
+            setScheduleWarning('');
+            return;
         }
-    };
-
-    const handleMapClick = async (latlng) => {
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
-            const data = await res.json();
-            if (data && data.display_name) {
-                const parts = data.display_name.split(',');
-                const locationName = parts.length > 2 ? `${parts[0].trim()}, ${parts[1].trim()}, ${parts[2].trim()}` : data.display_name;
-                setFormData(prev => ({ ...prev, location: locationName }));
-                setMapSearchQuery(locationName);
-                toast.success('Lokasi berhasil didapatkan dari peta.', { position: 'top-center' });
-            }
-        } catch (error) {
-            console.error("Reverse geocode error:", error);
-            toast.error('Gagal mendapatkan nama lokasi dari peta.', { position: 'top-center' });
+        const date = new Date(proposedDate + 'T00:00:00');
+        const day = date.getDay(); // 0: Minggu, 1: Senin, ..., 4: Kamis, 5: Jumat
+        if (day === 0 || day >= 5) {
+            setScheduleWarning('⚠️ Penanganan (Konseling) hanya tersedia pada hari Senin sampai Kamis. Silakan pilih hari lain.');
+        } else {
+            setScheduleWarning('');
         }
-    };
+    }, [proposedDate]);
 
     const [formData, setFormData] = useState({
         guest_name: '',
         guest_email: '',
         guest_phone: '',
-        victim_type: 'self',
-        victim_name: '',
-        victim_relationship: '',
-        is_external_victim: true, // enforced
-        victim_identity_proof: null,
-        suspect_name: '',
-        suspect_status: 'Mahasiswa',
-        suspect_affiliation: '',
-        suspect_phone: '',
-        counselor_id: '', // Empty
-        urgency_level: 'medium',
+        guest_nim: '',
+        guest_prodi: '',
+        guest_unit: '',
         title: '',
         violence_category_id: '',
+        urgency_level: 'medium',
+        victim_type: 'self',
+        victim_name: '',
+        victim_gender: '',
+        victim_relationship: '',
+        suspect_name: '',
+        suspect_gender: '',
+        suspect_status: '',
+        suspect_affiliation: '',
+        suspect_phone: '',
+        description: '',
         chronology: '',
         location: '',
+        latitude: '',
+        longitude: '',
         incident_date: '',
-        attachments: []
+        attachments: [],
+        victim_identity_proof: null
     });
 
-    const getAuthHeaders = () => {
-        return {
-            Accept: 'application/json'
-        };
-    };
+    const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
-        // Sync Map to form lat/lng
-        if (mapPosition) {
-            setFormData(prev => ({
-                ...prev,
-                latitude: mapPosition.lat,
-                longitude: mapPosition.lng
-            }));
-        }
-    }, [mapPosition]);
-
-    useEffect(() => {
-        const fetchData = async () => {
+        const fetchCategories = async () => {
             try {
-                // Fetch Categories public endpoint
-                const catRes = await fetch(`${API_BASE_URL}/public-categories`, {
+                const response = await fetch(`${API_BASE_URL}/public-categories`, {
                     method: 'GET',
-                    headers: getAuthHeaders(),
+                    headers: { 'Accept': 'application/json' },
                 });
-                const catData = await catRes.json();
-                if (catRes.ok) setCategories(catData?.data || catData);
-
-                // Fetch Counselors (Accessible API Path based on api.php)
-                const counRes = await fetch(`${API_BASE_URL}/public-counselors`, {
-                    method: 'GET',
-                    headers: getAuthHeaders(),
-                });
-                const counData = await counRes.json();
-                if (counRes.ok) setCounselors(counData?.data || counData);
+                const data = await response.json();
+                if (response.ok) {
+                    setCategories(data?.data || data);
+                }
             } catch (err) {
-                console.error('Gagal memuat data API (Kategori / Konselor)', err);
+                console.error('Gagal memuat kategori API', err);
             }
         };
-        fetchData();
+        fetchCategories();
     }, []);
-
-    const handleCounselorSelect = async (counselorId) => {
-        setFormData(prev => ({ ...prev, counselor_id: counselorId }));
-        setSelectedSlots([]); // Reset slots when switching counselor
-        
-        setLoadingSchedules(true);
-        try {
-            // Use public endpoint for counselor schedules if available, or fall back to /user/counselor-schedules
-            // Assuming we need a public endpoint for guest reports
-            const schedRes = await fetch(`${API_BASE_URL}/public-counselor-schedules?counselor_id=${counselorId}`, {
-                method: 'GET',
-                headers: getAuthHeaders()
-            });
-            const schedData = await schedRes.json();
-            if (schedRes.ok && schedData.data) {
-                setRealSchedules(schedData.data);
-            }
-        } catch (err) {
-            console.error("Failed to fetch schedules:", err);
-            toast.error("Gagal memuat jadwal konselor.");
-        } finally {
-            setLoadingSchedules(false);
-        }
-    };
-
-    const toggleSlotSelection = (slot) => {
-        setSelectedSlots(prev => {
-            const isAlreadySelected = prev.some(s => s.id === slot.id);
-            if (isAlreadySelected) {
-                return prev.filter(s => s.id !== slot.id);
-            }
-            if (prev.length >= 2) {
-                toast.error("Maksimal 2 slot terpilih.");
-                return prev;
-            }
-            return [...prev, slot];
-        });
-    };
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         
-        if (name === 'guest_phone') {
-            // Only allow digits
+        if (name === 'guest_phone' || name === 'suspect_phone') {
             const digits = value.replace(/\D/g, '');
-            // If it starts with 0, remove it
-            const cleanDigits = digits.startsWith('0') ? digits.substring(1) : digits;
-            
-            setFormData(prev => ({
-                ...prev,
-                [name]: cleanDigits
-            }));
+            setFormData(prev => ({ ...prev, [name]: digits }));
             return;
         }
 
@@ -313,24 +99,18 @@ const LaporUmum = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+
+        if (formErrors[name]) {
+            setFormErrors(prev => ({ ...prev, [name]: null }));
+        }
     };
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        if (files.length > 0) {
-            const validFiles = files.filter(file => {
-                if (file.size > 10 * 1024 * 1024) {
-                    toast.error(`File ${file.name} melebihi 10MB`, { position: 'top-center' });
-                    return false;
-                }
-                return true;
-            });
-
-            setFormData(prev => ({
-                ...prev,
-                attachments: [...prev.attachments, ...validFiles]
-            }));
-        }
+        setFormData(prev => ({
+            ...prev,
+            attachments: [...prev.attachments, ...files]
+        }));
     };
 
     const removeAttachment = (index) => {
@@ -340,822 +120,695 @@ const LaporUmum = () => {
         }));
     };
 
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.guest_name.trim()) errors.guest_name = 'Nama lengkap wajib diisi';
+        if (!formData.guest_email.trim()) errors.guest_email = 'Email wajib diisi';
+        if (!formData.guest_phone.trim()) errors.guest_phone = 'Nomor WhatsApp wajib diisi';
+        
+        if (!formData.title.trim()) errors.title = 'Judul laporan wajib diisi';
+        if (!formData.violence_category_id) errors.violence_category_id = 'Kategori wajib dipilih';
+        
+        if (formData.victim_type === 'other') {
+            if (!formData.victim_name.trim()) errors.victim_name = 'Nama korban wajib diisi';
+            if (!formData.victim_gender) errors.victim_gender = 'Jenis kelamin korban wajib dipilih';
+            if (!formData.victim_relationship.trim()) errors.victim_relationship = 'Hubungan dengan korban wajib diisi';
+        } else {
+            if (!formData.victim_gender) errors.victim_gender = 'Jenis kelamin Anda wajib dipilih';
+        }
+
+        if (!formData.description.trim()) errors.description = 'Deskripsi singkat wajib diisi';
+        if (!formData.chronology.trim()) errors.chronology = 'Kronologi kejadian wajib diisi';
+        if (!formData.location.trim()) errors.location = 'Lokasi kejadian wajib diisi';
+        
+        if (!proposedDate) errors.proposed_date = 'Tanggal usulan wajib dipilih';
+        if (!proposedTime) errors.proposed_time = 'Jam usulan wajib dipilih';
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setLoading(true);
         setSubmitError('');
 
         try {
-            // Map 'self/other' string logically depending on the requirement
-            // If the backend accepts self/other, the current state is fine.
-
             const payload = new FormData();
-            payload.append('title', formData.title);
-            payload.append('violence_category_id', formData.violence_category_id);
-            payload.append('victim_type', formData.victim_type);
-
+            
+            // Guest Fields
             payload.append('guest_name', formData.guest_name);
             payload.append('guest_email', formData.guest_email);
             payload.append('guest_phone', formData.guest_phone);
-            if (formData.victim_type === 'other') {
-                payload.append('victim_name', formData.victim_name);
-                payload.append('victim_relationship', formData.victim_relationship);
-                payload.append('is_external_victim', "1");
-                if (formData.victim_identity_proof) {
-                    payload.append('victim_identity_proof', formData.victim_identity_proof);
-                }
-            }
-
-            payload.append('suspect_name', formData.suspect_name);
-            payload.append('suspect_status', formData.suspect_status);
-            payload.append('suspect_affiliation', formData.suspect_affiliation);
-            payload.append('suspect_phone', formData.suspect_phone);
-
-            payload.append('counselor_id', formData.counselor_id);
+            
+            // Basic Fields
+            payload.append('title', formData.title);
+            payload.append('violence_category_id', formData.violence_category_id);
             payload.append('urgency_level', formData.urgency_level);
-            payload.append('description', formData.chronology); // API requirement backward-compatibility
+            
+            // Guest Identity
+            payload.append('guest_name', formData.guest_name);
+            payload.append('guest_email', formData.guest_email);
+            payload.append('guest_phone', formData.guest_phone);
+            payload.append('guest_nim', formData.guest_nim);
+            payload.append('guest_prodi', formData.guest_prodi);
+            payload.append('guest_unit', formData.guest_unit);
+            
+            // Victim Fields
+            payload.append('victim_type', formData.victim_type);
+            payload.append('victim_name', formData.victim_type === 'self' ? formData.guest_name : formData.victim_name);
+            payload.append('victim_gender', formData.victim_gender);
+            payload.append('victim_relationship', formData.victim_type === 'self' ? 'Diri Sendiri' : formData.victim_relationship);
+            
+            // Suspect Fields
+            payload.append('suspect_name', formData.suspect_name || 'Tidak Diketahui');
+            payload.append('suspect_gender', formData.suspect_gender || '');
+            payload.append('suspect_status', formData.suspect_status || 'Lainnya');
+            payload.append('suspect_affiliation', formData.suspect_affiliation || '-');
+            payload.append('suspect_phone', formData.suspect_phone || '');
+            
+            // Incident Detail Fields
+            payload.append('description', formData.description);
             payload.append('chronology', formData.chronology);
             payload.append('location', formData.location);
             if (formData.incident_date) payload.append('incident_date', formData.incident_date);
-            if (formData.latitude) payload.append('latitude', formData.latitude);
-            if (formData.longitude) payload.append('longitude', formData.longitude);
+            if (formData.latitude !== '' && formData.latitude !== null) payload.append('latitude', formData.latitude);
+            if (formData.longitude !== '' && formData.longitude !== null) payload.append('longitude', formData.longitude);
             
-            // Handle multiple attachments
-            if (formData.attachments && formData.attachments.length > 0) {
-                formData.attachments.forEach((file) => {
-                    payload.append('attachments[]', file);
-                });
+            // Scheduling
+            payload.append('proposed_date', proposedDate);
+            payload.append('proposed_time', proposedTime);
+            
+            // Attachments
+            if (formData.attachments.length > 0) {
+                formData.attachments.forEach(file => payload.append('attachments[]', file));
             }
-
-            // Append Selected Slots
-            if (selectedSlots.length > 0) {
-                selectedSlots.forEach(slotUid => {
-                    payload.append('selected_slots[]', slotUid);
-                });
+            if (formData.victim_identity_proof) {
+                payload.append('victim_identity_proof', formData.victim_identity_proof);
             }
 
             const response = await fetch(`${API_BASE_URL}/public-complaints`, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json'
-                },
+                headers: { 'Accept': 'application/json' },
                 body: payload,
             });
 
             const data = await response.json().catch(() => null);
 
             if (!response.ok) {
-                const errorMessage = data?.message || data?.error || 'Terjadi kesalahan saat menyimpan formulir.';
-                throw new Error(errorMessage);
+                if (response.status === 422 && data?.errors) {
+                    const errorMessages = Object.values(data.errors).flat().join(', ');
+                    throw new Error(errorMessages);
+                }
+                throw new Error(data?.message || 'Gagal mengirim laporan.');
             }
 
-            if (data?.data?.id) {
-                setCreatedComplaintId(data.data.id);
-                setCreatedReportId(data.data.report_id);
-            }
-
+            setReportId(data?.data?.report_id || 'ID-LAPORAN');
             setSuccess(true);
+            toast.success('Laporan berhasil dikirim!', {
+                duration: 5000,
+                icon: '🚀',
+                style: {
+                    borderRadius: '16px',
+                    background: '#334155',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                },
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
-            console.error('Submit form error:', err);
-            setSubmitError(err.message || 'Gagal mengirim laporan. Silakan coba lagi.');
+            console.error('Submit error:', err);
+            setSubmitError(err.message);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setLoading(false);
         }
     };
 
-    
-    if (success) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex flex-col">
-                <Navbar />
-                <div className="flex-grow w-full max-w-3xl mx-auto p-4 md:p-8 text-center mt-20">
-                    <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Laporan Berhasil Terkirim!</h2>
-                    <p className="text-gray-500 mb-6">Laporan Anda telah masuk ke sistem Satgas PPKPT Politeknik Negeri Jember. Tim Satgas akan segera meninjau laporan Anda dan menghubungi Anda melalui kontak yang telah diberikan.</p>
-                    
-                    <div className="flex flex-col items-center gap-4">
-                        <a 
-                            href={`https://wa.me/6282126432696?text=${encodeURIComponent(`Halo Satgas PPKPT Polije, saya baru saja mengirimkan laporan pengaduan dengan nomor registrasi *${createdReportId}*. Mohon konfirmasinya. Terima kasih.`)}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="px-8 py-3 bg-[#25D366] text-white font-bold rounded-xl hover:bg-[#20ba56] transition-all flex items-center gap-2 shadow-md hover:scale-105"
-                        >
-                            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12.031 6.172c-2.32 0-4.519 1.486-5.093 3.315-.126.462-.034.894.272 1.29.373.483 1.493 1.491 1.493 1.491 1.157 1.129 1.157 1.129 1.157 1.129s.215.111.411.16c.159.04.309.02.435-.07l.951-.68s.517-.37.951-.37c.433 0 .951.37.951.37l.951.68c.126.09.276.11.435.07.196-.049.411-.16.411-.16s0 0 1.157-1.129c0 0 1.119-1.008 1.493-1.491.306-.396.398-.828.272-1.29-.574-1.829-2.773-3.315-5.093-3.315zM22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
-                            Konfirmasi via WhatsApp Satgas
-                        </a>
-                        <button onClick={() => navigate('/')} className="px-6 py-2 text-gray-500 hover:text-[#8b5cf6] font-medium transition-colors">Kembali ke Beranda</button>
-                    </div>
-                </div>
-                <Footer />
-            </div>
-        );
-    }
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col pt-8">
+        <div className="min-h-screen bg-gray-50 flex flex-col pt-8 font-['Poppins']">
             <Navbar />
+            <Toaster position="top-right" reverseOrder={false} />
+            
             <div className="w-full flex-grow pt-16">
-            <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-4 md:py-8">
-
-                {/* HEADER */}
-                <div className="mb-8">
-                    <button
-                        type="button"
-                        onClick={() => navigate('/')}
-                        className="flex items-center text-gray-500 hover:text-[#8b5cf6] mb-4 transition-colors font-medium text-sm"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Kembali
-                    </button>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Buat Laporan Pengaduan</h1>
-                    <div className="flex items-start bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm">Identitas Anda akan dirahasiakan. Laporkan kejadian yang Anda alami atau saksikan dengan detail yang lengkap.</p>
-                    </div>
-                </div>
-
-                {submitError && (
-                    <div className="mb-6 bg-red-50 text-red-800 p-4 rounded-xl border border-red-200 flex items-center">
-                        <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-                        <p className="text-sm font-medium">{submitError}</p>
-                    </div>
-                )}
-
-                {success && (
-                    <div className="mb-6 bg-green-50 text-green-800 p-4 rounded-xl border border-green-200 flex items-center">
-                        <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-                        <p className="text-sm font-medium">Laporan berhasil disubmit! Mengarahkan anda ke histori laporan...</p>
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-8">
-
-                    {/* DATA PELAPOR (TAMU) */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                                <User className="w-5 h-5 mr-2 text-[#8b5cf6]" /> Kontak Pelapor
-                            </h2>
-                            <p className="text-xs text-gray-500 mt-1">Silakan masukkan kontak yang bisa dihubungi oleh Satgas PPKPT (Identitas Anda TETAP DIRAHSIAKAN)</p>
+                <div className={styles.page}>
+                    
+                    <header className={styles.header}>
+                        <button type="button" className={styles.backButton} onClick={() => navigate('/')}>
+                            <ArrowLeft size={20} strokeWidth={1.8} />
+                            Kembali ke Beranda
+                        </button>
+                        <div>
+                            <h1 className={styles.title}>📢 Layanan Pengaduan Publik</h1>
+                            <p className="opacity-90 mt-2 mb-4 text-gray-500">Masyarakat umum dapat melaporkan tindak kekerasan/perundungan di lingkungan Polije melalui formulir ini.</p>
                         </div>
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pelapor <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" name="guest_name" required
-                                    value={formData.guest_name} onChange={handleInputChange}
-                                    placeholder="Masukkan nama Anda"
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon/WhatsApp <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 text-sm font-medium">+62</span>
-                                    </div>
-                                    <input
-                                        type="text" name="guest_phone" required
-                                        value={formData.guest_phone} onChange={handleInputChange}
-                                        placeholder="8123456789"
-                                        className={`w-full bg-white border ${!formData.guest_phone ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
-                                    />
-                                </div>
-                                <p className="text-[10px] text-gray-500 mt-1">Hanya angka yang diperbolehkan.</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Email <span className="text-red-500">*</span></label>
-                                <input
-                                    type="email" name="guest_email" required
-                                    value={formData.guest_email} onChange={handleInputChange}
-                                    placeholder="kamu@email.com"
-                                    className={`w-full bg-white border ${!formData.guest_email ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
-                                />
-                                <p className="text-[10px] text-gray-500 mt-1">Kami akan mengirimkan notifikasi ke email ini.</p>
+                    </header>
+
+                    <div className={styles.tipsContainer}>
+                        <div className={`${styles.tipCard} ${styles.blue}`}>
+                            <h4 className={`${styles.tipTitle} ${styles.blue}`}><Shield size={14} /> Keamanan Data</h4>
+                            <p className={`${styles.tipDesc} ${styles.blue}`}>Identitas Anda dijamin aman dan rahasia oleh Tim Satgas PPKPT.</p>
+                        </div>
+                        <div className={`${styles.tipCard} ${styles.rose}`}>
+                            <h4 className={`${styles.tipTitle} ${styles.rose}`}><FileText size={14} /> Bukti Kejadian</h4>
+                            <p className={`${styles.tipDesc} ${styles.rose}`}>Lampirkan bukti foto/dokumen untuk mempermudah investigasi.</p>
+                        </div>
+                        <div className={`${styles.tipCard} ${styles.amber}`}>
+                            <h4 className={`${styles.tipTitle} ${styles.amber}`}><Clock size={14} /> Respon Cepat</h4>
+                            <p className={`${styles.tipDesc} ${styles.amber}`}>Laporan Anda akan ditinjau dalam waktu maksimal 3x24 jam.</p>
+                        </div>
+                    </div>
+
+                    {submitError && (
+                        <div className={styles.errorCard}>
+                            <div className="bg-red-50 p-4 rounded-2xl flex items-center gap-3 border border-red-100 mb-6">
+                                <AlertCircle size={20} className="text-red-500" />
+                                <span className="text-red-700 text-sm">{submitError}</span>
                             </div>
                         </div>
-                    </section>
+                    )}
 
-                    {/* TIPE KEJADIAN */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                                <FileText className="w-5 h-5 mr-2 text-[#8b5cf6]" /> Tipe Kejadian
-                            </h2>
-                            <p className="text-xs text-gray-500 mt-1">Pilih apakah kejadian yang Anda laporkan dialami sendiri atau orang lain</p>
-                        </div>
-                        <div className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${formData.victim_type === 'self' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'
-                                    }`}>
-                                    <div className="flex items-center">
-                                        <input type="radio" name="victim_type" value="self" checked={formData.victim_type === 'self'} onChange={handleInputChange} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                        <span className="ml-3 font-bold text-gray-800">Kejadian yang saya alami sendiri</span>
-                                    </div>
-                                    <p className="mt-2 text-sm text-gray-500 ml-8">Saya sebagai korban langsung dari kejadian ini</p>
-                                </label>
-
-                                <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${formData.victim_type === 'other' ? 'border-[#8b5cf6] bg-purple-50' : 'border-gray-200 hover:border-purple-200'
-                                    }`}>
-                                    <div className="flex items-center">
-                                        <input type="radio" name="victim_type" value="other" checked={formData.victim_type === 'other'} onChange={handleInputChange} className="w-5 h-5 text-[#8b5cf6] accent-[#8b5cf6]" />
-                                        <span className="ml-3 font-bold text-gray-800">Kejadian yang dialami orang lain</span>
-                                    </div>
-                                </label>
+                    {success ? (
+                        <div className="max-w-2xl mx-auto py-12 px-6 bg-white rounded-[40px] shadow-2xl shadow-emerald-500/10 border border-emerald-50 text-center animate-in fade-in zoom-in duration-500">
+                            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500 animate-bounce">
+                                <CheckCircle size={48} strokeWidth={2.5} />
                             </div>
-
-                            {/* Conditional Fields for "Other" Victim */}
-                            {formData.victim_type === 'other' && (
-                                <div className="mt-6 p-5 bg-purple-50 rounded-xl border border-purple-100 flex flex-col gap-4 animate-fadeIn">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Korban <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="text" name="victim_name" required
-                                                value={formData.victim_name} onChange={handleInputChange}
-                                                placeholder="Masukkan nama lengkap korban"
-                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-1">Hubungan dengan Korban <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="text" name="victim_relationship" required
-                                                value={formData.victim_relationship} onChange={handleInputChange}
-                                                placeholder="Contoh: Teman Kelas, Adik Tingkat"
-                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="pt-2 border-t border-purple-100 mt-2">
-                                        <label className="flex items-center gap-3 cursor-pointer mb-4">
-                                            <input
-                                                type="checkbox" name="is_external_victim"
-                                                checked={formData.is_external_victim} onChange={handleInputChange}
-                                                className="w-5 h-5 rounded border-gray-300 text-[#8b5cf6] focus:ring-[#8b5cf6] accent-[#8b5cf6]"
-                                            />
-                                            <span className="text-sm font-semibold text-gray-800">Korban adalah Pihak Luar (Masyarakat Umum)</span>
-                                        </label>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">Laporan Berhasil Terkirim!</h2>
+                            <div className="bg-emerald-50 p-6 rounded-3xl mb-8 text-left">
+                                <p className="text-emerald-900 text-sm font-medium leading-relaxed">
+                                    <strong>Pesan Penting:</strong><br/>
+                                    Laporan Anda telah masuk ke sistem Satgas PPKPT dengan nomor registrasi <strong>{reportId}</strong>. Harap simpan nomor ini atau hubungi Admin via WhatsApp untuk pemantauan lebih lanjut.
+                                </p>
+                            </div>
+                            <p className="text-gray-500 text-sm mb-8">
+                                Nomor Registrasi: <span className="font-bold text-emerald-600">{reportId}</span><br/>
+                                Tim Satgas akan segera meninjau laporan Anda.
+                            </p>
+                            <div className="flex flex-col gap-4">
+                                <button 
+                                    onClick={() => {
+                                        const category = categories.find(c => (c.unique_id || c.id) === formData.violence_category_id);
+                                        const categoryName = category ? (category.name || category.kategori) : 'Pengaduan Umum';
                                         
-                                        {formData.is_external_victim && (
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Bukti Identitas Korban <span className="text-red-500">*</span></label>
-                                                <p className="text-xs text-gray-500 mb-2">Upload scan/foto KTP korban untuk mencegah laporan palsu.</p>
-                                                <input
-                                                    type="file" required accept=".jpeg,.jpg,.png,.pdf"
-                                                    onChange={(e) => setFormData(prev => ({...prev, victim_identity_proof: e.target.files[0]}))}
-                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                                />
-                                            </div>
-                                        )}
+                                        const waText = window.encodeURIComponent(
+`🌟 *LAPORAN BARU - POLIJE CARE* 🌟
+
+Halo Tim Satgas PPKPT,
+Saya telah membuat laporan pengaduan melalui portal publik.
+
+*DETAIL LAPORAN:*
+━━━━━━━━━━━━━━━━━━━━
+🆔 *ID Laporan:* ${reportId}
+📂 *Kategori:* ${categoryName}
+📝 *Judul:* ${formData.title}
+⏰ *Usulan Jadwal:* ${proposedDate} (${proposedTime} WIB)
+━━━━━━━━━━━━━━━━━━━━
+
+Mohon untuk segera ditindaklanjuti. Terima kasih.`
+                                        );
+                                        window.open(`https://wa.me/628123456789?text=${waText}`);
+                                    }}
+                                    className="w-full py-5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+                                >
+                                    <Send size={18} /> Hubungi Satgas via WhatsApp
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/')}
+                                    className="w-full py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                                >
+                                    Kembali ke Beranda
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className={styles.content}>
+                            
+                            {/* SECTION 1: DATA PELAPOR (PUBLIC ONLY) */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <User size={20} strokeWidth={1.8} />
+                                    Identitas Pelapor (Masyarakat Umum)
+                                </h2>
+                                <p className={styles.sectionDesc}>Mohon isi data diri Anda dengan benar agar Tim Satgas dapat menghubungi Anda.</p>
+                                
+                                <div className={styles.formGrid}>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Nama Lengkap <span className={styles.required}>*</span></label>
+                                        <input
+                                            type="text" name="guest_name" required
+                                            className={styles.input}
+                                            placeholder="Nama sesuai KTP"
+                                            value={formData.guest_name} onChange={handleInputChange}
+                                        />
+                                        {formErrors.guest_name && <span className={styles.errorText}>{formErrors.guest_name}</span>}
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Email Aktif <span className={styles.required}>*</span></label>
+                                        <input
+                                            type="email" name="guest_email" required
+                                            className={styles.input}
+                                            placeholder="contoh@gmail.com"
+                                            value={formData.guest_email} onChange={handleInputChange}
+                                        />
+                                        {formErrors.guest_email && <span className={styles.errorText}>{formErrors.guest_email}</span>}
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Nomor WhatsApp <span className={styles.required}>*</span></label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-3 text-gray-400 font-medium">+62</span>
+                                            <input
+                                                type="text" name="guest_phone" required
+                                                className={styles.input} style={{ paddingLeft: '48px' }}
+                                                placeholder="8123xxx"
+                                                value={formData.guest_phone} onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        {formErrors.guest_phone && <span className={styles.errorText}>{formErrors.guest_phone}</span>}
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>NIM / NIK <span className="text-gray-400 text-[10px] font-normal ml-1">(Opsional)</span></label>
+                                        <input
+                                            type="text" name="guest_nim"
+                                            className={styles.input}
+                                            placeholder="Nomor Induk Mahasiswa / KTP"
+                                            value={formData.guest_nim} onChange={handleInputChange}
+                                        />
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Program Studi <span className="text-gray-400 text-[10px] font-normal ml-1">(Opsional)</span></label>
+                                        <input
+                                            type="text" name="guest_prodi"
+                                            className={styles.input}
+                                            placeholder="Contoh: Teknologi Rekayasa Perangkat Lunak"
+                                            value={formData.guest_prodi} onChange={handleInputChange}
+                                        />
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Jurusan / Unit <span className="text-gray-400 text-[10px] font-normal ml-1">(Opsional)</span></label>
+                                        <input
+                                            type="text" name="guest_unit"
+                                            className={styles.input}
+                                            placeholder="Contoh: Teknologi Informasi"
+                                            value={formData.guest_unit} onChange={handleInputChange}
+                                        />
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    </section>
+                            </section>
 
-                    {/* DATA TERLAPOR (PELAKU) */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                                <User className="w-5 h-5 mr-2 text-rose-500" /> Data Terlapor (Pelaku)
-                            </h2>
-                            <p className="text-xs text-gray-500 mt-1">Identitas pelaku/tersangka dari Politeknik Negeri Jember</p>
-                        </div>
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Terlapor <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" name="suspect_name" required
-                                    value={formData.suspect_name} onChange={handleInputChange}
-                                    placeholder="Nama Lengkap Terlapor"
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Status Terlapor <span className="text-red-500">*</span></label>
-                                <select
-                                    name="suspect_status" required
-                                    value={formData.suspect_status} onChange={handleInputChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-                                >
-                                    <option value="Mahasiswa">Mahasiswa</option>
-                                    <option value="Dosen">Dosen</option>
-                                    <option value="Tenaga Pendidik">Tenaga Pendidik</option>
-                                    <option value="Pihak Luar">Pihak Luar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Afiliasi Terlapor <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text" name="suspect_affiliation" required
-                                    value={formData.suspect_affiliation} onChange={handleInputChange}
-                                    placeholder="Jurusan/Bagian pelaku. (Contoh: Jurusan Teknologi Informasi). Tulis '-' bila tidak tahu."
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-                                />
-                                <p className="text-[11px] text-gray-500 mt-1 leading-tight">Afiliasi berarti asal bagian/jurusan pelaku di lingkungan Politeknik Negeri Jember (Contoh: "Mahasiswa Teknologi Informasi" atau "Dosen Pertanian"). Tulis "-" jika Anda tidak mengetahui secara pasti.</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon/WA Terlapor <span className="text-gray-400 font-normal">(jika diketahui)</span></label>
-                                <input
-                                    type="text" name="suspect_phone"
-                                    value={formData.suspect_phone} onChange={handleInputChange}
-                                    placeholder="Contoh: 08123456789"
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-                                />
-                            </div>
-                        </div>
-                    </section>
+                            {/* SECTION 2: INFORMASI LAPORAN */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <FileText size={20} strokeWidth={1.8} />
+                                    Informasi Laporan
+                                </h2>
+                                <p className={styles.sectionDesc}>Berikan judul yang jelas dan pilih kategori kekerasan yang sesuai.</p>
 
-                    {/* PEMILIHAN KONSELOR */}
-                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                                <User className="w-6 h-6 mr-3 text-[#8b5cf6]" /> Pemilihan Konselor Ahli
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1">Pilih konselor yang akan membantu menangani laporan Anda secara profesional</p>
-                        </div>
-                        
-                        <div className="p-8">
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-                                    <span>Pilih Konselor & Jadwal <span className="text-red-500">*</span></span>
-                                    {formData.counselor_id && (
-                                        <span className="text-xs text-[#8b5cf6] font-bold bg-purple-50 px-3 py-1 rounded-full animate-pulse">
-                                            {selectedSlots.length > 0 ? `✓ ${selectedSlots.length} Slot Terpilih` : '⚠ Pilih Slot Waktu'}
-                                        </span>
-                                    )}
-                                </label>
-
-                                {counselors.length === 0 ? (
-                                    <div className="py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Info className="w-6 h-6 text-gray-400" />
-                                        </div>
-                                        <p className="text-sm text-gray-500">Belum ada konselor tersedia saat ini.</p>
+                                <div className={styles.formGrid}>
+                                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                        <label className={styles.label}>Judul Laporan <span className={styles.required}>*</span></label>
+                                        <input
+                                            type="text" name="title" required
+                                            className={styles.input}
+                                            placeholder="Contoh: Pelecehan Verbal di Lingkungan Kampus"
+                                            value={formData.title} onChange={handleInputChange}
+                                        />
+                                        {formErrors.title && <span className={styles.errorText}>{formErrors.title}</span>}
                                     </div>
-                                ) : (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                        {counselors.map((c, index) => {
-                                            const isActive = formData.counselor_id === c.id;
-                                            
-                                            return (
-                                                <motion.div
-                                                    key={c.id}
-                                                    layout
-                                                    initial={false}
-                                                    animate={{ 
-                                                        borderColor: isActive ? '#8b5cf6' : '#f3f4f6',
-                                                        backgroundColor: isActive ? '#fdfaff' : '#ffffff'
-                                                    }}
-                                                    className={`relative rounded-3xl border-2 transition-shadow overflow-hidden ${isActive ? 'shadow-lg ring-1 ring-purple-100' : 'hover:border-purple-200 hover:shadow-md cursor-pointer'}`}
-                                                    onClick={() => !isActive && handleCounselorSelect(c.id)}
-                                                >
-                                                    <div className="p-4 sm:p-5">
-                                                        <div className="flex items-start gap-4 sm:gap-6">
-                                                            {/* Profile Image */}
-                                                            <div className="relative flex-shrink-0">
-                                                                <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 ${isActive ? 'border-purple-500' : 'border-gray-100 shadow-sm'}`}>
-                                                                    <img
-                                                                        src={c.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || c.nama)}&background=random&color=fff&size=200`}
-                                                                        alt={c.name}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                                {isActive && (
-                                                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#8b5cf6] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                                                                        <Check className="w-3 h-3" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
 
-                                                            {/* Info */}
-                                                            <div className="flex-grow">
-                                                                <div className="flex flex-col mb-2">
-                                                                    <h4 className={`text-xl font-bold leading-tight mb-1 ${isActive ? 'text-purple-900' : 'text-gray-800'}`}>
-                                                                        {c.name || c.nama}
-                                                                    </h4>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {(() => {
-                                                                            if (!isActive) return (
-                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 uppercase tracking-wider">
-                                                                                    Belum Dipilih
-                                                                                </span>
-                                                                            );
-                                                                            if (loadingSchedules) return (
-                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 animate-pulse uppercase tracking-wider">
-                                                                                    Mengecek...
-                                                                                </span>
-                                                                            );
-                                                                            const hasAvailable = realSchedules.some(sch => sch.is_active && !sch.is_booked);
-                                                                            return hasAvailable ? (
-                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">
-                                                                                    Tersedia
-                                                                                </span>
-                                                                            ) : (
-                                                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
-                                                                                    Penuh
-                                                                                </span>
-                                                                            );
-                                                                        })()}
-                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-[#8b5cf6] uppercase tracking-wider">
-                                                                            {c.bio || 'Konselor'}
-                                                                        </span>
-                                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
-                                                                            {c.availability_info?.display || '0/0 Slot'} Terisi
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <p className="text-sm text-gray-500 line-clamp-2 mb-3">
-                                                                    Specialist in handling student counseling and psychological support.
-                                                                </p>
-                                                                
-                                                                {!isActive && (
-                                                                    <button 
-                                                                        type="button"
-                                                                        className="text-xs font-bold text-[#8b5cf6] flex items-center gap-1 hover:underline"
-                                                                    >
-                                                                        Klik untuk pilih & lihat jadwal <Clock className="w-3 h-3" />
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Expanded Content: Schedules */}
-                                                        <AnimatePresence>
-                                                            {isActive && (
-                                                                <motion.div
-                                                                    initial={{ opacity: 0, height: 0 }}
-                                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                                    exit={{ opacity: 0, height: 0 }}
-                                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                                                    className="mt-6 pt-6 border-t border-purple-100"
-                                                                >
-                                                                    <div className="bg-white rounded-2xl p-4 border border-purple-50">
-                                                                        <div className="flex items-center justify-between mb-4">
-                                                                            <h5 className="font-bold text-gray-800 flex items-center gap-2">
-                                                                                <Calendar className="w-4 h-4 text-[#8b5cf6]" /> Slot Waktu Tersedia
-                                                                            </h5>
-                                                                            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Pilih Maksimal 2 Slot</span>
-                                                                        </div>
-
-                                                                        {loadingSchedules ? (
-                                                                            <div className="py-8 text-center">
-                                                                                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
-                                                                                <p className="text-xs text-gray-400">Memuat jadwal...</p>
-                                                                            </div>
-                                                                        ) : realSchedules.length === 0 ? (
-                                                                            <div className="py-6 text-center text-xs text-gray-400">
-                                                                                Belum ada jadwal tersedia untuk konselor ini.
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                                                                                {(() => {
-                                                                                    const grouped = realSchedules.reduce((acc, sch) => {
-                                                                                        const key = sch.next_date || sch.hari;
-                                                                                        if (!acc[key]) acc[key] = { hari: sch.hari, next_date: sch.next_date, slots: [] };
-                                                                                        acc[key].slots.push(sch);
-                                                                                        return acc;
-                                                                                    }, {});
-
-                                                                                    return Object.values(grouped).map((group, gIdx) => (
-                                                                                        <div key={gIdx} className="space-y-2">
-                                                                                            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2">
-                                                                                                {formatDay(group.hari)}, {group.next_date ? new Date(group.next_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}
-                                                                                            </p>
-                                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                                                                {group.slots.map(sch => {
-                                                                                                    const slotUid = `${sch.id}-${sch.jam_mulai}`;
-                                                                                                    const isAvailable = sch.is_active && !sch.is_booked;
-                                                                                                    const isSelected = selectedSlots.includes(slotUid);
-                                                                                                    const isDisabled = !isAvailable || (!isSelected && selectedSlots.length >= 2);
-
-                                                                                                    const toggleSlot = (e) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        if (!isAvailable) return;
-                                                                                                        if (isSelected) {
-                                                                                                            setSelectedSlots(prev => prev.filter(id => id !== slotUid));
-                                                                                                        } else if (selectedSlots.length < 2) {
-                                                                                                            if (selectedSlots.length === 1) {
-                                                                                                                const firstId = selectedSlots[0];
-                                                                                                                const firstSch = realSchedules.find(s => `${s.id}-${s.jam_mulai}` === firstId);
-                                                                                                                if (firstSch) {
-                                                                                                                    const thisDate = sch.next_date || sch.hari;
-                                                                                                                    const firstDate = firstSch.next_date || firstSch.hari;
-                                                                                                                    if (thisDate !== firstDate) {
-                                                                                                                        toast.error("Pilih slot di hari yang sama.");
-                                                                                                                        return;
-                                                                                                                    }
-                                                                                                                    const fE = extractT(firstSch.jam_selesai);
-                                                                                                                    const tS = extractT(sch.jam_mulai);
-                                                                                                                    const tE = extractT(sch.jam_selesai);
-                                                                                                                    const fS = extractT(firstSch.jam_mulai);
-                                                                                                                    if (fE !== tS && tE !== fS) {
-                                                                                                                        toast.error("Slot harus berurutan.");
-                                                                                                                        return;
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            }
-                                                                                                            setSelectedSlots(prev => [...prev, slotUid]);
-                                                                                                        }
-                                                                                                    };
-
-                                                                                                    return (
-                                                                                                        <button
-                                                                                                            key={slotUid}
-                                                                                                            type="button"
-                                                                                                            onClick={toggleSlot}
-                                                                                                            disabled={isDisabled && !isSelected}
-                                                                                                            className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all text-center
-                                                                                                                ${isSelected 
-                                                                                                                    ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-sm ring-1 ring-purple-100' 
-                                                                                                                    : isAvailable 
-                                                                                                                        ? 'border-gray-100 bg-white hover:border-purple-200 text-gray-700' 
-                                                                                                                        : 'border-red-50 bg-red-50/30 text-red-300 cursor-not-allowed opacity-50'
-                                                                                                                }`}
-                                                                                                        >
-                                                                                                            <span className="text-xs font-bold leading-none mb-1">
-                                                                                                                {extractT(sch.jam_mulai)}
-                                                                                                            </span>
-                                                                                                            <span className={`text-[8px] font-bold uppercase tracking-tighter ${isSelected ? 'text-purple-600' : isAvailable ? 'text-green-500' : 'text-red-400'}`}>
-                                                                                                                {isSelected ? 'Terpilih' : isAvailable ? 'Tersedia' : 'Penuh'}
-                                                                                                            </span>
-                                                                                                        </button>
-                                                                                                    );
-                                                                                                })}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    ));
-                                                                                })()}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-                                                </motion.div>
-                                            );
-                                        })}
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Kategori Kekerasan <span className={styles.required}>*</span></label>
+                                        <select
+                                            name="violence_category_id" required
+                                            className={styles.select}
+                                            value={formData.violence_category_id} onChange={handleInputChange}
+                                        >
+                                            <option value="">-- Pilih Kategori --</option>
+                                            {categories.map((cat, idx) => (
+                                                <option key={cat.unique_id || cat.id || idx} value={cat.unique_id || cat.id}>
+                                                    {cat.name || cat.kategori}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.violence_category_id && <span className={styles.errorText}>{formErrors.violence_category_id}</span>}
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    </section>
 
-                    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-purple-50 rounded-lg text-[#8b5cf6]">
-                                <Info className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900">Informasi Tambahan</h2>
-                                <p className="text-sm text-gray-500">Lengkapi informasi berikut untuk klasifikasi laporan</p>
-                            </div>
-                        </div>
-
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Jenis Korban <span className="text-red-500">*</span></label>
-                                        <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 block pointer-events-none">
-                                            {formData.victim_type === 'self' ? 'Diri Sendiri' : 'Orang Lain'}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Tingkat Urgensi <span className="text-red-500">*</span></label>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Tingkat Urgensi <span className={styles.required}>*</span></label>
                                         <select
                                             name="urgency_level" required
+                                            className={styles.select}
                                             value={formData.urgency_level} onChange={handleInputChange}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
                                         >
-                                            <option value="low">Rendah</option>
-                                            <option value="medium">Sedang</option>
-                                            <option value="high">Tinggi</option>
+                                            <option value="low">🟢 Rendah (Tidak mendesak)</option>
+                                            <option value="medium">🟡 Sedang (Perlu penanganan)</option>
+                                            <option value="high">🔴 Tinggi (Mendesak/Darurat)</option>
                                         </select>
                                     </div>
                                 </div>
+                            </section>
 
-                            </div>
-                    </section>
+                            {/* SECTION 3: INFORMASI KORBAN */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <User size={20} strokeWidth={1.8} />
+                                    Informasi Korban
+                                </h2>
+                                <p className={styles.sectionDesc}>Siapa yang mengalami kejadian ini?</p>
 
-                    {/* INFORMASI DASAR */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4 pb-3 border-b border-gray-100">Informasi Dasar</h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Judul Laporan <span className="text-red-500">*</span></label>
-                                <p className="text-xs text-gray-500 mb-2">Berikan judul yang jelas untuk laporan Anda</p>
-                                <input
-                                    type="text" name="title" required
-                                    value={formData.title} onChange={handleInputChange}
-                                    placeholder="Contoh: Pelecehan di Koridor Kelas"
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Kategori Kekerasan <span className="text-red-500">*</span></label>
-                                <p className="text-xs text-gray-500 mb-2">Pilih Kategori sesuai dengan kejadian</p>
-                                <select
-                                    name="violence_category_id" required
-                                    value={formData.violence_category_id} onChange={handleInputChange}
-                                    className={`w-full bg-gray-50 border ${!formData.violence_category_id ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
-                                >
-                                    <option value="">-- Pilih Kategori --</option>
-                                    {categories.map(c => (
-                                        <option key={c.unique_id} value={c.unique_id}>{c.name || c.kategori}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* DETAIL KEJADIAN */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-800">Detail Kejadian</h2>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            {/* KRONOLOGI */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Kronologi Kejadian ({formData.victim_type === 'self' ? 'Sebagai Korban' : 'Sebagai Saksi/Pelapor'}) <span className="text-red-500">*</span></label>
-                                <p className="text-xs text-gray-500 mb-2">
-                                    Jelaskan secara detail kejadian yang Anda {formData.victim_type === 'self' ? 'alami' : 'ketahui'}, termasuk kronologi, pelaku, waktu, tempat, dan dampak yang dirasakan.
-                                    <span className="block mt-1 text-[#8b5cf6] font-medium">💡 Ceritakan kejadian secara berurutan waktu untuk membantu kami memahami situasi dengan lebih baik.</span>
-                                </p>
-                                <textarea
-                                    name="chronology" required minLength="50" rows="6"
-                                    value={formData.chronology} onChange={handleInputChange}
-                                    placeholder="Jelaskan kejadian secara detail, mulai dari awal hingga akhir..."
-                                    className={`w-full bg-gray-50 border ${!formData.chronology || formData.chronology.length < 50 ? 'border-red-300' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] resize-y transition-colors`}
-                                ></textarea>
-                                <p className="text-xs text-gray-400 mt-1 text-right">Minimal 50 karakter.</p>
-                            </div>
-
-                            {/* LOKASI DAN TANGGAL */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Lokasi Kejadian <span className="text-red-500">*</span></label>
-                                    <p className="text-xs text-gray-500 mb-2">Sebutkan lokasi detail kejadian</p>
-                                    <div className="relative">
-                                        <MapPin className="w-4 h-4 absolute left-4 top-3.5 text-gray-400" />
-                                        <input
-                                            type="text" name="location" required
-                                            value={formData.location} onChange={handleInputChange}
-                                            placeholder="Contoh: Gedung A Lantai 3"
-                                            className={`w-full bg-gray-50 border ${!formData.location ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Tanggal Kejadian <span className="text-red-500">*</span></label>
-                                    <p className="text-xs text-gray-500 mb-2">Hari dan tanggal peristiwa</p>
-                                    <div className="relative">
-                                        <Calendar className="w-4 h-4 absolute left-4 top-3.5 text-gray-400" />
-                                        <input
-                                            type="date" name="incident_date" required
-                                            max={new Date().toISOString().split("T")[0]}
-                                            value={formData.incident_date} onChange={handleInputChange}
-                                            className={`w-full bg-gray-50 border ${!formData.incident_date || new Date(formData.incident_date) > new Date() ? 'border-red-300' : 'border-gray-200'} rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] transition-colors`}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* PETA */}
-                            <div className="pt-2">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1 flex justify-between items-center">
-                                    <span>Pilih Lokasi pada Peta <span className="text-red-500">*</span></span>
-                                    <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Klik peta atau cari alamat untuk menandai lokasi</span>
-                                </label>
-
-                                <div className="flex gap-2 my-2">
-                                    <div className="relative flex-1">
-                                        <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={mapSearchQuery}
-                                            onChange={(e) => setMapSearchQuery(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleMapSearch())}
-                                            placeholder="Cari desa, jalan, gedung (Misal: Gedung Asih Polije)"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
-                                            list="campus-locations"
-                                        />
-                                        <datalist id="campus-locations">
-                                            {CAMPUS_LOCATIONS.map((loc, i) => (
-                                                <option key={i} value={loc.name} />
-                                            ))}
-                                        </datalist>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={handleMapSearch}
-                                        disabled={isSearchingMap || !mapSearchQuery.trim()}
-                                        className="bg-[#8b5cf6] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#7c4ee6] transition-colors disabled:opacity-50"
-                                    >
-                                        {isSearchingMap ? 'Mencari...' : 'Cari di Peta'}
-                                    </button>
-                                </div>
-
-                                <div className="h-[250px] w-full rounded-xl overflow-hidden border border-gray-200 relative z-0 mt-2">
-                                    <MapContainer center={defaultCenter} zoom={13} scrollWheelZoom={true} style={{ height: "100%", width: "100%" }} ref={mapRef}>
-                                        <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        />
-                                        <LocationMarker position={mapPosition} setPosition={setMapPosition} onMapClick={handleMapClick} />
-                                    </MapContainer>
-                                </div>
-                                {mapPosition && (
-                                    <p className="text-xs text-green-600 mt-2 font-medium">✓ Koordinat terpilih: {mapPosition.lat.toFixed(5)}, {mapPosition.lng.toFixed(5)}</p>
-                                )}
-                                {!mapPosition && (
-                                    <p className="text-xs text-red-500 mt-2">Mohon klik salah satu titik di peta untuk menandai pin lokasi.</p>
-                                )}
-                                <div className="flex items-start mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                    <Shield className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-gray-500"><strong className="text-gray-700">Privasi Terjamin:</strong> Lokasi hanya digunakan untuk keperluan penanganan laporan dan tidak akan disebarkan ke publik.</p>
-                                </div>
-                            </div>
-
-                            {/* LAMPIRAN */}
-                            <div className="pt-4 border-t border-gray-100">
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Lampiran Bukti Pendukung <span className="text-gray-400 font-normal">(Opsional)</span></label>
-                                <p className="text-xs text-gray-500 mb-3">JPG, PNG, atau PDF (maks. 10MB)</p>
-
-                                <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer group">
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        onChange={handleFileChange}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-                                    <Paperclip className="w-8 h-8 text-gray-400 mx-auto mb-2 group-hover:text-[#8b5cf6] transition-colors" />
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Klik untuk upload satu atau lebih file bukti</p>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                            {formData.attachments.length > 0 ? `${formData.attachments.length} file dipilih` : 'Belum ada file terpilih'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* File Preview List */}
-                                {formData.attachments.length > 0 && (
-                                    <div className="mt-4 space-y-2">
-                                        {formData.attachments.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 group">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#8b5cf6] shadow-sm border border-gray-100">
-                                                        <FileText size={20} />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-semibold text-gray-800 truncate max-w-[200px] md:max-w-md">
-                                                            {file.name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeAttachment(index)}
-                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                >
-                                                    <X size={18} />
-                                                </button>
+                                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                    <div className={styles.radioGroup}>
+                                        <label className={`${styles.radioLabel} ${formData.victim_type === 'self' ? styles.radioLabelActive : ''}`}>
+                                            <input
+                                                type="radio" name="victim_type" value="self"
+                                                className={styles.radioInput}
+                                                checked={formData.victim_type === 'self'} onChange={handleInputChange}
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-800 text-sm">Saya Sendiri</span>
+                                                <span className="text-[11px] text-gray-500">Saya sebagai korban langsung</span>
                                             </div>
-                                        ))}
+                                        </label>
+                                        <label className={`${styles.radioLabel} ${formData.victim_type === 'other' ? styles.radioLabelActive : ''}`}>
+                                            <input
+                                                type="radio" name="victim_type" value="other"
+                                                className={styles.radioInput}
+                                                checked={formData.victim_type === 'other'} onChange={handleInputChange}
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-800 text-sm">Orang Lain</span>
+                                                <span className="text-[11px] text-gray-500">Melaporkan orang lain</span>
+                                            </div>
+                                        </label>
                                     </div>
-                                )}
                                 </div>
-                            </div>
-                    </section>
 
-                    {/* SUBMIT BUTTON */}
-                    <div className="flex justify-end pt-4 pb-12">
-                        <button
-                            type="button" onClick={() => navigate('/')}
-                            className="px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 transition-colors mr-4"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading || !mapPosition}
-                            className="px-8 py-3 bg-[#8b5cf6] text-white font-medium rounded-xl hover:bg-[#7c4ee6] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center"
-                        >
-                            {loading ? 'Menyimpan...' : 'Kirim Laporan Pengaduan'}
-                        </button>
-                    </div>
+                                <div className={styles.formGrid}>
+                                    {formData.victim_type === 'other' && (
+                                        <>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label}>Nama Korban <span className={styles.required}>*</span></label>
+                                                <input
+                                                    type="text" name="victim_name" required
+                                                    className={styles.input}
+                                                    placeholder="Nama lengkap korban"
+                                                    value={formData.victim_name} onChange={handleInputChange}
+                                                />
+                                                {formErrors.victim_name && <span className={styles.errorText}>{formErrors.victim_name}</span>}
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label className={styles.label}>Hubungan dengan Korban <span className={styles.required}>*</span></label>
+                                                <input
+                                                    type="text" name="victim_relationship" required
+                                                    className={styles.input}
+                                                    placeholder="Teman, Keluarga, dll"
+                                                    value={formData.victim_relationship} onChange={handleInputChange}
+                                                />
+                                                {formErrors.victim_relationship && <span className={styles.errorText}>{formErrors.victim_relationship}</span>}
+                                            </div>
+                                        </>
+                                    )}
 
-                </form>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>
+                                            {formData.victim_type === 'self' ? 'Jenis Kelamin Anda' : 'Jenis Kelamin Korban'} 
+                                            <span className={styles.required}>*</span>
+                                        </label>
+                                        <div className={styles.radioGroup}>
+                                            <label className={`${styles.radioLabel} ${formData.victim_gender === 'Laki-laki' ? styles.radioLabelActive : ''}`}>
+                                                <input type="radio" name="victim_gender" value="Laki-laki" checked={formData.victim_gender === 'Laki-laki'} onChange={handleInputChange} className={styles.radioInput} />
+                                                <span className="text-sm font-medium text-gray-700">Laki-laki</span>
+                                            </label>
+                                            <label className={`${styles.radioLabel} ${formData.victim_gender === 'Perempuan' ? styles.radioLabelActive : ''}`}>
+                                                <input type="radio" name="victim_gender" value="Perempuan" checked={formData.victim_gender === 'Perempuan'} onChange={handleInputChange} className={styles.radioInput} />
+                                                <span className="text-sm font-medium text-gray-700">Perempuan</span>
+                                            </label>
+                                        </div>
+                                        {formErrors.victim_gender && <span className={styles.errorText}>{formErrors.victim_gender}</span>}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* SECTION 4: INFORMASI TERLAPOR */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <Shield size={20} strokeWidth={1.8} className="text-rose-500" />
+                                    Informasi Terlapor (Pelaku)
+                                </h2>
+                                <p className={styles.sectionDesc}>Data terduga pelaku dari lingkungan Politeknik Negeri Jember.</p>
+
+                                <div className={styles.formGrid}>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Nama Terlapor <span className="text-gray-400 text-xs ml-1">(Inisial jika tidak tahu)</span></label>
+                                        <input
+                                            type="text" name="suspect_name"
+                                            className={styles.input}
+                                            placeholder="Nama lengkap/inisial pelaku"
+                                            value={formData.suspect_name} onChange={handleInputChange}
+                                        />
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Jenis Kelamin Terlapor</label>
+                                        <div className={styles.radioGroup}>
+                                            <label className={`${styles.radioLabel} ${formData.suspect_gender === 'Laki-laki' ? styles.radioLabelActive : ''}`}>
+                                                <input type="radio" name="suspect_gender" value="Laki-laki" checked={formData.suspect_gender === 'Laki-laki'} onChange={handleInputChange} className={styles.radioInput} />
+                                                <span className="text-sm font-medium text-gray-700">Laki-laki</span>
+                                            </label>
+                                            <label className={`${styles.radioLabel} ${formData.suspect_gender === 'Perempuan' ? styles.radioLabelActive : ''}`}>
+                                                <input type="radio" name="suspect_gender" value="Perempuan" checked={formData.suspect_gender === 'Perempuan'} onChange={handleInputChange} className={styles.radioInput} />
+                                                <span className="text-sm font-medium text-gray-700">Perempuan</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Status Terlapor</label>
+                                        <select
+                                            name="suspect_status"
+                                            className={styles.select}
+                                            value={formData.suspect_status} onChange={handleInputChange}
+                                        >
+                                            <option value="">Pilih Status</option>
+                                            <option value="Mahasiswa">Mahasiswa</option>
+                                            <option value="Dosen">Dosen</option>
+                                            <option value="Tenaga Pendidik">Tenaga Pendidik</option>
+                                            <option value="Pihak Luar">Pihak Luar</option>
+                                        </select>
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Afiliasi/Bagian Terlapor</label>
+                                        <input
+                                            type="text" name="suspect_affiliation"
+                                            className={styles.input}
+                                            placeholder="Contoh: Jurusan Teknologi Informasi"
+                                            value={formData.suspect_affiliation} onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                             {/* SECTION 5: JADWAL KONSULTASI */}
+                            <section className={styles.section}>
+                                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white -mx-8 -mt-8 mb-8">
+                                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                                        <Calendar className="w-6 h-6 mr-3 text-purple-600" /> Usulan Jadwal Penanganan
+                                    </h2>
+                                    <p className="text-xs text-gray-500 mt-1">Kapan Anda bersedia untuk berdiskusi lebih lanjut dengan Tim Satgas?</p>
+                                </div>
+
+                                <div className="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 mb-8 flex items-start gap-4">
+                                    <Info className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-bold text-amber-900 mb-1">Ketentuan Jadwal Penanganan:</p>
+                                        <ul className="text-[11px] text-amber-800 space-y-1 font-medium">
+                                            <li className="flex items-center gap-2">• Tersedia hari <span className="font-bold underline decoration-amber-400">Senin - Kamis</span></li>
+                                            <li className="flex items-center gap-2">• Jam operasional <span className="font-bold underline decoration-amber-400">08:00 - 16:00 WIB</span></li>
+                                            <li className="flex items-center gap-2">• Jumat - Minggu hanya untuk pengiriman laporan (tanpa jadwal langsung)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div className={styles.formGrid}>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Pilih Tanggal Pertemuan <span className={styles.required}>*</span></label>
+                                        <input
+                                            type="date" required
+                                            min={new Date().toISOString().split('T')[0]}
+                                            className={`${styles.input} ${scheduleWarning ? 'border-amber-400 bg-amber-50' : ''}`}
+                                            value={proposedDate} onChange={(e) => setProposedDate(e.target.value)}
+                                        />
+                                        {scheduleWarning && (
+                                            <div className="mt-3 p-3 bg-amber-100 border border-amber-200 rounded-xl flex items-start gap-2 text-amber-800 animate-in fade-in slide-in-from-top-1">
+                                                <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
+                                                <p className="text-[10px] font-bold leading-tight">{scheduleWarning}</p>
+                                            </div>
+                                        )}
+                                        {formErrors.proposed_date && <span className={styles.errorText}>{formErrors.proposed_date}</span>}
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Pilih Jam Pertemuan (08:00 - 16:00) <span className={styles.required}>*</span></label>
+                                        <select 
+                                            required
+                                            className={styles.select}
+                                            value={proposedTime}
+                                            onChange={(e) => setProposedTime(e.target.value)}
+                                        >
+                                            {['08','09','10','11','12','13','14','15','16'].map(h => (
+                                                <React.Fragment key={h}>
+                                                    <option value={`${h}:00`}>{h}:00 WIB</option>
+                                                    <option value={`${h}:30`}>{h}:30 WIB</option>
+                                                </React.Fragment>
+                                            ))}
+                                        </select>
+                                        {formErrors.proposed_time && <span className={styles.errorText}>{formErrors.proposed_time}</span>}
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* SECTION 6: DETAIL KEJADIAN */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <AlertCircle size={20} strokeWidth={1.8} className="text-amber-500" />
+                                    Detail Kejadian (Kronologi)
+                                </h2>
+                                <p className={styles.sectionDesc}>Jelaskan kejadian secara rinci untuk mempermudah penanganan.</p>
+
+                                <div className={styles.formGrid}>
+                                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                        <label className={styles.label}>Ringkasan Singkat <span className={styles.required}>*</span></label>
+                                        <textarea
+                                            name="description" required
+                                            className={styles.textarea}
+                                            placeholder="Garis besar kejadian dalam 1-2 kalimat."
+                                            value={formData.description} onChange={handleInputChange}
+                                        ></textarea>
+                                        {formErrors.description && <span className={styles.errorText}>{formErrors.description}</span>}
+                                    </div>
+
+                                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                        <label className={styles.label}>Kronologi Lengkap <span className={styles.required}>*</span></label>
+                                        <textarea
+                                            name="chronology" required
+                                            className={styles.textarea} style={{ minHeight: '180px' }}
+                                            placeholder="Ceritakan urutan kejadian secara mendalam..."
+                                            value={formData.chronology} onChange={handleInputChange}
+                                        ></textarea>
+                                        {formErrors.chronology && <span className={styles.errorText}>{formErrors.chronology}</span>}
+                                    </div>
+
+                                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                        <label className={styles.label}>Lokasi Kejadian <span className={styles.required}>*</span></label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-3 text-gray-400">
+                                                <MapPin size={18} />
+                                            </span>
+                                            <input
+                                                type="text" name="location" required
+                                                className={styles.input} style={{ paddingLeft: '36px' }}
+                                                placeholder="Contoh: Lobby Gedung JTI"
+                                                value={formData.location} onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        {formErrors.location && <span className={styles.errorText}>{formErrors.location}</span>}
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Latitude <span className="text-gray-400 text-xs ml-1">(Opsional)</span></label>
+                                        <input
+                                            type="number" step="any" name="latitude"
+                                            className={styles.input}
+                                            placeholder="-8.xxx"
+                                            value={formData.latitude} onChange={handleInputChange}
+                                        />
+                                    </div>
+
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Longitude <span className="text-gray-400 text-xs ml-1">(Opsional)</span></label>
+                                        <input
+                                            type="number" step="any" name="longitude"
+                                            className={styles.input}
+                                            placeholder="113.xxx"
+                                            value={formData.longitude} onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* SECTION 7: LAMPIRAN */}
+                            <section className={styles.section}>
+                                <h2 className={styles.sectionTitle}>
+                                    <Paperclip size={20} strokeWidth={1.8} className="text-gray-500" />
+                                    Lampiran Bukti (Opsional)
+                                </h2>
+                                <p className={styles.sectionDesc}>Unggah foto, screenshot, atau dokumen pendukung lainnya (JPG/PNG/PDF).</p>
+
+                                <div className="mt-4">
+                                    <div className="relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:bg-gray-50 transition-all group">
+                                        <input
+                                            type="file" multiple accept=".jpg,.jpeg,.png,.pdf"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            onChange={handleFileChange}
+                                        />
+                                        <div className="flex flex-col items-center">
+                                            <Paperclip className="w-10 h-10 text-gray-400 group-hover:text-purple-500 transition-colors mb-2" />
+                                            <p className="text-sm font-medium text-gray-600">Klik atau seret file ke sini</p>
+                                            <p className="text-xs text-gray-400 mt-1">Maksimal total file 10MB</p>
+                                        </div>
+                                    </div>
+
+                                    {formData.attachments.length > 0 && (
+                                        <div className="mt-6 space-y-2">
+                                            {formData.attachments.map((file, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm animate-in slide-in-from-left-2 duration-300">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
+                                                            <FileText size={20} />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-800 truncate max-w-[200px]">{file.name}</p>
+                                                            <p className="text-[10px] text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => removeAttachment(idx)}
+                                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    >
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+                            <button type="submit" className={styles.submitButton} disabled={loading}>
+                                {loading ? (
+                                    <span className="flex items-center gap-2">
+                                        <Clock className="animate-spin" size={18} /> Memproses Laporan...
+                                    </span>
+                                ) : (
+                                    <>Kirim Laporan Pengaduan <Send size={18} /></>
+                                )}
+                            </button>
+                        </form>
+                    )}
+
+                </div>
             </div>
-        </div>
+
             <Footer />
         </div>
     );

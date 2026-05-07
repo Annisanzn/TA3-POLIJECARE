@@ -32,8 +32,9 @@ class GoogleAuthController extends Controller
                 return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/login-new?error=domain_not_allowed');
             }
 
-            // Determine role
-            $role = str_ends_with($email, '@student.polije.ac.id') ? 'user' : 'konselor';
+            // Determine role — Default to user for everyone
+            // Counselor/Admin roles should be assigned manually by Super Admin
+            $role = 'user';
             
             // Extract NIM if student
             $nim = null;

@@ -21,11 +21,12 @@ class CounselingController extends Controller
         $user = Auth::user();
         $query = CounselingSchedule::with(['user', 'counselor', 'complaint.counselor']);
 
-        // Role-based filtering
         if ($user->role === 'konselor') {
-            $query->where('counselor_id', $user->id);
+            $query->where(function($q) use ($user) {
+                $q->where('counselor_id', $user->id)
+                  ->orWhereNull('counselor_id');
+            });
             // Show ONLY Pelapor (Reporter) sessions in the schedule list
-            // Witness/Suspect meetings only appear in the Complaint Detail
             $query->where('counselee_type', 'pelapor');
         } elseif ($user->role === 'operator') {
             // Operator dashboard only shows active student schedules
@@ -598,10 +599,12 @@ class CounselingController extends Controller
         $schedule = CounselingSchedule::findOrFail($id);
 
         // Check permission
-        if (!($user->role === 'operator' || ($user->role === 'konselor' && $schedule->counselor_id === $user->id))) {
+        // Super Admin (operator) or Tim Satgas (konselor) can approve.
+        // Counselor can approve if it's assigned to them OR if it's unassigned.
+        if (!($user->role === 'operator' || $user->role === 'admin' || ($user->role === 'konselor' && ($schedule->counselor_id === $user->id || is_null($schedule->counselor_id))))) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to approve this schedule'
+                'message' => 'Anda tidak memiliki otoritas untuk menyetujui jadwal ini.'
             ], 403);
         }
 
@@ -617,6 +620,7 @@ class CounselingController extends Controller
         $schedule->update([
             'status' => CounselingSchedule::STATUS_APPROVED,
             'approved_at' => now(),
+            'counselor_id' => $schedule->counselor_id ?? $user->id, // Claim session if null
         ]);
 
         // Sync to complaint

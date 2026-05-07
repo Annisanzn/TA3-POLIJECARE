@@ -60,7 +60,7 @@ const Footer = () => {
                   PolijeCare
                 </h3>
                 <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary dark:!text-white">
-                  Satgas PPKS Polije
+                  Satgas PPKPT Polije
                 </p>
               </div>
             </motion.div>
@@ -128,7 +128,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-3 h-3" />
-              <span>satgas.ppks@polije.ac.id</span>
+              <span>satgas.ppkpt@polije.ac.id</span>
             </div>
           </div>
         </div>

@@ -29,7 +29,7 @@ const Toast = ({ toast, onClose }) => {
   );
 };
 
-const CounselingManagementPage = () => {
+const SatgasManagementPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
@@ -71,7 +71,7 @@ const CounselingManagementPage = () => {
     jam_mulai: '09:00',
     jam_selesai: '10:00',
     metode: 'offline',
-    lokasi: 'Ruang Satgas PPKS',
+    lokasi: 'Ruang Satgas PPKPT',
     jenis_pengaduan: '',
     is_record_only: false
   });
@@ -221,7 +221,7 @@ const CounselingManagementPage = () => {
           jam_mulai: '09:00',
           jam_selesai: '10:00',
           metode: 'offline',
-          lokasi: 'Ruang Satgas PPKS',
+          lokasi: 'Ruang Satgas PPKPT',
           jenis_pengaduan: '',
           is_record_only: false
         });
@@ -302,14 +302,14 @@ const CounselingManagementPage = () => {
 
   const handleReassign = async () => {
     if (!reassignModal.selectedCounselorId) {
-      showToast('Pilih konselor terlebih dahulu', 'error');
+      showToast('Pilih Satgas terlebih dahulu', 'error');
       return;
     }
     setIsLoading(true);
     try {
       const response = await counselingService.reassignCounselor(reassignModal.schedule.id, reassignModal.selectedCounselorId);
       if (response.success) {
-        showToast('Konselor berhasil diganti!');
+        showToast('Satgas berhasil diganti!');
         fetchSchedules(pagination.current_page);
         setDetailModal({ open: false, schedule: null, loading: false });
         setReassignModal({ open: false, schedule: null, selectedCounselorId: '' });
@@ -317,7 +317,7 @@ const CounselingManagementPage = () => {
         showToast(response.message || 'Gagal mengganti konselor', 'error');
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Terjadi kesalahan saat mengganti konselor', 'error');
+      showToast(err.response?.data?.message || 'Terjadi kesalahan saat mengganti Satgas', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -383,10 +383,10 @@ const CounselingManagementPage = () => {
                 >
                   <FiMenu size={20} />
                 </button>
-                <FiClock className="text-blue-600" /> Jadwal Konseling
+                <FiClock className="text-blue-600" /> Jadwal Penanganan Satgas
               </h1>
               <p className="text-gray-500 text-[11px] sm:text-sm mt-1 font-medium">
-                Sistem Penjadwalan & Konsultasi PolijeCare
+                Sistem Penjadwalan & Penanganan Kasus PolijeCare
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -394,11 +394,7 @@ const CounselingManagementPage = () => {
                 className="p-2.5 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-50 active:scale-95 transition-all shadow-sm" title="Refresh Data">
                 <FiRefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
               </button>
-              <button 
-                onClick={() => setManualEntryModal(true)}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200 flex items-center gap-2">
-                <FiPlus size={18} /> Tambah Jadwal Manual
-              </button>
+                <FiPlus size={18} /> Tambah Sesi Satgas Manual
             </div>
           </div>
         </header>
@@ -424,7 +420,7 @@ const CounselingManagementPage = () => {
                 <div className="relative">
                   <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                   <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Nama mahasiswa/konselor..."
+                    placeholder="Nama mahasiswa/satgas..."
                     className="w-full pl-11 pr-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" />
                 </div>
               </div>
@@ -449,10 +445,10 @@ const CounselingManagementPage = () => {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 uppercase px-1">Konselor</label>
+                <label className="text-xs font-bold text-gray-500 uppercase px-1">Satgas</label>
                 <select value={counselorFilter} onChange={e => setCounselorFilter(e.target.value)}
                   className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer">
-                  <option value="all">Semua Konselor</option>
+                  <option value="all">Semua Satgas</option>
                   {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
@@ -629,8 +625,8 @@ const CounselingManagementPage = () => {
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
             <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Input Jadwal Manual</h3>
-                <p className="text-xs font-bold text-gray-400 mt-1 uppercase">Buat Sesi Konseling Langsung</p>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Manajemen Penanganan</h1>
+                <p className="text-xs font-bold text-gray-400 mt-1 uppercase">Buat Sesi Penanganan Langsung</p>
               </div>
               <button onClick={() => setManualEntryModal(false)} className="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-2xl text-gray-400">
                 <FiX size={24} />
@@ -677,10 +673,10 @@ const CounselingManagementPage = () => {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Konselor <span className="text-red-500">*</span></label>
+                      <label className="text-xs font-bold text-gray-500 uppercase px-1">Satgas <span className="text-red-500">*</span></label>
                       <select required value={manualFormData.counselor_id} onChange={e => setManualFormData({...manualFormData, counselor_id: e.target.value})}
                         className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none cursor-pointer">
-                        <option value="">Pilih Konselor...</option>
+                        <option value="">Pilih Satgas...</option>
                         {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </div>
@@ -717,7 +713,7 @@ const CounselingManagementPage = () => {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-gray-500 uppercase px-1">Metode</label>
                   <div className="flex gap-2 p-1.5 bg-gray-100 rounded-2xl">
-                    <button type="button" onClick={() => setManualFormData({...manualFormData, metode: 'offline', lokasi: 'Ruang Satgas PPKS'})}
+                    <button type="button" onClick={() => setManualFormData({...manualFormData, metode: 'offline', lokasi: 'Ruang Satgas PPKPT'})}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${manualFormData.metode === 'offline' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}>Offline</button>
                     <button type="button" onClick={() => setManualFormData({...manualFormData, metode: 'online', lokasi: 'Google Meet'})}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${manualFormData.metode === 'online' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}>Online</button>
@@ -727,14 +723,14 @@ const CounselingManagementPage = () => {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-gray-500 uppercase px-1">Lokasi / Link</label>
                   <input type="text" value={manualFormData.lokasi} onChange={e => setManualFormData({...manualFormData, lokasi: e.target.value})}
-                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder={manualFormData.metode === 'online' ? 'https://meet.google.com/...' : 'Ruang Konseling...'} />
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 outline-none" placeholder={manualFormData.metode === 'online' ? 'https://meet.google.com/...' : 'Ruang Penanganan...'} />
                 </div>
               </div>
 
               <div className="pt-6">
                 <button type="submit" disabled={isLoading}
                   className="w-full py-4 bg-blue-600 text-white rounded-[24px] text-sm font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50">
-                  {isLoading ? <FiRefreshCw className="animate-spin" /> : <FiCheckCircle />} Simpan Jadwal Konsultasi
+                  {isLoading ? <FiRefreshCw className="animate-spin" /> : <FiCheckCircle />} Simpan Sesi Penanganan
                 </button>
               </div>
             </form>
@@ -749,7 +745,7 @@ const CounselingManagementPage = () => {
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
             <div className="px-10 py-8 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Detail Konseling</h3>
+                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Detail Sesi Satgas</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">ID: #{detailModal.schedule?.id}</span>
                 </div>
@@ -786,7 +782,7 @@ const CounselingManagementPage = () => {
                       <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100">
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                            <FiUser size={12} /> Konselor Bertugas
+                            <FiUser size={12} /> Satgas Bertugas
                           </p>
                           {(detailModal.schedule?.status === 'approved' || detailModal.schedule?.status === 'pending') && (
                             <button onClick={() => setReassignModal({ open: true, schedule: detailModal.schedule, selectedCounselorId: detailModal.schedule?.counselor_id || '' })}
@@ -857,7 +853,7 @@ const CounselingManagementPage = () => {
 
                   {detailModal.schedule?.status === 'completed' && detailModal.schedule?.feedback_notes && (
                     <div className="p-6 bg-slate-50 rounded-[32px] border border-gray-200 shadow-sm mt-6">
-                      <h4 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Konseling (Feedback)</h4>
+                      <h4 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2"><FiFileText size={16} /> Catatan Penanganan (Feedback)</h4>
                       <div className="bg-white p-5 rounded-2xl border border-gray-100 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                         {detailModal.schedule.feedback_notes}
                       </div>
@@ -898,7 +894,7 @@ const CounselingManagementPage = () => {
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Kirim Persetujuan?</h3>
             <p className="text-gray-500 text-sm mb-10 font-medium leading-relaxed">
-              Anda akan menyetujui sesi konseling untuk <strong>{approvalModal.schedule.user?.name}</strong>.
+              Anda akan menyetujui sesi penanganan untuk <strong>{approvalModal.schedule.user?.name}</strong>.
             </p>
             <div className="flex gap-4">
               <button onClick={() => setApprovalModal({ open: false, schedule: null })} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-3xl text-sm font-bold hover:bg-gray-50 transition-all">Batal</button>
@@ -919,7 +915,7 @@ const CounselingManagementPage = () => {
             <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Tolak Permintaan</h3>
             <p className="text-gray-500 text-sm mb-8 font-medium">Berikan alasan agar mahasiswa dapat menjadwalkan ulang.</p>
             <textarea value={rejectionModal.reason} onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
-              placeholder="Contoh: Mohon maaf, konselor sudah memiliki agenda lain di jam tersebut..."
+              placeholder="Contoh: Mohon maaf, Satgas sudah memiliki agenda lain di jam tersebut..."
               rows={4}
               className="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-[32px] text-sm focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all mb-8 resize-none font-medium" />
             <div className="flex gap-4">
@@ -935,16 +931,16 @@ const CounselingManagementPage = () => {
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setReassignModal({ open: false, schedule: null, selectedCounselorId: '' })} />
           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-md p-10 animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Ganti Konselor</h3>
-            <p className="text-gray-500 text-sm mb-8 font-medium">Pilih konselor baru untuk sesi konseling ini.</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">Ganti Satgas</h3>
+            <p className="text-gray-500 text-sm mb-8 font-medium">Pilih Satgas baru untuk sesi penanganan ini.</p>
             <div className="mb-8">
-              <label className="block text-xs font-bold text-gray-700 mb-2">Pilih Konselor <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-gray-700 mb-2">Pilih Satgas <span className="text-red-500">*</span></label>
               <select
                 value={reassignModal.selectedCounselorId}
                 onChange={(e) => setReassignModal({ ...reassignModal, selectedCounselorId: e.target.value })}
                 className="w-full px-5 py-3.5 bg-gray-50/50 border border-gray-200 rounded-2xl text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
               >
-                <option value="" disabled>-- Pilih Konselor --</option>
+                <option value="" disabled>-- Pilih Satgas --</option>
                 {counselors.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -961,4 +957,4 @@ const CounselingManagementPage = () => {
   );
 };
 
-export default CounselingManagementPage;
+export default SatgasManagementPage;

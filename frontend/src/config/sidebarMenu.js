@@ -14,8 +14,8 @@ export const sidebarMenu = {
         { name: 'Manajemen Pengaduan', icon: 'FiFileText', path: '/operator/manajemen-pengaduan' },
         { name: 'Manajemen Materi', icon: 'FiBook', path: '/operator/manajemen-materi' },
         { name: 'Kategori Kekerasan', icon: 'FiTag', path: '/operator/kategori-kekerasan' },
-        { name: 'Jadwal Konseling', icon: 'FiCalendar', path: '/operator/counseling-management' },
-        { name: 'Jadwal Konselor', icon: 'FiClock', path: '/operator/counselor-schedule-management' },
+        { name: 'Jadwal Penanganan', icon: 'FiCalendar', path: '/operator/counseling-management' },
+        { name: 'Jadwal Satgas', icon: 'FiClock', path: '/operator/counselor-schedule-management' },
         { name: 'Manajemen Pengumuman', icon: 'FiBell', path: '/operator/manajemen-pengumuman' },
       ]
     },
@@ -23,7 +23,7 @@ export const sidebarMenu = {
       category: 'PENGATURAN',
       items: [
         { name: 'Manajemen Admin', icon: 'FiSettings', path: '/operator/manajemen-admin' },
-        { name: 'Profil Operator', icon: 'FiUser', path: '/operator/profil' },
+        { name: 'Profil Super Admin', icon: 'FiUser', path: '/operator/profil' },
       ]
     }
   ],
@@ -33,21 +33,21 @@ export const sidebarMenu = {
       category: 'UTAMA',
       items: [
         { name: 'Dashboard', icon: 'FiHome', path: '/konselor/dashboard', active: true },
-        { name: 'Jadwal Saya', icon: 'FiCalendar', path: '/konselor/my-schedule-management' },
+        { name: 'Jadwal Satgas', icon: 'FiCalendar', path: '/konselor/my-schedule-management' },
       ]
     },
     {
-      category: 'KONSELING',
+      category: 'PENANGANAN',
       items: [
         { name: 'Sesi Aktif', icon: 'FiClock', path: '/konselor/sesi-aktif' },
-        { name: 'Riwayat Konseling', icon: 'FiFileText', path: '/konselor/riwayat' },
+        { name: 'Riwayat Penanganan', icon: 'FiFileText', path: '/konselor/riwayat' },
         { name: 'Klien Saya', icon: 'FiUsers', path: '/konselor/klien' },
       ]
     },
     {
       category: 'MATERI',
       items: [
-        { name: 'Materi Konseling', icon: 'FiBook', path: '/konselor/materi' },
+        { name: 'Materi Edukasi', icon: 'FiBook', path: '/konselor/materi' },
         { name: 'Artikel', icon: 'FiFileText', path: '/konselor/artikel' },
       ]
     }
@@ -70,10 +70,10 @@ export const sidebarMenu = {
       ]
     },
     {
-      category: 'KONSELING',
+      category: 'PENANGANAN',
       items: [
-        { name: 'Jadwal Konseling', icon: 'FiCalendar', path: '/user/jadwal' },
-        { name: 'Riwayat Konseling', icon: 'FiFileText', path: '/user/riwayat-konseling' },
+        { name: 'Jadwal Penanganan', icon: 'FiCalendar', path: '/user/jadwal' },
+        { name: 'Riwayat Penanganan', icon: 'FiFileText', path: '/user/riwayat-konseling' },
       ]
     }
   ]

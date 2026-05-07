@@ -89,15 +89,17 @@ class UserComplaintController extends Controller
             'violence_category_id' => 'required|exists:violence_categories,unique_id',
             'victim_type' => 'required|in:self,other',
             'victim_name' => 'required_if:victim_type,other|nullable|string|max:255',
+            'victim_gender' => 'required|in:Laki-laki,Perempuan',
             'victim_relationship' => 'required_if:victim_type,other|nullable|string|max:255',
             'is_external_victim' => 'boolean',
             'suspect_name' => 'required|string|max:255',
+            'suspect_gender' => 'nullable|in:Laki-laki,Perempuan',
             'suspect_status' => 'required|string|max:255',
             'suspect_affiliation' => 'required|string|max:255',
             'suspect_phone' => 'nullable|string|max:30',
             'chronology' => 'required|string',
             'urgency_level' => 'required|in:low,medium,high,critical',
-            'counselor_id' => 'required|exists:users,id',
+            'counselor_id' => 'nullable|exists:users,id',
             'location' => 'required|string|max:255',
             'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? 'required|date|before_or_equal:today' : 'nullable',
             'latitude' => 'nullable|numeric',
@@ -107,6 +109,11 @@ class UserComplaintController extends Controller
             'guest_name' => 'nullable|string|max:255',
             'guest_email' => 'required|email|max:255',
             'guest_phone' => 'required|string|max:20',
+            'guest_nim' => 'nullable|string|max:50',
+            'guest_prodi' => 'nullable|string|max:255',
+            'guest_unit' => 'nullable|string|max:255',
+            'proposed_date' => 'required|date|after_or_equal:today',
+            'proposed_time' => 'required|string',
         ]);
 
         try {
@@ -117,16 +124,18 @@ class UserComplaintController extends Controller
 
             $complaint = Complaint::create([
                 'user_id' => auth()->id(),
-                'counselor_id' => $validated['counselor_id'],
+                'counselor_id' => $validated['counselor_id'] ?? null,
                 'violence_category_id' => $validated['violence_category_id'],
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'victim_type' => $validated['victim_type'],
                 'victim_name' => $validated['victim_name'] ?? null,
+                'victim_gender' => $validated['victim_gender'],
                 'victim_relationship' => $validated['victim_relationship'] ?? null,
                 'is_external_victim' => $request->boolean('is_external_victim', false),
                 'victim_identity_proof' => $identityProofPath,
                 'suspect_name' => $validated['suspect_name'],
+                'suspect_gender' => $validated['suspect_gender'] ?? null,
                 'suspect_status' => $validated['suspect_status'],
                 'suspect_affiliation' => $validated['suspect_affiliation'],
                 'suspect_phone' => $validated['suspect_phone'] ?? null,
@@ -137,13 +146,17 @@ class UserComplaintController extends Controller
                 'longitude' => $validated['longitude'] ?? null,
                 'incident_date' => Schema::hasColumn('complaints', 'incident_date') ? ($validated['incident_date'] ?? null) : null,
                 'file_path' => null, // Will be set to the first attachment if any
-                'guest_name' => $validated['guest_name'] ?? null,
-                'guest_email' => $validated['guest_email'] ?? null,
-                'guest_phone' => $validated['guest_phone'] ?? null,
+                'guest_name' => $validated['guest_name'] ?? auth()->user()->name,
+                'guest_email' => $validated['guest_email'] ?? auth()->user()->email,
+                'guest_phone' => $validated['guest_phone'] ?? auth()->user()->phone,
+                'guest_nim' => $validated['guest_nim'] ?? auth()->user()->nim,
+                'guest_prodi' => $validated['guest_prodi'] ?? null,
+                'guest_unit' => $validated['guest_unit'] ?? null,
 
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'status' => 'pending',
+                'counseling_schedule' => $validated['proposed_date'] . ' ' . $validated['proposed_time'] . ':00',
             ]);
 
             // Handle multiple attachments
@@ -179,6 +192,22 @@ class UserComplaintController extends Controller
                     'file_name' => $file->getClientOriginalName(),
                     'file_type' => $file->getClientMimeType(),
                     'file_size' => $file->getSize(),
+                ]);
+            }
+
+            // Create Counseling Schedule Entry
+            if (!empty($validated['proposed_date']) && !empty($validated['proposed_time'])) {
+                \App\Models\CounselingSchedule::create([
+                    'complaint_id' => $complaint->id,
+                    'counselor_id' => $validated['counselor_id'] ?? null,
+                    'tanggal' => $validated['proposed_date'],
+                    'jam_mulai' => $validated['proposed_time'],
+                    'jam_selesai' => \Carbon\Carbon::parse($validated['proposed_time'])->addHour()->format('H:i'),
+                    'metode' => 'offline',
+                    'status' => 'pending',
+                    'counselee_type' => 'pelapor',
+                    'counselee_name' => auth()->user()->name,
+                    'jenis_pengaduan' => 'Tindak Lanjut Laporan User',
                 ]);
             }
 
