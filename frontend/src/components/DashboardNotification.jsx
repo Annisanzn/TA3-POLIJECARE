@@ -149,10 +149,10 @@ const DashboardNotification = ({ role = 'konselor' }) => {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    useEffect(() => {
-        const hasToday = notifs.some(n => n.type === 'today' && !dismissed.includes(n.id));
-        if (hasToday) setOpen(true);
-    }, [notifs]);
+    // useEffect(() => {
+    //     const hasToday = notifs.some(n => n.type === 'today' && !dismissed.includes(n.id));
+    //     if (hasToday) setOpen(true);
+    // }, [notifs]);
 
     const visibleNotifs = notifs.filter(n => !dismissed.includes(n.id));
     const unreadCount = visibleNotifs.length;

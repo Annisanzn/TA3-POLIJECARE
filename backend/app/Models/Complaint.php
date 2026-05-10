@@ -12,6 +12,7 @@ class Complaint extends Model
 
     protected $fillable = [
         'report_id',
+        'tracking_code',
         'user_id',
         'counselor_id',
         'violence_category_id',
@@ -84,11 +85,13 @@ class Complaint extends Model
     protected static function booted()
     {
         static::creating(function (self $complaint) {
-            if ($complaint->report_id) {
-                return;
+            if (!$complaint->report_id) {
+                $complaint->report_id = static::generateReportId();
             }
 
-            $complaint->report_id = static::generateReportId();
+            if (!$complaint->tracking_code) {
+                $complaint->tracking_code = strtoupper(\Illuminate\Support\Str::random(6));
+            }
         });
     }
 

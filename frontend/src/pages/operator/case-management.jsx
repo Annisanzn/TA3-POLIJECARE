@@ -23,11 +23,10 @@ const Toast = ({ toast, onClose }) => {
   }, [toast, onClose]);
   if (!toast) return null;
   return (
-    <div className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-6 py-4 rounded-[24px] shadow-2xl animate-in slide-in-from-right-10 duration-300 border backdrop-blur-md ${
-      toast.type === 'success' 
-        ? 'bg-emerald-50/90 dark:bg-emerald-900/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-100' 
-        : 'bg-rose-50/90 dark:bg-rose-900/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-100'
-    }`}>
+    <div className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-6 py-4 rounded-[24px] shadow-2xl animate-in slide-in-from-right-10 duration-300 border backdrop-blur-md ${toast.type === 'success'
+      ? 'bg-emerald-50/90 dark:bg-emerald-900/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-100'
+      : 'bg-rose-50/90 dark:bg-rose-900/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-100'
+      }`}>
       {toast.type === 'success' ? <FiCheckCircle className="shrink-0" /> : <FiAlertCircle className="shrink-0" />}
       <span className="text-sm font-bold">{toast.message}</span>
     </div>
@@ -38,13 +37,13 @@ const Toast = ({ toast, onClose }) => {
 const CaseManagementPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'new';
-  
+
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({ 
+  const [stats, setStats] = useState({
     total: 0, pending: 0, approved: 0, completed: 0, rejected: 0,
     today: 0, upcoming: 0, archived: 0
   });
@@ -62,14 +61,14 @@ const CaseManagementPage = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
-  
-  const [statusModal, setStatusModal] = useState({ 
-    open: false, complaint: null, status: 'pending', rejection_reason: '', isRejectOnly: false 
+
+  const [statusModal, setStatusModal] = useState({
+    open: false, complaint: null, status: 'pending', rejection_reason: '', isRejectOnly: false
   });
-  const [scheduleModal, setScheduleModal] = useState({ 
-    open: false, complaint: null, counselor_id: '', counseling_schedule: '' 
+  const [scheduleModal, setScheduleModal] = useState({
+    open: false, complaint: null, counselor_id: '', counseling_schedule: ''
   });
-  const [exportModal, setExportModal] = useState({ 
+  const [exportModal, setExportModal] = useState({
     open: false, date_from: '', date_to: '', status: 'all',
     selectedColumns: ['report_id', 'created_at', 'category', 'urgency', 'status', 'victim_name', 'title', 'chronology']
   });
@@ -109,22 +108,22 @@ const CaseManagementPage = () => {
       if (urgencyFilter !== 'all') params.urgency_level = urgencyFilter;
 
       const res = await axios.get(endpoint, { params });
-      
+
       if (endpoint === '/operator/complaints') {
         setData(res.data.data || []);
         setPagination({ current_page: res.data.current_page, last_page: res.data.last_page, total: res.data.total });
       } else {
         setData(res.data.data.data || res.data.data || []);
-        setPagination({ 
-          current_page: res.data.data?.current_page || 1, 
-          last_page: res.data.data?.last_page || 1, 
-          total: res.data.data?.total || 0 
+        setPagination({
+          current_page: res.data.data?.current_page || 1,
+          last_page: res.data.data?.last_page || 1,
+          total: res.data.data?.total || 0
         });
       }
 
       const statsRes = await axios.get('/counseling/statistics');
       const compStatsRes = await axios.get('/operator/complaints-stats');
-      
+
       setStats({
         ...statsRes.data.data,
         pending: compStatsRes.data.data.pending,
@@ -204,11 +203,11 @@ const CaseManagementPage = () => {
         setIsSubmitting(false);
       }
     } else {
-      setScheduleModal({ 
-        open: true, 
-        complaint: report, 
-        counselor_id: report.counselor_id || '', 
-        counseling_schedule: report.counseling_schedule ? dayjs(report.counseling_schedule).format('YYYY-MM-DDTHH:mm') : '' 
+      setScheduleModal({
+        open: true,
+        complaint: report,
+        counselor_id: report.counselor_id || '',
+        counseling_schedule: report.counseling_schedule ? dayjs(report.counseling_schedule).format('YYYY-MM-DDTHH:mm') : ''
       });
     }
   };
@@ -260,11 +259,11 @@ const CaseManagementPage = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
       `}</style>
-      
+
       <div className="flex-none h-full overflow-y-auto no-scrollbar border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
         <Sidebar collapsed={sidebarCollapsed} toggleCollapse={toggleSidebar} />
       </div>
-      
+
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Toast toast={toast} onClose={() => setToast(null)} />
 
@@ -293,96 +292,111 @@ const CaseManagementPage = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 bg-slate-50/50 dark:bg-slate-950/50 scroll-smooth custom-scrollbar transition-all">
-          
+
           <div className="flex flex-wrap items-center gap-6">
             <div className="bg-white dark:bg-slate-900 px-8 py-6 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-800 flex items-center gap-8 group hover:shadow-xl transition-all">
-               <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/20 rounded-[1.25rem] flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-inner">
-                  <FiBarChart2 size={28} />
-               </div>
-               <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wide mb-1">Total Kasus</span>
-                  <span className="text-3xl font-bold text-slate-900 dark:text-white leading-none tracking-tight">{stats.total || 0}</span>
-               </div>
-               <div className="h-12 w-[1px] bg-slate-100 dark:bg-slate-800" />
-               <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wide mb-1">Status</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
-                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-100">Online</span>
-                  </div>
-               </div>
+              <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/20 rounded-[1.25rem] flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-inner">
+                <FiBarChart2 size={28} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wide mb-1">Total Kasus</span>
+                <span className="text-3xl font-bold text-slate-900 dark:text-white leading-none tracking-tight">{stats.total || 0}</span>
+              </div>
+              <div className="h-12 w-[1px] bg-slate-100 dark:bg-slate-800" />
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wide mb-1">Status</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-100">Online</span>
+                </div>
+              </div>
             </div>
 
             <div className="bg-white dark:bg-slate-900 px-6 py-6 rounded-[2rem] border border-gray-100 dark:border-slate-800 flex items-center gap-5 shadow-sm hover:shadow-lg transition-all">
-                <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-2xl text-rose-600 dark:text-rose-400"><FiTrendingUp size={22} /></div>
-                <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Butuh Atensi</span>
-                    <span className="text-2xl font-bold text-slate-900 leading-none">{stats.pending || 0}</span>
-                </div>
+              <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-2xl text-rose-600 dark:text-rose-400"><FiTrendingUp size={22} /></div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Butuh Atensi</span>
+                <span className="text-2xl font-bold text-slate-900 leading-none">{stats.pending || 0}</span>
+              </div>
             </div>
           </div>
 
           {/* POIN 7: Text Field Bagus di Dark Mode */}
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-gray-100 dark:border-slate-800 transition-all">
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Cari Laporan</label>
-                  <div className="relative group">
-                    <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-colors" size={18} />
-                    <input type="text" placeholder="Masukkan ID / Judul..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-sm font-medium text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Cari Laporan</label>
+                <div className="relative group">
+                  <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                  <input type="text" placeholder="Masukkan ID / Judul..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-sm font-medium text-slate-900 dark:text-white outline-none transition-all shadow-inner" />
                 </div>
+              </div>
 
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Urgensi</label>
-                  <div className="relative">
-                    <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)}
-                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-medium text-slate-800 outline-none transition-all appearance-none cursor-pointer shadow-inner">
-                      <option value="all">-- Semua Urgensi --</option>
-                      <option value="critical">Critical</option>
-                      <option value="high">High</option>
-                      <option value="medium">Medium</option>
-                      <option value="low">Low</option>
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Urgensi</label>
+                <div className="relative">
+                  <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)}
+                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-medium text-slate-800 outline-none transition-all appearance-none cursor-pointer shadow-inner">
+                    <option value="all">-- Semua Urgensi --</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><FiFilter size={14} /></div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 space-y-3">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Kategori Aksi</label>
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-bold text-slate-800 outline-none appearance-none cursor-pointer shadow-inner">
+                      <option value="all">Semua Status</option>
+                      <option value="pending">Menunggu</option>
+                      <option value="approved">Proses</option>
+                      <option value="completed">Selesai</option>
                     </select>
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><FiFilter size={14} /></div>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><FiTrendingUp size={14} /></div>
                   </div>
+                  <button onClick={handleReset} className="px-6 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-[1.5rem] hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all shadow-sm flex items-center justify-center">
+                    <FiRefreshCw size={20} />
+                  </button>
                 </div>
-
-                <div className="lg:col-span-2 space-y-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Kategori Aksi</label>
-                  <div className="flex gap-3">
-                    <div className="relative flex-1">
-                      <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-[1.5rem] text-xs font-bold text-slate-800 outline-none appearance-none cursor-pointer shadow-inner">
-                        <option value="all">Semua Status</option>
-                        <option value="pending">Menunggu</option>
-                        <option value="approved">Proses</option>
-                        <option value="completed">Selesai</option>
-                      </select>
-                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><FiTrendingUp size={14} /></div>
-                    </div>
-                    <button onClick={handleReset} className="px-6 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-[1.5rem] hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all shadow-sm flex items-center justify-center">
-                      <FiRefreshCw size={20} />
-                    </button>
-                  </div>
-                </div>
-             </div>
+              </div>
+            </div>
           </div>
 
           <div className="w-full overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-100 dark:border-slate-800 p-2 shadow-sm">
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
               {[
-                { id: 'new', label: 'Laporan Baru', count: stats.pending, active: 'bg-rose-600 text-white shadow-xl shadow-rose-200 dark:shadow-rose-900/20', inactive: 'text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20', badge: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-100' },
-                { id: 'today', label: 'Hari Ini', count: stats.today, active: 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 dark:shadow-indigo-900/20', inactive: 'text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20', badge: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-100' },
-                { id: 'upcoming', label: 'Mendatang', count: stats.upcoming, active: 'bg-blue-600 text-white shadow-xl shadow-blue-200 dark:shadow-blue-900/20', inactive: 'text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20', badge: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-100' },
-                { id: 'active', label: 'Penanganan', count: stats.approved, active: 'bg-emerald-600 text-white shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20', inactive: 'text-emerald-500 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20', badge: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-100' },
-                { id: 'archive', label: 'Arsip Selesai', count: stats.archived, active: 'bg-slate-800 dark:bg-slate-700 text-white shadow-xl shadow-slate-200 dark:shadow-slate-900/20', inactive: 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800', badge: 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-100' }
+                {
+                  id: 'new', label: 'Laporan Baru', count: stats.pending, active: 'bg-rose-600 text-white shadow-xl shadow-rose-200 dark:shadow-rose-900/20',
+                  inactive: 'text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20', badge: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-100'
+                },
+                {
+                  id: 'today', label: 'Hari Ini', count: stats.today, active: 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 dark:shadow-indigo-900/20',
+                  inactive: 'text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20', badge: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-100'
+                },
+                {
+                  id: 'upcoming', label: 'Mendatang', count: stats.upcoming, active: 'bg-blue-600 text-white shadow-xl shadow-blue-200 dark:shadow-blue-900/20',
+                  inactive: 'text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20', badge: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-100'
+                },
+                {
+                  id: 'active', label: 'Penanganan', count: stats.approved, active: 'bg-emerald-600 text-white shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20',
+                  inactive: 'text-emerald-500 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20', badge: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-100'
+                },
+                {
+                  id: 'archive', label: 'Arsip Selesai', count: stats.archived, active: 'bg-slate-800 dark:bg-slate-700 text-white shadow-xl shadow-slate-200 dark:shadow-slate-900/20',
+                  inactive: 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800', badge: 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-100'
+                }
               ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 min-w-[150px] px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 whitespace-nowrap ${
-                    activeTab === tab.id ? `${tab.active}` : `${tab.inactive}`
-                  }`}>
+                  className={`flex-1 min-w-[150px] px-6 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 whitespace-nowrap 
+                    ${activeTab === tab.id ? `${tab.active}` : `${tab.inactive}`
+                    }`}>
                   {tab.label}
                   <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-bold ${activeTab === tab.id ? 'bg-white/20 text-white' : tab.badge}`}>
                     {tab.count || 0}
@@ -401,7 +415,7 @@ const CaseManagementPage = () => {
             ) : data.length === 0 ? (
               <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-[3rem] border border-gray-100 dark:border-slate-800 shadow-sm transition-all">
                 <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FiFileText size={48} className="text-slate-200 dark:text-slate-700" />
+                  <FiFileText size={48} className="text-slate-200 dark:text-slate-700" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Data Kosong</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold tracking-widest mt-2">Tidak ada laporan dalam kategori ini.</p>
@@ -411,25 +425,25 @@ const CaseManagementPage = () => {
                 {data.map((item) => {
                   const isReport = activeTab === 'new' || activeTab === 'active' || activeTab === 'archive';
                   const report = isReport ? item : item.complaint;
-                  const counselorName = isReport 
-                    ? (item.counselor?.name || item.counselor_name || report?.counselor?.name || report?.counselor_name) 
+                  const counselorName = isReport
+                    ? (item.counselor?.name || item.counselor_name || report?.counselor?.name || report?.counselor_name)
                     : (item.counselor?.name || item.counselor_name || item.complaint?.counselor?.name || item.complaint?.counselor_name);
 
                   return (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key={item.id} 
-                        className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group relative overflow-hidden flex flex-col h-full">
-                      
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key={item.id}
+                      className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group relative overflow-hidden flex flex-col h-full">
+
                       <div className={`absolute top-0 right-0 px-6 py-2 rounded-bl-[1.5rem] text-[10px] font-bold tracking-widest border-l border-b border-white/10 shadow-sm ${getUrgencyBadge(report?.urgency_level)}`}>
                         {report?.urgency_level}
                       </div>
 
                       <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 bg-slate-50 dark:bg-slate-950 rounded-2xl flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-inner group-hover:shadow-indigo-500/50">
-                            <FiFileText size={22} />
+                          <FiFileText size={22} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[10px] font-bold text-slate-400 tracking-wide">Laporan ID</p>
-                            <p className="text-xs font-bold text-slate-900 tracking-tight">{report?.report_id}</p>
+                          <p className="text-[10px] font-bold text-slate-400 tracking-wide">Laporan ID</p>
+                          <p className="text-xs font-bold text-slate-900 tracking-tight">{report?.report_id}</p>
                         </div>
                       </div>
 
@@ -439,13 +453,13 @@ const CaseManagementPage = () => {
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-2">Pelapor</p>
                           <p className="text-xs font-bold text-slate-900 truncate flex items-center gap-2">
-                             <FiUser size={14} className="text-indigo-500" /> {report?.user_name || report?.guest_name || report?.user?.name || 'Nama Tidak Tersedia'}
+                            <FiUser size={14} className="text-indigo-500" /> {report?.user_name || report?.guest_name || report?.user?.name || 'Nama Tidak Tersedia'}
                           </p>
                         </div>
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-2">Satgas Bertugas</p>
                           <p className={`text-xs font-bold truncate flex items-center gap-2 ${counselorName ? 'text-slate-900' : 'text-rose-500 opacity-80'}`}>
-                             <FiShield size={14} className={counselorName ? 'text-emerald-500' : 'text-rose-500'} /> {counselorName || 'Belum Diplot'}
+                            <FiShield size={14} className={counselorName ? 'text-emerald-500' : 'text-rose-500'} /> {counselorName || 'Belum Diplot'}
                           </p>
                         </div>
                       </div>
@@ -458,10 +472,10 @@ const CaseManagementPage = () => {
                         {activeTab === 'new' && (
                           <div className="flex gap-2.5">
                             <button onClick={() => handleQuickApprove(report)} className="p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-[1.25rem] border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 transition-all shadow-sm active:scale-95" title="Terima & Plot">
-                                <FiCheck size={20} />
+                              <FiCheck size={20} />
                             </button>
                             <button onClick={() => setStatusModal({ open: true, complaint: report, status: 'rejected', rejection_reason: '', isRejectOnly: true })} className="p-4 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-[1.25rem] border border-rose-100 dark:border-rose-800 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 transition-all shadow-sm active:scale-95" title="Tolak Laporan">
-                                <FiX size={20} />
+                              <FiX size={20} />
                             </button>
                           </div>
                         )}
@@ -479,25 +493,25 @@ const CaseManagementPage = () => {
         {statusModal.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-full max-w-md p-10 overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
-               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Update Status</h3>
-               {!statusModal.isRejectOnly && (
-                 <select value={statusModal.status} onChange={e => setStatusModal(p => ({...p, status: e.target.value}))}
-                   className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none mb-6 font-bold text-xs tracking-widest dark:text-white">
-                    <option value="pending">PENDING</option>
-                    <option value="approved">APPROVED</option>
-                    <option value="completed">COMPLETED</option>
-                    <option value="rejected">REJECTED</option>
-                 </select>
-               )}
-               {(statusModal.status === 'rejected' || statusModal.isRejectOnly) && (
-                 <textarea placeholder="Berikan alasan penolakan yang jelas..." value={statusModal.rejection_reason} onChange={e => setStatusModal(p => ({...p, rejection_reason: e.target.value}))}
-                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl min-h-[120px] outline-none text-sm font-semibold mb-6 dark:text-white focus:border-rose-500 transition-all" />
-               )}
-               <div className="flex gap-4">
-                  <button onClick={() => setStatusModal({ open: false })} className="flex-1 py-4 text-slate-400 dark:text-slate-500 font-bold tracking-widest text-[10px] hover:text-slate-900 dark:hover:text-white">Batal</button>
-                  <button onClick={submitStatus} className={`flex-[2] py-5 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl transition-all active:scale-95 ${statusModal.isRejectOnly ? 'bg-rose-600 shadow-rose-200 dark:shadow-none' : 'bg-indigo-600 shadow-indigo-200 dark:shadow-none'}`}>Konfirmasi</button>
-               </div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Update Status</h3>
+              {!statusModal.isRejectOnly && (
+                <select value={statusModal.status} onChange={e => setStatusModal(p => ({ ...p, status: e.target.value }))}
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none mb-6 font-bold text-xs tracking-widest dark:text-white">
+                  <option value="pending">PENDING</option>
+                  <option value="approved">APPROVED</option>
+                  <option value="completed">COMPLETED</option>
+                  <option value="rejected">REJECTED</option>
+                </select>
+              )}
+              {(statusModal.status === 'rejected' || statusModal.isRejectOnly) && (
+                <textarea placeholder="Berikan alasan penolakan yang jelas..." value={statusModal.rejection_reason} onChange={e => setStatusModal(p => ({ ...p, rejection_reason: e.target.value }))}
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl min-h-[120px] outline-none text-sm font-semibold mb-6 dark:text-white focus:border-rose-500 transition-all" />
+              )}
+              <div className="flex gap-4">
+                <button onClick={() => setStatusModal({ open: false })} className="flex-1 py-4 text-slate-400 dark:text-slate-500 font-bold tracking-widest text-[10px] hover:text-slate-900 dark:hover:text-white">Batal</button>
+                <button onClick={submitStatus} className={`flex-[2] py-5 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl transition-all active:scale-95 ${statusModal.isRejectOnly ? 'bg-rose-600 shadow-rose-200 dark:shadow-none' : 'bg-indigo-600 shadow-indigo-200 dark:shadow-none'}`}>Konfirmasi</button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -507,26 +521,26 @@ const CaseManagementPage = () => {
         {scheduleModal.open && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60 dark:bg-slate-950/80 transition-all">
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 overflow-hidden border border-gray-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
-               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10" />
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 shadow-sm z-10" />
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center tracking-tight">Penugasan Satgas</h3>
               <div className="space-y-6 mb-10">
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Pilih Satgas Bertugas</label>
-                     <select value={scheduleModal.counselor_id} onChange={e => setScheduleModal(p => ({...p, counselor_id: e.target.value}))}
-                     className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none text-xs font-bold uppercase tracking-widest dark:text-white appearance-none cursor-pointer">
-                     <option value="">-- Pilih Satgas --</option>
-                     {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                     </select>
-                  </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Jadwal Sesi</label>
-                    <input type="datetime-local" value={scheduleModal.counseling_schedule} onChange={e => setScheduleModal(p => ({...p, counseling_schedule: e.target.value}))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Pilih Satgas Bertugas</label>
+                  <select value={scheduleModal.counselor_id} onChange={e => setScheduleModal(p => ({ ...p, counselor_id: e.target.value }))}
+                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 focus:border-indigo-500 rounded-2xl outline-none text-xs font-bold uppercase tracking-widest dark:text-white appearance-none cursor-pointer">
+                    <option value="">-- Pilih Satgas --</option>
+                    {counselors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Jadwal Sesi</label>
+                  <input type="datetime-local" value={scheduleModal.counseling_schedule} onChange={e => setScheduleModal(p => ({ ...p, counseling_schedule: e.target.value }))}
                     className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-2xl outline-none text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest focus:border-indigo-500" />
-                 </div>
+                </div>
               </div>
               <div className="flex gap-4">
-                 <button onClick={() => setScheduleModal({ open: false })} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
-                 <button onClick={submitSchedule} className="flex-[2] py-5 bg-indigo-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all">Setujui & Plot</button>
+                <button onClick={() => setScheduleModal({ open: false })} className="flex-1 py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Batal</button>
+                <button onClick={submitSchedule} className="flex-[2] py-5 bg-indigo-600 text-white font-bold rounded-full text-[10px] tracking-widest shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all">Setujui & Plot</button>
               </div>
             </motion.div>
           </motion.div>
@@ -535,109 +549,109 @@ const CaseManagementPage = () => {
 
       <AnimatePresence>
         {exportModal.open && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 z-[110] flex justify-center p-4 md:p-8 backdrop-blur-md bg-slate-900/40 dark:bg-slate-950/80 transition-all overflow-y-auto custom-scrollbar"
           >
-            <motion.div 
-              initial={{ scale: 0.95, y: 20 }} 
-              animate={{ scale: 1, y: 0 }} 
-              exit={{ scale: 0.95, y: 20 }} 
-              className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl p-10 md:p-12 my-auto border border-slate-100 dark:border-slate-800" 
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="relative bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl p-10 md:p-12 my-auto border border-slate-100 dark:border-slate-800"
               onClick={e => e.stopPropagation()}
             >
-               <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500 rounded-t-[2.5rem]" />
-               
-               <div className="mb-10 text-center">
-                 <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Ekspor Laporan</h3>
-                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pilih rentang waktu dan data yang ingin Anda unduh</p>
-               </div>
-               
-               <div className="space-y-10 mb-12">
-                  {/* Row 1: Dates */}
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Rentang Waktu</label>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-semibold text-slate-500 ml-1">Dari Tanggal</span>
-                        <input type="date" value={exportModal.date_from} onChange={e => setExportModal({...exportModal, date_from: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
-                      </div>
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-semibold text-slate-500 ml-1">Sampai Tanggal</span>
-                        <input type="date" value={exportModal.date_to} onChange={e => setExportModal({...exportModal, date_to: e.target.value})} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
-                      </div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500 rounded-t-[2.5rem]" />
+
+              <div className="mb-10 text-center">
+                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Ekspor Laporan</h3>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pilih rentang waktu dan data yang ingin Anda unduh</p>
+              </div>
+
+              <div className="space-y-10 mb-12">
+                {/* Row 1: Dates */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Rentang Waktu</label>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-semibold text-slate-500 ml-1">Dari Tanggal</span>
+                      <input type="date" value={exportModal.date_from} onChange={e => setExportModal({ ...exportModal, date_from: e.target.value })} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
+                    </div>
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-semibold text-slate-500 ml-1">Sampai Tanggal</span>
+                      <input type="date" value={exportModal.date_to} onChange={e => setExportModal({ ...exportModal, date_to: e.target.value })} className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all shadow-sm" />
                     </div>
                   </div>
+                </div>
 
-                  {/* Row 2: Status */}
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Status Laporan</label>
-                    <select value={exportModal.status} onChange={e => setExportModal({...exportModal, status: e.target.value})} className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all appearance-none cursor-pointer shadow-sm">
-                       <option value="all">Semua Status (Laporan Masuk, Proses, Selesai)</option>
-                       <option value="pending">Hanya Laporan Baru (Pending)</option>
-                       <option value="approved">Hanya Laporan Diproses (Approved)</option>
-                       <option value="completed">Hanya Laporan Selesai (Completed)</option>
-                    </select>
-                  </div>
+                {/* Row 2: Status */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Status Laporan</label>
+                  <select value={exportModal.status} onChange={e => setExportModal({ ...exportModal, status: e.target.value })} className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all appearance-none cursor-pointer shadow-sm">
+                    <option value="all">Semua Status (Laporan Masuk, Proses, Selesai)</option>
+                    <option value="pending">Hanya Laporan Baru (Pending)</option>
+                    <option value="approved">Hanya Laporan Diproses (Approved)</option>
+                    <option value="completed">Hanya Laporan Selesai (Completed)</option>
+                  </select>
+                </div>
 
-                  {/* Row 3: Columns Grid */}
-                  <div className="space-y-5">
-                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Pilih Kolom Data (CSV)</label>
-                    <div className="bg-slate-50/50 dark:bg-slate-950/30 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50">
-                       <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
-                         {[
-                           { id: 'report_id', label: 'ID Laporan' },
-                           { id: 'created_at', label: 'Tanggal Lapor' },
-                           { id: 'category', label: 'Kategori' },
-                           { id: 'urgency', label: 'Urgensi' },
-                           { id: 'status', label: 'Status' },
-                           { id: 'victim_name', label: 'Nama Korban' },
-                           { id: 'victim_gender', label: 'J.K Korban' },
-                           { id: 'victim_type', label: 'Tipe Korban' },
-                           { id: 'location', label: 'Lokasi' },
-                           { id: 'title', label: 'Judul' },
-                           { id: 'chronology', label: 'Kronologi' },
-                           { id: 'suspect_name', label: 'Terlapor' },
-                           { id: 'suspect_gender', label: 'J.K Terlapor' },
-                           { id: 'suspect_status', label: 'Status Terlapor' },
-                           { id: 'counselor', label: 'Satgas' },
-                           { id: 'schedule', label: 'Jadwal' },
-                           { id: 'rejection_reason', label: 'Alasan Tolak' }
-                         ].map(col => (
-                           <label key={col.id} className="flex items-center gap-3 cursor-pointer group">
-                              <div className="relative flex items-center justify-center">
-                                <input 
-                                  type="checkbox" 
-                                  checked={exportModal.selectedColumns?.includes(col.id)} 
-                                  onChange={(e) => {
-                                    const cols = [...(exportModal.selectedColumns || [])];
-                                    if (e.target.checked) cols.push(col.id);
-                                    else if (cols.length > 1) {
-                                      const idx = cols.indexOf(col.id);
-                                      cols.splice(idx, 1);
-                                    }
-                                    setExportModal({ ...exportModal, selectedColumns: cols });
-                                  }}
-                                  className="peer w-5 h-5 accent-emerald-500 rounded-md border-slate-300 transition-all cursor-pointer" 
-                                />
-                              </div>
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 transition-colors whitespace-nowrap">{col.label}</span>
-                           </label>
-                         ))}
-                       </div>
+                {/* Row 3: Columns Grid */}
+                <div className="space-y-5">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Pilih Kolom Data (CSV)</label>
+                  <div className="bg-slate-50/50 dark:bg-slate-950/30 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+                      {[
+                        { id: 'report_id', label: 'ID Laporan' },
+                        { id: 'created_at', label: 'Tanggal Lapor' },
+                        { id: 'category', label: 'Kategori' },
+                        { id: 'urgency', label: 'Urgensi' },
+                        { id: 'status', label: 'Status' },
+                        { id: 'victim_name', label: 'Nama Korban' },
+                        { id: 'victim_gender', label: 'J.K Korban' },
+                        { id: 'victim_type', label: 'Tipe Korban' },
+                        { id: 'location', label: 'Lokasi' },
+                        { id: 'title', label: 'Judul' },
+                        { id: 'chronology', label: 'Kronologi' },
+                        { id: 'suspect_name', label: 'Terlapor' },
+                        { id: 'suspect_gender', label: 'J.K Terlapor' },
+                        { id: 'suspect_status', label: 'Status Terlapor' },
+                        { id: 'counselor', label: 'Satgas' },
+                        { id: 'schedule', label: 'Jadwal' },
+                        { id: 'rejection_reason', label: 'Alasan Tolak' }
+                      ].map(col => (
+                        <label key={col.id} className="flex items-center gap-3 cursor-pointer group">
+                          <div className="relative flex items-center justify-center">
+                            <input
+                              type="checkbox"
+                              checked={exportModal.selectedColumns?.includes(col.id)}
+                              onChange={(e) => {
+                                const cols = [...(exportModal.selectedColumns || [])];
+                                if (e.target.checked) cols.push(col.id);
+                                else if (cols.length > 1) {
+                                  const idx = cols.indexOf(col.id);
+                                  cols.splice(idx, 1);
+                                }
+                                setExportModal({ ...exportModal, selectedColumns: cols });
+                              }}
+                              className="peer w-5 h-5 accent-emerald-500 rounded-md border-slate-300 transition-all cursor-pointer"
+                            />
+                          </div>
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 transition-colors whitespace-nowrap">{col.label}</span>
+                        </label>
+                      ))}
                     </div>
                   </div>
-               </div>
+                </div>
+              </div>
 
-               <div className="flex items-center gap-4 mt-8">
-                  <button onClick={() => setExportModal({ ...exportModal, open: false })} className="flex-1 py-4 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-rose-600 transition-colors">Batal</button>
-                  <button onClick={handleExport} className="flex-[2] py-5 bg-emerald-600 text-white font-bold rounded-full text-[10px] tracking-[0.2em] shadow-xl shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    {isSubmitting ? <FiLoader className="animate-spin" /> : <FiDownload size={14} />}
-                    UNDUH CSV
-                  </button>
-               </div>
+              <div className="flex items-center gap-4 mt-8">
+                <button onClick={() => setExportModal({ ...exportModal, open: false })} className="flex-1 py-4 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-rose-600 transition-colors">Batal</button>
+                <button onClick={handleExport} className="flex-[2] py-5 bg-emerald-600 text-white font-bold rounded-full text-[10px] tracking-[0.2em] shadow-xl shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  {isSubmitting ? <FiLoader className="animate-spin" /> : <FiDownload size={14} />}
+                  UNDUH CSV
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

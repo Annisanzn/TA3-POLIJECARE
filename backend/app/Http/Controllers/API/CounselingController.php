@@ -21,15 +21,8 @@ class CounselingController extends Controller
         $user = Auth::user();
         $query = CounselingSchedule::with(['user', 'counselor', 'complaint.counselor']);
 
-        if ($user->role === 'konselor') {
-            $query->where(function($q) use ($user) {
-                $q->where('counselor_id', $user->id)
-                  ->orWhereNull('counselor_id');
-            });
-            // Show ONLY Pelapor (Reporter) sessions in the schedule list
-            $query->where('counselee_type', 'pelapor');
-        } elseif ($user->role === 'operator') {
-            // Operator dashboard only shows active student schedules
+        if ($user->role === 'konselor' || $user->role === 'operator') {
+            // Tim Satgas PPKPT and Operators can see all active schedules
             $query->where('counselee_type', 'pelapor');
         } elseif ($user->role === 'user') {
             $query->where('user_id', $user->id);
@@ -73,10 +66,10 @@ class CounselingController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 })->orWhereHas('counselor', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             });
         }
@@ -98,19 +91,19 @@ class CounselingController extends Controller
                 // 2. From the linked complaint's user relation
                 // 3. From the linked complaint's guest data
                 $userName = $s->counselee_name
-                            ?? optional($s->user)->name 
-                            ?? ($s->complaint ? optional($s->complaint->user)->name : null)
-                            ?? optional($s->complaint)->guest_name 
-                            ?? 'Pelapor';
-                            
-                $userPhone = optional($s->user)->phone 
-                             ?? ($s->complaint ? optional($s->complaint->user)->phone : null) 
-                             ?? optional($s->complaint)->guest_phone;
+                    ?? optional($s->user)->name
+                    ?? ($s->complaint ? optional($s->complaint->user)->name : null)
+                    ?? optional($s->complaint)->guest_name
+                    ?? 'Pelapor';
 
-                $counselorName = optional($s->counselor)->name 
-                                 ?? ($s->complaint ? optional($s->complaint->counselor)->name : null) 
-                                 ?? 'Belum diplot';
-                
+                $userPhone = optional($s->user)->phone
+                    ?? ($s->complaint ? optional($s->complaint->user)->phone : null)
+                    ?? optional($s->complaint)->guest_phone;
+
+                $counselorName = optional($s->counselor)->name
+                    ?? ($s->complaint ? optional($s->complaint->counselor)->name : null)
+                    ?? 'Belum diplot';
+
                 return [
                     'id' => $s->id,
                     'complaint_id' => $s->complaint_id,
@@ -173,42 +166,42 @@ class CounselingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'id'                => $schedule->id,
-                'status'            => $schedule->status,
-                'tanggal'           => $schedule->tanggal,
-                'jam_mulai'         => $schedule->jam_mulai,
-                'jam_selesai'       => $schedule->jam_selesai,
-                'metode'            => $schedule->metode,
-                'lokasi'            => $schedule->lokasi,
-                'meeting_link'      => $schedule->meeting_link,
-                'jenis_pengaduan'   => $schedule->jenis_pengaduan,
-                'alasan_penolakan'  => $schedule->alasan_penolakan ?? $schedule->rejection_reason ?? null,
-                'approved_at'       => $schedule->approved_at,
-                'created_at'        => $schedule->created_at,
+                'id' => $schedule->id,
+                'status' => $schedule->status,
+                'tanggal' => $schedule->tanggal,
+                'jam_mulai' => $schedule->jam_mulai,
+                'jam_selesai' => $schedule->jam_selesai,
+                'metode' => $schedule->metode,
+                'lokasi' => $schedule->lokasi,
+                'meeting_link' => $schedule->meeting_link,
+                'jenis_pengaduan' => $schedule->jenis_pengaduan,
+                'alasan_penolakan' => $schedule->alasan_penolakan ?? $schedule->rejection_reason ?? null,
+                'approved_at' => $schedule->approved_at,
+                'created_at' => $schedule->created_at,
                 'user' => $schedule->user ? [
-                    'id'    => $schedule->user->id,
-                    'name'  => $schedule->user->name,
+                    'id' => $schedule->user->id,
+                    'name' => $schedule->user->name,
                     'email' => $schedule->user->email,
-                    'nim'   => $schedule->user->nim ?? null,
+                    'nim' => $schedule->user->nim ?? null,
                 ] : null,
                 'counselor' => $schedule->counselor ? [
-                    'id'    => $schedule->counselor->id,
-                    'name'  => $schedule->counselor->name,
+                    'id' => $schedule->counselor->id,
+                    'name' => $schedule->counselor->name,
                     'email' => $schedule->counselor->email,
                 ] : null,
                 'complaint' => $complaint ? [
-                    'id'            => $complaint->id,
-                    'report_id'     => $complaint->report_id,
-                    'title'         => $complaint->title,
-                    'description'   => $complaint->description,
-                    'chronology'    => $complaint->chronology,
+                    'id' => $complaint->id,
+                    'report_id' => $complaint->report_id,
+                    'title' => $complaint->title,
+                    'description' => $complaint->description,
+                    'chronology' => $complaint->chronology,
                     'urgency_level' => $complaint->urgency_level,
-                    'location'      => $complaint->location,
-                    'status'        => $complaint->status,
-                    'file_path'     => $complaint->file_path ? asset('storage/' . $complaint->file_path) : null,
-                    'is_anonymous'  => $complaint->is_anonymous,
-                    'victim_type'   => $complaint->victim_type,
-                    'victim_name'   => $complaint->victim_name,
+                    'location' => $complaint->location,
+                    'status' => $complaint->status,
+                    'file_path' => $complaint->file_path ? asset('storage/' . $complaint->file_path) : null,
+                    'is_anonymous' => $complaint->is_anonymous,
+                    'victim_type' => $complaint->victim_type,
+                    'victim_name' => $complaint->victim_name,
                 ] : null,
                 'feedback_notes' => $schedule->feedback_notes,
                 'feedback_attachment' => $schedule->feedback_attachment ? asset('storage/' . $schedule->feedback_attachment) : null,
@@ -229,45 +222,59 @@ class CounselingController extends Controller
                 if ($counselor->profile_photo) {
                     $counselor->profile_photo = asset('storage/' . $counselor->profile_photo);
                 }
-                
-                $dayMap = ['Senin'=>1,'Selasa'=>2,'Rabu'=>3,'Kamis'=>4,'Jumat'=>5,'Sabtu'=>6,'Minggu'=>0];
+
+                $dayMap = ['Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4, 'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 0];
                 $activeSchedules = \App\Models\CounselorSchedule::where('counselor_id', $counselor->id)
                     ->where('is_active', true)->orderBy('hari')->orderBy('jam_mulai')->get();
-                $today = now(); $todayDow = $today->dayOfWeek;
-                $bestDay = null; $bestDiff = 999; $dayStats = [];
-                
+                $today = now();
+                $todayDow = $today->dayOfWeek;
+                $bestDay = null;
+                $bestDiff = 999;
+                $dayStats = [];
+
                 foreach ($activeSchedules as $sched) {
                     $dayNum = $dayMap[$sched->hari] ?? null;
-                    if ($dayNum === null) continue;
+                    if ($dayNum === null)
+                        continue;
                     $diff = $dayNum - $todayDow;
-                    if ($diff <= 0) $diff += 7;
+                    if ($diff <= 0)
+                        $diff += 7;
                     $nextDate = $today->copy()->addDays($diff)->toDateString();
                     $chunkDuration = $sched->slot_duration ?? 60;
                     $startTimeStr = is_object($sched->jam_mulai) ? $sched->jam_mulai->format('H:i') : substr($sched->jam_mulai, 0, 5);
                     $endTimeStr = is_object($sched->jam_selesai) ? $sched->jam_selesai->format('H:i') : substr($sched->jam_selesai, 0, 5);
                     $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
                     $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
-                    $totalChunks = 0; $bookedChunks = 0; $cursor = $startTime->copy();
+                    $totalChunks = 0;
+                    $bookedChunks = 0;
+                    $cursor = $startTime->copy();
                     while ($cursor->copy()->addMinutes($chunkDuration)->lte($endTime)) {
                         $totalChunks++;
                         $isBooked = \App\Models\CounselingSchedule::where('counselor_id', $counselor->id)
                             ->where('tanggal', $nextDate)->timeOverlap($cursor->format('H:i:s'), $cursor->copy()->addMinutes($chunkDuration)->format('H:i:s'))
                             ->whereIn('status', ['pending', 'approved'])->exists();
-                        if ($isBooked) $bookedChunks++;
+                        if ($isBooked)
+                            $bookedChunks++;
                         $cursor->addMinutes($chunkDuration);
                     }
-                    if ($totalChunks === 0) { $totalChunks = 1; }
-                    if (!isset($dayStats[$sched->hari])) $dayStats[$sched->hari] = ['total'=>0,'booked'=>0];
+                    if ($totalChunks === 0) {
+                        $totalChunks = 1;
+                    }
+                    if (!isset($dayStats[$sched->hari]))
+                        $dayStats[$sched->hari] = ['total' => 0, 'booked' => 0];
                     $dayStats[$sched->hari]['total'] += $totalChunks;
                     $dayStats[$sched->hari]['booked'] += $bookedChunks;
-                    if ($diff < $bestDiff) { $bestDiff = $diff; $bestDay = $sched->hari; }
+                    if ($diff < $bestDiff) {
+                        $bestDiff = $diff;
+                        $bestDay = $sched->hari;
+                    }
                 }
-                
+
                 if ($bestDay && isset($dayStats[$bestDay])) {
                     $s = $dayStats[$bestDay];
-                    $counselor->availability_info = ['total'=>$s['total'],'booked'=>$s['booked'],'display'=>$bestDay.': '.$s['booked'].'/'.$s['total'].' Slot'];
+                    $counselor->availability_info = ['total' => $s['total'], 'booked' => $s['booked'], 'display' => $bestDay . ': ' . $s['booked'] . '/' . $s['total'] . ' Slot'];
                 } else {
-                    $counselor->availability_info = ['total'=>0,'booked'=>0,'display'=>'0/0 Slot'];
+                    $counselor->availability_info = ['total' => 0, 'booked' => 0, 'display' => '0/0 Slot'];
                 }
                 return $counselor;
             });
@@ -297,7 +304,7 @@ class CounselingController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $schedules,
+            'data' => $schedules,
             'message' => 'Counseling schedules retrieved'
         ]);
     }
@@ -338,7 +345,7 @@ class CounselingController extends Controller
                 ->where(function ($query) use ($startTime, $endTime) {
                     $query->where(function ($q) use ($startTime, $endTime) {
                         $q->where('jam_mulai', '<', $endTime)
-                          ->where('jam_selesai', '>', $startTime);
+                            ->where('jam_selesai', '>', $startTime);
                     });
                 })
                 ->whereIn('status', ['pending', 'approved'])
@@ -454,9 +461,9 @@ class CounselingController extends Controller
 
         // Check for double booking (only for future/non-completed sessions)
         $complaintId = $request->complaint_id;
-        
+
         $targetCounselorId = $request->counselor_id ?? ($user->role === 'konselor' ? $user->id : null);
-        
+
         // Inherit counselor from complaint if not explicitly provided
         if (!$targetCounselorId && $complaintId) {
             $existingComplaint = \App\Models\Complaint::find($complaintId);
@@ -464,7 +471,7 @@ class CounselingController extends Controller
                 $targetCounselorId = $existingComplaint->counselor_id;
             }
         }
-        
+
         if ($targetCounselorId && !$isRecordOnly) {
             $hasConflict = CounselingSchedule::where('counselor_id', $targetCounselorId)
                 ->where('tanggal', $request->tanggal)
@@ -484,7 +491,7 @@ class CounselingController extends Controller
         // Jika tidak ada complaint_id (konseling manual murni), kita buatkan "Complaint" (Pengaduan) baru di background
         if (!$complaintId && ($user->role === 'konselor' || $user->role === 'operator')) {
             $violenceCat = \App\Models\ViolenceCategory::where('name', $request->jenis_pengaduan)->first();
-            $catId = $violenceCat ? $violenceCat->unique_id : 'CAT-'.date('Y');
+            $catId = $violenceCat ? $violenceCat->unique_id : 'CAT-' . date('Y');
 
             $newComplaint = \App\Models\Complaint::create([
                 'user_id' => $user->role === 'user' ? $user->id : null,
@@ -536,7 +543,7 @@ class CounselingController extends Controller
         if (in_array($user->role, ['konselor', 'operator', 'admin'])) {
             $data['status'] = 'approved';
             $data['approved_at'] = now();
-            
+
             if ($isRecordOnly) {
                 $data['status'] = 'completed';
             }
@@ -762,7 +769,7 @@ class CounselingController extends Controller
 
         // Allow if user is an operator/admin, OR if user is the assigned counselor
         $isOperator = in_array($userRole, ['operator', 'admin']);
-        $isAssignedCounselor = $userRole === 'konselor' && (int)$schedule->counselor_id === (int)$user->id;
+        $isAssignedCounselor = $userRole === 'konselor' && (int) $schedule->counselor_id === (int) $user->id;
 
         if (!$isOperator && !$isAssignedCounselor) {
             return response()->json([
@@ -888,9 +895,9 @@ class CounselingController extends Controller
             'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
             'today' => (clone $query)->where('status', 'approved')->whereDate('tanggal', $today)->count(),
             'upcoming' => (clone $query)->where('status', 'approved')->whereDate('tanggal', '>', $today)->count(),
-            'archived' => (clone $query)->where(function($q) use ($today) {
+            'archived' => (clone $query)->where(function ($q) use ($today) {
                 $q->whereIn('status', ['completed', 'rejected', 'cancelled'])
-                  ->orWhereDate('tanggal', '<', $today);
+                    ->orWhereDate('tanggal', '<', $today);
             })->count(),
         ];
 

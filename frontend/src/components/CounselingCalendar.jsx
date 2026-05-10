@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiChevronLeft, FiChevronRight, FiX, FiCalendar, FiClock, FiUser, FiRefreshCw, FiShield, FiAlertCircle } from 'react-icons/fi';
 import TimePicker24h from './ui/TimePicker24h';
 
 const MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -34,61 +34,7 @@ const STATUS_LABELS = {
     holiday: 'Hari Libur Nasional',
 };
 
-const ID_HOLIDAYS = {
-    // 2024
-    '2024-01-01': 'Tahun Baru 2024 Masehi',
-    '2024-02-08': 'Isra Mikraj',
-    '2024-02-10': 'Tahun Baru Imlek',
-    '2024-03-11': 'Nyepi',
-    '2024-03-29': 'Wafat Isa Al Masih',
-    '2024-03-31': 'Hari Paskah',
-    '2024-04-10': 'Idul Fitri 1445 H',
-    '2024-04-11': 'Idul Fitri 1445 H',
-    '2024-05-01': 'Hari Buruh',
-    '2024-05-09': 'Kenaikan Isa Al Masih',
-    '2024-05-23': 'Waisak',
-    '2024-06-01': 'Hari Lahir Pancasila',
-    '2024-06-17': 'Idul Adha 1445 H',
-    '2024-07-07': 'Tahun Baru Islam 1446 H',
-    '2024-08-17': 'Hari Kemerdekaan RI',
-    '2024-09-16': 'Maulid Nabi Muhammad SAW',
-    '2024-12-25': 'Hari Raya Natal',
-    // 2025
-    '2025-01-01': 'Tahun Baru 2025 Masehi',
-    '2025-01-27': 'Isra Mikraj',
-    '2025-01-29': 'Tahun Baru Imlek',
-    '2025-03-29': 'Nyepi',
-    '2025-03-31': 'Idul Fitri 1446 H',
-    '2025-04-01': 'Idul Fitri 1446 H',
-    '2025-04-18': 'Wafat Isa Al Masih',
-    '2025-04-20': 'Hari Paskah',
-    '2025-05-01': 'Hari Buruh',
-    '2025-05-12': 'Waisak',
-    '2025-05-29': 'Kenaikan Isa Al Masih',
-    '2025-06-01': 'Hari Lahir Pancasila',
-    '2025-06-06': 'Idul Adha 1446 H',
-    '2025-06-27': 'Tahun Baru Islam 1447 H',
-    '2025-08-17': 'Hari Kemerdekaan RI',
-    '2025-09-05': 'Maulid Nabi Muhammad SAW',
-    '2025-12-25': 'Hari Raya Natal',
-    // 2026
-    '2026-01-01': 'Tahun Baru 2026 Masehi',
-    '2026-01-16': 'Isra Mikraj',
-    '2026-02-17': 'Tahun Baru Imlek',
-    '2026-03-19': 'Nyepi',
-    '2026-03-20': 'Idul Fitri 1447 H',
-    '2026-03-21': 'Idul Fitri 1447 H',
-    '2026-04-03': 'Wafat Isa Al Masih',
-    '2026-04-05': 'Hari Paskah',
-    '2026-05-01': 'Hari Buruh / Waisak',
-    '2026-05-14': 'Kenaikan Isa Al Masih',
-    '2026-05-27': 'Idul Adha 1447 H',
-    '2026-06-01': 'Hari Lahir Pancasila',
-    '2026-06-16': 'Tahun Baru Islam 1448 H',
-    '2026-08-17': 'Hari Kemerdekaan RI',
-    '2026-08-26': 'Maulid Nabi Muhammad SAW',
-    '2026-12-25': 'Hari Raya Natal'
-};
+// Dynamic Holidays are now fetched from a public API
 
 const EXTERNAL_AGENDA_KEY = 'counseling_external_agendas';
 
@@ -111,6 +57,27 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [addForm, setAddForm] = useState({ date: '', time: '09:00', title: '', description: '' });
     const [loading, setLoading] = useState(false);
+    const [dynamicHolidays, setDynamicHolidays] = useState({});
+
+    const fetchHolidays = async (year) => {
+        try {
+            const response = await fetch(`https://api-harilibur.vercel.app/api?year=${year}`);
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                const mapped = {};
+                data.forEach(h => {
+                    mapped[h.holiday_date] = h.holiday_name;
+                });
+                setDynamicHolidays(prev => ({ ...prev, ...mapped }));
+            }
+        } catch (err) {
+            console.error("Gagal mengambil data hari libur:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchHolidays(currentYear);
+    }, [currentYear]);
 
     const fetchSessions = async () => {
         setLoading(true);
@@ -174,7 +141,7 @@ const CounselingCalendar = ({ role = 'konselor' }) => {
         });
 
         // Inject holidays
-        Object.entries(ID_HOLIDAYS).forEach(([hDate, hName]) => {
+        Object.entries(dynamicHolidays).forEach(([hDate, hName]) => {
             if (!map[hDate]) map[hDate] = [];
             if (!map[hDate].find(e => e.id === `holiday-${hDate}`)) {
                 map[hDate].push({

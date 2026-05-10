@@ -175,13 +175,16 @@ const Contact = () => {
             {/* Right Column: Map */}
             <div className="lg:col-span-7 h-full min-h-[500px]">
               <SpotlightCard
-                className="h-full rounded-3xl p-2 border border-white/20 bg-white/60 dark:bg-black/20 dark:border-white/10 backdrop-blur-md shadow-xl overflow-hidden"
+                className="h-full rounded-3xl p-2 border border-white/20 bg-white/60 
+                dark:bg-black/20 dark:border-white/10 backdrop-blur-md shadow-xl overflow-hidden"
                 spotlightColor="rgba(255, 255, 255, 0.1)"
               >
                 <div className="relative w-full h-full rounded-2xl overflow-hidden group">
                   <iframe
                     title="Lokasi Politeknik Negeri Jember"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.424564483758!2d113.72093787447761!3d-8.16021369187063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd695b617d8f623%3A0x280e466373737b60!2sPoliteknik%20Negeri%20Jember!5e0!3m2!1sid!2sid!4v1708150000000!5m2!1sid!2sid"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.424564483758!2d113.720937874477
+                    61!3d-8.16021369187063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd695b617d8f623%3A0x280e466373737b60!
+                    2sPoliteknik%20Negeri%20Jember!5e0!3m2!1sid!2sid!4v1708150000000!5m2!1sid!2sid"
                     width="100%"
                     height="100%"
                     style={{ border: 0, minHeight: '500px' }}
@@ -192,7 +195,9 @@ const Contact = () => {
                   ></iframe>
 
                   {/* Map Overlay Info */}
-                  <div className="absolute bottom-6 left-6 right-6 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-lg translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <div className="absolute bottom-6 left-6 right-6 bg-white/90 dark:bg-black/80 backdrop-blur-md p-4 
+                  rounded-xl border border-white/20 shadow-lg translate-y-full opacity-0 group-hover:translate-y-0 
+                  group-hover:opacity-100 transition-all duration-500">
                     <div className="flex items-start space-x-3">
                       <MapPin className="w-5 h-5 text-red-500 flex-shrink-0 mt-1" />
                       <div>

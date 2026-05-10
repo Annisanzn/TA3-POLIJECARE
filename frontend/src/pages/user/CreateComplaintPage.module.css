@@ -1,7 +1,8 @@
 .page {
-    padding: 24px;
-    max-width: 1000px;
+    padding: 24px 20px;
+    max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .header {
@@ -41,7 +42,7 @@
 .content {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
 }
 
 .section {
@@ -256,8 +257,8 @@
 .tipsContainer {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .tipCard {
@@ -311,17 +312,49 @@
     gap: 8px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .formGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .radioGroup {
-        flex-direction: column;
-    }
-
-    .tipsContainer {
-        grid-template-columns: 1fr;
-    }
+/* Modern Time Grid Picker */
+.timeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
 }
+
+.timeSlot {
+    padding: 12px 8px;
+    border-radius: 16px;
+    border: 2px solid #f3f4f6;
+    background: white;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.timeSlot:hover {
+    border-color: #ddd6fe;
+    background: #f5f3ff;
+    color: #7c3aed;
+    transform: translateY(-2px);
+}
+
+.timeSlotActive {
+    border-color: #8b5cf6 !important;
+    background: #8b5cf6 !important;
+    color: white !important;
+    box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px) scale(0.98);
+}
+
+@media (max-width: 640px) {
+    .timeGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

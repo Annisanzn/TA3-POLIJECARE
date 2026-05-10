@@ -14,10 +14,20 @@ class OperatorDashboardController extends Controller
      * GET /api/operator/dashboard/report-category-distribution
      * GET /api/konselor/dashboard/report-category-distribution
      */
-    public function reportCategoryDistribution()
+    public function reportCategoryDistribution(Request $request)
     {
         try {
-            $data = Complaint::select('violence_category_id', DB::raw('COUNT(*) as jumlah'))
+            $query = Complaint::query();
+
+            // Apply filters
+            if ($request->has('year') && $request->year !== 'Semua') {
+                $query->whereYear('created_at', $request->year);
+            }
+            if ($request->has('month') && $request->month !== 'Semua') {
+                $query->whereMonth('created_at', $request->month);
+            }
+
+            $data = $query->select('violence_category_id', DB::raw('COUNT(*) as jumlah'))
                 ->whereNotNull('violence_category_id')
                 ->groupBy('violence_category_id')
                 ->get()
@@ -40,6 +50,94 @@ class OperatorDashboardController extends Controller
                 'success' => true,
                 'data'    => [],
             ]);
+        }
+    }
+
+    /**
+     * Get gender distribution.
+     */
+    public function genderDistribution(Request $request)
+    {
+        try {
+            $query = Complaint::query();
+
+            if ($request->has('year') && $request->year !== 'Semua') {
+                $query->whereYear('created_at', $request->year);
+            }
+
+            // Group by month and gender
+            $data = $query->select(
+                DB::raw('MONTH(created_at) as bulan'),
+                DB::raw('SUM(CASE WHEN victim_gender = "Laki-laki" THEN 1 ELSE 0 END) as laki'),
+                DB::raw('SUM(CASE WHEN victim_gender = "Perempuan" THEN 1 ELSE 0 END) as perempuan')
+            )
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get()
+            ->map(function($item) {
+                $monthNames = [
+                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                ];
+                $total = $item->laki + $item->perempuan;
+                return [
+                    'month' => $monthNames[$item->bulan],
+                    'laki' => $total > 0 ? round(($item->laki / $total) * 100) : 0,
+                    'perempuan' => $total > 0 ? round(($item->perempuan / $total) * 100) : 0,
+                    'total' => 100
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gender Distribution Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'data' => []]);
+        }
+    }
+
+    /**
+     * Get department distribution.
+     */
+    public function departmentDistribution(Request $request)
+    {
+        try {
+            $query = Complaint::query();
+
+            if ($request->has('year') && $request->year !== 'Semua') {
+                $query->whereYear('created_at', $request->year);
+            }
+            if ($request->has('month') && $request->month !== 'Semua') {
+                $query->whereMonth('created_at', $request->month);
+            }
+
+            // We use guest_prodi or user->prodi. Let's simplify and use guest_prodi if it's populated, 
+            // or we might need a more complex join.
+            // For now, let's use guest_prodi as it's often used in public reports.
+            // In a real scenario, we might want to consolidate this.
+            
+            $data = $query->select(DB::raw('COALESCE(guest_prodi, "Lainnya") as prodi'), DB::raw('COUNT(*) as jumlah'))
+                ->groupBy('prodi')
+                ->orderByDesc('jumlah')
+                ->take(5)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'name' => $item->prodi,
+                        'value' => (int) $item->jumlah
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Department Distribution Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'data' => []]);
         }
     }
 

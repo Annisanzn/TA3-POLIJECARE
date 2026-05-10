@@ -13,6 +13,7 @@ import { Toaster } from 'react-hot-toast';
 // Pages
 import LandingPage from './pages/LandingPage';
 import LaporUmum from './pages/public/LaporUmum';
+import TrackingLaporan from './pages/public/TrackingLaporan';
 import PusatEdukasi from './pages/public/PusatEdukasi';
 import UserDashboard from './pages/user/dashboard';
 import KonselorDashboard from './pages/konselor/dashboard';
@@ -62,6 +63,7 @@ const AnimatedRoutes = () => {
         <Route path="/articles" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/contact" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/lapor-umum" element={<PageTransition><LaporUmum /></PageTransition>} />
+        <Route path="/lacak-laporan" element={<PageTransition><TrackingLaporan /></PageTransition>} />
         <Route path="/edukasi" element={<PageTransition><PusatEdukasi /></PageTransition>} />
 
         {/* Article Detail - public reading page */}

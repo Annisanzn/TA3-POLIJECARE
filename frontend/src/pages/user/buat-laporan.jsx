@@ -15,6 +15,11 @@ const BuatLaporan = () => {
     const navigate = useNavigate();
     const { user: currentUser } = useAuth();
 
+    const TIME_SLOTS = [
+        '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+        '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00'
+    ];
+
     const [categories, setCategories] = useState([]);
 
     const [loading, setLoading] = useState(false);
@@ -38,6 +43,7 @@ const BuatLaporan = () => {
         suspect_status: 'Mahasiswa',
         suspect_affiliation: '',
         suspect_phone: '',
+        suspect_whatsapp: '',
         urgency_level: 'medium',
         title: '',
         violence_category_id: '',
@@ -191,6 +197,7 @@ const BuatLaporan = () => {
             payload.append('suspect_status', formData.suspect_status);
             payload.append('suspect_affiliation', formData.suspect_affiliation);
             payload.append('suspect_phone', formData.suspect_phone);
+            if (formData.suspect_whatsapp) payload.append('suspect_whatsapp', formData.suspect_whatsapp);
             payload.append('urgency_level', formData.urgency_level);
             payload.append('description', formData.chronology);
             payload.append('chronology', formData.chronology);
@@ -283,7 +290,7 @@ const BuatLaporan = () => {
 
 
 
-                <form onSubmit={handleSubmit} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-4 max-w-[1400px] mx-auto">
                     {/* DATA PELAPOR */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
@@ -393,6 +400,7 @@ const BuatLaporan = () => {
                                 </select>
                             </div>
                             <div><label className="text-sm font-semibold mb-1 block">Afiliasi *</label><input type="text" name="suspect_affiliation" required value={formData.suspect_affiliation} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
+                            <div><label className="text-sm font-semibold mb-1 block">WhatsApp Terlapor</label><input type="text" name="suspect_whatsapp" value={formData.suspect_whatsapp} onChange={handleInputChange} placeholder="8123xxx (Jika ada)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
                         </div>
                     </section>
 
@@ -445,33 +453,28 @@ const BuatLaporan = () => {
                                         </motion.div>
                                     )}
                                 </div>
-                                <div>
-                                    <label className="text-sm font-semibold mb-2 block">Pilih Jam (24 Jam) *</label>
-                                    <div className="flex gap-2">
-                                        <select 
-                                            required 
-                                            value={proposedTime.split(':')[0] || ''} 
-                                            onChange={(e) => setProposedTime(`${e.target.value}:${proposedTime.split(':')[1] || '00'}`)}
-                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-[#8b5cf6]"
-                                        >
-                                            <option value="">Jam</option>
-                                            {['08','09','10','11','12','13','14','15','16'].map(h => (
-                                                <option key={h} value={h}>{h}</option>
-                                            ))}
-                                        </select>
-                                        <select 
-                                            required 
-                                            value={proposedTime.split(':')[1] || ''} 
-                                            onChange={(e) => setProposedTime(`${proposedTime.split(':')[0] || '08'}:${e.target.value}`)}
-                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-sm focus:ring-2 focus:ring-[#8b5cf6]"
-                                        >
-                                            <option value="">Menit</option>
-                                            {['00','15','30','45'].map(m => (
-                                                <option key={m} value={m}>{m}</option>
-                                            ))}
-                                        </select>
+                                <div className="col-span-full">
+                                    <label className="text-sm font-semibold mb-3 block">Pilih Jam (24 Jam) *</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                        {TIME_SLOTS.map((time) => (
+                                            <button
+                                                key={time}
+                                                type="button"
+                                                onClick={() => setProposedTime(time)}
+                                                className={`px-4 py-3 rounded-2xl border-2 transition-all font-bold text-sm flex items-center justify-center gap-2
+                                                    ${proposedTime === time 
+                                                        ? 'bg-[#8b5cf6] border-[#8b5cf6] text-white shadow-lg shadow-purple-200 scale-[0.98]' 
+                                                        : 'bg-white border-gray-100 text-gray-500 hover:border-purple-200 hover:bg-purple-50'
+                                                    }`}
+                                            >
+                                                <Clock className={`w-4 h-4 ${proposedTime === time ? 'text-white' : 'text-gray-400'}`} />
+                                                {time}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-2">Format 24 Jam (Contoh: 14:30)</p>
+                                    <p className="text-[10px] text-gray-400 mt-3 flex items-center gap-1">
+                                        <Info className="w-3 h-3" /> Klik salah satu slot waktu di atas untuk memilih jadwal.
+                                    </p>
                                 </div>
                             </div>
                         </div>

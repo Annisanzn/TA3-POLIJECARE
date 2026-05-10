@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Info, FileText, BookOpen, Phone, Library } from 'lucide-react';
+import { Home, Info, FileText, BookOpen, Phone, Library, Search } from 'lucide-react';
 import { ExpandableTabs } from "@/components/ui/expandable-tabs";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +24,7 @@ const Navbar = () => {
     { name: 'Cara Melapor', href: '#services' },
     { name: 'Artikel', href: '#articles' },
     { name: 'Edukasi', href: '#materials' },
+    { name: 'Lacak Laporan', href: '/lacak-laporan' },
     { name: 'Kontak', href: '#contact' }
   ];
 
@@ -33,6 +34,7 @@ const Navbar = () => {
     { title: "Cara Melapor", icon: FileText },
     { title: "Artikel", icon: BookOpen },
     { title: "Edukasi", icon: Library },
+    { title: "Lacak", icon: Search },
     { title: "Kontak", icon: Phone },
   ];
 
@@ -42,6 +44,8 @@ const Navbar = () => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else {
+      navigate(href);
     }
     setIsMobileMenuOpen(false);
   };

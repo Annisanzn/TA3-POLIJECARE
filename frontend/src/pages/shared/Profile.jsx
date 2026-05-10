@@ -191,30 +191,14 @@ const Profile = () => {
                 </div>
 
                 <div className="mb-2">
-                   {!isEditing ? (
-                     <button 
-                      onClick={() => setIsEditing(true)}
-                      className="px-6 py-3 bg-white text-slate-900 rounded-2xl text-xs font-semibold tracking-wide shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-                     >
-                        <FiSettings /> Edit Profil
-                     </button>
-                   ) : (
-                     <div className="flex gap-3">
-                        <button 
-                          onClick={() => setIsEditing(false)}
-                          className="px-6 py-3 bg-white/20 text-white rounded-2xl text-xs font-semibold tracking-wide border border-white/40 hover:bg-white/30 transition-all"
-                        >
-                            Batal
-                        </button>
-                        <button 
-                          onClick={handleSaveProfile}
-                          disabled={isSaving}
-                          className="px-6 py-3 bg-white text-emerald-600 rounded-2xl text-xs font-semibold tracking-wide shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-                        >
-                            {isSaving ? 'Menyimpan...' : 'Simpan'}
-                        </button>
-                     </div>
-                   )}
+                    {!isEditing && (
+                      <button 
+                       onClick={() => setIsEditing(true)}
+                       className="px-6 py-3 bg-white text-slate-900 rounded-2xl text-xs font-semibold tracking-wide shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+                      >
+                         <FiSettings /> Edit Profil
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
@@ -410,17 +394,17 @@ const Profile = () => {
                    </div>
 
                    {isEditing && (
-                     <div className="mt-12 pt-8 border-t border-gray-50 flex justify-end gap-4">
+                     <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                         <button 
                           onClick={() => setIsEditing(false)}
-                          className="px-8 py-4 bg-gray-100 text-gray-500 rounded-2xl text-xs font-semibold tracking-wide hover:bg-gray-200 transition-all"
+                          className="w-full sm:w-auto px-8 py-4 bg-gray-100 text-gray-500 rounded-2xl text-xs font-semibold tracking-wide hover:bg-gray-200 transition-all order-2 sm:order-1"
                         >
                             Batal
                         </button>
                         <button 
                           onClick={handleSaveProfile}
                           disabled={isSaving}
-                          className="px-10 py-4 bg-emerald-500 text-white rounded-2xl text-xs font-semibold tracking-wide shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all flex items-center gap-2"
+                          className="w-full sm:w-auto px-10 py-4 bg-emerald-500 text-white rounded-2xl text-xs font-semibold tracking-wide shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 order-1 sm:order-2"
                         >
                             {isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
