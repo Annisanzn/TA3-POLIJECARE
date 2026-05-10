@@ -24,6 +24,37 @@ Route::get('/test', function () {
     ]);
 });
 
+// EMERGENCY ROUTES FOR PRODUCTION (No terminal access)
+Route::get('/run-migration-now', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return '<h1>Migrasi Berhasil!</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>';
+    } catch (\Exception $e) {
+        return '<h1>Migrasi Gagal!</h1><pre>' . $e->getMessage() . '</pre>';
+    }
+});
+
+Route::get('/storage-link-now', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        return '<h1>Storage Link Berhasil!</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>';
+    } catch (\Exception $e) {
+        return '<h1>Gagal Storage Link!</h1><pre>' . $e->getMessage() . '</pre>';
+    }
+});
+
+Route::get('/clear-cache-now', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        return "<h1>Semua cache telah dihapus!</h1>";
+    } catch (\Exception $e) {
+        return '<h1>Gagal hapus cache!</h1><pre>' . $e->getMessage() . '</pre>';
+    }
+});
+
 // Test route without authentication
 Route::get('/test-users', [UserController::class, 'index']);
 
@@ -52,6 +83,7 @@ Route::post('/public-complaints', [\App\Http\Controllers\API\PublicComplaintCont
 Route::get('/public-categories', [\App\Http\Controllers\API\ViolenceCategoryController::class, 'publicIndex']);
 Route::get('/public-counselors', [\App\Http\Controllers\API\CounselingController::class, 'getCounselors']);
 Route::get('/public-counselor-schedules', [\App\Http\Controllers\API\CounselorScheduleController::class, 'publicIndex']);
+Route::get('/public/track', [\App\Http\Controllers\API\PublicTrackingController::class, 'track']);
 
 // Public Materials Route
 Route::get('/public-materials', [\App\Http\Controllers\API\MaterialController::class, 'index']);
@@ -95,6 +127,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard stats
         Route::get('/dashboard', [\App\Http\Controllers\API\KonselorDashboardController::class, 'stats']);
         Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
+        Route::get('/dashboard/gender-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'genderDistribution']);
+        Route::get('/dashboard/department-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'departmentDistribution']);
 
         // Pengaduan yang terkait konselor ini
         Route::get('/pengaduan', [\App\Http\Controllers\API\ComplaintController::class, 'index']);
@@ -171,6 +205,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard Statistics
         Route::get('/dashboard', [\App\Http\Controllers\API\OperatorDashboardController::class, 'index']);
         Route::get('/dashboard/report-category-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'reportCategoryDistribution']);
+        Route::get('/dashboard/gender-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'genderDistribution']);
+        Route::get('/dashboard/department-distribution', [\App\Http\Controllers\API\OperatorDashboardController::class, 'departmentDistribution']);
 
         // Violence categories management routes
         Route::get('/categories', [ViolenceCategoryController::class, 'index']);

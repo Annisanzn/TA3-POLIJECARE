@@ -72,29 +72,59 @@ const DonutChart = ({ data, size = 160, strokeWidth = 20 }) => {
 const CHART_COLORS = ['#7C3AED', '#A78BFA', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899', '#14B8A6'];
 
 const ChartSection = () => {
-  const [activeYear, setActiveYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState('2026');
+  const [selectedMonth, setSelectedMonth] = useState('Semua');
   const [showMapModal, setShowMapModal] = useState(false);
   const { user } = useAuth();
 
-  // Dynamic state for category distribution chart
+  // Dynamic state for charts
   const [categoryData, setCategoryData] = useState([]);
-  const [loadingCategory, setLoadingCategory] = useState(true);
+  const [genderData, setGenderData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  
+  const [loading, setLoading] = useState(true);
 
-  const years = ['Semua', '2023', '2024', '2025'];
+  const years = ['Semua', '2024', '2025', '2026'];
+  const months = [
+    { value: 'Semua', label: 'Semua Bulan' },
+    { value: '1', label: 'Januari' },
+    { value: '2', label: 'Februari' },
+    { value: '3', label: 'Maret' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'Mei' },
+    { value: '6', label: 'Juni' },
+    { value: '7', label: 'Juli' },
+    { value: '8', label: 'Agustus' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' },
+  ];
 
-  // Fetch category distribution data from API
+  // Fetch all chart data from API
   useEffect(() => {
-    const fetchCategoryDistribution = async () => {
+    const fetchAllChartData = async () => {
       if (!user?.role) return;
       try {
-        setLoadingCategory(true);
-        // Determine API prefix based on user role
+        setLoading(true);
         const rolePrefix = user?.role === 'konselor' ? '/konselor' : '/operator';
-        const res = await api.get(`${rolePrefix}/dashboard/report-category-distribution`);
+        
+        const params = {};
+        if (selectedYear !== 'Semua') params.year = selectedYear;
+        if (selectedMonth !== 'Semua') params.month = selectedMonth;
 
-        if (res.data?.success && Array.isArray(res.data.data)) {
-          const total = res.data.data.reduce((sum, item) => sum + item.jumlah, 0);
-          const transformed = res.data.data.map((item, index) => {
+        const genderParams = selectedYear !== 'Semua' ? { year: selectedYear } : {};
+
+        const [catRes, genRes, depRes] = await Promise.all([
+          api.get(`${rolePrefix}/dashboard/report-category-distribution`, { params }),
+          api.get(`${rolePrefix}/dashboard/gender-distribution`, { params: genderParams }),
+          api.get(`${rolePrefix}/dashboard/department-distribution`, { params })
+        ]);
+
+        // Process Category Data
+        if (catRes.data?.success && Array.isArray(catRes.data.data)) {
+          const total = catRes.data.data.reduce((sum, item) => sum + item.jumlah, 0);
+          const transformed = catRes.data.data.map((item, index) => {
             const pct = total > 0 ? ((item.jumlah / total) * 100).toFixed(0) : 0;
             return {
               name: item.kategori,
@@ -107,45 +137,42 @@ const ChartSection = () => {
           });
           setCategoryData(transformed);
         }
+
+        // Process Gender Data
+        if (genRes.data?.success) {
+          setGenderData(genRes.data.data);
+        }
+
+        // Process Department Data
+        if (depRes.data?.success) {
+          const depTotal = depRes.data.data.reduce((sum, item) => sum + item.value, 0);
+          const transformedDep = depRes.data.data.map((item, index) => ({
+            ...item,
+            color: CHART_COLORS[index % CHART_COLORS.length],
+            percentage: depTotal > 0 ? `${((item.value / depTotal) * 100).toFixed(0)}%` : '0%'
+          }));
+          setDepartmentData(transformedDep);
+        }
+
       } catch (error) {
-        console.error('Failed to fetch category distribution', error);
-        setCategoryData([]);
+        console.error('Failed to fetch chart data', error);
       } finally {
-        setLoadingCategory(false);
+        setLoading(false);
       }
     };
 
-    fetchCategoryDistribution();
-  }, [user?.role]);
+    fetchAllChartData();
+  }, [user?.role, selectedYear, selectedMonth]);
 
   // Compute dynamic totals
   const totalReports = categoryData.reduce((sum, item) => sum + (item.rawCount || 0), 0);
   const highestCategory = categoryData.length > 0 ? categoryData.reduce((max, item) => item.rawCount > max.rawCount ? item : max, categoryData[0]) : null;
 
-  // Data untuk distribusi gender - format baru untuk stacked bar
-  const genderData = [
-    { month: 'Januari', laki: 65, perempuan: 35, total: 100 },
-    { month: 'Februari', laki: 70, perempuan: 30, total: 100 },
-    { month: 'Maret', laki: 55, perempuan: 45, total: 100 },
-    { month: 'April', laki: 60, perempuan: 40, total: 100 },
-    { month: 'Mei', laki: 75, perempuan: 25, total: 100 },
-    { month: 'Juni', laki: 50, perempuan: 50, total: 100 },
-  ];
-
-  // Data untuk sebaran kekerasan seksual per jurusan
-  const departmentData = [
-    { name: 'Teknologi Informasi', value: 18, color: '#F59E0B', percentage: '36%' },
-    { name: 'Kesehatan', value: 12, color: '#EF4444', percentage: '24%' },
-    { name: 'Manajemen Agribisnis', value: 8, color: '#10B981', percentage: '16%' },
-    { name: 'Teknik', value: 7, color: '#3B82F6', percentage: '14%' },
-    { name: 'Produksi Pertanian', value: 5, color: '#8B5CF6', percentage: '10%' },
-  ];
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Chart 1: Sebaran Kekerasan per Kategori */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-800 lg:col-span-2">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
               <FiPieChart className="w-5 h-5 text-purple-600" />
@@ -155,10 +182,34 @@ const ChartSection = () => {
               <p className="text-sm text-gray-500">Distribusi jenis laporan kekerasan</p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2">
+            {/* Year Selector */}
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-2 transition-all"
+            >
+              {years.map(y => (
+                <option key={y} value={y}>{y === 'Semua' ? 'Semua Tahun' : y}</option>
+              ))}
+            </select>
+
+            {/* Month Selector */}
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-2 transition-all"
+            >
+              {months.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Loading State */}
-        {loadingCategory ? (
+        {loading ? (
           <div className="space-y-4 animate-pulse">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="space-y-2">
@@ -343,8 +394,14 @@ const ChartSection = () => {
         <div className="mt-6 pt-6 border-t border-gray-100">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              Rata-rata: <span className="font-medium text-blue-600">62% Laki-laki</span>,
-              <span className="font-medium text-purple-600 ml-2">38% Perempuan</span>
+              {genderData.length > 0 ? (
+                <>
+                  Rata-rata: <span className="font-medium text-blue-600">{Math.round(genderData.reduce((sum, item) => sum + item.laki, 0) / genderData.length)}% Laki-laki</span>,
+                  <span className="font-medium text-purple-600 ml-2">{Math.round(genderData.reduce((sum, item) => sum + item.perempuan, 0) / genderData.length)}% Perempuan</span>
+                </>
+              ) : (
+                <span>Tidak ada data gender untuk periode ini</span>
+              )}
             </div>
           </div>
         </div>
@@ -363,30 +420,32 @@ const ChartSection = () => {
             </div>
           </div>
           <div className="text-sm font-medium text-gray-900 bg-red-50 px-3 py-1 rounded-full">
-            Total: 50 kasus
+            Total: {departmentData.reduce((sum, item) => sum + item.value, 0)} kasus
           </div>
         </div>
 
         {/* Summary Highlight */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-100 dark:border-red-900/30 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Jurusan dengan kasus tertinggi</div>
-              <div className="text-xl font-bold text-slate-900">Jurusan Teknologi Informasi</div>
-            </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-slate-900">36%</div>
-              <div className="text-xs font-medium text-slate-500">18 dari 50 kasus</div>
+        {departmentData.length > 0 && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-100 dark:border-red-900/30 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Jurusan dengan kasus tertinggi</div>
+                <div className="text-xl font-bold text-slate-900">{departmentData[0].name}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-slate-900">{departmentData[0].percentage}</div>
+                <div className="text-xs font-medium text-slate-500">{departmentData[0].value} dari {departmentData.reduce((sum, item) => sum + item.value, 0)} kasus</div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Horizontal Bar Chart Sorted Descending */}
         <div className="space-y-4">
           {departmentData
-            .sort((a, b) => b.value - a.value) // Sort by value descending
             .map((item, index) => {
-              const percentage = (item.value / 50) * 100;
+              const totalDep = departmentData.reduce((sum, d) => sum + d.value, 0);
+              const percentage = totalDep > 0 ? (item.value / totalDep) * 100 : 0;
               const isHighest = index === 0;
               const isSecond = index === 1;
 
@@ -448,7 +507,7 @@ const ChartSection = () => {
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: item.color }}
                       ></div>
-                      <span>{item.value} dari 50 total kasus</span>
+                      <span>{item.value} dari {departmentData.reduce((sum, d) => sum + d.value, 0)} total kasus</span>
                     </div>
                     <span className={`font-medium ${isHighest ? 'text-red-600' :
                       isSecond ? 'text-orange-600' : 'text-gray-600'
