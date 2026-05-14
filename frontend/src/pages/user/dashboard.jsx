@@ -279,44 +279,44 @@ const UserDashboard = () => {
                 </motion.div>
 
                 {/* 7. Kontak Satgas PPKPT (Emergency) MOVED TO LEFT COLUMN */}
-                <motion.div variants={itemVariant} className="bg-gray-900 border border-gray-800 rounded-[32px] p-6 sm:p-8 shadow-xl shadow-gray-900/10">
+                <motion.div variants={itemVariant} className="bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-[32px] p-6 sm:p-8 shadow-sm">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-3 h-3 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
-                    <h2 className="text-xl font-bold text-white">Bantuan Darurat Satgas</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Bantuan Darurat Satgas</h2>
                   </div>
 
                   <div className="space-y-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-rose-400 shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 shrink-0">
                         <FiPhoneCall size={18} />
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Hotline 24/7</p>
-                        <a href={`tel:${satgas_contact?.phone || ''}`} className="font-semibold text-base text-white hover:text-rose-400 transition-colors">
+                        <a href={`tel:${satgas_contact?.phone || ''}`} className="font-semibold text-base text-gray-900 hover:text-[#8b5cf6] transition-colors">
                           {satgas_contact?.phone || '+62 812-3456-7890'}
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-blue-400 shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
                         <FiMail size={18} />
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Email Satgas</p>
-                        <a href={`mailto:${satgas_contact?.email || ''}`} className="font-semibold text-sm text-white hover:text-blue-400 transition-colors">
+                        <a href={`mailto:${satgas_contact?.email || ''}`} className="font-semibold text-sm text-gray-900 hover:text-[#8b5cf6] transition-colors">
                           {satgas_contact?.email || 'satgas.ppkpt@polije.ac.id'}
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-emerald-400 shrink-0 mt-1">
+                      <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0 mt-1">
                         <FiMapPin size={18} />
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Lokasi Kantor</p>
-                        <p className="font-semibold text-sm text-white leading-snug">
+                        <p className="font-semibold text-sm text-gray-700 leading-snug">
                           {satgas_contact?.location || 'Gedung Rektorat Lt. 1, Politeknik Negeri Jember'}
                         </p>
                       </div>

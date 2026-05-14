@@ -58,6 +58,46 @@ const BuatLaporan = () => {
         guest_unit: currentUser?.unit || ''
     });
 
+    const [fieldErrors, setFieldErrors] = useState({});
+
+    const validateField = (name, value) => {
+        switch (name) {
+            case 'title':
+                return !value ? 'Judul laporan wajib diisi.' : (value.length < 5 ? 'Judul minimal 5 karakter.' : '');
+            case 'violence_category_id':
+                return !value ? 'Kategori kekerasan wajib dipilih.' : '';
+            case 'guest_phone':
+                return !value ? 'Nomor WhatsApp wajib diisi.' : (value.length < 8 ? 'Nomor WhatsApp minimal 8 digit.' : '');
+            case 'guest_email':
+                return !value ? 'Email aktif wajib diisi.' : '';
+            case 'location':
+                return !value ? 'Lokasi kejadian wajib diisi.' : '';
+            case 'incident_date':
+                return !value ? 'Tanggal kejadian wajib diisi.' : '';
+            case 'chronology':
+                if (!value) return 'Kronologi kejadian wajib diisi.';
+                if (value.length < 50) return `Kronologi minimal 50 karakter. (saat ini ${value.length} karakter)`;
+                return '';
+            case 'suspect_name':
+                return !value ? 'Nama terlapor wajib diisi.' : '';
+            case 'suspect_affiliation':
+                return !value ? 'Afiliasi terlapor wajib diisi.' : '';
+            case 'victim_name':
+                return !value ? 'Nama korban wajib diisi.' : '';
+            case 'victim_relationship':
+                return !value ? 'Hubungan dengan korban wajib diisi.' : '';
+            default:
+                return '';
+        }
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        const error = validateField(name, value);
+        setFieldErrors(prev => ({ ...prev, [name]: error }));
+    };
+
+
     const getAuthHeaders = () => {
         const token = localStorage.getItem('token');
         return {
@@ -69,7 +109,7 @@ const BuatLaporan = () => {
     useEffect(() => {
         // Enforce profile completion before allowing report creation
         const isProfileIncomplete = currentUser?.role === 'user' && (!currentUser?.gender || !currentUser?.unit || !currentUser?.name);
-        
+
         if (isProfileIncomplete) {
             toast.error('Mohon lengkapi profil Anda (Nama, Jenis Kelamin, Unit) terlebih dahulu sebelum membuat laporan.');
             navigate('/profile', { replace: true });
@@ -105,6 +145,11 @@ const BuatLaporan = () => {
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
 
+        // Clear error on change
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => ({ ...prev, [name]: '' }));
+        }
+
         if (name === 'guest_phone') {
             const digits = value.replace(/\D/g, '');
             const cleanDigits = digits.startsWith('0') ? digits.substring(1) : digits;
@@ -139,19 +184,28 @@ const BuatLaporan = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const missingFields = [];
-        if (!formData.title) missingFields.push('Judul Laporan');
-        if (!formData.violence_category_id) missingFields.push('Kategori Kekerasan');
-        if (!formData.guest_phone) missingFields.push('Nomor WhatsApp');
-        if (!formData.guest_email) missingFields.push('Email Aktif');
-        if (!formData.location) missingFields.push('Lokasi Kejadian');
-        if (!formData.incident_date) missingFields.push('Tanggal Kejadian');
-        if (!formData.chronology) missingFields.push('Kronologi Kejadian');
-        if (!proposedDate) missingFields.push('Tanggal Usulan');
-        if (!proposedTime) missingFields.push('Jam Usulan');
+        // Validate all fields
+        const fieldsToValidate = ['title', 'violence_category_id', 'guest_phone', 'guest_email', 'location', 'incident_date', 'chronology', 'suspect_name', 'suspect_affiliation'];
+        if (formData.victim_type === 'other') {
+            fieldsToValidate.push('victim_name', 'victim_relationship');
+        }
 
-        if (missingFields.length > 0) {
-            alert(`⚠️ Mohon lengkapi: ${missingFields.join(', ')}`);
+        const errors = {};
+        fieldsToValidate.forEach(field => {
+            const err = validateField(field, formData[field]);
+            if (err) errors[field] = err;
+        });
+
+        // Schedule validation
+        if (!proposedDate) errors.proposedDate = 'Tanggal usulan jadwal wajib dipilih.';
+        if (!proposedTime) errors.proposedTime = 'Jam usulan jadwal wajib dipilih.';
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            toast.error('Mohon lengkapi semua kolom yang ditandai merah.');
+            // Scroll to first error
+            const firstErrorField = document.querySelector('[data-error="true"]');
+            if (firstErrorField) firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -236,7 +290,8 @@ const BuatLaporan = () => {
         return (
             <UserLayout user={currentUser}>
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#1e1b4b]/40 backdrop-blur-sm">
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden">
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden">
                         <div className="h-32 bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] flex items-center justify-center">
                             <CheckCircle className="w-16 h-16 text-white" />
                         </div>
@@ -244,27 +299,30 @@ const BuatLaporan = () => {
                             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">Laporan Terkirim!</h2>
                             <p className="text-gray-500 mb-8">Nomor registrasi: <span className="font-bold text-[#8b5cf6]">{createdReportId}</span></p>
                             <div className="space-y-4">
-                                <a 
+                                <a
                                     href={`https://wa.me/6282126432696?text=${encodeURIComponent(
                                         `*KONFIRMASI LAPORAN POLIJECARE*\n\n` +
                                         `Halo Satgas PPKPT Polije, saya telah mengirimkan laporan pengaduan melalui aplikasi PolijeCare.\n\n` +
                                         `*Detail Laporan:*\n` +
                                         `- *ID Laporan:* ${createdReportId}\n` +
                                         `- *Nama Pelapor:* ${currentUser?.name}\n` +
-                                        `- *Kategori:* ${categories.find(c => String(c.unique_id) === String(formData.violence_category_id))?.name || 'Laporan'}\n` +
+                                        `- *Kategori:* ${categories.find
+                                            (c => String(c.unique_id) === String(formData.violence_category_id))?.name || 'Laporan'}\n` +
                                         `- *Judul:* ${formData.title}\n\n` +
                                         `*Usulan Jadwal Penanganan:*\n` +
                                         `- *Tanggal:* ${proposedDate}\n` +
                                         `- *Jam:* ${proposedTime} WIB\n\n` +
                                         `Mohon bantuan untuk proses selanjutnya. Terima kasih.`
-                                    )}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className="w-full py-4 bg-[#25D366] text-white font-bold rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-green-100 hover:bg-[#20bd5c] transition-all"
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-4 bg-[#25D366] text-white font-bold rounded-2xl flex items-center 
+                                    justify-center gap-3 shadow-lg shadow-green-100 hover:bg-[#20bd5c] transition-all"
                                 >
                                     Konfirmasi via WhatsApp
                                 </a>
-                                <button onClick={() => navigate('/user/histori-pengaduan')} className="w-full py-4 border-2 border-gray-100 text-gray-500 font-bold rounded-2xl">Lihat Riwayat</button>
+                                <button onClick={() => navigate('/user/histori-pengaduan')} className="w-full py-4 border-2
+                                 border-gray-100 text-gray-500 font-bold rounded-2xl">Lihat Riwayat</button>
                             </div>
                         </div>
                     </motion.div>
@@ -306,16 +364,18 @@ const BuatLaporan = () => {
                             <div><label className="text-xs text-gray-500 font-medium block mb-1">Semester</label><div className="font-semibold text-gray-900">{currentUser?.semester || '-'}</div></div>
                         </div>
                         <div className="px-6 py-4 bg-purple-50/50 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div data-error={!!fieldErrors.guest_phone}>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">WA Aktif <span className="text-red-500">*</span></label>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm font-medium">+62</span>
-                                    <input type="text" name="guest_phone" required value={formData.guest_phone} onChange={handleInputChange} className="w-full bg-white border border-gray-200 rounded-xl pl-12 pr-4 py-2.5 text-sm focus:ring-[#8b5cf6]" />
+                                    <input type="text" name="guest_phone" required value={formData.guest_phone} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-white border ${fieldErrors.guest_phone ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl pl-12 pr-4 py-2.5 text-sm focus:ring-[#8b5cf6]`} />
                                 </div>
+                                {fieldErrors.guest_phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.guest_phone}</p>}
                             </div>
-                            <div>
+                            <div data-error={!!fieldErrors.guest_email}>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Email Aktif <span className="text-red-500">*</span></label>
-                                <input type="email" name="guest_email" required value={formData.guest_email} onChange={handleInputChange} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-[#8b5cf6]" />
+                                <input type="email" name="guest_email" required value={formData.guest_email} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-white border ${fieldErrors.guest_email ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-2.5 text-sm focus:ring-[#8b5cf6]`} />
+                                {fieldErrors.guest_email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.guest_email}</p>}
                             </div>
                         </div>
                     </section>
@@ -341,7 +401,7 @@ const BuatLaporan = () => {
                                     </div>
                                 </label>
                             </div>
-                            
+
                             <div className="mt-6">
                                 <label className="text-sm font-semibold mb-3 block">
                                     {formData.victim_type === 'self' ? 'Jenis Kelamin Anda' : 'Jenis Kelamin Korban'} *
@@ -360,8 +420,8 @@ const BuatLaporan = () => {
 
                             {formData.victim_type === 'other' && (
                                 <div className="mt-6 p-5 bg-purple-50 rounded-xl border border-purple-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label className="text-sm font-semibold mb-1 block">Nama Korban *</label><input type="text" name="victim_name" required value={formData.victim_name} onChange={handleInputChange} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
-                                    <div><label className="text-sm font-semibold mb-1 block">Hubungan *</label><input type="text" name="victim_relationship" required value={formData.victim_relationship} onChange={handleInputChange} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
+                                    <div data-error={!!fieldErrors.victim_name}><label className="text-sm font-semibold mb-1 block">Nama Korban *</label><input type="text" name="victim_name" required value={formData.victim_name} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-white border ${fieldErrors.victim_name ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />{fieldErrors.victim_name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.victim_name}</p>}</div>
+                                    <div data-error={!!fieldErrors.victim_relationship}><label className="text-sm font-semibold mb-1 block">Hubungan *</label><input type="text" name="victim_relationship" required value={formData.victim_relationship} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-white border ${fieldErrors.victim_relationship ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />{fieldErrors.victim_relationship && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.victim_relationship}</p>}</div>
                                 </div>
                             )}
                         </div>
@@ -374,7 +434,7 @@ const BuatLaporan = () => {
                             <p className="text-xs text-gray-400 mt-1">Data Terlapor adalah orang yang diadukan atau diduga melakukan tindakan kekerasan/perundungan.</p>
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div><label className="text-sm font-semibold mb-1 block">Nama Terlapor *</label><input type="text" name="suspect_name" required value={formData.suspect_name} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
+                            <div data-error={!!fieldErrors.suspect_name}><label className="text-sm font-semibold mb-1 block">Nama Terlapor *</label><input type="text" name="suspect_name" required value={formData.suspect_name} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-gray-50 border ${fieldErrors.suspect_name ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />{fieldErrors.suspect_name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.suspect_name}</p>}</div>
                             <div>
                                 <label className="text-sm font-semibold mb-1 block">Jenis Kelamin</label>
                                 <div className="flex gap-2">
@@ -399,7 +459,7 @@ const BuatLaporan = () => {
                                     <option value="Pihak Luar">Pihak Luar / Lainnya</option>
                                 </select>
                             </div>
-                            <div><label className="text-sm font-semibold mb-1 block">Afiliasi *</label><input type="text" name="suspect_affiliation" required value={formData.suspect_affiliation} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
+                            <div data-error={!!fieldErrors.suspect_affiliation}><label className="text-sm font-semibold mb-1 block">Afiliasi *</label><input type="text" name="suspect_affiliation" required value={formData.suspect_affiliation} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-gray-50 border ${fieldErrors.suspect_affiliation ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />{fieldErrors.suspect_affiliation && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.suspect_affiliation}</p>}</div>
                             <div><label className="text-sm font-semibold mb-1 block">WhatsApp Terlapor</label><input type="text" name="suspect_whatsapp" value={formData.suspect_whatsapp} onChange={handleInputChange} placeholder="8123xxx (Jika ada)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
                         </div>
                     </section>
@@ -424,18 +484,19 @@ const BuatLaporan = () => {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
+                                <div data-error={!!fieldErrors.proposedDate}>
                                     <label className="text-sm font-semibold mb-2 block">Pilih Tanggal *</label>
-                                    <input 
-                                        type="date" 
-                                        required 
-                                        min={new Date().toISOString().split('T')[0]} 
-                                        value={proposedDate} 
-                                        onChange={(e) => setProposedDate(e.target.value)} 
-                                        className={`w-full bg-gray-50 border ${proposedDate && (new Date(proposedDate + 'T00:00:00').getDay() === 0 || new Date(proposedDate + 'T00:00:00').getDay() >= 5) ? 'border-rose-300 ring-2 ring-rose-50' : 'border-gray-200'} rounded-2xl px-6 py-4 text-sm transition-all`} 
+                                    <input
+                                        type="date"
+                                        required
+                                        min={new Date().toISOString().split('T')[0]}
+                                        value={proposedDate}
+                                        onChange={(e) => { setProposedDate(e.target.value); setFieldErrors(prev => ({ ...prev, proposedDate: '' })); }}
+                                        className={`w-full bg-gray-50 border ${fieldErrors.proposedDate ? 'border-red-400 ring-2 ring-red-100' : (proposedDate && (new Date(proposedDate + 'T00:00:00').getDay() === 0 || new Date(proposedDate + 'T00:00:00').getDay() >= 5) ? 'border-rose-300 ring-2 ring-rose-50' : 'border-gray-200')} rounded-2xl px-6 py-4 text-sm transition-all`}
                                     />
+                                    {fieldErrors.proposedDate && <p className="text-xs text-red-500 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.proposedDate}</p>}
                                     {proposedDate && (new Date(proposedDate + 'T00:00:00').getDay() === 0 || new Date(proposedDate + 'T00:00:00').getDay() >= 5) && (
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             className="mt-4 p-5 bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-200 rounded-[2rem] shadow-xl shadow-rose-500/5 flex items-start gap-4"
@@ -446,7 +507,7 @@ const BuatLaporan = () => {
                                             <div className="space-y-1">
                                                 <p className="text-sm font-bold text-rose-900">Jadwal Tidak Tersedia</p>
                                                 <p className="text-[11px] font-medium text-rose-700 leading-relaxed">
-                                                    Maaf, layanan konseling Satgas hanya tersedia hari <span className="font-bold">Senin sampai Kamis</span>. 
+                                                    Maaf, layanan konseling Satgas hanya tersedia hari <span className="font-bold">Senin sampai Kamis</span>.
                                                     Silakan pilih tanggal lain untuk penanganan langsung, atau tetap kirimkan laporan tanpa jadwal penanganan.
                                                 </p>
                                             </div>
@@ -460,10 +521,10 @@ const BuatLaporan = () => {
                                             <button
                                                 key={time}
                                                 type="button"
-                                                onClick={() => setProposedTime(time)}
+                                                onClick={() => { setProposedTime(time); setFieldErrors(prev => ({ ...prev, proposedTime: '' })); }}
                                                 className={`px-4 py-3 rounded-2xl border-2 transition-all font-bold text-sm flex items-center justify-center gap-2
-                                                    ${proposedTime === time 
-                                                        ? 'bg-[#8b5cf6] border-[#8b5cf6] text-white shadow-lg shadow-purple-200 scale-[0.98]' 
+                                                    ${proposedTime === time
+                                                        ? 'bg-[#8b5cf6] border-[#8b5cf6] text-white shadow-lg shadow-purple-200 scale-[0.98]'
                                                         : 'bg-white border-gray-100 text-gray-500 hover:border-purple-200 hover:bg-purple-50'
                                                     }`}
                                             >
@@ -472,9 +533,13 @@ const BuatLaporan = () => {
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-3 flex items-center gap-1">
-                                        <Info className="w-3 h-3" /> Klik salah satu slot waktu di atas untuk memilih jadwal.
-                                    </p>
+                                    {fieldErrors.proposedTime ? (
+                                        <p className="text-xs text-red-500 mt-3 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.proposedTime}</p>
+                                    ) : (
+                                        <p className="text-[10px] text-gray-400 mt-3 flex items-center gap-1">
+                                            <Info className="w-3 h-3" /> Klik salah satu slot waktu di atas untuk memilih jadwal.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -484,13 +549,33 @@ const BuatLaporan = () => {
                     <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label className="text-sm font-semibold mb-2 block">Tingkat Urgensi *</label><select name="urgency_level" required value={formData.urgency_level} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm"><option value="low">Rendah</option><option value="medium">Sedang</option><option value="high">Tinggi</option></select></div>
-                            <div><label className="text-sm font-semibold mb-2 block">Kategori Kekerasan *</label><select name="violence_category_id" required value={formData.violence_category_id} onChange={handleInputChange} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm"><option value="">-- Pilih --</option>{categories.map(c => (<option key={c.unique_id} value={c.unique_id}>{c.name}</option>))}</select></div>
+                            <div data-error={!!fieldErrors.violence_category_id}>
+                                <label className="text-sm font-semibold mb-2 block">Kategori Kekerasan *</label>
+                                <select name="violence_category_id" required value={formData.violence_category_id} onChange={handleInputChange} onBlur={handleBlur} className={`w-full bg-gray-50 border ${fieldErrors.violence_category_id ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`}>
+                                    <option value="">-- Pilih --</option>{categories.map(c => (<option key={c.unique_id} value={c.unique_id}>{c.name}</option>))}
+                                </select>
+                                {fieldErrors.violence_category_id && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.violence_category_id}</p>}
+                            </div>
                         </div>
-                        <div className="mt-6"><label className="text-sm font-semibold mb-2 block">Judul Laporan *</label><input type="text" name="title" required value={formData.title} onChange={handleInputChange} placeholder="Judul singkat..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" /></div>
-                        <div className="mt-6">
-                            <label className="text-sm font-semibold mb-1 block">Kronologi * (Min 50 Karakter)</label>
+                        <div className="mt-6" data-error={!!fieldErrors.title}>
+                            <label className="text-sm font-semibold mb-2 block">Judul Laporan *</label>
+                            <input type="text" name="title" required value={formData.title} onChange={handleInputChange} onBlur={handleBlur} placeholder="Judul singkat..." className={`w-full bg-gray-50 border ${fieldErrors.title ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />
+                            {fieldErrors.title && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.title}</p>}
+                        </div>
+                        <div className="mt-6" data-error={!!fieldErrors.chronology}>
+                            <label className="text-sm font-semibold mb-1 block">Kronologi * <span className="text-gray-400 font-normal">(Min 50 Karakter)</span></label>
                             <p className="text-xs text-gray-400 mb-2">Kronologi adalah urutan kejadian yang menjelaskan bagaimana peristiwa tersebut berlangsung dari awal hingga akhir secara detail.</p>
-                            <textarea name="chronology" required minLength="50" rows="5" value={formData.chronology} onChange={handleInputChange} placeholder="Ceritakan secara detail urutan kejadiannya..." className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" />
+                            <textarea name="chronology" required minLength="50" rows="5" value={formData.chronology} onChange={handleInputChange} onBlur={handleBlur} placeholder="Ceritakan secara detail urutan kejadiannya..." className={`w-full bg-gray-50 border ${fieldErrors.chronology ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm`} />
+                            <div className="flex items-center justify-between mt-1">
+                                {fieldErrors.chronology ? (
+                                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.chronology}</p>
+                                ) : (
+                                    <span className="text-xs text-gray-400" />
+                                )}
+                                <span className={`text-xs font-medium ${formData.chronology.length >= 50 ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                    {formData.chronology.length}/50 karakter
+                                </span>
+                            </div>
                         </div>
                     </section>
 
@@ -506,30 +591,37 @@ const BuatLaporan = () => {
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div data-error={!!fieldErrors.location}>
                                 <label className="text-sm font-semibold mb-2 block">Lokasi Detail *</label>
-                                <input 
-                                    type="text" 
-                                    name="location" 
-                                    required 
-                                    value={formData.location} 
-                                    onChange={handleInputChange} 
-                                    placeholder="Contoh: Gedung JTI Lantai 2, Ruang Kelas 05" 
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#8b5cf6]" 
+                                <input
+                                    type="text"
+                                    name="location"
+                                    required
+                                    value={formData.location}
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    placeholder="Contoh: Gedung JTI Lantai 2, Ruang Kelas 05"
+                                    className={`w-full bg-gray-50 border ${fieldErrors.location ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#8b5cf6]`}
                                 />
-                                <p className="text-xs text-gray-400 mt-2">Sebutkan gedung, lantai, atau ruangan spesifik.</p>
+                                {fieldErrors.location ? (
+                                    <p className="text-xs text-red-500 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.location}</p>
+                                ) : (
+                                    <p className="text-xs text-gray-400 mt-2">Sebutkan gedung, lantai, atau ruangan spesifik.</p>
+                                )}
                             </div>
-                            <div>
+                            <div data-error={!!fieldErrors.incident_date}>
                                 <label className="text-sm font-semibold mb-2 block">Tanggal Kejadian *</label>
-                                <input 
-                                    type="date" 
-                                    name="incident_date" 
-                                    required 
-                                    max={new Date().toISOString().split("T")[0]} 
-                                    value={formData.incident_date} 
-                                    onChange={handleInputChange} 
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#8b5cf6]" 
+                                <input
+                                    type="date"
+                                    name="incident_date"
+                                    required
+                                    max={new Date().toISOString().split("T")[0]}
+                                    value={formData.incident_date}
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    className={`w-full bg-gray-50 border ${fieldErrors.incident_date ? 'border-red-400 ring-2 ring-red-100' : 'border-gray-200'} rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#8b5cf6]`}
                                 />
+                                {fieldErrors.incident_date && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.incident_date}</p>}
                             </div>
                         </div>
                     </section>

@@ -5,8 +5,8 @@ import axios from '../utils/axiosConfig';
 const initialState = {
   user: JSON.parse(localStorage.getItem('user')) || null,
   token: localStorage.getItem('token'),
-  isAuthenticated: !!localStorage.getItem('token'),
-  isLoading: false,
+  isAuthenticated: !!localStorage.getItem('token') && !!localStorage.getItem('user'),
+  isLoading: !!localStorage.getItem('token'),
   error: null,
 };
 
@@ -72,7 +72,7 @@ const authReducer = (state, action) => {
       return {
         ...state,
         user: action.payload,
-        isAuthenticated: true,
+        isAuthenticated: !!action.payload,
         isLoading: false,
       };
 
@@ -143,10 +143,7 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // No token - set loading to false immediately
-        dispatch({
-          type: AUTH_ACTIONS.LOAD_USER_SUCCESS,
-          payload: null,
-        });
+        dispatch({ type: AUTH_ACTIONS.LOAD_USER_FAILURE });
       }
     };
 

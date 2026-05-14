@@ -5,7 +5,7 @@ import {
     FiArrowLeft, FiClock, FiFileText, FiUser,
     FiAlertCircle, FiLock, FiInfo, FiActivity, FiTag,
     FiCheckCircle, FiRefreshCw, FiCalendar, FiMapPin, FiWifi,
-    FiShield, FiLink
+    FiShield, FiLink, FiMessageSquare
 } from 'react-icons/fi';
 import Sidebar from '../../components/layout/Sidebar';
 import Topbar from '../../components/layout/Topbar';
@@ -125,8 +125,20 @@ const DetailPengaduan = () => {
     }
 
     const statusInfo = getComplaintStatusInfo(complaint.status);
-    const latestSchedule = counselingSchedules.length > 0 ? counselingSchedules[counselingSchedules.length - 1] : null;
-    const counselingStepIdx = latestSchedule ? getCounselingStepIndex(latestSchedule.status) : -1;
+    const latestSchedule = counselingSchedules.length > 0 ? counselingSchedules[0] : null;
+    
+    const getActiveStepIndex = () => {
+        if (complaint.status === 'completed') return 3;
+        if (complaint.status === 'rejected') return 2;
+        if (latestSchedule) {
+            const idx = getCounselingStepIndex(latestSchedule.status);
+            return idx !== -1 ? idx : 1;
+        }
+        if (complaint.status === 'approved') return 1;
+        return 0; // pending
+    };
+
+    const activeStepIdx = getActiveStepIndex();
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -159,6 +171,44 @@ const DetailPengaduan = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
                         >
+                            {/* Visual Status Stepper */}
+                            <div className="bg-gray-50/50 px-6 py-8 border-b border-gray-100">
+                                <div className="max-w-3xl mx-auto relative">
+                                    {/* Line Background */}
+                                    <div className="absolute top-5 left-0 w-full h-1 bg-gray-200 rounded-full"></div>
+                                    
+                                    {/* Active Line Progress */}
+                                    <div 
+                                        className="absolute top-5 left-0 h-1 bg-[#8B5CF6] rounded-full transition-all duration-700 ease-in-out"
+                                        style={{ width: `${(activeStepIdx / (COUNSELING_STEPS.length - 1)) * 100}%` }}
+                                    ></div>
+
+                                    {/* Steps */}
+                                    <div className="relative flex justify-between">
+                                        {COUNSELING_STEPS.map((step, index) => {
+                                            const isActive = index <= activeStepIdx;
+                                            const isCurrent = index === activeStepIdx;
+                                            
+                                            return (
+                                                <div key={step.key} className="flex flex-col items-center">
+                                                    <div className={`w-11 h-11 rounded-full flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${
+                                                        isActive ? `${step.color} text-white` : 'bg-white text-gray-400 border-2 border-gray-100'
+                                                    } ${isCurrent ? `ring-4 ${step.ring} scale-110` : ''}`}>
+                                                        {isActive && index < activeStepIdx ? <FiCheckCircle className="w-6 h-6" /> : (index + 1)}
+                                                    </div>
+                                                    <div className="mt-3 text-center">
+                                                        <p className={`text-[10px] font-bold uppercase tracking-wider leading-tight whitespace-pre-line ${
+                                                            isActive ? 'text-gray-900' : 'text-gray-400'
+                                                        }`}>
+                                                            {step.label}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                             {/* Title Section */}
                             <div className="p-6 md:p-8 border-b border-gray-100">
                                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
@@ -315,14 +365,16 @@ const DetailPengaduan = () => {
                                     </section>
 
                                     {/* Counseling Notes Timeline for User */}
-                                    {complaint.counseling_notes && complaint.counseling_notes.length > 0 && (
+                                    {counselingSchedules.some(s => s.feedback_notes || s.keterangan_pihak || s.saran_konselor) && (
                                         <section className="mb-10">
                                             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
                                                 <FiRefreshCw className="text-[#8B5CF6]" /> Perkembangan Penanganan
                                             </h3>
                                             <div className="space-y-6 relative before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                                                {complaint.counseling_notes.map((note, idx) => (
-                                                    <div key={note.id || idx} className="relative pl-12 group">
+                                                {counselingSchedules
+                                                    .filter(s => s.feedback_notes || s.keterangan_pihak || s.saran_konselor)
+                                                    .map((note, idx) => (
+                                                        <div key={note.id || idx} className="relative pl-12 group">
                                                         <div className="absolute left-0 top-1 w-10 h-10 rounded-xl bg-white border-2 border-gray-100 flex items-center justify-center z-10 group-hover:border-[#8B5CF6] transition-colors shadow-sm">
                                                             <FiMessageSquare className="w-4 h-4 text-gray-400 group-hover:text-[#8B5CF6]" />
                                                         </div>
